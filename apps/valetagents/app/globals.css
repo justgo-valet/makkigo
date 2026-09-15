@@ -1,7 +1,6 @@
 @import '@makkigo/ui/styles/globals.css';
 
 @source './**/*.{ts,tsx}';
-@source '../src/**/*.{ts,tsx}';
 
 :root {
   font-family: Inter, system-ui, sans-serif;
