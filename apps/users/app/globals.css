@@ -1,4 +1,13 @@
-:root { font-family: Inter, system-ui, sans-serif; color: #17202a; background: #f4f6f7; font-synthesis: none; text-rendering: optimizeLegibility; }
+@import '@makkigo/ui/styles/globals.css';
+
+@source './**/*.{ts,tsx}';
+@source '../src/**/*.{ts,tsx}';
+
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
 * { box-sizing: border-box; }
 body { margin: 0; }
 main { max-width: 72rem; margin: 0 auto; padding: 4rem 2rem; }
