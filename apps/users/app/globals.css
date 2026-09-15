@@ -1,13 +1,19 @@
-@import '@makkigo/ui/styles/globals.css';
+@import "@makkigo/ui/styles/globals.css";
 
 @source './**/*.{ts,tsx}';
 
 :root {
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--font-ubuntu), system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
-* { box-sizing: border-box; }
-body { margin: 0; }
-main { max-width: 72rem; margin: 0 auto; padding: 4rem 2rem; }
-h1 { margin: 0 0 1rem; font-size: 3rem; }
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 72rem;
+  margin: 0 auto;
+}
