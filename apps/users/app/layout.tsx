@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="ko" className={ubuntu.variable}>
       <body>
         <main className="w-screen h-screen flex  justify-center p-0">
-          <section className="max-w-[767px] w-full px-5">{children}</section>
+          <section className="max-w-[767px] w-full p-4">{children}</section>
         </main>
       </body>
     </html>

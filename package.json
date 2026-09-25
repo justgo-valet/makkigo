@@ -13,10 +13,5 @@
     "start:users": "pnpm --filter @makkigo/users start",
     "typecheck": "pnpm --filter './apps/*' typecheck"
   },
-  "packageManager": "pnpm@12.6.0",
-  "dependencies": {
-    "@hookform/resolvers": "^5.9.1",
-    "react-hook-form": "^7.88.0",
-    "zod": "^4.6.5"
-  }
+  "packageManager": "pnpm@12.6.0"
 }
