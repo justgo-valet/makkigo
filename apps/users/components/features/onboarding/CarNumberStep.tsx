@@ -1,0 +1,30 @@
+import { Field, FieldLabel, Input } from "@makkigo/ui";
+import { useFormContext } from "react-hook-form";
+import type { OnboardingFormValues } from "@/types/pages/onboarding";
+
+export default function CarNumberStep() {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<OnboardingFormValues>();
+
+  return (
+    <Field data-invalid={Boolean(errors.vehicleNumber)}>
+      <FieldLabel htmlFor="vehicle-number" hidden>차량 번호</FieldLabel>
+      <Input
+        className="h-12"
+        id="vehicle-number"
+        placeholder="12가 3456"
+        autoComplete="off"
+        aria-invalid={Boolean(errors.vehicleNumber)}
+        aria-describedby="vehicle-number-error"
+        {...register("vehicleNumber")}
+      />
+      {errors.vehicleNumber && (
+        <p id="vehicle-number-error" className="text-sm text-destructive">
+          {errors.vehicleNumber.message}
+        </p>
+      )}
+    </Field>
+  );
+}

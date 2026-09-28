@@ -6,16 +6,20 @@ import Image from "next/image";
 
 export default function Header() {
   const router = useRouter();
-  const { showBackButton, backNavigateText, logoPosition, showRightMenu } = useLayout(
-    state => state.headerConfiguration,
-  );
+  const {
+    showBackButton,
+    backNavigateText,
+    backButtonHandler,
+    logoPosition,
+    showRightMenu,
+  } = useLayout(state => state.headerConfiguration);
 
   return (
     <header className="relative flex items-center justify-between w-full h-12">
       {showBackButton && (
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={backButtonHandler ?? router.back}
           aria-label={backNavigateText ?? "뒤로 가기"}
           className="z-10 flex h-full cursor-pointer items-center gap-1 text-xs text-(--tertiary-color)"
         >

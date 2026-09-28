@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { Ubuntu } from "next/font/google";
-import Header from "@/components/common/Header";
+import Header from "@/components/layouts/Header";
 
 const ubuntu = Ubuntu({
   subsets: ["latin"],
@@ -20,10 +20,10 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ko" className={ubuntu.variable}>
-      <body className="w-screen h-screen flex flex-col items-center">
-        <main className="w-full max-w-[767px] h-screen flex-col items-center p-4">
+      <body className="flex flex-col items-center w-screen h-screen">
+        <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4">
           <Header/>
-          <section className="w-full">{children}</section>
+          <section className="min-h-0 w-full flex-1">{children}</section>
         </main>
       </body>
     </html>

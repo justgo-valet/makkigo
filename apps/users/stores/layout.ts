@@ -1,28 +1,14 @@
 import { create } from "zustand";
-
-type LogoPosition = "left" | "center" | "hidden";
-
-interface HeaderConfiguration {
-  showBackButton: boolean;
-  backNavigateText: string | null;
-  logoPosition: LogoPosition;
-  showRightMenu: boolean;
-}
-
-interface BottomConfiguration {
-  visible: boolean;
-}
-
-interface LayoutState {
-  headerConfiguration: HeaderConfiguration;
-  bottomConfiguration: BottomConfiguration;
-  setHeaderConfiguration: (config: Partial<HeaderConfiguration>) => void;
-  setBottomConfiguration: (config: Partial<BottomConfiguration>) => void;
-}
+import type {
+  BottomConfiguration,
+  HeaderConfiguration,
+  LayoutState,
+} from "@/types/store/layoutStore";
 
 const defaultHeaderConfiguration: HeaderConfiguration = {
   showBackButton: false,
   backNavigateText: null,
+  backButtonHandler: null,
   logoPosition: "center",
   showRightMenu: false,
 };
@@ -31,9 +17,9 @@ const defaultBottomConfiguration: BottomConfiguration = {
   visible: false,
 };
 
-const useLayout = create<LayoutState>(set => ({
-  headerConfiguration: defaultHeaderConfiguration,
-  bottomConfiguration: defaultBottomConfiguration,
+const useLayout = create<LayoutState>()(set => ({
+  headerConfiguration: { ...defaultHeaderConfiguration },
+  bottomConfiguration: { ...defaultBottomConfiguration },
   setHeaderConfiguration: config =>
     set({ headerConfiguration: { ...defaultHeaderConfiguration, ...config } }),
   setBottomConfiguration: config =>
@@ -41,4 +27,3 @@ const useLayout = create<LayoutState>(set => ({
 }));
 
 export { useLayout };
-export type { HeaderConfiguration, BottomConfiguration, LogoPosition };
