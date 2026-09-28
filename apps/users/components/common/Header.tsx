@@ -1,17 +1,17 @@
 "use client";
 
 import { useLayout } from "@/stores/layout";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Header() {
   const router = useRouter();
-  const { showBackButton, backNavigateText, logoPosition } = useLayout(
+  const { showBackButton, backNavigateText, logoPosition, showRightMenu } = useLayout(
     state => state.headerConfiguration,
   );
 
   return (
-    <header className="relative flex items-center w-full h-12">
+    <header className="relative flex items-center justify-between w-full h-12">
       {showBackButton && (
         <button
           type="button"
@@ -33,19 +33,32 @@ export default function Header() {
       {logoPosition !== "hidden" && (
         <div
           className={
-            logoPosition === "center"
+            showBackButton && logoPosition === "center"
               ? "absolute left-1/2 -translate-x-1/2"
               : showBackButton
                 ? "ml-4"
                 : ""
           }
         >
-                  {/* TODO: 로고 확정 시 변경 */}
+          {/* TODO: 로고 확정 시 변경 */}
           <span className="text-xl font-bold tracking-tight text-(--primary-color)">
             MAKKIGO
           </span>
         </div>
       )}
+
+      {
+        showRightMenu && (
+          <nav className="flex items-center gap-3">
+            <button type="button" aria-label="알림" className="cursor-pointer">
+                <Image src="/icons/alarm.svg" alt="" aria-hidden="true" width={24} height={24}/>
+            </button>
+            <button type="button" aria-label="프로필" className="cursor-pointer">
+                <Image src="/icons/profile.svg" alt="" aria-hidden="true" width={24} height={24}/>
+            </button>
+          </nav>
+        )
+      }
     </header>
   );
 }

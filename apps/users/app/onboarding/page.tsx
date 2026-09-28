@@ -11,7 +11,8 @@ export default function Onboarding() {
   useEffect(() => {
     setHeaderConfiguration({
       showBackButton: true,
-      backNavigateText: '뒤로 가기'
+      showRightMenu: true,
+      backNavigateText: '뒤로 가기',
     });
   }, [setHeaderConfiguration]);
 

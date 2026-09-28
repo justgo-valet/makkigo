@@ -6,6 +6,7 @@ interface HeaderConfiguration {
   showBackButton: boolean;
   backNavigateText: string | null;
   logoPosition: LogoPosition;
+  showRightMenu: boolean;
 }
 
 interface BottomConfiguration {
@@ -23,6 +24,7 @@ const defaultHeaderConfiguration: HeaderConfiguration = {
   showBackButton: false,
   backNavigateText: null,
   logoPosition: "center",
+  showRightMenu: false,
 };
 
 const defaultBottomConfiguration: BottomConfiguration = {
