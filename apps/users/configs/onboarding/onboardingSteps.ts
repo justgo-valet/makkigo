@@ -7,5 +7,13 @@ const ONBOARDING_STEPS = [
 
 type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 
-export { ONBOARDING_STEPS };
+const getOnboardingStepIndex = (step: string | null) => {
+  const stepIndex = ONBOARDING_STEPS.findIndex(
+    onboardingStep => onboardingStep === step,
+  );
+
+  return stepIndex >= 0 ? stepIndex : 0;
+};
+
+export { getOnboardingStepIndex, ONBOARDING_STEPS };
 export type { OnboardingStep };

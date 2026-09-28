@@ -12,7 +12,7 @@ export default function CarNumberStep() {
     <Field data-invalid={Boolean(errors.vehicleNumber)}>
       <FieldLabel htmlFor="vehicle-number" hidden>차량 번호</FieldLabel>
       <Input
-        className="h-12"
+        className="h-12 text-foreground"
         id="vehicle-number"
         placeholder="12가 3456"
         autoComplete="off"
