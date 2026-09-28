@@ -1,5 +1,6 @@
 import { Field, FieldLabel, Input } from "@makkigo/ui";
 import { useFormContext } from "react-hook-form";
+
 import type { OnboardingFormValues } from "@/types/pages/onboarding";
 
 export default function CarModelStep() {
@@ -10,7 +11,9 @@ export default function CarModelStep() {
 
   return (
     <Field data-invalid={Boolean(errors.carModel)}>
-      <FieldLabel htmlFor="car-model" hidden>차량 모델</FieldLabel>
+      <FieldLabel htmlFor="car-model" hidden>
+        차량 모델
+      </FieldLabel>
       <Input
         className="text-foreground"
         id="car-model"

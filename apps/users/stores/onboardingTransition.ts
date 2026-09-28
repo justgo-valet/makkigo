@@ -7,9 +7,9 @@ interface OnboardingTransitionState {
   setDirection: (direction: OnboardingTransitionDirection) => void;
 }
 
-const useOnboardingTransition = create<OnboardingTransitionState>()(set => ({
+const useOnboardingTransition = create<OnboardingTransitionState>()((set) => ({
   direction: "forward",
-  setDirection: direction => set({ direction }),
+  setDirection: (direction) => set({ direction }),
 }));
 
 export { useOnboardingTransition };

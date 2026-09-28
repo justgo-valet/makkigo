@@ -1,7 +1,9 @@
 import { Field, FieldLabel, Input } from "@makkigo/ui";
 import { useController, useFormContext } from "react-hook-form";
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+
 import { formatPhoneNumber } from "@/libs/common/format";
+
+import type { OnboardingFormValues } from "@/types/pages/onboarding";
 
 export default function PhoneNumberStep() {
   const {
@@ -25,7 +27,7 @@ export default function PhoneNumberStep() {
         aria-invalid={Boolean(errors.phoneNumber)}
         aria-describedby="phone-number-error"
         {...field}
-        onChange={event => field.onChange(formatPhoneNumber(event.target.value))}
+        onChange={(event) => field.onChange(formatPhoneNumber(event.target.value))}
       />
       {errors.phoneNumber && (
         <p id="phone-number-error" className="text-sm text-destructive">

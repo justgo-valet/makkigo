@@ -1,9 +1,11 @@
 "use client";
 
-import useOnboarding from "@/hooks/useOnboarding";
 import { Button } from "@makkigo/ui";
 import { useFormContext } from "react-hook-form";
+
 import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
+import useOnboarding from "@/hooks/useOnboarding";
+
 import type { OnboardingFormValues } from "@/types/pages/onboarding";
 
 export default function OnboardingContent() {
@@ -23,7 +25,7 @@ export default function OnboardingContent() {
   return (
     <form
       className="mx-auto flex h-full w-full max-w-md flex-col pt-6"
-      onSubmit={event => {
+      onSubmit={(event) => {
         event.preventDefault();
         void handlePrimaryAction();
       }}

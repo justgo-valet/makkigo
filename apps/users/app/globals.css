@@ -7,10 +7,10 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  --primary-color: #2170D6;
-  --secondary-color: #81A9DA;
-  --tertiary-color: #64748B;
-  --base-color: #03090F;
+  --primary-color: #2170d6;
+  --secondary-color: #81a9da;
+  --tertiary-color: #64748b;
+  --base-color: #03090f;
 }
 
 * {

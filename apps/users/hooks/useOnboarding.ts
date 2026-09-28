@@ -1,10 +1,8 @@
-import {
-  getOnboardingStepIndex,
-  ONBOARDING_STEPS,
-} from "@/configs/onboarding/onboardingSteps";
-import { useOnboardingTransition } from "@/stores/onboardingTransition";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+
+import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/configs/onboarding/onboardingSteps";
+import { useOnboardingTransition } from "@/stores/onboardingTransition";
 
 type OnboardingButtonType = "NEXT" | "SUBMIT";
 
@@ -12,9 +10,7 @@ const useOnboarding = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const setTransitionDirection = useOnboardingTransition(
-    state => state.setDirection,
-  );
+  const setTransitionDirection = useOnboardingTransition((state) => state.setDirection);
 
   const stepIndex = getOnboardingStepIndex(searchParams.get("step"));
   const isFirstStep = stepIndex === 0;

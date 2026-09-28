@@ -1,10 +1,11 @@
-import type { ComponentType } from "react";
 import CarBrandStep from "@/components/features/onboarding/CarBrandStep";
 import CarModelStep from "@/components/features/onboarding/CarModelStep";
 import CarNumberStep from "@/components/features/onboarding/CarNumberStep";
 import PhoneNumberStep from "@/components/features/onboarding/PhoneNumberStep";
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+
 import type { OnboardingStep } from "./onboardingSteps";
+import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { ComponentType } from "react";
 
 interface OnboardingStepDefinition {
   title: string;
@@ -19,7 +20,6 @@ const DEFAULT_FORM_VALUES: OnboardingFormValues = {
   carBrand: "",
   carModel: "",
 };
-
 
 const onboardingFlow = {
   CAR_NUMBER: {

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import type {
   BottomConfiguration,
   HeaderConfiguration,
@@ -17,12 +18,12 @@ const defaultBottomConfiguration: BottomConfiguration = {
   visible: false,
 };
 
-const useLayout = create<LayoutState>()(set => ({
+const useLayout = create<LayoutState>()((set) => ({
   headerConfiguration: { ...defaultHeaderConfiguration },
   bottomConfiguration: { ...defaultBottomConfiguration },
-  setHeaderConfiguration: config =>
+  setHeaderConfiguration: (config) =>
     set({ headerConfiguration: { ...defaultHeaderConfiguration, ...config } }),
-  setBottomConfiguration: config =>
+  setBottomConfiguration: (config) =>
     set({ bottomConfiguration: { ...defaultBottomConfiguration, ...config } }),
 }));
 

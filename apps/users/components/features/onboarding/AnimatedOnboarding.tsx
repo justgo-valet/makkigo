@@ -1,13 +1,16 @@
 "use client";
 
+import { AnimatePresence, useReducedMotion, motion } from "motion/react";
+import { useSearchParams } from "next/navigation";
+
 import { ONBOARDING_TRANSITION, SLIDE_DISTANCE } from "@/configs/onboarding/onboardingAnimation";
 import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/configs/onboarding/onboardingSteps";
 import useOnboarding from "@/hooks/useOnboarding";
 import useOnboardingHeader from "@/hooks/useOnboardingHeader";
 import { useOnboardingTransition } from "@/stores/onboardingTransition";
-import { AnimatePresence, useReducedMotion, Variants, motion } from "motion/react";
-import { useSearchParams } from "next/navigation";
-import { ReactNode } from "react";
+
+import type { Variants } from "motion/react";
+import type { ReactNode } from "react";
 
 const createSlideVariants = (shouldReduceMotion: boolean): Variants => {
   const distance = shouldReduceMotion ? 0 : SLIDE_DISTANCE;
@@ -29,7 +32,7 @@ const createSlideVariants = (shouldReduceMotion: boolean): Variants => {
 export default function AnimatedOnboarding({ children }: Readonly<{ children: ReactNode }>) {
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion() ?? false;
-  const transitionDirection = useOnboardingTransition(state => state.direction);
+  const transitionDirection = useOnboardingTransition((state) => state.direction);
   const { handleBack } = useOnboarding();
   const stepIndex = getOnboardingStepIndex(searchParams.get("step"));
   const slideDirection = transitionDirection === "forward" ? 1 : -1;
@@ -47,9 +50,7 @@ export default function AnimatedOnboarding({ children }: Readonly<{ children: Re
           initial="enter"
           animate="center"
           exit="exit"
-          transition={
-            shouldReduceMotion ? { duration: 0 } : ONBOARDING_TRANSITION
-          }
+          transition={shouldReduceMotion ? { duration: 0 } : ONBOARDING_TRANSITION}
           className="absolute inset-0"
         >
           {children}

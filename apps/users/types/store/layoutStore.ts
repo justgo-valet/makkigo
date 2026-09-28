@@ -19,9 +19,4 @@ interface LayoutState {
   setBottomConfiguration: (config: Partial<BottomConfiguration>) => void;
 }
 
-export type {
-  BottomConfiguration,
-  HeaderConfiguration,
-  LayoutState,
-  LogoPosition,
-};
+export type { BottomConfiguration, HeaderConfiguration, LayoutState, LogoPosition };

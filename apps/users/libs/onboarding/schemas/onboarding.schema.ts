@@ -9,5 +9,7 @@ const onboardingSchema = z.object({
   carBrand: z.string().trim().min(1, "차량 브랜드를 입력해주세요."),
   carModel: z.string().trim().min(1, "차량 모델을 입력해주세요."),
 });
+type Onboarding = z.infer<typeof onboardingSchema>;
 
 export { onboardingSchema };
+export type { Onboarding };
