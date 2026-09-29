@@ -33,7 +33,7 @@ export default function OnboardingContent() {
       <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
         <StepComponent />
       </div>
-      <div className="relative z-10 shrink-0 bg-background pt-2 shadow-[0_-12px_28px_-20px_rgb(3_9_15/0.24)]">
+      <div className="relative z-10 shrink-0 bg-background pt-2">
         <Button type="submit" size="lg" className="h-12 w-full shadow-none">
           {buttonType === "NEXT" ? "다음으로" : "시작하기"}
         </Button>

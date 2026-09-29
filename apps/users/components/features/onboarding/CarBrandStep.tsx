@@ -20,8 +20,8 @@ export default function CarBrandStep() {
       <FieldLabel htmlFor="car-brand" className="text-xl font-bold text-(--base-color)">
         어떤 차량인가요?
       </FieldLabel>
-      <div className="flex-1 min-h-0 mt-6">
-        <div className="grid h-full grid-cols-3 gap-3 overflow-y-auto overscroll-contain py-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
+      <div className="relative flex-1 min-h-0 mt-2">
+        <div className="grid h-full grid-cols-3 gap-3 overflow-y-auto overscroll-contain pt-2 pb-12 scrollbar-none [&::-webkit-scrollbar]:hidden">
           {carBrandLogoRegistry.map((carBrand) => (
             <Card
               key={carBrand.name}
@@ -70,6 +70,10 @@ export default function CarBrandStep() {
             </CardContent>
           </Card>
         </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 z-10 pointer-events-none h-14 bg-linear-to-t from-background via-background/80 to-transparent"
+        />
       </div>
       {errors.carBrand && (
         <p id="car-brand-error" className="text-sm text-destructive">
