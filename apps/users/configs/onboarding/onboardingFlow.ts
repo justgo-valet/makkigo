@@ -4,7 +4,7 @@ import CarNumberStep from "@/components/features/onboarding/CarNumberStep";
 import PhoneNumberStep from "@/components/features/onboarding/PhoneNumberStep";
 
 import type { OnboardingStep } from "./onboardingSteps";
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 import type { ComponentType } from "react";
 
 interface OnboardingStepDefinition {

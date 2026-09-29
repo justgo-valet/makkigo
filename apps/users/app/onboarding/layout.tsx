@@ -8,7 +8,7 @@ import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboard
 import { DEFAULT_FORM_VALUES } from "@/configs/onboarding/onboardingFlow";
 import { onboardingSchema } from "@/libs/onboarding/schemas/onboarding.schema";
 
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 import type { ReactNode } from "react";
 
 export default function OnboardingLayout({ children }: Readonly<{ children: ReactNode }>) {

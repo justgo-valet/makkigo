@@ -3,7 +3,7 @@ import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { formatPhoneNumber } from "@/libs/common/format";
 
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 
 export default function PhoneNumberStep() {
   const {
@@ -11,13 +11,11 @@ export default function PhoneNumberStep() {
     formState: { errors },
   } = useFormContext<OnboardingFormValues>();
   const { field } = useController({ name: "phoneNumber", control });
-  const carNumber = useWatch({ name: 'vehicleNumber', control });
+  const carNumber = useWatch({ name: "vehicleNumber", control });
 
   return (
     <Field data-invalid={Boolean(errors.phoneNumber)}>
-      <Label className="text-sm text-(--base-color) font-light">
-        {carNumber}
-      </Label>
+      <Label className="text-sm text-(--base-color) font-light">{carNumber}</Label>
       <FieldLabel htmlFor="phone-number" className="text-xl font-bold text-(--base-color)">
         휴대전화 번호를 알려주세요
       </FieldLabel>

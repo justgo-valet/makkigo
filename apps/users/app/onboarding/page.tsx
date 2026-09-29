@@ -6,7 +6,7 @@ import { useFormContext } from "react-hook-form";
 import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
 import useOnboarding from "@/hooks/useOnboarding";
 
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 
 export default function OnboardingContent() {
   const { onboardingStep, buttonType, handleMoveNextStep } = useOnboarding();

@@ -5,7 +5,7 @@ import { useController, useFormContext } from "react-hook-form";
 
 import { carBrandLogoRegistry } from "@/configs/onboarding/carBrandLogoRegistry";
 
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 
 export default function CarBrandStep() {
   const {

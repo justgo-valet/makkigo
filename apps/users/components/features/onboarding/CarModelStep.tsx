@@ -1,7 +1,7 @@
 import { Field, FieldLabel, Input } from "@makkigo/ui";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import type { OnboardingFormValues } from "@/types/pages/onboarding";
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 
 export default function CarModelStep() {
   const {
@@ -9,11 +9,11 @@ export default function CarModelStep() {
     control,
     formState: { errors },
   } = useFormContext<OnboardingFormValues>();
-  const carBrand = useWatch({ name: 'carBrand', control });
+  const carBrand = useWatch({ name: "carBrand", control });
 
   return (
     <Field data-invalid={Boolean(errors.carModel)}>
-      <FieldLabel htmlFor="car-model"  className="text-xl font-bold text-(--base-color)">
+      <FieldLabel htmlFor="car-model" className="text-xl font-bold text-(--base-color)">
         {carBrand} 모델을 선택해주세요.
       </FieldLabel>
       <Input
