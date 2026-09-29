@@ -1,5 +1,5 @@
-import { Field, FieldLabel, Input } from "@makkigo/ui";
-import { useController, useFormContext } from "react-hook-form";
+import { Field, FieldLabel, Input, Label } from "@makkigo/ui";
+import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { formatPhoneNumber } from "@/libs/common/format";
 
@@ -11,11 +11,15 @@ export default function PhoneNumberStep() {
     formState: { errors },
   } = useFormContext<OnboardingFormValues>();
   const { field } = useController({ name: "phoneNumber", control });
+  const carNumber = useWatch({ name: 'vehicleNumber', control });
 
   return (
     <Field data-invalid={Boolean(errors.phoneNumber)}>
-      <FieldLabel htmlFor="phone-number" hidden>
-        휴대전화 번호
+      <Label className="text-sm text-(--base-color) font-light">
+        {carNumber}
+      </Label>
+      <FieldLabel htmlFor="phone-number" className="text-xl font-bold text-(--base-color)">
+        휴대전화 번호를 알려주세요
       </FieldLabel>
       <Input
         className="h-12 text-foreground"

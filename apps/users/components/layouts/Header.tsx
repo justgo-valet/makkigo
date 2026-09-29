@@ -19,7 +19,7 @@ export default function Header() {
           aria-label={backNavigateText ?? "뒤로 가기"}
           className="z-10 flex h-full cursor-pointer items-center gap-1 text-xs text-(--tertiary-color)"
         >
-          <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={20} height={20} />
+          <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
           {backNavigateText && <span>{backNavigateText}</span>}
         </button>
       )}

@@ -24,19 +24,20 @@ export default function OnboardingContent() {
 
   return (
     <form
-      className="mx-auto flex h-full w-full max-w-md flex-col pt-6"
+      className="flex flex-col w-full h-full max-w-md min-h-0 pt-2 mx-auto"
       onSubmit={(event) => {
         event.preventDefault();
         void handlePrimaryAction();
       }}
     >
-      <h1 className="text-xl font-bold text-(--base-color)">{step.title}</h1>
-      <div className="flex flex-1 pt-4">
+      <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
         <StepComponent />
       </div>
-      <Button type="submit" size="lg" className="h-12 w-full">
-        {buttonType === "NEXT" ? "다음으로" : "시작하기"}
-      </Button>
+      <div className="relative z-10 shrink-0 bg-background pt-2 shadow-[0_-12px_28px_-20px_rgb(3_9_15/0.24)]">
+        <Button type="submit" size="lg" className="h-12 w-full shadow-none">
+          {buttonType === "NEXT" ? "다음으로" : "시작하기"}
+        </Button>
+      </div>
     </form>
   );
 }

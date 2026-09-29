@@ -11,8 +11,8 @@ export default function CarNumberStep() {
 
   return (
     <Field data-invalid={Boolean(errors.vehicleNumber)}>
-      <FieldLabel htmlFor="vehicle-number" hidden>
-        차량 번호
+      <FieldLabel htmlFor="vehicle-number" className="text-xl font-bold text-(--base-color)">
+        차량 번호를 알려주세요
       </FieldLabel>
       <Input
         className="h-12 text-foreground"
