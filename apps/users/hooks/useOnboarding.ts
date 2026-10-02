@@ -21,9 +21,10 @@ const useOnboarding = () => {
     (targetStepIndex: number) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("step", ONBOARDING_STEPS[targetStepIndex]);
-      router.replace(`${pathname}?${params.toString()}`);
+      // 스텝 전환은 클라이언트 상태라 서버 내비게이션 없이 URL만 갱신한다.
+      window.history.replaceState(null, "", `${pathname}?${params.toString()}`);
     },
-    [pathname, router, searchParams],
+    [pathname, searchParams],
   );
 
   const handleMoveNextStep = useCallback(() => {

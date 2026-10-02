@@ -3,6 +3,7 @@
 import { Button } from "@makkigo/ui";
 import { useFormContext } from "react-hook-form";
 
+import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboarding";
 import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
 import useOnboarding from "@/hooks/useOnboarding";
 
@@ -23,21 +24,23 @@ export default function OnboardingContent() {
   };
 
   return (
-    <form
-      className="flex flex-col w-full h-full max-w-md min-h-0 pt-2 mx-auto"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void handlePrimaryAction();
-      }}
-    >
-      <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
-        <StepComponent />
-      </div>
-      <div className="relative z-10 shrink-0 bg-background pt-2">
-        <Button type="submit" size="lg" className="h-12 w-full shadow-none">
-          {buttonType === "NEXT" ? "다음으로" : "시작하기"}
-        </Button>
-      </div>
-    </form>
+    <AnimatedOnboarding>
+      <form
+        className="flex flex-col w-full h-full max-w-md min-h-0 pt-2 mx-auto"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handlePrimaryAction();
+        }}
+      >
+        <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
+          <StepComponent />
+        </div>
+        <div className="relative z-10 shrink-0 bg-background pt-2">
+          <Button type="submit" size="lg" className="h-12 w-full shadow-none">
+            {buttonType === "NEXT" ? "다음으로" : "시작하기"}
+          </Button>
+        </div>
+      </form>
+    </AnimatedOnboarding>
   );
 }

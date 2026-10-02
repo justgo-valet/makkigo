@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Suspense } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboarding";
 import { DEFAULT_FORM_VALUES } from "@/configs/onboarding/onboardingFlow";
 import { onboardingSchema } from "@/libs/onboarding/schemas/onboarding.schema";
 
@@ -19,9 +18,7 @@ export default function OnboardingLayout({ children }: Readonly<{ children: Reac
 
   return (
     <FormProvider {...form}>
-      <Suspense fallback={null}>
-        <AnimatedOnboarding>{children}</AnimatedOnboarding>
-      </Suspense>
+      <Suspense fallback={null}>{children}</Suspense>
     </FormProvider>
   );
 }
