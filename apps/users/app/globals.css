@@ -6,14 +6,13 @@
   font-family: var(--font-ubuntu), system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+
+  --primary-color: #2170d6;
+  --secondary-color: #81a9da;
+  --tertiary-color: #64748b;
+  --base-color: #03090f;
 }
+
 * {
   box-sizing: border-box;
-}
-body {
-  margin: 0;
-}
-main {
-  max-width: 72rem;
-  margin: 0 auto;
 }

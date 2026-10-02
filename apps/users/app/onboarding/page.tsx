@@ -1,16 +1,46 @@
-import { Card, CardContent, CardFooter } from "@makkigo/ui/components/ui/card";
-import OnboardingInputForm from "./_components/OnboardingInputForm";
+"use client";
 
-export default function Onboarding() {
+import { Button } from "@makkigo/ui";
+import { useFormContext } from "react-hook-form";
+
+import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboarding";
+import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
+import useOnboarding from "@/hooks/useOnboarding";
+
+import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+
+export default function OnboardingContent() {
+  const { onboardingStep, buttonType, handleMoveNextStep } = useOnboarding();
+  const form = useFormContext<OnboardingFormValues>();
+  const step = onboardingFlow[onboardingStep];
+  const StepComponent = step.component;
+
+  const handlePrimaryAction = async () => {
+    const isValid = await form.trigger(step.fields, { shouldFocus: true });
+
+    if (!isValid) return;
+
+    handleMoveNextStep();
+  };
+
   return (
-    <div className="w-[320px] flex flex-col justify-center mx-auto">
-      <OnboardingInputForm />
-      <Card>
-        <CardContent></CardContent>
-        <CardFooter>
-          애스턴마틴
-        </CardFooter>
-      </Card>
-    </div>
+    <AnimatedOnboarding>
+      <form
+        className="flex flex-col w-full h-full max-w-md min-h-0 pt-2 mx-auto"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handlePrimaryAction();
+        }}
+      >
+        <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
+          <StepComponent />
+        </div>
+        <div className="relative z-10 shrink-0 bg-background pt-2">
+          <Button type="submit" size="lg" className="h-12 w-full shadow-none">
+            {buttonType === "NEXT" ? "다음으로" : "시작하기"}
+          </Button>
+        </div>
+      </form>
+    </AnimatedOnboarding>
   );
 }
