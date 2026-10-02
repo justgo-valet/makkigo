@@ -8,5 +8,4 @@ next-env.d.ts
 *.log
 *.tsbuildinfo
 
-.env
 **/.env*
