@@ -1,0 +1,7 @@
+model CarBrand {
+    id      Int    @id @default(autoincrement())
+    name    String
+    logoUrl String @map("logo_url")
+
+    @@map("car_brands")
+}
