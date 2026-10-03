@@ -177,6 +177,9 @@ importers:
       '@makkigo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      database:
+        specifier: workspace:*
+        version: link:../../packages/database
       ky:
         specifier: ^2.1.0
         version: 2.1.0
