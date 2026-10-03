@@ -18,5 +18,29 @@ services:
       retries: 5
       start_period: 10s
 
+  db-setup:
+    image: node:22-alpine
+    container_name: makkigo-db-setup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env.development
+    working_dir: /app/packages/database
+    volumes:
+      - ./packages/database:/app/packages/database
+      - ./.env.development:/app/.env.development:ro
+      - /app/packages/database/node_modules # 호스트(macOS)의 node_modules 대신 컨테이너 전용 node_modules를 사용합니다.
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        export DATABASE_URL="postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:5432/$${POSTGRES_DB}"
+        npm install --no-package-lock --no-audit --no-fund
+        npx prisma db push
+        npx prisma db execute --file prisma/init/init.sql
+    restart: "no"
+
 volumes:
   postgres_data:
