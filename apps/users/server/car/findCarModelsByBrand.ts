@@ -1,9 +1,16 @@
+import { prisma } from "database";
+
 import type { CarModelsResponse } from "@/libs/onboarding/contracts/carModels";
 
+const koreanCollator = new Intl.Collator("ko");
+
 const findCarModelsByBrand = async (brand: string): Promise<CarModelsResponse> => {
-  // TODO: 차량 모델 데이터 소스와 캐시 정책이 확정되면 repository 호출로 교체합니다.
-  void brand;
-  return [];
+  const carModels = await prisma.carModel.findMany({
+    where: { brand: { name: brand } },
+    select: { name: true },
+  });
+
+  return carModels.map(({ name }) => name).toSorted(koreanCollator.compare);
 };
 
 export { findCarModelsByBrand };
