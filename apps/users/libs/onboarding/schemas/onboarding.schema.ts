@@ -1,7 +1,16 @@
 import { z } from "zod";
 
+import { completeOnboardingRequestSchema } from "@/libs/onboarding/contracts/onboarding";
+
 const onboardingSchema = z.object({
-  vehicleNumber: z.string().trim().min(1, "차량 번호를 입력해주세요."),
+  vehicleNumber: z
+    .string()
+    .trim()
+    .min(1, "차량 번호를 입력해주세요.")
+    .refine(
+      (value) => completeOnboardingRequestSchema.shape.vehicleNumber.safeParse(value).success,
+      "12가3456 또는 123가4567 형식으로 입력해주세요.",
+    ),
   phoneNumber: z
     .string()
     .trim()

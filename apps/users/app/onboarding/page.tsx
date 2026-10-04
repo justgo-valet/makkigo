@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@makkigo/ui";
+import { getErrorMessage } from "@makkigo/api-client";
+import { Button, FieldError } from "@makkigo/ui";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -8,20 +9,68 @@ import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboard
 import ConsentSheet from "@/components/features/onboarding/ConsentSheet";
 import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
 import useOnboarding from "@/hooks/useOnboarding";
+import {
+  completeOnboarding,
+  getOnboardingErrorCode,
+} from "@/libs/onboarding/apis/completeOnboarding";
 
 import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 
+const FALLBACK_ERROR_MESSAGE = "정보를 저장하지 못했습니다. 다시 시도해주세요.";
+
 export default function OnboardingContent() {
-  const { onboardingStep, buttonType, handleMoveNextStep } = useOnboarding();
+  const { onboardingStep, buttonType, handleMoveNextStep, handleMoveToStep } = useOnboarding();
   const form = useFormContext<OnboardingFormValues>();
   const [hasAgreedConsents, setHasAgreedConsents] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const step = onboardingFlow[onboardingStep];
   const StepComponent = step.component;
 
+  const submitOnboarding = async () => {
+    setIsSubmitting(true);
+    setSubmitErrorMessage(null);
+
+    try {
+      await completeOnboarding(form.getValues());
+      handleMoveNextStep();
+    } catch (error) {
+      const message = getErrorMessage(error, FALLBACK_ERROR_MESSAGE);
+
+      switch (getOnboardingErrorCode(error)) {
+        case "DUPLICATE_VEHICLE":
+          handleMoveToStep("CAR_NUMBER");
+          form.setError("vehicleNumber", { message });
+          break;
+        case "DUPLICATE_PHONE":
+          handleMoveToStep("PHONE_NUMBER");
+          form.setError("phoneNumber", { message });
+          break;
+        case "REQUIRED_CONSENTS_MISSING":
+          setHasAgreedConsents(false);
+          break;
+        case "ALREADY_COMPLETED":
+          handleMoveNextStep();
+          break;
+        default:
+          setSubmitErrorMessage(message);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handlePrimaryAction = async () => {
+    if (isSubmitting) return;
+
     const isValid = await form.trigger(step.fields, { shouldFocus: true });
 
     if (!isValid) return;
+
+    if (buttonType === "SUBMIT") {
+      await submitOnboarding();
+      return;
+    }
 
     handleMoveNextStep();
   };
@@ -38,8 +87,14 @@ export default function OnboardingContent() {
         <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
           <StepComponent />
         </div>
-        <div className="relative z-10 shrink-0 bg-background pt-2">
-          <Button type="submit" size="lg" className="h-12 w-full shadow-none">
+        <div className="relative z-10 flex flex-col gap-2 pt-2 shrink-0 bg-background">
+          {buttonType === "SUBMIT" && <FieldError>{submitErrorMessage}</FieldError>}
+          <Button
+            type="submit"
+            size="lg"
+            className="h-12 w-full shadow-none"
+            disabled={isSubmitting}
+          >
             {buttonType === "NEXT" ? "다음으로" : "시작하기"}
           </Button>
         </div>

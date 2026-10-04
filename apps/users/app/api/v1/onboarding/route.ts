@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     if (!(await hasRequiredConsents(userId))) {
       return NextResponse.json(
-        { message: ERROR_MESSAGES.REQUIRED_CONSENTS_MISSING },
+        { code: "REQUIRED_CONSENTS_MISSING", message: ERROR_MESSAGES.REQUIRED_CONSENTS_MISSING },
         { status: 403 },
       );
     }
@@ -41,7 +41,10 @@ export async function POST(request: NextRequest) {
     const result = await completeOnboarding(userId, body.data);
 
     if (!result.ok) {
-      return NextResponse.json({ message: ERROR_MESSAGES[result.reason] }, { status: 409 });
+      return NextResponse.json(
+        { code: result.reason, message: ERROR_MESSAGES[result.reason] },
+        { status: 409 },
+      );
     }
 
     return new NextResponse(null, { status: 204 });

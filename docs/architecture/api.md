@@ -4,6 +4,7 @@
 
 - 경로에 버전: `/api/v1/...` (Flutter 앱은 업데이트 안 한 옛 버전이 남으므로). 기존 `/api/car/get-car-models` 는 버전 없음 → 통일 여부 미정
 - 오류 응답: `{ "message": "사용자에게 보여줄 문장" }` + 상태 코드
+  - 화면이 오류 종류에 따라 다르게 움직여야 하면 `code` 를 함께 보냄 (예: 온보딩 `DUPLICATE_PHONE`, `DUPLICATE_VEHICLE`, `ALREADY_COMPLETED`, `REQUIRED_CONSENTS_MISSING`)
 - 요청·응답 스키마(zod): `apps/<앱>/libs/<도메인>/contracts/`
 - 서버 로직: `apps/<앱>/server/<도메인>/`, 공통 인증: `packages/auth`
 - **1 API = 1 PR = 1 커밋**. 앞 작업에 의존하면 앞 PR 위에 쌓습니다.
