@@ -7,7 +7,9 @@
 - 요청·응답 스키마(zod): `apps/<앱>/libs/<도메인>/contracts/`
 - 서버 로직: `apps/<앱>/server/<도메인>/`, 공통 인증: `packages/auth`
 - **1 API = 1 PR = 1 커밋**. 앞 작업에 의존하면 앞 PR 위에 쌓습니다.
-- 머지는 **Squash and merge**. 쌓인 PR 은 앞 PR 이 머지되면 새 dev 위로 옮긴 뒤 머지합니다.
+- 머지는 **Squash and merge** (기능 PR → dev). 쌓인 PR 은 앞 PR 이 머지되면 새 dev 위로 옮기고 **base 를 dev 로 바꾼 뒤** 머지합니다.
+- **dev → main 은 merge commit 만** 씁니다. → [deployment.md](deployment.md#브랜치--버전--릴리스)
+- PR 제목 · 커밋 메시지는 Conventional Commits (`feat(scope): ...`) — CI 가 검사합니다 ([#32](https://github.com/justgo-valet/makkigo/pull/32), dev 대상 PR 은 커밋 메시지까지).
 
 ## 프론트에서 API 부르기
 
