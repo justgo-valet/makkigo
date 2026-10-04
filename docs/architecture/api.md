@@ -23,8 +23,8 @@
 | 메서드 · 경로 | 하는 일 | 로그인 | PR |
 |---|---|---|---|
 | `GET /api/car/get-car-models?brand=` | 브랜드별 차량 모델 (아직 빈 배열) | | dev (#5) |
-| `POST /api/v1/auth/social/{kakao\|google\|apple\|naver}` | 소셜 로그인 · 가입 | | [#11](https://github.com/justgo-valet/makkigo/pull/11) |
-| `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) |
+| `POST /api/v1/auth/social/{kakao\|google\|apple\|naver}` | 소셜 로그인 · 가입 | | [#11](https://github.com/justgo-valet/makkigo/pull/11) → [#23](https://github.com/justgo-valet/makkigo/pull/23) |
+| `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |
 | `DELETE /api/v1/users/me` | 회원 탈퇴 | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
@@ -39,7 +39,7 @@
 | [#9](https://github.com/justgo-valet/makkigo/pull/9) | 발렛 도메인 Prisma 모델 (체인 머지 후 정리 예정) |
 | [#10](https://github.com/justgo-valet/makkigo/pull/10) | `database` 패키지 Prisma 클라이언트 export, Postgres adapter |
 
-머지 순서: ~~#10~~(머지됨) → [#19](https://github.com/justgo-valet/makkigo/pull/19) 마이그레이션 전환 → #11 → #12 → #13 → #14 → #15 → #16 → (#9 정리)
+고객 인증 · 온보딩 API 와 기반 PR 은 모두 dev 에 머지됐습니다 (2026-10-04). #11 · #12 는 쌓인 상태에서 앞 브랜치로 머지되어, 같은 내용을 [#23](https://github.com/justgo-valet/makkigo/pull/23) · [#24](https://github.com/justgo-valet/makkigo/pull/24) 로 dev 에 다시 머지했습니다. 남은 것: #9 정리.
 
 ## 예정
 

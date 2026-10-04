@@ -1,0 +1,76 @@
+# 배포
+
+## 구성
+
+- AWS **EC2 1대**, 서울 리전(`ap-northeast-2`). **운영 서버만** 둡니다 (개발 서버 없음).
+- 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), PostgreSQL. 직접 운영합니다.
+- DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
+
+## 환경변수 — SSM Parameter Store
+
+운영 환경변수는 서버 파일이 아니라 **SSM Parameter Store** 에 둡니다. 값 변경 이력이 남고, 서버가 망가져도 값이 보존됩니다.
+
+### 이름 규칙
+
+```
+/makkigo/<환경>/<대상>/<변수 이름>
+
+/makkigo/prod/users/AUTH_JWT_SECRET
+         │    │     └─ 컨테이너 안에서 쓰는 변수 이름 그대로
+         │    └─ 앱 또는 컨테이너: users, valetagents, postgres
+         └─ 환경: prod (개발 서버를 만들면 dev)
+```
+
+경로로 나누는 이유:
+
+| 이유 | 예 |
+|---|---|
+| 앱 하나의 변수를 **한 번에** 꺼냄. 변수를 추가해도 배포 스크립트를 고치지 않음 | `aws ssm get-parameters-by-path --path /makkigo/prod/users --with-decryption` |
+| 권한을 **경로 단위**로 줌. 서버는 자기 경로 밖을 못 봄 | EC2 역할에 `/makkigo/prod/*` 읽기만 허용 |
+| 같은 변수 이름을 앱 · 환경별로 구분 | `/makkigo/prod/users/AUTH_JWT_SECRET` ↔ `/makkigo/prod/valetagents/AUTH_JWT_SECRET` |
+
+### 규칙
+
+- 유형은 **SecureString**, 계층은 **표준**, KMS 키는 기본값(`alias/aws/ssm`)
+- 리전은 EC2 와 같은 **서울**
+- 값은 콘솔에만 입력합니다. 채팅 · 이슈 · 커밋에 붙이지 않습니다.
+- `AUTH_JWT_SECRET` 은 환경 · 앱마다 **다른 값** (`openssl rand -base64 32`)
+
+### 파라미터 목록
+
+| 이름 | 값 |
+|---|---|
+| `/makkigo/prod/postgres/POSTGRES_USER` | DB 사용자 |
+| `/makkigo/prod/postgres/POSTGRES_PASSWORD` | DB 비밀번호 (영문 · 숫자로 길게 — 특수문자는 `DATABASE_URL` 에서 깨짐) |
+| `/makkigo/prod/postgres/POSTGRES_DB` | DB 이름 |
+| `/makkigo/prod/users/DATABASE_URL` | `postgresql://<사용자>:<비밀번호>@postgres:5432/<DB이름>` — 호스트는 `localhost` 가 아니라 DB 컨테이너 이름 `postgres` |
+| `/makkigo/prod/users/AUTH_JWT_SECRET` | |
+| `/makkigo/prod/users/KAKAO_APP_ID` | |
+| `/makkigo/prod/users/GOOGLE_IOS_CLIENT_ID` | |
+| `/makkigo/prod/users/GOOGLE_ANDROID_CLIENT_ID` | Flutter `serverClientId` (웹 유형 클라이언트 ID) |
+| `/makkigo/prod/users/APPLE_BUNDLE_ID` | |
+| `/makkigo/prod/users/NAVER_CLIENT_ID` | 현재 미사용 → [auth.md](auth.md) |
+
+요원 앱은 요원 인증을 만들 때 `/makkigo/prod/valetagents/` 에 추가합니다.
+
+### 서버가 읽을 수 있게 하기
+
+1. IAM → 역할 생성 → 신뢰할 엔터티 **EC2**
+2. 권한: `ssm:GetParametersByPath`, `ssm:GetParameters` — 리소스 `arn:aws:ssm:ap-northeast-2:<계정 ID>:parameter/makkigo/prod/*`
+3. EC2 → 작업 → 보안 → **IAM 역할 수정** → 위 역할
+
+기본 KMS 키를 쓰면 복호화 권한은 따로 주지 않아도 됩니다.
+
+## 아직 만들 것
+
+[open-questions.md](../planning/open-questions.md) 의 배포 항목 참고. 순서 제안:
+
+1. **CI**: PR 마다 타입 체크 · lint · 테스트 · 빌드를 GitHub Actions 로 자동 실행 (지금은 없음)
+2. **헬스 체크 API**: 프록시 · compose 가 앱이 살아 있는지 확인할 주소 (예: `GET /api/health`)
+3. 앱 Dockerfile — Next.js `output: "standalone"`, 빌드 단계에서 `prisma generate`
+4. 운영용 docker compose — 앱 2개 + PostgreSQL + **HTTPS 프록시** + SSM 에서 환경변수를 꺼내 넣는 스크립트
+   - 운영에서는 인증 쿠키가 `Secure` 라서 **HTTPS 가 아니면 로그인이 안 됩니다.** 도메인 · 인증서가 필요합니다.
+   - 마이그레이션(`migrate deploy`)을 실행할 이미지에는 Prisma CLI(`prisma`, 지금은 devDependency)가 있어야 합니다.
+5. GitHub Actions 배포
+6. DB 백업 (정기 덤프 → S3)
+7. 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리
