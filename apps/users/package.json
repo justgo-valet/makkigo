@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "@makkigo/api-client": "workspace:*",
     "@makkigo/auth": "workspace:*",
     "@makkigo/ui": "workspace:*",
     "database": "workspace:*",
