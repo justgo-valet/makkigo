@@ -28,4 +28,13 @@ const setAuthCookies = (
   });
 };
 
-export { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, setAuthCookies };
+const clearAuthCookies = (response: NextResponse) => {
+  response.cookies.set(ACCESS_TOKEN_COOKIE, "", { ...baseCookieOptions, path: "/", maxAge: 0 });
+  response.cookies.set(REFRESH_TOKEN_COOKIE, "", {
+    ...baseCookieOptions,
+    path: REFRESH_TOKEN_COOKIE_PATH,
+    maxAge: 0,
+  });
+};
+
+export { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, clearAuthCookies, setAuthCookies };
