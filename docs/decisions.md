@@ -46,3 +46,4 @@
 | 2026-10-04 | DB 스키마 반영을 `db push` 에서 **마이그레이션 파일(`migrate deploy`)** 로 지금부터 전환 | 운영에서 `db push` 는 데이터 손실 위험 | 대화 |
 | 2026-10-04 | 머지는 **Squash and merge** 원칙. 쌓인 PR 은 앞 PR 머지 후 새 dev 위로 옮김(rebase) | 커밋 이력 정리 | 대화 |
 | 2026-10-04 | 작업 방식: 1 API = 1 PR = 1 커밋, 코드 주석 최소화(설명은 PR·문서), 기획 변경은 docs 에 반영 | | 대화 |
+| 2026-10-04 | `next dev` 의 `AGENTS.md`·`CLAUDE.md` 자동 생성을 `agentRules: false` 로 끔 (고객 앱·요원 앱) | 실행할 때마다 생겨 커밋에 섞임 | 대화 |
