@@ -17,6 +17,7 @@
 | 로그인·토큰·쿠키, Flutter 웹뷰 연동 | [architecture/auth.md](architecture/auth.md) |
 | API 목록과 각 PR, 프론트에서 API 부르는 법 | [architecture/api.md](architecture/api.md) |
 | 서버 구성, 운영 환경변수(SSM Parameter Store) 이름 규칙 · 목록 | [architecture/deployment.md](architecture/deployment.md) |
+| Flutter 앱 폴더 · 앱 ID · 웹뷰 규칙 · 스토어 조건 | [architecture/mobile.md](architecture/mobile.md) |
 | "전에 뭐라고 정했지?" — 날짜순 결정 기록 | [decisions.md](decisions.md) |
 
 ## 우선순위
