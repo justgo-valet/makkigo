@@ -15,7 +15,6 @@
     "db:generate": "pnpm --filter database generate",
     "db:format": "pnpm --filter database format",
     "db:validate": "pnpm --filter database validate",
-    "db:push": "pnpm --filter database db:push",
     "db:migrate:dev": "pnpm --filter database migrate:dev",
     "db:migrate:deploy": "pnpm --filter database migrate:deploy",
     "db:studio": "pnpm --filter database studio"
