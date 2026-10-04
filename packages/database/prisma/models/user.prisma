@@ -1,0 +1,52 @@
+enum SocialProvider {
+    KAKAO
+    GOOGLE
+    APPLE
+    NAVER
+}
+
+model User {
+    id        Int       @id @default(autoincrement())
+    phone     String?   @unique
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+    socialAccounts UserSocialAccount[]
+    refreshTokens  UserRefreshToken[]
+
+    @@map("users")
+}
+
+model UserSocialAccount {
+    id             Int            @id @default(autoincrement())
+    userId         Int            @map("user_id")
+    provider       SocialProvider
+    providerUserId String         @map("provider_user_id")
+    email          String?
+    createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerUserId])
+    @@index([userId])
+    @@map("user_social_accounts")
+}
+
+model UserRefreshToken {
+    id         Int       @id @default(autoincrement())
+    userId     Int       @map("user_id")
+    tokenHash  String    @unique @map("token_hash") @db.Char(64)
+    userAgent  String?   @map("user_agent")
+    expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+    revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(3)
+    lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(3)
+    createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([expiresAt])
+    @@map("user_refresh_tokens")
+}
