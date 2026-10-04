@@ -1,0 +1,9 @@
+{$USERS_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy users:3001
+}
+
+{$VALET_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy valetagents:3000
+}
