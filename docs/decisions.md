@@ -40,4 +40,9 @@
 | 2026-10-04 | 프론트 API 클라이언트는 고객·요원 앱 공통 패키지(ky 기반). 401 재발급 한 번만, 실패 시 고객 앱은 `/login` | 재발급 동시 호출 시 로그아웃 방지 | [#18](https://github.com/justgo-valet/makkigo/pull/18) |
 | 2026-10-04 | 기존 `getCarModels` 는 새 클라이언트로 옮기지 않음 (경로 통일 논의 때) | 버전 없는 경로 | [#18](https://github.com/justgo-valet/makkigo/pull/18) |
 | 2026-10-04 | 테스트 도구 vitest 를 api-client 패키지에 도입 | 동시 요청 같은 동작은 화면으로 확인하기 어려움 | [#18](https://github.com/justgo-valet/makkigo/pull/18) |
+| 2026-10-04 | 배포는 **AWS** (세부 구성 미정) | 사용자 선택 | 대화 |
+| 2026-10-04 | 배포: **EC2 1대, 운영 서버만**(개발 서버 없음). 앱 2개와 PostgreSQL 을 같은 서버에 Docker 컨테이너로, 직접 운영 | 1차 MVP 규모 | 대화 |
+| 2026-10-04 | 운영 환경변수는 **SSM Parameter Store** 에 두고 컨테이너 실행 때 꺼내 씀 | 값 변경 이력, 서버가 망가져도 값 보존 | 대화 |
+| 2026-10-04 | DB 스키마 반영을 `db push` 에서 **마이그레이션 파일(`migrate deploy`)** 로 지금부터 전환 | 운영에서 `db push` 는 데이터 손실 위험 | 대화 |
+| 2026-10-04 | 머지는 **Squash and merge** 원칙. 쌓인 PR 은 앞 PR 머지 후 새 dev 위로 옮김(rebase) | 커밋 이력 정리 | 대화 |
 | 2026-10-04 | 작업 방식: 1 API = 1 PR = 1 커밋, 코드 주석 최소화(설명은 PR·문서), 기획 변경은 docs 에 반영 | | 대화 |
