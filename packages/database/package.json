@@ -9,7 +9,6 @@
     "generate": "prisma generate",
     "format": "prisma format",
     "validate": "prisma validate",
-    "db:push": "prisma db push",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "NODE_ENV=production prisma migrate deploy",
     "studio": "prisma studio"

@@ -38,7 +38,7 @@ services:
         set -e
         export DATABASE_URL="postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:5432/$${POSTGRES_DB}"
         npm install --no-package-lock --no-audit --no-fund
-        npx prisma db push
+        npx prisma migrate deploy
         npx prisma db execute --file prisma/init/init.sql
     restart: "no"
 
