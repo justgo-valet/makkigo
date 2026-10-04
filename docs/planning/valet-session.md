@@ -1,6 +1,7 @@
 # 발렛 세션
 
 한 번의 맡김~찾음이 세션 하나입니다. 같은 차가 하루에 두 번 오면 세션도 두 개입니다.
+유형별로 처음부터 끝까지 따라가는 예시는 [valet-scenarios.md](valet-scenarios.md) 를 봅니다.
 테이블: `valet_sessions` (#9) → [database.md](../architecture/database.md)
 
 ## 상태
