@@ -9,6 +9,7 @@
 | 서비스가 뭔지, 용어(요원·부스·업체), 누가 어떤 앱을 쓰는지 | [planning/overview.md](planning/overview.md) |
 | 고객이 앱에서 무엇을 어떤 순서로 하는지 | [planning/user-flows.md](planning/user-flows.md) |
 | 발렛 세션 상태, 요금 계산, QR, 티켓, 업체 연결 규칙 | [planning/valet-session.md](planning/valet-session.md) |
+| 발렛 유형(예약형 · 현장형 · 비회원)별 처음부터 끝까지 시나리오 | [planning/valet-scenarios.md](planning/valet-scenarios.md) |
 | 결제, 약관 동의, 회원 탈퇴·개인정보 보관 | [planning/policies.md](planning/policies.md) |
 | 아직 정하지 않은 것, 알고 두는 허점 | [planning/open-questions.md](planning/open-questions.md) |
 | Figma 위치, 화면 목록, 화면별 데이터 | [design/screens.md](design/screens.md) |
