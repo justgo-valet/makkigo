@@ -1,0 +1,17 @@
+model Vehicle {
+    id              Int      @id @default(autoincrement())
+    userId          Int      @unique @map("user_id")
+    plateNumber     String   @unique @map("plate_number")
+    brandId         Int?     @map("brand_id")
+    modelId         Int?     @map("model_id")
+    customBrandName String?  @map("custom_brand_name")
+    customModelName String?  @map("custom_model_name")
+    createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+    user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    brand CarBrand? @relation(fields: [brandId], references: [id])
+    model CarModel? @relation(fields: [modelId], references: [id])
+
+    @@map("vehicles")
+}

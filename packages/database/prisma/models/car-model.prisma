@@ -4,7 +4,8 @@ model CarModel {
     imageUrl String @map("image_url")
     brandId  Int    @map("brand_id")
 
-    brand CarBrand @relation(fields: [brandId], references: [id])
+    brand    CarBrand  @relation(fields: [brandId], references: [id])
+    vehicles Vehicle[]
 
     @@unique([name, brandId])
     @@map("car_models")
