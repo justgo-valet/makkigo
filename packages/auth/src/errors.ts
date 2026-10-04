@@ -11,3 +11,10 @@ export class AuthConfigError extends Error {
     this.name = "AuthConfigError";
   }
 }
+
+export class InvalidRefreshTokenError extends Error {
+  constructor() {
+    super("리프레시 토큰이 유효하지 않습니다.");
+    this.name = "InvalidRefreshTokenError";
+  }
+}
