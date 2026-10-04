@@ -7,6 +7,7 @@
 - 요청·응답 스키마(zod): `apps/<앱>/libs/<도메인>/contracts/`
 - 서버 로직: `apps/<앱>/server/<도메인>/`, 공통 인증: `packages/auth`
 - **1 API = 1 PR = 1 커밋**. 앞 작업에 의존하면 앞 PR 위에 쌓습니다.
+- 머지는 **Squash and merge**. 쌓인 PR 은 앞 PR 이 머지되면 새 dev 위로 옮긴 뒤 머지합니다.
 
 ## 프론트에서 API 부르기
 
@@ -38,7 +39,7 @@
 | [#9](https://github.com/justgo-valet/makkigo/pull/9) | 발렛 도메인 Prisma 모델 (체인 머지 후 정리 예정) |
 | [#10](https://github.com/justgo-valet/makkigo/pull/10) | `database` 패키지 Prisma 클라이언트 export, Postgres adapter |
 
-머지 순서: #10 → #11 → #12 → #13 → #14 → #15 → #16 → (#9 정리)
+머지 순서: ~~#10~~(머지됨) → [#19](https://github.com/justgo-valet/makkigo/pull/19) 마이그레이션 전환 → #11 → #12 → #13 → #14 → #15 → #16 → (#9 정리)
 
 ## 예정
 

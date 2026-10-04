@@ -3,7 +3,7 @@
 - PostgreSQL 16 (docker compose) + Prisma 7
 - 패키지: `packages/database` — 모델은 `prisma/models/*.prisma` 에 나눠 둡니다.
 - 앱에서 쓰기: `import { prisma } from "database"` (#10)
-- 스키마 반영은 아직 마이그레이션 없이 `db push` (docker compose 의 db-setup 컨테이너가 실행)
+- 스키마 반영은 **마이그레이션 파일**(`prisma migrate deploy`)로 전환 중입니다. 스키마를 바꾸는 PR 은 마이그레이션 파일을 함께 올립니다.
 
 ## 규칙
 
