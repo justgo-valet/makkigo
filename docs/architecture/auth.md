@@ -50,7 +50,10 @@ Flutter (네이티브 소셜 로그인) ──소셜 토큰──▶ POST /api/v
 
 ⚠️ 네이버는 토큰이 우리 앱에서 발급됐는지 확인하는 공식 수단을 찾지 못했습니다. `NAVER_CLIENT_ID` 는 현재 쓰이지 않습니다.
 
-## 환경변수 (`apps/users/.env.development.local` 등)
+## 환경변수
+
+로컬은 `apps/users/.env.development.local` 등, 운영은 SSM Parameter Store `/makkigo/prod/users/` → [deployment.md](deployment.md)
+
 
 | 이름 | 값 |
 |---|---|
@@ -58,6 +61,6 @@ Flutter (네이티브 소셜 로그인) ──소셜 토큰──▶ POST /api/v
 | `AUTH_JWT_SECRET` | `openssl rand -base64 32` |
 | `KAKAO_APP_ID` | 카카오 개발자 콘솔의 앱 ID (숫자) |
 | `GOOGLE_IOS_CLIENT_ID` | 구글 iOS 클라이언트 ID |
-| `GOOGLE_ANDROID_CLIENT_ID` | Flutter `google_sign_in` 의 `serverClientId` (웹 유형 클라이언트 ID) |
+| `GOOGLE_ANDROID_CLIENT_ID` | Flutter `google_sign_in` 의 `serverClientId` (웹 유형 클라이언트 ID). iOS 에서도 `serverClientId` 를 쓰면 iOS 토큰의 대상도 이 값이 되므로 `GOOGLE_IOS_CLIENT_ID` 에도 같은 값을 넣습니다 |
 | `APPLE_BUNDLE_ID` | iOS 앱 번들 ID |
 | `NAVER_CLIENT_ID` | 현재 미사용 |
