@@ -14,16 +14,18 @@ enum ConsentType {
 }
 
 model User {
-    id        Int       @id @default(autoincrement())
-    phone     String?   @unique
-    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-    deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+    id                  Int       @id @default(autoincrement())
+    phone               String?   @unique
+    createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+    deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(3)
+    personalDataPurgeAt DateTime? @map("personal_data_purge_at") @db.Timestamptz(3)
 
     socialAccounts UserSocialAccount[]
     refreshTokens  UserRefreshToken[]
     consents       UserConsent[]
 
+    @@index([personalDataPurgeAt])
     @@map("users")
 }
 
