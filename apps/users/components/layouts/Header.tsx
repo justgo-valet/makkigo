@@ -7,8 +7,16 @@ import { useLayout } from "@/stores/layout";
 
 export default function Header() {
   const router = useRouter();
-  const { showBackButton, backNavigateText, backButtonHandler, logoPosition, showRightMenu } =
-    useLayout((state) => state.headerConfiguration);
+  const {
+    visible,
+    showBackButton,
+    backNavigateText,
+    backButtonHandler,
+    logoPosition,
+    showRightMenu,
+  } = useLayout((state) => state.headerConfiguration);
+
+  if (!visible) return null;
 
   return (
     <header className="relative flex items-center justify-between w-full h-12">
