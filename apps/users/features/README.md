@@ -11,7 +11,7 @@ features/<도메인>/
   *.ts          그 기능에서만 쓰는 설정 · 상수 · store
 ```
 
-필요한 하위 폴더만 만듭니다. 파일이 한두 개면 하위 폴더 없이 바로 둡니다 (예: `car/carBrandLogoRegistry.ts`).
+필요한 하위 폴더만 만듭니다. 파일이 한두 개면 하위 폴더 없이 바로 둡니다 (예: `consent/consentItems.ts`).
 
 ## 규칙
 

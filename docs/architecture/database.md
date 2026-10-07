@@ -16,13 +16,13 @@
 | 금액 | 원 단위 `Int` |
 | 삭제 | 회원은 탈퇴 시각 기록 (soft delete) + 개인정보 30일 후 삭제 |
 | 주석 | 코드에는 최소화, 설명은 PR 과 이 문서에 |
-| 이미지 | 전체 주소가 아니라 **경로만** 저장 (`booth_photos.path`, `merchant_photos.path`, `logo_url`, `image_url`). 주소는 `NEXT_PUBLIC_IMAGE_BASE_URL` 과 조합 |
+| 이미지 | 전체 주소가 아니라 **경로만** 저장 (`booth_photos.path`, `merchant_photos.path`, `logo_url`, `image_url`). 서버가 `IMAGE_BASE_URL`(런타임 환경변수)과 합쳐 전체 주소로 응답 |
 
 ## 테이블
 
 | 영역 | 테이블 | 어디에 |
 |---|---|---|
-| 차량 마스터 | `car_brands`, `car_models` | dev (#8) |
+| 차량 마스터 | `car_brands`(35), `car_models`(182) — 데이터는 `prisma/init/init.sql`, 컨테이너 시작마다 실행(같은 이름이면 이미지 경로만 갱신) | dev (#8) |
 | 고객 인증 | `users`, `user_social_accounts`, `user_refresh_tokens`, `user_login_codes`(앱 로그인 1회용 코드) | #11, [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | 약관 | `user_consents` (enum `PRIVACY_OVERSEAS_TRANSFER` 는 기존 기록용, 새로 받지 않음) | #14 |
 | 차량 | `vehicles` | #16 |
