@@ -23,6 +23,7 @@ model User {
 
     socialAccounts UserSocialAccount[]
     refreshTokens  UserRefreshToken[]
+    loginCodes     UserLoginCode[]
     consents       UserConsent[]
     pushDevices    PushDevice[]
     notifications  Notification[]
@@ -64,6 +65,22 @@ model UserRefreshToken {
     @@index([userId])
     @@index([expiresAt])
     @@map("user_refresh_tokens")
+}
+
+model UserLoginCode {
+    id           Int       @id @default(autoincrement())
+    userId       Int       @map("user_id")
+    codeHash     String    @unique @map("code_hash") @db.Char(64)
+    appChallenge String    @map("app_challenge") @db.Char(43)
+    expiresAt    DateTime  @map("expires_at") @db.Timestamptz(3)
+    usedAt       DateTime? @map("used_at") @db.Timestamptz(3)
+    createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([expiresAt])
+    @@map("user_login_codes")
 }
 
 model UserConsent {

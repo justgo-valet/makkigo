@@ -23,7 +23,7 @@
 | 영역 | 테이블 | 어디에 |
 |---|---|---|
 | 차량 마스터 | `car_brands`, `car_models` | dev (#8) |
-| 고객 인증 | `users`, `user_social_accounts`, `user_refresh_tokens` | #11 |
+| 고객 인증 | `users`, `user_social_accounts`, `user_refresh_tokens`, `user_login_codes`(앱 로그인 1회용 코드) | #11, [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | 약관 | `user_consents` | #14 |
 | 차량 | `vehicles` | #16 |
 | 요원 · 업체 관리자 | `staff`, `staff_social_accounts` | #9 (요원 인증 작업 때 리프레시 토큰 등 추가) |
@@ -63,7 +63,7 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 | 차량 → 고객 필수 | 세션에 **차량 번호 직접 저장**, 회원이면 FK | 비회원 차량은 행이 없음 |
 | 상태: 주차 요청 · 주차 완료 · 출차 요청 · 출차 완료 | 6개 상태 | 출차 준비 중(응답 후), 취소 추가 → [valet-session.md](../planning/valet-session.md) |
 | 알림 유형 테이블 | enum | |
-| (없음) | 소셜 계정, 리프레시 토큰, 푸시 기기 | Flutter 네이티브 로그인 · FCM |
+| (없음) | 소셜 계정, 리프레시 토큰, 1회용 로그인 코드, 푸시 기기 | 소셜 로그인 · FCM |
 
 ## 모델 메모
 
