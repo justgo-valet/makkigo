@@ -6,7 +6,7 @@
 - 오류 응답: `{ "message": "사용자에게 보여줄 문장" }` + 상태 코드
   - 화면이 오류 종류에 따라 다르게 움직여야 하면 `code` 를 함께 보냄 (예: 온보딩 `DUPLICATE_PHONE`, `DUPLICATE_VEHICLE`, `ALREADY_COMPLETED`, `REQUIRED_CONSENTS_MISSING`)
 - 요청·응답 스키마(zod): `apps/<앱>/libs/<도메인>/contracts/`
-- 서버 로직: `apps/<앱>/server/<도메인>/`, 공통 인증: `packages/auth`
+- 서버 로직: `apps/<앱>/server/<도메인>/` (`import "server-only"` 로 클라이언트에서 못 가져오게 막음), 공통 인증: `packages/auth`
 - **1 API = 1 PR = 1 커밋**. 앞 작업에 의존하면 앞 PR 위에 쌓습니다.
 - 머지는 **Squash and merge** (기능 PR → dev). 쌓인 PR 은 앞 PR 이 머지되면 새 dev 위로 옮기고 **base 를 dev 로 바꾼 뒤** 머지합니다.
 - **dev → main 은 merge commit 만** 씁니다. → [deployment.md](deployment.md#브랜치--버전--릴리스)

@@ -1,3 +1,5 @@
+import { isRequiredConsent } from "@/libs/consent/contracts/consents";
+
 import type { ConsentType } from "@/libs/consent/contracts/consents";
 
 interface ConsentItem {
@@ -8,13 +10,16 @@ interface ConsentItem {
 
 const CONSENT_DOCUMENT_VERSION = "2026-10-04";
 
-const consentItems: readonly ConsentItem[] = [
-  { type: "TERMS_OF_SERVICE", label: "서비스 이용약관", required: true },
-  { type: "PRIVACY_COLLECTION", label: "개인정보 수집 · 이용", required: true },
-  { type: "PRIVACY_OVERSEAS_TRANSFER", label: "개인정보 국외 이전", required: true },
-  { type: "APP_PUSH", label: "앱 푸시 알림 수신", required: false },
-  { type: "ALIMTALK", label: "알림톡 수신", required: false },
-];
+// 필수 여부는 서버와 같은 기준(REQUIRED_CONSENT_TYPES)에서 가져온다.
+const consentItems: readonly ConsentItem[] = (
+  [
+    { type: "TERMS_OF_SERVICE", label: "서비스 이용약관" },
+    { type: "PRIVACY_COLLECTION", label: "개인정보 수집 · 이용" },
+    { type: "PRIVACY_OVERSEAS_TRANSFER", label: "개인정보 국외 이전" },
+    { type: "APP_PUSH", label: "앱 푸시 알림 수신" },
+    { type: "ALIMTALK", label: "알림톡 수신" },
+  ] as const
+).map((item) => ({ ...item, required: isRequiredConsent(item.type) }));
 
 export { CONSENT_DOCUMENT_VERSION, consentItems };
 export type { ConsentItem };

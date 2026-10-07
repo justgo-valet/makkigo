@@ -24,5 +24,4 @@ const getCarModels = async (brand: string): Promise<CarModelsResponse> => {
   return parsedResponse.data;
 };
 
-export default getCarModels;
 export { getCarModels };

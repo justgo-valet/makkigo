@@ -63,4 +63,4 @@ const useConsent = (onAgreed: () => void) => {
   };
 };
 
-export default useConsent;
+export { useConsent };

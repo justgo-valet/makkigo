@@ -39,6 +39,5 @@ const carBrandLogoRegistry = [
 type CarBrand = (typeof carBrandLogoRegistry)[number];
 type CarBrandId = CarBrand["id"];
 
-export default carBrandLogoRegistry;
 export { carBrandLogoRegistry };
 export type { CarBrand, CarBrandId };

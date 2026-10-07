@@ -1,3 +1,4 @@
+import "server-only";
 import { getActiveUserIdFromAccessToken } from "@makkigo/auth";
 
 import { ACCESS_TOKEN_COOKIE } from "./authCookies";

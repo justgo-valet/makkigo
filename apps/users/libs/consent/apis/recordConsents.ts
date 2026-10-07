@@ -1,6 +1,8 @@
 import { apiClient } from "@/libs/common/api/apiClient";
-
-import { recordConsentsRequestSchema, type RecordConsentsRequest } from "@/libs/consent/contracts/consents";
+import {
+  recordConsentsRequestSchema,
+  type RecordConsentsRequest,
+} from "@/libs/consent/contracts/consents";
 
 const recordConsents = async (request: RecordConsentsRequest) => {
   const parsedRequest = recordConsentsRequestSchema.safeParse(request);

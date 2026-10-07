@@ -72,4 +72,4 @@ const useOnboarding = () => {
   };
 };
 
-export default useOnboarding;
+export { useOnboarding };

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useController, useFormContext } from "react-hook-form";
 
 import { carBrandLogoRegistry } from "@/configs/onboarding/carBrandLogoRegistry";
-import useStaggeredReveal from "@/hooks/useStaggeredReveal";
+import { useStaggeredReveal } from "@/hooks/useStaggeredReveal";
 
 import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 

@@ -1,7 +1,7 @@
 import { Field, FieldLabel, Input, Label } from "@makkigo/ui";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
-import { formatPhoneNumber } from "@/libs/common/format";
+import { formatPhoneNumber } from "@/libs/common/format/phoneNumber";
 
 import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
 

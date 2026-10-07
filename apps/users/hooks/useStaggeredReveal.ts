@@ -45,4 +45,4 @@ const useStaggeredReveal = <T extends HTMLElement>(staggerMs: number) => {
   return { rootRef, revealDelays };
 };
 
-export default useStaggeredReveal;
+export { useStaggeredReveal };

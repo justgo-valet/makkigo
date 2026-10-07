@@ -9,7 +9,7 @@ import { useFormContext } from "react-hook-form";
 import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboarding";
 import ConsentSheet from "@/components/features/onboarding/ConsentSheet";
 import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
-import useOnboarding from "@/hooks/useOnboarding";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import {
   completeOnboarding,
   getOnboardingErrorCode,

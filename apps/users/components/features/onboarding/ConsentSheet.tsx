@@ -14,7 +14,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { consentItems } from "@/configs/consent/consentItems";
-import useConsent from "@/hooks/useConsent";
+import { useConsent } from "@/hooks/useConsent";
 
 import type { ConsentType } from "@/libs/consent/contracts/consents";
 

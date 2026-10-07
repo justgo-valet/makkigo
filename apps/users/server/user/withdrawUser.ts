@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "database";
 
 const PERSONAL_DATA_RETENTION_DAYS = 30;

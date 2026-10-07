@@ -17,4 +17,4 @@ const useOnboardingHeader = (handleBack: () => void) => {
   useEffect(() => () => setHeaderConfiguration({}), [setHeaderConfiguration]);
 };
 
-export default useOnboardingHeader;
+export { useOnboardingHeader };

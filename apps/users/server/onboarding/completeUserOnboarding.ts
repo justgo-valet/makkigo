@@ -1,10 +1,14 @@
+import "server-only";
 import { Prisma, prisma } from "database";
 
-import type { CompleteOnboardingRequest } from "@/libs/onboarding/contracts/onboarding";
+import type {
+  CompleteOnboardingRequest,
+  OnboardingErrorCode,
+} from "@/libs/onboarding/contracts/onboarding";
 
 type CompleteOnboardingResult =
   | { ok: true }
-  | { ok: false; reason: "ALREADY_COMPLETED" | "DUPLICATE_PHONE" | "DUPLICATE_VEHICLE" };
+  | { ok: false; reason: Exclude<OnboardingErrorCode, "REQUIRED_CONSENTS_MISSING"> };
 
 const resolveCarIds = async (brandName: string, modelName: string) => {
   const brand = await prisma.carBrand.findUnique({ where: { name: brandName } });
@@ -27,7 +31,7 @@ const isUniqueViolationOn = (error: unknown, field: string) =>
   error.code === "P2002" &&
   JSON.stringify(error.meta ?? {}).includes(field);
 
-const completeOnboarding = async (
+const completeUserOnboarding = async (
   userId: number,
   request: CompleteOnboardingRequest,
 ): Promise<CompleteOnboardingResult> => {
@@ -64,4 +68,4 @@ const completeOnboarding = async (
   return { ok: true };
 };
 
-export { completeOnboarding };
+export { completeUserOnboarding };

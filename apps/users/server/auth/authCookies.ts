@@ -1,3 +1,4 @@
+import "server-only";
 import type { IssuedToken } from "@makkigo/auth";
 import type { NextResponse } from "next/server";
 
