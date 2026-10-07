@@ -1,11 +1,18 @@
 export { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./config";
-export { AuthConfigError, InvalidRefreshTokenError, InvalidSocialTokenError } from "./errors";
-export { parseSocialProvider, verifySocialToken } from "./providers";
+export { AuthConfigError, InvalidRefreshTokenError, SocialAuthError } from "./errors";
+export { parseSocialProvider } from "./oauth";
+export { consumeUserLoginCode, createUserLoginCode } from "./user-login-code";
 export { revokeUserRefreshToken } from "./user-logout";
+export {
+  completeUserOAuth,
+  isValidAppChallenge,
+  readUserOAuthState,
+  startUserOAuth,
+} from "./user-oauth";
 export { getActiveUserIdFromAccessToken } from "./user-session";
-export { signInUserWithSocial } from "./user-social-sign-in";
 export { refreshUserTokens } from "./user-token-refresh";
+export { issueUserTokens } from "./user-tokens";
 
-export type { SocialIdentity } from "./providers";
+export type { OAuthCallbackParams, SocialIdentity } from "./oauth";
+export type { OAuthClient, OAuthState } from "./oauth/state";
 export type { IssuedToken } from "./tokens";
-export type { UserSocialSignInResult } from "./user-social-sign-in";

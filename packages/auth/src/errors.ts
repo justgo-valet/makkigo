@@ -1,7 +1,7 @@
-export class InvalidSocialTokenError extends Error {
-  constructor(message = "소셜 토큰이 유효하지 않습니다.", options?: ErrorOptions) {
+export class SocialAuthError extends Error {
+  constructor(message = "소셜 로그인 정보를 확인하지 못했습니다.", options?: ErrorOptions) {
     super(message, options);
-    this.name = "InvalidSocialTokenError";
+    this.name = "SocialAuthError";
   }
 }
 

@@ -2,7 +2,7 @@ import { prisma } from "database";
 
 import { InvalidRefreshTokenError } from "./errors";
 import { hashToken } from "./tokens";
-import { issueUserTokens } from "./user-social-sign-in";
+import { issueUserTokens } from "./user-tokens";
 
 export const refreshUserTokens = async (input: {
   refreshToken: string;
