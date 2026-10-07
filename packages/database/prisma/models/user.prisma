@@ -11,6 +11,8 @@ enum ConsentType {
     PRIVACY_OVERSEAS_TRANSFER
     APP_PUSH
     ALIMTALK
+    AGE_14_OR_OVER
+    PRIVACY_THIRD_PARTY
 }
 
 model User {

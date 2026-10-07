@@ -1,17 +1,19 @@
 import { z } from "zod";
 
 const CONSENT_TYPES = [
+  "AGE_14_OR_OVER",
   "TERMS_OF_SERVICE",
   "PRIVACY_COLLECTION",
-  "PRIVACY_OVERSEAS_TRANSFER",
+  "PRIVACY_THIRD_PARTY",
   "APP_PUSH",
   "ALIMTALK",
 ] as const;
 
 const REQUIRED_CONSENT_TYPES = [
+  "AGE_14_OR_OVER",
   "TERMS_OF_SERVICE",
   "PRIVACY_COLLECTION",
-  "PRIVACY_OVERSEAS_TRANSFER",
+  "PRIVACY_THIRD_PARTY",
 ] as const satisfies readonly (typeof CONSENT_TYPES)[number][];
 
 const consentTypeSchema = z.enum(CONSENT_TYPES);
