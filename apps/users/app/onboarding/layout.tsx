@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Suspense } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import MemberGate from "@/features/auth/components/MemberGate";
 import { DEFAULT_FORM_VALUES } from "@/features/onboarding/onboardingFlow";
 import { onboardingSchema } from "@/features/onboarding/schemas/onboarding.schema";
 
@@ -17,8 +18,10 @@ export default function OnboardingLayout({ children }: Readonly<{ children: Reac
   });
 
   return (
-    <FormProvider {...form}>
-      <Suspense fallback={null}>{children}</Suspense>
-    </FormProvider>
+    <MemberGate area="onboarding">
+      <FormProvider {...form}>
+        <Suspense fallback={null}>{children}</Suspense>
+      </FormProvider>
+    </MemberGate>
   );
 }

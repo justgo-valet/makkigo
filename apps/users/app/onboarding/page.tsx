@@ -14,6 +14,7 @@ import {
 import AnimatedOnboarding from "@/features/onboarding/components/AnimatedOnboarding";
 import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
 import { onboardingFlow } from "@/features/onboarding/onboardingFlow";
+import { useMe } from "@/features/user/hooks/useMe";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
@@ -22,7 +23,8 @@ const FALLBACK_ERROR_MESSAGE = "정보를 저장하지 못했습니다. 다시 �
 export default function OnboardingContent() {
   const { onboardingStep, buttonType, handleMoveNextStep, handleMoveToStep } = useOnboarding();
   const form = useFormContext<OnboardingFormValues>();
-  const [hasAgreedConsents, setHasAgreedConsents] = useState(false);
+  const { data: me } = useMe();
+  const [hasAgreedConsents, setHasAgreedConsents] = useState(me?.requiredConsentsAgreed ?? false);
   const step = onboardingFlow[onboardingStep];
   const StepComponent = step.component;
 
