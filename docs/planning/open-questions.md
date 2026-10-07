@@ -30,4 +30,3 @@
 | 네이버 토큰이 우리 앱에서 발급됐는지 확인 | 공식 수단을 찾지 못해 프로필 조회로만 검증 → [auth.md](../architecture/auth.md) |
 | Flutter → 웹뷰 로그인 상태 전달 방식 | Flutter 연동 때 결정 → [auth.md](../architecture/auth.md) |
 | 기존 API 의 버전 경로 통일 | `/api/car/get-car-models` 는 `/api/v1` 이 아님. 지상님과 협의 |
-| `next dev` 가 만드는 `AGENTS.md`, `CLAUDE.md` | 커밋할지 gitignore 할지 미정 |
