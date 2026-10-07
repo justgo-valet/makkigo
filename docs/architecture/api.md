@@ -29,7 +29,8 @@
 | `GET /api/v1/cars/models?brand=` | 브랜드별 차량 모델 이름 (한국어 순). 옛 경로 `/api/car/get-car-models` 는 삭제 | | dev (#5), [#26](https://github.com/justgo-valet/makkigo/pull/26) |
 | `GET /api/v1/auth/oauth/{kakao\|google\|apple\|naver}` | 소셜 로그인 시작 → 제공자 로그인 페이지로 이동. 앱은 `?app_challenge=` | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | `GET · POST /api/v1/auth/oauth/{provider}/callback` | 제공자 콜백: 회원 확인 · 가입 → 웹은 쿠키 + 이동, 앱은 1회용 코드로 앱 복귀 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
-| `GET /api/v1/auth/oauth/exchange?code=&verifier=` | 앱 웹뷰에서 1회용 코드 → 쿠키 + 이동 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
+| `POST /api/v1/auth/oauth/{provider}/app-session` | 앱 로그인 준비: `verifier` 를 웹뷰 쿠키에 심고, 앱이 열 `authUrl` · 돌아올 `returnUrl` 을 돌려줌 | | [#46](https://github.com/justgo-valet/makkigo/pull/46) |
+| `GET /api/v1/auth/oauth/exchange?code=` (또는 `?error=`) | 앱 웹뷰에서 1회용 코드 + `verifier` 쿠키 → 로그인 쿠키 + 이동 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |

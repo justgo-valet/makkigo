@@ -15,11 +15,15 @@
                     우리 토큰 쿠키 + /onboarding 또는 / 로 이동
 
 [앱 (Flutter 웹뷰)]
-웹뷰 /login ─▶ 앱에 로그인 요청 ─▶ 앱이 시스템 브라우저 창으로
-   GET /api/v1/auth/oauth/{provider}?app_challenge=…   (iOS ASWebAuthenticationSession, Android Custom Tabs)
+웹뷰 /login ─▶ POST /api/v1/auth/oauth/{provider}/app-session
+                 └ verifier 를 웹뷰 쿠키에 심고 { authUrl, returnUrl } 응답
+웹뷰 ─▶ 앱에 "이 주소로 창 열어줘" (authUrl, returnUrl)
+앱이 시스템 브라우저 창으로 authUrl 열기   (iOS ASWebAuthenticationSession, Android Custom Tabs)
+   = GET /api/v1/auth/oauth/{provider}?app_challenge=…
              └▶ 제공자 로그인 ─▶ callback ─▶ 1회용 로그인 코드 발급
                                               └▶ com.makkigo.user://auth?code=… 로 앱 복귀
-앱이 웹뷰에서 GET /api/v1/auth/oauth/exchange?code=…&verifier=… 를 열기
+앱이 웹뷰에서 returnUrl + 받은 쿼리를 그대로 열기
+   = GET /api/v1/auth/oauth/exchange?code=…   (verifier 는 웹뷰 쿠키에 있음)
    └▶ 우리 토큰 쿠키가 **웹뷰에** 심김 + /onboarding 또는 / 로 이동
 ```
 
@@ -27,11 +31,13 @@
 
 **왜 1회용 코드를 거치나**: 시스템 브라우저 창과 웹뷰는 쿠키 저장소가 다릅니다. 창에서 받은 로그인을 웹뷰로 옮기려고, 2분짜리 1회용 코드를 앱 복귀 주소에 실어 보내고 웹뷰가 그 코드를 쿠키로 바꿉니다.
 
-**`app_challenge` / `verifier`**: 앱이 시작할 때 임의 값(`verifier`, 43~128자)을 만들고 그 SHA-256(base64url, 43자)을 `app_challenge` 로 보냅니다. 교환할 때 원래 `verifier` 가 있어야 합니다. 다른 앱이 같은 복귀 주소(`com.makkigo.user://`)를 가로채도 `verifier` 가 없어서 로그인할 수 없습니다 (OAuth PKCE 와 같은 원리).
+**`app_challenge` / `verifier`**: 서버가 앱 로그인 준비(`app-session`) 때 임의 값(`verifier`, 43자)을 만들어 **웹뷰 쿠키**(`makkigo_app_login_verifier`, HttpOnly, path `/api/v1/auth/oauth`, 10분)에 심고, 그 SHA-256(base64url, 43자)을 `app_challenge` 로 `authUrl` 에 넣습니다. 교환할 때 그 쿠키가 있어야 합니다. 다른 앱이 같은 복귀 주소(`com.makkigo.user://`)를 가로채도 `verifier` 가 없어서 로그인할 수 없습니다 (OAuth PKCE 와 같은 원리).
 
 **로그인 뒤 이동**: 필수 약관 동의 + 온보딩까지 끝났으면 `/`, 아니면 `/onboarding` (`GET /api/v1/users/me` 와 같은 기준).
 
 **실패 · 취소**: 웹은 `/login?error=cancelled|failed`, 앱은 `com.makkigo.user://auth?error=cancelled|failed`.
+
+**앱은 심부름만 합니다** (decisions 2026-10-08): 앱은 웹이 준 `authUrl` 을 창으로 열고, 돌아온 쿼리를 웹이 준 `returnUrl` 에 붙여 웹뷰에서 열 뿐입니다. 제공자 목록 · API 경로 · `verifier` 를 앱이 모르므로, 로그인 · 회원가입을 바꿔도 **서버 배포만** 하면 되고 앱 업데이트(스토어 심사)는 필요 없습니다. 앱 업데이트가 필요한 것은 브리지 메시지 형식이나 복귀 주소(`com.makkigo.user://auth`)를 바꿀 때뿐입니다 → [mobile.md](mobile.md#웹--앱-브리지).
 
 ## OAuth 세부
 

@@ -1,7 +1,11 @@
 export { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./config";
 export { AuthConfigError, InvalidRefreshTokenError, SocialAuthError } from "./errors";
 export { parseSocialProvider } from "./oauth";
-export { consumeUserLoginCode, createUserLoginCode } from "./user-login-code";
+export {
+  consumeUserLoginCode,
+  createAppLoginVerifier,
+  createUserLoginCode,
+} from "./user-login-code";
 export { revokeUserRefreshToken } from "./user-logout";
 export {
   completeUserOAuth,

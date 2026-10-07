@@ -5,6 +5,12 @@ import { prisma } from "database";
 import { LOGIN_CODE_TTL_SECONDS } from "./config";
 import { createRandomToken, hashBase64Url, hashToken } from "./tokens";
 
+export const createAppLoginVerifier = () => {
+  const verifier = createRandomToken();
+
+  return { verifier, appChallenge: hashBase64Url(verifier) };
+};
+
 export const createUserLoginCode = async (userId: number, appChallenge: string) => {
   const code = createRandomToken();
 
