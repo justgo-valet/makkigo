@@ -5,6 +5,10 @@
 - AWS **EC2 1대**, 서울 리전(`ap-northeast-2`). **운영 서버만** 둡니다 (개발 서버 없음).
 - 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), PostgreSQL. 직접 운영합니다.
 - DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
+- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com` (가비아 DNS A 레코드 → EC2 탄력적 IP). 루트 `makkigo.com` 은 비워 둠
+- HTTPS: **Caddy** 가 Let's Encrypt 인증서를 자동 발급 · 갱신
+- PostgreSQL 5432 는 호스트에도 열어 둠 (로컬에서 운영 DB 확인용). EC2 보안 그룹이 허용한 IP 만 접속 가능
+- 서버에서 쓰는 파일은 `deploy/` 폴더: `docker-compose.prod.yml`, `Caddyfile`, `load-env.sh`, `deploy.sh`
 
 ## 환경변수 — SSM Parameter Store
 
@@ -128,16 +132,16 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 
 스쿼시하면 `main` 에 `dev` 와 다른 새 커밋이 생겨, 다음 `dev → main` 마다 같은 변경이 충돌합니다. 그래서 이 경로만 스쿼시 원칙의 예외입니다.
 
-## 아직 만들 것
+## 진행 상황
 
-[open-questions.md](../planning/open-questions.md) 의 배포 항목 참고. 순서 제안:
-
-1. **CI**: PR 마다 타입 체크 · lint · 테스트 · 빌드를 GitHub Actions 로 자동 실행 (지금은 없음)
-2. **헬스 체크 API**: 프록시 · compose 가 앱이 살아 있는지 확인할 주소 (예: `GET /api/health`)
-3. 앱 Dockerfile — Next.js `output: "standalone"`, 빌드 단계에서 `prisma generate`
-4. 운영용 docker compose — 앱 2개 + PostgreSQL + **HTTPS 프록시** + SSM 에서 환경변수를 꺼내 넣는 스크립트
-   - 운영에서는 인증 쿠키가 `Secure` 라서 **HTTPS 가 아니면 로그인이 안 됩니다.** 도메인 · 인증서가 필요합니다.
-   - 마이그레이션(`migrate deploy`)을 실행할 이미지에는 Prisma CLI(`prisma`, 지금은 devDependency)가 있어야 합니다.
-5. GitHub Actions 배포
-6. DB 백업 (정기 덤프 → S3)
-7. 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리
+| 작업 | 상태 |
+|---|---|
+| CI (GitHub Actions) — 타입 체크 · lint · 포맷 · 테스트 · 빌드 · 마이그레이션 검사, PR 제목 · 커밋 형식 | ✅ #32 |
+| 헬스 체크 `GET /api/health` (두 앱) | ✅ #33 |
+| Dockerfile — users · valetagents(standalone) · migrate | ✅ #34 |
+| 운영 compose · Caddy · SSM 환경변수 스크립트 · 배포 스크립트 (`deploy/`) | ✅ #36 |
+| 배포 Actions — main 머지 시 이미지 빌드 → GHCR → OIDC + SSM 명령으로 배포, 수동 배포 · 되돌리기 | 다음 |
+| AWS 준비 — GitHub OIDC 공급자, 배포용 IAM 역할, EC2 IAM 역할, 서버 Docker · AWS CLI, GHCR 토큰 | 배포 Actions 와 함께 |
+| release-please (`Release-As: 1.0.0`) | 출시 때 |
+| DB 백업 (정기 덤프 → S3) | 미정 |
+| 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리 | 미정 |
