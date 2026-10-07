@@ -12,6 +12,7 @@ import {
   getOnboardingErrorCode,
 } from "@/features/onboarding/apis/completeOnboarding";
 import AnimatedOnboarding from "@/features/onboarding/components/AnimatedOnboarding";
+import { useDuplicateCheck } from "@/features/onboarding/hooks/useDuplicateCheck";
 import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
 import { onboardingFlow } from "@/features/onboarding/onboardingFlow";
 import { useMe } from "@/features/user/hooks/useMe";
@@ -25,6 +26,7 @@ export default function OnboardingContent() {
   const form = useFormContext<OnboardingFormValues>();
   const { data: me } = useMe();
   const [hasAgreedConsents, setHasAgreedConsents] = useState(me?.requiredConsentsAgreed ?? false);
+  const { verify: verifyNotDuplicated, isChecking } = useDuplicateCheck();
   const step = onboardingFlow[onboardingStep];
   const StepComponent = step.component;
 
@@ -63,7 +65,7 @@ export default function OnboardingContent() {
       : null;
 
   const handlePrimaryAction = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || isChecking) return;
 
     const isValid = await form.trigger(step.fields, { shouldFocus: true });
 
@@ -73,6 +75,8 @@ export default function OnboardingContent() {
       submitOnboarding(form.getValues());
       return;
     }
+
+    if (!(await verifyNotDuplicated(onboardingStep))) return;
 
     handleMoveNextStep();
   };
@@ -95,7 +99,7 @@ export default function OnboardingContent() {
             type="submit"
             size="lg"
             className="h-12 w-full shadow-none"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isChecking}
           >
             {buttonType === "NEXT" ? "다음으로" : "시작하기"}
           </Button>
