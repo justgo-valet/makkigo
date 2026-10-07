@@ -3,6 +3,7 @@ import { create } from "zustand";
 type LogoPosition = "left" | "center" | "hidden";
 
 interface HeaderConfiguration {
+  visible: boolean;
   showBackButton: boolean;
   backNavigateText: string | null;
   backButtonHandler: (() => void) | null;
@@ -22,6 +23,7 @@ interface LayoutState {
 }
 
 const defaultHeaderConfiguration: HeaderConfiguration = {
+  visible: true,
   showBackButton: false,
   backNavigateText: null,
   backButtonHandler: null,

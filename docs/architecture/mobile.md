@@ -29,6 +29,16 @@
 | 지원 기기 | iOS 는 **iPhone 만** (iPad 스크린샷 · 심사 부담 없음) |
 | HTTP | 운영은 HTTPS 만. 개발용 HTTP 는 Android 디버그 빌드와 iOS 로컬 네트워크만 허용 |
 
+## 웹 ↔ 앱 브리지
+
+웹뷰에 `MakkigoApp` JavaScript 채널이 있습니다. 웹은 `window.MakkigoApp` 이 있으면 앱 안이라고 판단합니다.
+
+| 방향 | 메시지 | 앱이 하는 일 |
+|---|---|---|
+| 웹 → 앱 | `{"type":"socialLogin","provider":"kakao\|google\|apple\|naver"}` | 시스템 브라우저 창으로 `/api/v1/auth/oauth/{provider}?app_challenge=…` 를 열고, 돌아오면 웹뷰에서 `/api/v1/auth/oauth/exchange` 를 엶 → [auth.md](auth.md#흐름) |
+
+메시지를 추가 · 변경할 때는 makkigo 와 makkigo-mobile PR 을 서로 링크합니다.
+
 ## 빌드 · 서명
 
 - Android 운영 서명: `apps/users/android/key.properties` 가 있으면 그 키로, 없으면 디버그 키로 서명합니다. 키 파일(`*.jks`)과 `key.properties` 는 커밋하지 않습니다.

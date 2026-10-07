@@ -46,6 +46,35 @@
 - `state` = 우리 키로 서명한 JWT (10분, 제공자 · nonce · CSRF 값 · 웹/앱 · `app_challenge`). CSRF 값은 `makkigo_oauth_csrf` 쿠키(path `/api/v1/auth/oauth`)와 맞춰 봅니다. 애플은 다른 사이트에서 POST 로 돌아오므로 운영에서 이 쿠키는 `SameSite=None; Secure` 입니다.
 - 1회용 로그인 코드: `user_login_codes` 에 해시만 저장, 2분, 한 번 쓰면 끝 (틀린 `verifier` 로 시도해도 버려짐).
 
+## 로그인 버튼
+
+**medi25 로그인 화면(https://medi25.com/html/login/login_m.php)과 같은 스타일**로 코드에서 그립니다 (decisions 2026-10-08). 로고는 각 사 공식 리소스에서 가져왔습니다 (`apps/users/public/images/login/`).
+
+- 공통: 높이 48px, 모서리 8px, 버튼 간격 12px, Pretendard(`pretendard` 패키지, 쓰는 글자만 받는 dynamic subset) 16px SemiBold
+- 32px 로고 칸 + 8px + 문구, 둘을 묶어 가운데 정렬
+
+| 제공자 | 바탕 / 글자 | 로고 | 문구 |
+|---|---|---|---|
+| 카카오 | #FBE200 / #333333 | 공식 말풍선 심볼 18px (`kakao_symbol.svg`) | 카카오로 계속하기 |
+| 구글 | 흰색, 테두리 #D0D5DD / #333333 | 공식 G 로고 20px (`google_logo_square.png` 의 가운데) | Google로 계속하기 |
+| 애플 | #101828 / 흰색 | 버튼 생성기 로고를 흰 로고만 남기고 자름, 19×24 (`apple_logo_white.png`) | Apple로 계속하기 |
+| 네이버 | #1BC500 / 흰색 | 공식 이미지에서 뽑은 흰 N 로고 18px (`naver_logo.png`) | 네이버로 계속하기 |
+
+구글 버튼은 medi25 에 없어서 같은 틀(흰 바탕 + 회색 테두리)로 만들었습니다.
+
+**각 사 가이드와 다른 점** (알고 쓰는 것): 애플은 바탕이 검정 · 흰색이 아니고 글자가 버튼 높이의 43%(≈21px)보다 작음, 카카오는 색(#FEE500)과 문구("카카오 로그인")가 다름, 네이버는 지정 녹색과 다름, 구글은 Roboto 가 아님. 애플은 심사에서 커스텀 버튼을 보므로 반려되면 애플 버튼만 가이드대로 되돌립니다.
+
+## 소셜 아이콘
+
+마이페이지의 "연결된 소셜 계정" 표시용 공식 아이콘은 `apps/users/public/images/social/` 에 둡니다.
+
+| 파일 | 출처 |
+|---|---|
+| `kakao.svg` | 카카오 `kakao_login_light.svg` (노란 원 + 말풍선) |
+| `naver.png` | 네이버 `NAVER_login_Light_KR_green_icon_H56.png` (녹색 원 + N, 224px) |
+| `google.svg` | 구글 `Theme=Light, Show text=No, Shape=Pill` (흰 원 + G) |
+| `apple.png` | 애플 생성기 로고 전용 버튼 (검정 사각형 + 로고, 64px) |
+
 ## 콘솔 설정
 
 리다이렉트(콜백) 주소: `https://app.makkigo.com/api/v1/auth/oauth/{kakao|google|apple|naver}/callback`. 로컬은 `http://localhost:3001/...` 도 등록합니다 (애플은 HTTPS · 실제 도메인만 가능).
