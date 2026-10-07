@@ -1,10 +1,10 @@
-import CarBrandStep from "@/components/features/onboarding/CarBrandStep";
-import CarModelStep from "@/components/features/onboarding/CarModelStep";
-import CarNumberStep from "@/components/features/onboarding/CarNumberStep";
-import PhoneNumberStep from "@/components/features/onboarding/PhoneNumberStep";
+import CarBrandStep from "@/features/onboarding/components/CarBrandStep";
+import CarModelStep from "@/features/onboarding/components/CarModelStep";
+import CarNumberStep from "@/features/onboarding/components/CarNumberStep";
+import PhoneNumberStep from "@/features/onboarding/components/PhoneNumberStep";
 
 import type { OnboardingStep } from "./onboardingSteps";
-import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 import type { ComponentType } from "react";
 
 interface OnboardingStepDefinition {

@@ -6,16 +6,16 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboarding";
-import ConsentSheet from "@/components/features/onboarding/ConsentSheet";
-import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
-import { useOnboarding } from "@/hooks/useOnboarding";
+import ConsentSheet from "@/features/consent/components/ConsentSheet";
 import {
   completeOnboarding,
   getOnboardingErrorCode,
-} from "@/libs/onboarding/apis/completeOnboarding";
+} from "@/features/onboarding/apis/completeOnboarding";
+import AnimatedOnboarding from "@/features/onboarding/components/AnimatedOnboarding";
+import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
+import { onboardingFlow } from "@/features/onboarding/onboardingFlow";
 
-import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
 const FALLBACK_ERROR_MESSAGE = "정보를 저장하지 못했습니다. 다시 시도해주세요.";
 

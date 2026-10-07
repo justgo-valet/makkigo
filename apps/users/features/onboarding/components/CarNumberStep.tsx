@@ -1,7 +1,7 @@
 import { Field, FieldLabel, Input } from "@makkigo/ui";
 import { useFormContext } from "react-hook-form";
 
-import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
 export default function CarNumberStep() {
   const {

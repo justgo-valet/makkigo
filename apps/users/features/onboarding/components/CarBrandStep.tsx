@@ -3,10 +3,10 @@ import { Card, CardContent } from "@makkigo/ui/components/ui/card";
 import Image from "next/image";
 import { useController, useFormContext } from "react-hook-form";
 
-import { carBrandLogoRegistry } from "@/configs/onboarding/carBrandLogoRegistry";
+import { carBrandLogoRegistry } from "@/features/car/carBrandLogoRegistry";
 import { useStaggeredReveal } from "@/hooks/useStaggeredReveal";
 
-import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
 const CARD_ENTER_CLASS_NAME =
   "animate-in fade-in slide-in-from-bottom-2 fill-mode-both animation-duration-500 motion-reduce:animate-none";

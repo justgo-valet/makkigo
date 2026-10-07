@@ -4,9 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
-import { getCarModels } from "@/libs/onboarding/apis/getCarModels";
+import { getCarModels } from "@/features/car/apis/getCarModels";
 
-import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
 const SELECTED_CARD_CLASS_NAME =
   "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/10 dark:bg-primary/10";

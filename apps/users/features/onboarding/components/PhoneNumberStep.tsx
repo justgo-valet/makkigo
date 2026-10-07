@@ -3,7 +3,7 @@ import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { formatPhoneNumber } from "@/libs/common/format/phoneNumber";
 
-import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
+import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
 export default function PhoneNumberStep() {
   const {

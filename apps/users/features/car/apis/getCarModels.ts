@@ -1,8 +1,8 @@
 import ky from "ky";
 
-import { carModelsResponseSchema } from "@/libs/onboarding/contracts/carModels";
+import { carModelsResponseSchema } from "@/libs/car/contracts/carModels";
 
-import type { CarModelsResponse } from "@/libs/onboarding/contracts/carModels";
+import type { CarModelsResponse } from "@/libs/car/contracts/carModels";
 
 const getCarModels = async (brand: string): Promise<CarModelsResponse> => {
   const normalizedBrand = brand.trim();

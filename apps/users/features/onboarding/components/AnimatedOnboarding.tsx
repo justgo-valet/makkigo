@@ -3,11 +3,11 @@
 import { AnimatePresence, useReducedMotion, motion } from "motion/react";
 import { useSearchParams } from "next/navigation";
 
-import { ONBOARDING_TRANSITION, SLIDE_DISTANCE } from "@/configs/onboarding/onboardingAnimation";
-import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/configs/onboarding/onboardingSteps";
-import { useOnboarding } from "@/hooks/useOnboarding";
-import { useOnboardingHeader } from "@/hooks/useOnboardingHeader";
-import { useOnboardingTransition } from "@/stores/onboardingTransition";
+import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
+import { useOnboardingHeader } from "@/features/onboarding/hooks/useOnboardingHeader";
+import { ONBOARDING_TRANSITION, SLIDE_DISTANCE } from "@/features/onboarding/onboardingAnimation";
+import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/features/onboarding/onboardingSteps";
+import { useOnboardingTransition } from "@/features/onboarding/onboardingTransition.store";
 
 import type { Variants } from "motion/react";
 import type { ReactNode } from "react";

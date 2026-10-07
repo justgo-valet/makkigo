@@ -1,10 +1,10 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/configs/onboarding/onboardingSteps";
-import { useOnboardingTransition } from "@/stores/onboardingTransition";
+import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/features/onboarding/onboardingSteps";
+import { useOnboardingTransition } from "@/features/onboarding/onboardingTransition.store";
 
-import type { OnboardingStep } from "@/configs/onboarding/onboardingSteps";
+import type { OnboardingStep } from "@/features/onboarding/onboardingSteps";
 
 type OnboardingButtonType = "NEXT" | "SUBMIT";
 
