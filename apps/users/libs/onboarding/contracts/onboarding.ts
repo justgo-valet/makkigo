@@ -13,7 +13,17 @@ const completeOnboardingRequestSchema = z.object({
   carModel: z.string().trim().min(1).max(60),
 });
 
-type CompleteOnboardingRequest = z.infer<typeof completeOnboardingRequestSchema>;
+const ONBOARDING_ERROR_CODES = [
+  "REQUIRED_CONSENTS_MISSING",
+  "ALREADY_COMPLETED",
+  "DUPLICATE_PHONE",
+  "DUPLICATE_VEHICLE",
+] as const;
 
-export { completeOnboardingRequestSchema };
-export type { CompleteOnboardingRequest };
+const onboardingErrorResponseSchema = z.object({ code: z.enum(ONBOARDING_ERROR_CODES) });
+
+type CompleteOnboardingRequest = z.infer<typeof completeOnboardingRequestSchema>;
+type OnboardingErrorCode = (typeof ONBOARDING_ERROR_CODES)[number];
+
+export { completeOnboardingRequestSchema, onboardingErrorResponseSchema };
+export type { CompleteOnboardingRequest, OnboardingErrorCode };

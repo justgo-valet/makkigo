@@ -4,6 +4,8 @@ import { useCallback } from "react";
 import { getOnboardingStepIndex, ONBOARDING_STEPS } from "@/configs/onboarding/onboardingSteps";
 import { useOnboardingTransition } from "@/stores/onboardingTransition";
 
+import type { OnboardingStep } from "@/configs/onboarding/onboardingSteps";
+
 type OnboardingButtonType = "NEXT" | "SUBMIT";
 
 const useOnboarding = () => {
@@ -47,6 +49,16 @@ const useOnboarding = () => {
     navigateToStep(stepIndex - 1);
   }, [isFirstStep, navigateToStep, router, setTransitionDirection, stepIndex]);
 
+  const handleMoveToStep = useCallback(
+    (targetStep: OnboardingStep) => {
+      const targetStepIndex = ONBOARDING_STEPS.indexOf(targetStep);
+
+      setTransitionDirection(targetStepIndex < stepIndex ? "backward" : "forward");
+      navigateToStep(targetStepIndex);
+    },
+    [navigateToStep, setTransitionDirection, stepIndex],
+  );
+
   return {
     onboardingStep: ONBOARDING_STEPS[stepIndex],
     stepIndex,
@@ -54,6 +66,7 @@ const useOnboarding = () => {
     buttonType,
     handleMoveNextStep,
     handleBack,
+    handleMoveToStep,
     isFirstStep,
     isLastStep,
   };
