@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+jobs:
+  check:
+    name: 타입 체크 · lint · 테스트 · 빌드
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prisma 클라이언트 생성 · 스키마 검증
+        run: |
+          pnpm db:generate
+          pnpm db:validate
+      - name: 타입 체크
+        run: pnpm -r typecheck
+      - name: lint
+        run: |
+          pnpm lint
+          pnpm --filter @makkigo/users lint:ox
+      - name: 포맷
+        run: pnpm --filter @makkigo/users format:check
+      - name: 테스트
+        run: pnpm -r test
+      - name: 빌드
+        run: pnpm build
+
+  migrations:
+    name: 마이그레이션 검사
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: 빈 DB 에 마이그레이션 적용
+        run: pnpm --filter database exec prisma migrate deploy
+      - name: 스키마와 마이그레이션 차이 확인
+        run: pnpm --filter database exec prisma migrate diff --from-config-datasource --to-schema prisma/ --exit-code
