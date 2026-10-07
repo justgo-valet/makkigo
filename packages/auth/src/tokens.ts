@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { jwtVerify, SignJWT } from "jose";
 
-import { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS, requireEnv } from "./config";
+import { ACCESS_TOKEN_TTL_SECONDS, getJwtSecret, REFRESH_TOKEN_TTL_SECONDS } from "./config";
 
 export type AuthAudience = "users";
 
@@ -17,7 +17,7 @@ export const createAccessToken = async (
   audience: AuthAudience,
   subjectId: number,
 ): Promise<IssuedToken> => {
-  const secret = new TextEncoder().encode(requireEnv("AUTH_JWT_SECRET"));
+  const secret = getJwtSecret();
   const expiresAt = new Date(Date.now() + ACCESS_TOKEN_TTL_SECONDS * 1000);
 
   const token = await new SignJWT({})
@@ -36,7 +36,7 @@ export const verifyAccessToken = async (
   audience: AuthAudience,
   token: string,
 ): Promise<number | null> => {
-  const secret = new TextEncoder().encode(requireEnv("AUTH_JWT_SECRET"));
+  const secret = getJwtSecret();
 
   try {
     const { payload } = await jwtVerify(token, secret, {
@@ -52,9 +52,14 @@ export const verifyAccessToken = async (
   }
 };
 
+export const createRandomToken = () => randomBytes(32).toString("base64url");
+
 export const createRefreshToken = (): IssuedToken => ({
-  token: randomBytes(32).toString("base64url"),
+  token: createRandomToken(),
   expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_SECONDS * 1000),
 });
 
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
+
+export const hashBase64Url = (value: string) =>
+  createHash("sha256").update(value).digest("base64url");

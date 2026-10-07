@@ -49,11 +49,14 @@
 | `/makkigo/prod/postgres/POSTGRES_DB` | DB 이름 |
 | `/makkigo/prod/users/DATABASE_URL` | `postgresql://<사용자>:<비밀번호>@postgres:5432/<DB이름>` — 호스트는 `localhost` 가 아니라 DB 컨테이너 이름 `postgres` |
 | `/makkigo/prod/users/AUTH_JWT_SECRET` | |
-| `/makkigo/prod/users/KAKAO_APP_ID` | |
-| `/makkigo/prod/users/GOOGLE_IOS_CLIENT_ID` | |
-| `/makkigo/prod/users/GOOGLE_ANDROID_CLIENT_ID` | Flutter `serverClientId` (웹 유형 클라이언트 ID) |
-| `/makkigo/prod/users/APPLE_BUNDLE_ID` | |
-| `/makkigo/prod/users/NAVER_CLIENT_ID` | 현재 미사용 → [auth.md](auth.md) |
+| `/makkigo/prod/users/PUBLIC_URL` | `https://app.makkigo.com` |
+| `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수) |
+| `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
+| `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
+| `/makkigo/prod/users/GOOGLE_CLIENT_SECRET` | |
+| `/makkigo/prod/users/APPLE_SERVICES_ID` | |
+| `/makkigo/prod/users/NAVER_CLIENT_ID` | |
+| `/makkigo/prod/users/NAVER_CLIENT_SECRET` | |
 | `/makkigo/prod/deploy/GHCR_USERNAME` | 서버가 GHCR 비공개 이미지를 받을 GitHub 계정 |
 | `/makkigo/prod/deploy/GHCR_TOKEN` | GitHub Personal Access Token (classic), 권한 `read:packages` 만 |
 
