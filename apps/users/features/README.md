@@ -15,6 +15,7 @@ features/<도메인>/
 
 ## 규칙
 
+- **UI 파일(`app/**/page.tsx` · `layout.tsx` · `components/`)은 그리기만 합니다.** 상태 계산 · 분기 · 오류 코드 처리 같은 로직은 `hooks/` 로, API 요청은 `apis/` 함수를 훅 안에서 부릅니다. 컴포넌트는 훅이 돌려준 값과 핸들러만 씁니다.
 - 다른 기능 폴더의 코드를 가져다 써도 됩니다 (예: `onboarding` 이 `consent/components/ConsentSheet` 사용). 세 곳 이상에서 쓰이면 공용 폴더(`components/` · `hooks/`)로 올립니다.
 - `server/` 를 가져오지 않습니다. 서버 데이터는 `apis/` 로 HTTP 요청해서 받습니다.
 - 서버 응답을 다루는 상태는 TanStack Query(`useQuery` · `useMutation`)로 관리합니다. `isSubmitting` · `errorMessage` 를 `useState` 로 직접 만들지 않습니다.
