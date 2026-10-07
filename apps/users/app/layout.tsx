@@ -1,6 +1,7 @@
 import { Ubuntu } from "next/font/google";
 
 import Header from "@/components/layouts/Header";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 import "./globals.css";
 
@@ -22,10 +23,12 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
   return (
     <html lang="ko" className={ubuntu.variable}>
       <body className="flex flex-col items-center w-screen h-screen">
-        <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4">
-          <Header />
-          <section className="min-h-0 w-full flex-1">{children}</section>
-        </main>
+        <QueryProvider>
+          <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4">
+            <Header />
+            <section className="min-h-0 w-full flex-1">{children}</section>
+          </main>
+        </QueryProvider>
       </body>
     </html>
   );

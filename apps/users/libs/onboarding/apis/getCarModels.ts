@@ -17,7 +17,11 @@ const getCarModels = async (brand: string): Promise<CarModelsResponse> => {
     })
     .json<unknown>();
 
-  return carModelsResponseSchema.parse(response);
+  const parsedResponse = carModelsResponseSchema.safeParse(response);
+  if (!parsedResponse.success) {
+    throw new Error("유효하지 않은 응답입니다.");
+  }
+  return parsedResponse.data;
 };
 
 export default getCarModels;

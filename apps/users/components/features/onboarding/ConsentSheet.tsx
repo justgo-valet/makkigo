@@ -1,15 +1,6 @@
 "use client";
 
-import { getErrorMessage } from "@makkigo/api-client";
-import {
-  Button,
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-} from "@makkigo/ui";
+import { Button, Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@makkigo/ui";
 import { Checkbox } from "@makkigo/ui/components/ui/checkbox";
 import {
   Sheet,
@@ -22,8 +13,8 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
-import { CONSENT_DOCUMENT_VERSION, consentItems } from "@/configs/consent/consentItems";
-import { recordConsents } from "@/libs/consent/apis/recordConsents";
+import { consentItems } from "@/configs/consent/consentItems";
+import useConsent from "@/hooks/useConsent";
 
 import type { ConsentType } from "@/libs/consent/contracts/consents";
 
@@ -32,55 +23,18 @@ interface ConsentSheetProps {
   onAgreed: () => void;
 }
 
-const FALLBACK_ERROR_MESSAGE = "약관 동의를 저장하지 못했습니다. 다시 시도해주세요.";
-
 export default function ConsentSheet({ open, onAgreed }: Readonly<ConsentSheetProps>) {
-  const [checkedTypes, setCheckedTypes] = useState<ReadonlySet<ConsentType>>(new Set());
   const [expandedType, setExpandedType] = useState<ConsentType | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const isAllChecked = checkedTypes.size === consentItems.length;
-  const isRequiredChecked = consentItems.every(
-    ({ type, required }) => !required || checkedTypes.has(type),
-  );
-
-  const toggleAll = (checked: boolean) => {
-    setCheckedTypes(new Set(checked ? consentItems.map(({ type }) => type) : []));
-  };
-
-  const toggleItem = (type: ConsentType, checked: boolean) => {
-    setCheckedTypes((previous) => {
-      const next = new Set(previous);
-
-      if (checked) {
-        next.add(type);
-      } else {
-        next.delete(type);
-      }
-
-      return next;
-    });
-  };
-
-  const handleSubmit = async () => {
-    if (!isRequiredChecked || isSubmitting) return;
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
-    try {
-      await recordConsents({
-        documentVersion: CONSENT_DOCUMENT_VERSION,
-        consents: consentItems.map(({ type }) => ({ type, agreed: checkedTypes.has(type) })),
-      });
-      onAgreed();
-    } catch (error) {
-      setErrorMessage(getErrorMessage(error, FALLBACK_ERROR_MESSAGE));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    agreedTypes,
+    isAllChecked,
+    isRequiredChecked,
+    isSubmitting,
+    errorMessage,
+    toggleAll,
+    toggleItem,
+    handleSubmit,
+  } = useConsent(onAgreed);
 
   return (
     <Sheet open={open}>
@@ -103,7 +57,10 @@ export default function ConsentSheet({ open, onAgreed }: Readonly<ConsentSheetPr
         </SheetHeader>
 
         <FieldGroup className="gap-3 px-5 pb-2">
-          <Field orientation="horizontal">
+          <Field
+            orientation="horizontal"
+            className={`border p-3 flex gap-3 rounded-md ${isAllChecked ? "border-primary bg-primary-foreground" : ""}`}
+          >
             <Checkbox
               id="consent-all"
               className="size-5"
@@ -114,14 +71,13 @@ export default function ConsentSheet({ open, onAgreed }: Readonly<ConsentSheetPr
               전체 동의
             </FieldLabel>
           </Field>
-          <FieldSeparator />
           {consentItems.map(({ type, label, required }) => (
-            <Field key={type} className="gap-1">
+            <Field key={type} className="gap-1 px-3">
               <Field orientation="horizontal">
                 <Checkbox
                   id={`consent-${type}`}
                   className="size-5"
-                  checked={checkedTypes.has(type)}
+                  checked={agreedTypes.includes(type)}
                   onCheckedChange={(checked) => toggleItem(type, checked === true)}
                 />
                 <FieldLabel htmlFor={`consent-${type}`} className="py-2 font-normal">

@@ -1,7 +1,10 @@
 import { isHTTPError } from "ky";
 
 import { apiClient } from "@/libs/common/api/apiClient";
-import { onboardingErrorResponseSchema } from "@/libs/onboarding/contracts/onboarding";
+import {
+  onboardingErrorResponseSchema,
+  completeOnboardingRequestSchema,
+} from "@/libs/onboarding/contracts/onboarding";
 
 import type {
   CompleteOnboardingRequest,
@@ -9,7 +12,13 @@ import type {
 } from "@/libs/onboarding/contracts/onboarding";
 
 const completeOnboarding = async (request: CompleteOnboardingRequest) => {
-  await apiClient.post("onboarding", { json: request });
+  const parsedRequest = completeOnboardingRequestSchema.safeParse(request);
+
+  if (!parsedRequest.success) {
+    throw new Error("유효하지 않은 요청입니다.");
+  }
+
+  await apiClient.post("onboarding", { json: parsedRequest.data });
 };
 
 const getOnboardingErrorCode = (error: unknown): OnboardingErrorCode | null => {

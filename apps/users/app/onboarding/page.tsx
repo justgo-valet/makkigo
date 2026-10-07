@@ -2,6 +2,7 @@
 
 import { getErrorMessage } from "@makkigo/api-client";
 import { Button, FieldError } from "@makkigo/ui";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -22,19 +23,17 @@ export default function OnboardingContent() {
   const { onboardingStep, buttonType, handleMoveNextStep, handleMoveToStep } = useOnboarding();
   const form = useFormContext<OnboardingFormValues>();
   const [hasAgreedConsents, setHasAgreedConsents] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const step = onboardingFlow[onboardingStep];
   const StepComponent = step.component;
 
-  const submitOnboarding = async () => {
-    setIsSubmitting(true);
-    setSubmitErrorMessage(null);
-
-    try {
-      await completeOnboarding(form.getValues());
-      handleMoveNextStep();
-    } catch (error) {
+  const {
+    mutate: submitOnboarding,
+    isPending: isSubmitting,
+    error,
+  } = useMutation({
+    mutationFn: completeOnboarding,
+    onSuccess: handleMoveNextStep,
+    onError: (error) => {
       const message = getErrorMessage(error, FALLBACK_ERROR_MESSAGE);
 
       switch (getOnboardingErrorCode(error)) {
@@ -52,13 +51,14 @@ export default function OnboardingContent() {
         case "ALREADY_COMPLETED":
           handleMoveNextStep();
           break;
-        default:
-          setSubmitErrorMessage(message);
       }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+  });
+  // 에러 코드로 처리되지 않은 실패만 버튼 위에 메시지로 보여준다.
+  const submitErrorMessage =
+    error && getOnboardingErrorCode(error) === null
+      ? getErrorMessage(error, FALLBACK_ERROR_MESSAGE)
+      : null;
 
   const handlePrimaryAction = async () => {
     if (isSubmitting) return;
@@ -68,7 +68,7 @@ export default function OnboardingContent() {
     if (!isValid) return;
 
     if (buttonType === "SUBMIT") {
-      await submitOnboarding();
+      submitOnboarding(form.getValues());
       return;
     }
 

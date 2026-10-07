@@ -1,17 +1,12 @@
 import { Field, FieldDescription, FieldError, FieldLabel, Input } from "@makkigo/ui";
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { getCarModels } from "@/libs/onboarding/apis/getCarModels";
 
 import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.schema";
-
-type CarModelsState =
-  | { status: "loading" }
-  | { status: "success"; carModels: readonly string[] }
-  | { status: "error" };
 
 const SELECTED_CARD_CLASS_NAME =
   "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/10 dark:bg-primary/10";
@@ -24,25 +19,13 @@ export default function CarModelStep() {
   } = useFormContext<OnboardingFormValues>();
   const { field } = useController({ name: "carModel", control });
   const carBrand = useWatch({ name: "carBrand", control });
-  const [carModelsState, setCarModelsState] = useState<CarModelsState>({ status: "loading" });
+  const { data: carModels = [], status: carModelsStatus } = useQuery({
+    queryKey: ["carModels", carBrand],
+    queryFn: () => getCarModels(carBrand),
+    // 실패하면 바로 직접 입력으로 넘어가도록 재시도하지 않는다.
+    retry: false,
+  });
 
-  useEffect(() => {
-    let ignore = false;
-
-    getCarModels(carBrand)
-      .then((carModels) => {
-        if (!ignore) setCarModelsState({ status: "success", carModels });
-      })
-      .catch(() => {
-        if (!ignore) setCarModelsState({ status: "error" });
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [carBrand]);
-
-  const carModels = carModelsState.status === "success" ? carModelsState.carModels : [];
   const isCustomModel = !carModels.includes(field.value);
 
   return (
@@ -50,7 +33,7 @@ export default function CarModelStep() {
       <FieldLabel htmlFor="car-model" className="text-xl font-bold text-(--base-color)">
         {carBrand} 모델을 선택해주세요.
       </FieldLabel>
-      {carModelsState.status === "error" && (
+      {carModelsStatus === "error" && (
         <FieldDescription>모델 목록을 불러오지 못했어요. 직접 입력해주세요.</FieldDescription>
       )}
       <div className="grid content-start flex-1 min-h-0 grid-cols-2 gap-3 pt-2 pb-12 mt-2 overflow-y-auto overscroll-contain scrollbar-none [&::-webkit-scrollbar]:hidden">
@@ -71,7 +54,7 @@ export default function CarModelStep() {
             </button>
           </Card>
         ))}
-        {carModelsState.status !== "loading" && (
+        {carModelsStatus !== "pending" && (
           <Card
             className={`col-span-2 border-dashed p-4 transition-all duration-200 ${
               isCustomModel && field.value.trim()

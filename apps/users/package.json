@@ -19,6 +19,7 @@
     "@makkigo/api-client": "workspace:*",
     "@makkigo/auth": "workspace:*",
     "@makkigo/ui": "workspace:*",
+    "@tanstack/react-query": "^5.104.1",
     "database": "workspace:*",
     "ky": "^2.1.0",
     "motion": "^13.4.4",
