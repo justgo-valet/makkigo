@@ -17,7 +17,7 @@
 
 /makkigo/prod/users/AUTH_JWT_SECRET
          │    │     └─ 컨테이너 안에서 쓰는 변수 이름 그대로
-         │    └─ 앱 또는 컨테이너: users, valetagents, postgres
+         │    └─ 앱 · 컨테이너 (users, valetagents, postgres) 또는 배포 도구용 (deploy)
          └─ 환경: prod (개발 서버를 만들면 dev)
 ```
 
@@ -50,6 +50,20 @@
 | `/makkigo/prod/users/GOOGLE_ANDROID_CLIENT_ID` | Flutter `serverClientId` (웹 유형 클라이언트 ID) |
 | `/makkigo/prod/users/APPLE_BUNDLE_ID` | |
 | `/makkigo/prod/users/NAVER_CLIENT_ID` | 현재 미사용 → [auth.md](auth.md) |
+| `/makkigo/prod/deploy/GHCR_USERNAME` | 서버가 GHCR 비공개 이미지를 받을 GitHub 계정 |
+| `/makkigo/prod/deploy/GHCR_TOKEN` | GitHub Personal Access Token (classic), 권한 `read:packages` 만 |
+
+전체 목록(값은 비움)은 루트 `.env.production.example` 에도 있습니다.
+
+### GitHub Actions Secrets
+
+파일이 아니라 저장소 Settings → Secrets and variables → Actions 에 등록합니다. **운영 비밀값은 두지 않고 배포에 필요한 값만** 둡니다.
+Actions 는 AWS 접속 키 없이 **OIDC** 로 IAM 역할을 맡고, **SSM 명령 실행(Run Command)** 으로 EC2 에 배포합니다. SSH 포트를 열지 않습니다.
+
+| 이름 | 값 |
+|---|---|
+| `AWS_DEPLOY_ROLE_ARN` | Actions 가 맡을 IAM 역할 ARN |
+| `EC2_INSTANCE_ID` | 배포 명령을 보낼 EC2 인스턴스 ID |
 
 요원 앱은 요원 인증을 만들 때 `/makkigo/prod/valetagents/` 에 추가합니다.
 

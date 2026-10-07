@@ -34,5 +34,5 @@ Figma 화면은 예시이고, 플로우·정책 문서가 우선합니다.
 
 - 패키지 매니저는 `pnpm@12.6.0` (루트 `package.json`). corepack 0.32 이하는 pnpm 12 를 실행하지 못하므로 `npm i -g corepack@latest` 로 올립니다.
 - Next.js 앱은 루트가 아니라 **앱 폴더의 `.env*`** 를 읽습니다 (예: `apps/users/.env.development.local`). 루트 `.env.development` 는 docker·Prisma 용입니다.
-- 루트 `.gitignore` 의 `**/.env*` 패턴이 `.env.example` 까지 무시합니다. 환경변수 목록은 [architecture/auth.md](architecture/auth.md) 를 봅니다.
+- 환경변수 목록(값은 비움): 로컬 docker · Prisma 는 루트 `.env.example`, 고객 앱은 `apps/users/.env.example`, 운영(SSM · GitHub Actions)은 루트 `.env.production.example`. 값을 채운 파일은 `.gitignore` 로 커밋되지 않습니다.
 - `next dev` 가 앱 폴더에 `AGENTS.md`, `CLAUDE.md` 를 만들지 않도록 두 앱 모두 `agentRules: false` 로 꺼 두었습니다.
