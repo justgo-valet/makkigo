@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useFormContext } from "react-hook-form";
 
 import { checkPhoneNumber } from "@/features/onboarding/apis/checkPhoneNumber";
+import { checkVehicleNumber } from "@/features/onboarding/apis/checkVehicleNumber";
 import { getOnboardingErrorCode } from "@/features/onboarding/apis/completeOnboarding";
 
 import type { OnboardingStep } from "@/features/onboarding/onboardingSteps";
@@ -17,6 +18,12 @@ interface DuplicateCheck {
 }
 
 const DUPLICATE_CHECKS: Partial<Record<OnboardingStep, DuplicateCheck>> = {
+  CAR_NUMBER: {
+    field: "vehicleNumber",
+    duplicateCode: "DUPLICATE_VEHICLE",
+    fallbackMessage: "차량 번호를 확인하지 못했습니다. 다시 시도해주세요.",
+    check: (vehicleNumber) => checkVehicleNumber({ vehicleNumber }),
+  },
   PHONE_NUMBER: {
     field: "phoneNumber",
     duplicateCode: "DUPLICATE_PHONE",
