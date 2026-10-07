@@ -1,6 +1,5 @@
-import ky from "ky";
-
 import { carModelsResponseSchema } from "@/libs/car/contracts/carModels";
+import { apiClient } from "@/libs/common/api/apiClient";
 
 import type { CarModelsResponse } from "@/libs/car/contracts/carModels";
 
@@ -11,10 +10,8 @@ const getCarModels = async (brand: string): Promise<CarModelsResponse> => {
     throw new Error("차량 브랜드는 필수입니다.");
   }
 
-  const response = await ky
-    .get("/api/car/get-car-models", {
-      searchParams: { brand: normalizedBrand },
-    })
+  const response = await apiClient
+    .get("cars/models", { searchParams: { brand: normalizedBrand } })
     .json<unknown>();
 
   const parsedResponse = carModelsResponseSchema.safeParse(response);

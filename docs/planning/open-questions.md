@@ -31,4 +31,3 @@
 | 네이버 토큰이 우리 앱에서 발급됐는지 확인 | 공식 수단을 찾지 못해 프로필 조회로만 검증 → [auth.md](../architecture/auth.md) |
 | Flutter → 웹뷰 로그인 상태 전달 방식 | Flutter 연동 때 결정 → [auth.md](../architecture/auth.md) |
 | 차량 모델 데이터 | `car_models` 에 넣을 데이터가 없음 (브랜드만 `init.sql` 에 있음). 모델이 없는 브랜드는 온보딩에서 직접 입력만 보임 |
-| 기존 API 의 버전 경로 통일 | `/api/car/get-car-models` 는 `/api/v1` 이 아님. 지상님과 협의 |

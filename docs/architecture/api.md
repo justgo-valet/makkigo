@@ -2,7 +2,7 @@
 
 ## 규칙
 
-- 경로에 버전: `/api/v1/...` (Flutter 앱은 업데이트 안 한 옛 버전이 남으므로). 기존 `/api/car/get-car-models` 는 버전 없음 → 통일 여부 미정
+- 경로에 버전: `/api/v1/...` (Flutter 앱은 업데이트 안 한 옛 버전이 남으므로)
 - 오류 응답: `{ "message": "사용자에게 보여줄 문장" }` + 상태 코드
   - 화면이 오류 종류에 따라 다르게 움직여야 하면 `code` 를 함께 보냄 (예: 온보딩 `DUPLICATE_PHONE`, `DUPLICATE_VEHICLE`, `ALREADY_COMPLETED`, `REQUIRED_CONSENTS_MISSING`)
 - 요청·응답 스키마(zod): `apps/<앱>/libs/<도메인>/contracts/`
@@ -26,7 +26,7 @@
 
 | 메서드 · 경로 | 하는 일 | 로그인 | PR |
 |---|---|---|---|
-| `GET /api/car/get-car-models?brand=` | 브랜드별 차량 모델 이름 (한국어 순) | | dev (#5), [#26](https://github.com/justgo-valet/makkigo/pull/26) |
+| `GET /api/v1/cars/models?brand=` | 브랜드별 차량 모델 이름 (한국어 순). 옛 경로 `/api/car/get-car-models` 는 삭제 | | dev (#5), [#26](https://github.com/justgo-valet/makkigo/pull/26) |
 | `POST /api/v1/auth/social/{kakao\|google\|apple\|naver}` | 소셜 로그인 · 가입 | | [#11](https://github.com/justgo-valet/makkigo/pull/11) → [#23](https://github.com/justgo-valet/makkigo/pull/23) |
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
