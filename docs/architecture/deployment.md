@@ -75,6 +75,59 @@ Actions 는 AWS 접속 키 없이 **OIDC** 로 IAM 역할을 맡고, **SSM 명�
 
 기본 KMS 키를 쓰면 복호화 권한은 따로 주지 않아도 됩니다.
 
+## 브랜치 · 버전 · 릴리스
+
+| 항목 | 규칙 |
+|---|---|
+| 브랜치 | 기능 PR → `dev` (Squash and merge) → `main` (**merge commit 만**) |
+| `main` | **서버에 올라간 코드.** `dev` 는 작업을 모으는 곳이고 버전이 없습니다 |
+| 버전 형식 | SemVer `MAJOR.MINOR.PATCH`, 태그 `v1.0.0` |
+| 버전 단위 | **서버 버전 하나** — 고객 앱 · 요원 앱을 같은 버전으로 함께 배포 |
+| 이미지 | GHCR `ghcr.io/justgo-valet/makkigo-users:<버전>`, `.../makkigo-valetagents:<버전>` (같은 버전) |
+| 버전 올리기 | **release-please** 가 커밋 제목으로 자동 결정 |
+| 되돌리기 | **수동** — Actions 에서 이전 버전을 골라 배포 |
+
+**스토어 버전과는 별개입니다.** App Store · Play Store 버전은 Flutter 앱(고객 앱 · 요원 앱 각각)의 버전이고, 웹 화면 · API 는 서버 배포만으로 바뀌므로 서로 맞추지 않습니다.
+
+### 출시 전 · 출시 · 출시 후
+
+| 단계 | 서버에 올리는 방법 | 버전 |
+|---|---|---|
+| **출시 전** (개발 서버 없이 운영 서버에서 테스트) | `dev → main` 머지 → **바로 자동 배포** | 없음. 이미지 태그는 커밋 번호 `sha-3d2b1a9` |
+| **출시** | `dev → main` 머지 커밋 메시지 끝에 `Release-As: 1.0.0` → 릴리스 PR 머지 | **`v1.0.0`** |
+| **출시 후** | `dev → main` 머지로 모으고 → **릴리스 PR 머지 = 배포** | release-please 가 계산 |
+
+출시 전후로 바뀌는 것은 "배포 신호" 하나입니다.
+
+루트 `package.json` 의 `version` 이 처음부터 `1.0.0` 으로 들어 있습니다. release-please 를 설정할 때 시작 버전(manifest)을 이 값과 헷갈리지 않게 맞추고, 첫 릴리스는 `Release-As: 1.0.0` 으로 지정합니다. 출시 후에는 실제 사용자가 있으므로, 사람이 릴리스 PR 을 머지해 "이 묶음을 이 버전으로 내보낸다"를 한 번 확인한 뒤 배포합니다.
+
+### 릴리스 PR
+
+release-please 봇이 `main` 에 변경이 들어올 때마다 자동으로 여는 PR 입니다 (사람이 릴리스 브랜치를 관리하지 않음).
+
+- 내용: 루트 버전 번호 변경, `CHANGELOG.md` (이번 버전에 들어간 기능 · 수정 목록)
+- `main` 에 변경이 더 들어오면 봇이 PR 을 갱신합니다 (1.1.0 → 1.2.0 등)
+- **머지하면** 태그 `v1.1.0` + GitHub Release 생성 → 같은 Actions 안에서 이미지 빌드 → GHCR → EC2 배포 → `migrate deploy`
+
+release-please 가 `GITHUB_TOKEN` 으로 만든 릴리스는 다른 워크플로를 깨우지 않으므로, 빌드 · 배포는 **같은 워크플로 안에서** 이어서 실행합니다.
+
+### 커밋 제목과 버전
+
+PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 다음 버전을 정합니다. **PR 제목 · 커밋 메시지 형식은 CI 가 검사합니다** ([#32](https://github.com/justgo-valet/makkigo/pull/32)).
+
+| 커밋 제목 | 버전 | 예 |
+|---|---|---|
+| `fix(...): ...` | 패치 | 1.0.0 → 1.0.1 |
+| `feat(...): ...` | 마이너 | 1.0.1 → 1.1.0 |
+| `feat(...)!: ...` 또는 본문 `BREAKING CHANGE:` | 메이저 | 1.1.0 → 2.0.0 |
+| `docs`, `chore`, `ci`, `refactor`, `test`, `style` | 안 올림 | |
+
+범위(scope)로 어느 앱의 변경인지 적으면 CHANGELOG 에서 구분됩니다: `feat(users): ...`, `fix(valetagents): ...`
+
+### dev → main 은 왜 merge commit 인가
+
+스쿼시하면 `main` 에 `dev` 와 다른 새 커밋이 생겨, 다음 `dev → main` 마다 같은 변경이 충돌합니다. 그래서 이 경로만 스쿼시 원칙의 예외입니다.
+
 ## 아직 만들 것
 
 [open-questions.md](../planning/open-questions.md) 의 배포 항목 참고. 순서 제안:

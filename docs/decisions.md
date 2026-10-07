@@ -45,5 +45,14 @@
 | 2026-10-04 | 운영 환경변수는 **SSM Parameter Store** 에 두고 컨테이너 실행 때 꺼내 씀 | 값 변경 이력, 서버가 망가져도 값 보존 | 대화 |
 | 2026-10-04 | DB 스키마 반영을 `db push` 에서 **마이그레이션 파일(`migrate deploy`)** 로 지금부터 전환 | 운영에서 `db push` 는 데이터 손실 위험 | 대화 |
 | 2026-10-04 | 머지는 **Squash and merge** 원칙. 쌓인 PR 은 앞 PR 머지 후 새 dev 위로 옮김(rebase) | 커밋 이력 정리 | 대화 |
+| 2026-10-04 | 배포 자동화는 **GitHub Actions**, 이미지는 **GHCR**(GitHub Packages) 에 버전 태그로 | 사용자 선택 | 대화 |
+| 2026-10-04 | 버전은 **SemVer**, **release-please** 로 커밋 제목에서 자동 결정. ~~고객 앱 · 요원 앱 따로~~ | 사람이 번호를 정하지 않음, CHANGELOG 자동 | 대화 |
+| 2026-10-04 | **main = 운영.** dev 에는 버전 없음. **dev → main 은 반드시 merge commit** (스쿼시 원칙의 예외) | 스쿼시하면 이력이 갈라져 매 릴리스 충돌 | 대화 |
+| 2026-10-04 | 릴리스 PR 머지 = 릴리스 생성 → 자동 배포. 이전 버전으로 되돌리기는 **수동** | | 대화 |
+| 2026-10-04 | PR 제목 · 커밋 메시지 형식(Conventional Commits) 을 CI 로 자동 검사 | 버전 계산의 입력 | 대화 |
+| 2026-10-04 | 환경변수 예시 파일: 루트 `.env.example`(로컬), `apps/users/.env.example`, `.env.production.example`(운영 목록) | 값은 비움 | [#28](https://github.com/justgo-valet/makkigo/pull/28) |
 | 2026-10-04 | 작업 방식: 1 API = 1 PR = 1 커밋, 코드 주석 최소화(설명은 PR·문서), 기획 변경은 docs 에 반영 | | 대화 |
 | 2026-10-04 | `next dev` 의 `AGENTS.md`·`CLAUDE.md` 자동 생성을 `agentRules: false` 로 끔 (고객 앱·요원 앱) | 실행할 때마다 생겨 커밋에 섞임 | 대화 |
+| 2026-10-05 | ← 변경: 서버 버전은 **하나로 묶음** (`v1.0.0`, 두 앱 함께 배포). 스토어 버전은 Flutter 앱별로 따로 | 공유 패키지 · 같은 DB · 같은 서버라 앱별 버전은 비용이 큼. 사용자에게 보이는 건 스토어 버전 | 대화 |
+| 2026-10-05 | `main` = 서버에 올라간 코드. **출시 전**: dev → main 머지 = 버전 없이 자동 배포(커밋 번호 태그). **출시**: `Release-As: 1.0.0`. **출시 후**: 표준 release-please — 릴리스 PR 머지 = 배포 | 개발 서버 없이 운영 서버에서 테스트, 출시 후엔 사람이 확인 | 대화 |
+| 2026-10-05 | 운영 비밀값은 **SSM Parameter Store 유지** (GitHub Secrets 로 옮기지 않음). GitHub Secrets 에는 배포용 값만. Actions 는 **OIDC** 로 AWS 역할을 맡고 **SSM 명령 실행**으로 EC2 에 배포 (SSH 안 씀) | 비밀값을 GitHub 에 두지 않음, 값 변경 이력 · 서버 장애 시 보존, SSH 포트 불필요 | 대화 |
