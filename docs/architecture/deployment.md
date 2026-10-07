@@ -140,8 +140,40 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | 헬스 체크 `GET /api/health` (두 앱) | ✅ #33 |
 | Dockerfile — users · valetagents(standalone) · migrate | ✅ #34 |
 | 운영 compose · Caddy · SSM 환경변수 스크립트 · 배포 스크립트 (`deploy/`) | ✅ #36 |
-| 배포 Actions — main 머지 시 이미지 빌드 → GHCR → OIDC + SSM 명령으로 배포, 수동 배포 · 되돌리기 | 다음 |
-| AWS 준비 — GitHub OIDC 공급자, 배포용 IAM 역할, EC2 IAM 역할, 서버 Docker · AWS CLI, GHCR 토큰 | 배포 Actions 와 함께 |
+| 배포 Actions — main 머지 시 이미지 빌드 → GHCR → OIDC + SSM 명령으로 배포, 수동 배포 · 되돌리기 | `.github/workflows/deploy.yml` |
+| AWS 준비 — GitHub OIDC 공급자, 배포용 IAM 역할, EC2 IAM 역할, 서버 Docker · AWS CLI, GHCR 토큰 | 스크립트 준비됨 (`deploy/aws/`), 실행은 아래 "처음 한 번" |
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
 | 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리 | 미정 |
+
+## 배포하기
+
+| 하고 싶은 것 | 방법 |
+|---|---|
+| 지금 dev 를 서버에 올리기 (출시 전) | `dev → main` PR 을 **merge commit** 으로 머지 → Actions "배포" 가 자동 실행 |
+| 특정 버전으로 다시 배포 · 되돌리기 | Actions → "배포" → Run workflow → `image_tag` 에 `sha-xxxxxxx` (또는 출시 후 `1.0.0`) |
+
+"배포" 워크플로가 하는 일:
+
+1. 이미지 3개(users · valetagents · migrate) 빌드 → GHCR `ghcr.io/justgo-valet/makkigo-<이름>:sha-<커밋 7자리>` (태그를 지정한 수동 실행이면 빌드 생략)
+2. OIDC 로 AWS 배포용 역할을 맡음 (AWS 접속 키 없음, **main 브랜치에서만** 맡을 수 있음)
+3. SSM 명령으로 EC2 에 `deploy/` 파일을 보내고 `deploy.sh` 실행 → 결과 로그를 Actions 에 출력
+
+같은 시각에 배포가 두 개 겹치지 않게 순서대로 실행됩니다.
+
+## 처음 한 번 (AWS · GitHub 준비)
+
+1. **IAM 설정** — AWS 콘솔 오른쪽 위 CloudShell 에서 저장소의 `deploy/aws/setup-iam.sh` 를 실행
+   ```bash
+   EC2_INSTANCE_ID=i-0b8a5131b7af49a02 bash setup-iam.sh
+   ```
+   GitHub OIDC 공급자, 배포용 역할 `makkigo-github-deploy`(이 인스턴스에 SSM 명령만), EC2 역할(SSM 연결 + `/makkigo/prod/*` 읽기)을 만들고 인스턴스에 연결합니다. 다시 실행해도 안전합니다. 마지막에 GitHub Secrets 값이 출력됩니다.
+2. **서버 준비** — 같은 CloudShell 에서 `deploy/aws/bootstrap-server.sh` 실행 (Docker · compose · AWS CLI 설치, `/opt/makkigo` 생성)
+3. **GHCR 토큰** — GitHub → Settings → Developer settings → Personal access tokens (classic), 권한 `read:packages` 만. CloudShell 에서 SSM 에 저장
+   ```bash
+   aws ssm put-parameter --name /makkigo/prod/deploy/GHCR_USERNAME --type SecureString --value <GitHub 아이디> --overwrite
+   read -rs T && aws ssm put-parameter --name /makkigo/prod/deploy/GHCR_TOKEN --type SecureString --value "$T" --overwrite
+   ```
+4. **GitHub Secrets** — `AWS_DEPLOY_ROLE_ARN`(1번 출력값), `EC2_INSTANCE_ID`
+5. 운영 값(`/makkigo/prod/users/*`, `/makkigo/prod/postgres/*`)이 SSM 에 들어 있는지 확인
+
