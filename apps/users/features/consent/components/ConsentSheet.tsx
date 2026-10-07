@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@makkigo/ui";
+import { Button, Field, FieldError, FieldGroup, FieldLabel } from "@makkigo/ui";
 import { Checkbox } from "@makkigo/ui/components/ui/checkbox";
 import {
   Sheet,
@@ -13,7 +13,9 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
+import ConsentDocument from "@/features/consent/components/ConsentDocument";
 import { consentItems } from "@/features/consent/consentItems";
+import { consentDocuments } from "@/features/consent/documents";
 import { useConsent } from "@/features/consent/hooks/useConsent";
 
 import type { ConsentType } from "@/libs/consent/contracts/consents";
@@ -71,53 +73,54 @@ export default function ConsentSheet({ open, onAgreed }: Readonly<ConsentSheetPr
               전체 동의
             </FieldLabel>
           </Field>
-          {consentItems.map(({ type, label, required }) => (
-            <Field key={type} className="gap-1 px-3">
-              <Field orientation="horizontal">
-                <Checkbox
-                  id={`consent-${type}`}
-                  className="size-5"
-                  checked={agreedTypes.includes(type)}
-                  onCheckedChange={(checked) => toggleItem(type, checked === true)}
-                />
-                <FieldLabel htmlFor={`consent-${type}`} className="py-2 font-normal">
-                  <span className={required ? "text-(--primary-color)" : "text-(--tertiary-color)"}>
-                    ({required ? "필수" : "선택"})
-                  </span>
-                  {label}
-                </FieldLabel>
-                {required && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-8"
-                    aria-label={`${label} 보기`}
-                    aria-expanded={expandedType === type}
-                    aria-controls={`consent-${type}-document`}
-                    onClick={() => setExpandedType(expandedType === type ? null : type)}
-                  >
-                    <Image
-                      src="/icons/arrow_left.svg"
-                      alt=""
-                      aria-hidden
-                      width={20}
-                      height={20}
-                      className={`transition-transform ${expandedType === type ? "-rotate-90" : "rotate-180"}`}
-                    />
-                  </Button>
+          {consentItems.map(({ type, label, required }) => {
+            const document = consentDocuments[type];
+
+            return (
+              <Field key={type} className="gap-1 px-3">
+                <Field orientation="horizontal">
+                  <Checkbox
+                    id={`consent-${type}`}
+                    className="size-5"
+                    checked={agreedTypes.includes(type)}
+                    onCheckedChange={(checked) => toggleItem(type, checked === true)}
+                  />
+                  <FieldLabel htmlFor={`consent-${type}`} className="py-2 font-normal">
+                    <span
+                      className={required ? "text-(--primary-color)" : "text-(--tertiary-color)"}
+                    >
+                      ({required ? "필수" : "선택"})
+                    </span>
+                    {label}
+                  </FieldLabel>
+                  {document && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      aria-label={`${label} 보기`}
+                      aria-expanded={expandedType === type}
+                      aria-controls={`consent-${type}-document`}
+                      onClick={() => setExpandedType(expandedType === type ? null : type)}
+                    >
+                      <Image
+                        src="/icons/arrow_left.svg"
+                        alt=""
+                        aria-hidden
+                        width={20}
+                        height={20}
+                        className={`transition-transform ${expandedType === type ? "-rotate-90" : "rotate-180"}`}
+                      />
+                    </Button>
+                  )}
+                </Field>
+                {document && expandedType === type && (
+                  <ConsentDocument id={`consent-${type}-document`} content={document} />
                 )}
               </Field>
-              {required && expandedType === type && (
-                <FieldDescription
-                  id={`consent-${type}-document`}
-                  className="px-3 py-3 text-xs rounded-md bg-muted"
-                >
-                  약관 본문을 준비하고 있습니다.
-                </FieldDescription>
-              )}
-            </Field>
-          ))}
+            );
+          })}
         </FieldGroup>
 
         <SheetFooter className="px-5 pt-2 pb-6">
