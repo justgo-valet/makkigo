@@ -65,3 +65,4 @@
 | 2026-10-05 | 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com` (`makkigo.com` 루트는 비워 둠). HTTPS 는 **Caddy** (인증서 자동 발급 · 갱신). PostgreSQL 5432 는 호스트에 열고 보안 그룹으로 허용 IP 만 | 앱별 하위 도메인이 앱별 쿠키 · 토큰 구분과 맞음. 로컬에서 운영 DB 확인 필요 | 대화, [#36](https://github.com/justgo-valet/makkigo/pull/36) |
 | 2026-10-07 | 부스 · 업체 사진은 **별도 테이블**(`booth_photos`, `merchant_photos`)에 1장 = 1행, 전체 주소가 아니라 **경로만** 저장 | 사진 수정 · 삭제가 잦아 한 장씩 다루고 S3 파일과 1:1 로 맞추기 위해. 경로만 저장하면 CDN · 도메인이 바뀌어도 DB 수정 불필요 | 지상님 리뷰, 대화, [#9](https://github.com/justgo-valet/makkigo/pull/9) |
 | 2026-10-07 | 알림 내역에 **보낸 채널**(`PUSH` / `ALIMTALK`) 기록, 안 보냈으면 비움 | 푸시 우선 · 알림톡 대체 정책에서 실제 경로 추적 | 대화, [#9](https://github.com/justgo-valet/makkigo/pull/9) |
+| 2026-10-08 | 배포 Actions: main push 시 이미지 빌드 → GHCR(`sha-<7자리>`) → OIDC 역할 → SSM 명령으로 `deploy/` 파일 전송 + `deploy.sh`. 수동 실행으로 태그 지정 배포 · 되돌리기. release-please 는 출시 때 추가. AWS 설정은 CloudShell 스크립트(`deploy/aws/`) | 서버에 저장소 · 추가 토큰 불필요, 설정을 스크립트로 재현 가능 | 대화 |
