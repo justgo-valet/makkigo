@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+**/node_modules
+**/.next
+**/generated
+**/.env*
+!**/.env*.example
+**/*.log
+**/AGENTS.md
+**/CLAUDE.md
+docs
