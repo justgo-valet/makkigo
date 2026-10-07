@@ -36,6 +36,7 @@
 | `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37) |
 | `DELETE /api/v1/users/me` | 회원 탈퇴 | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
 | `POST /api/v1/onboarding` | 휴대폰 번호 · 차량 저장 | ✅ | [#16](https://github.com/justgo-valet/makkigo/pull/16) |
+| `POST /api/v1/onboarding/phone-number/check` | 온보딩 휴대폰 번호 단계에서 다음으로 넘어가기 전 중복 확인 (204 사용 가능 · 409 `DUPLICATE_PHONE`, 내 번호는 통과) | ✅ | 이 PR |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
 
