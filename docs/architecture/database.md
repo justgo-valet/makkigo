@@ -3,7 +3,7 @@
 - PostgreSQL 16 (docker compose) + Prisma 7
 - 패키지: `packages/database` — 모델은 `prisma/models/*.prisma` 에 나눠 둡니다.
 - 앱에서 쓰기: `import { prisma } from "database"` (#10)
-- 스키마 반영은 **마이그레이션 파일**(`prisma migrate deploy`)로 전환 중입니다. 스키마를 바꾸는 PR 은 마이그레이션 파일을 함께 올립니다.
+- 스키마 반영은 **마이그레이션 파일**(`prisma migrate deploy`)로 합니다. 스키마를 바꾸는 PR 은 마이그레이션 파일을 함께 올리고, CI 가 빠뜨린 것을 잡습니다.
 
 ## 규칙
 
@@ -16,6 +16,7 @@
 | 금액 | 원 단위 `Int` |
 | 삭제 | 회원은 탈퇴 시각 기록 (soft delete) + 개인정보 30일 후 삭제 |
 | 주석 | 코드에는 최소화, 설명은 PR 과 이 문서에 |
+| 이미지 | 전체 주소가 아니라 **경로만** 저장 (`booth_photos.path`, `merchant_photos.path`, `logo_url`, `image_url`). 주소는 `NEXT_PUBLIC_IMAGE_BASE_URL` 과 조합 |
 
 ## 테이블
 
@@ -25,13 +26,12 @@
 | 고객 인증 | `users`, `user_social_accounts`, `user_refresh_tokens` | #11 |
 | 약관 | `user_consents` | #14 |
 | 차량 | `vehicles` | #16 |
-| 요원 · 업체 관리자 | `staff`, `staff_social_accounts` | #9 (요원 인증 작업 때 정리) |
-| 부스 | `booths`, `booth_agents`, `booth_fee_policies`, `booth_bank_accounts` | #9 |
-| 업체 · 티켓 | `merchants`, `booth_merchants`, `tickets`, `ticket_versions` | #9 |
+| 요원 · 업체 관리자 | `staff`, `staff_social_accounts` | #9 (요원 인증 작업 때 리프레시 토큰 등 추가) |
+| 부스 | `booths`, `booth_photos`, `booth_agents`, `booth_fee_policies`, `booth_bank_accounts` | #9 |
+| 업체 · 티켓 | `merchants`, `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9 |
 | 발렛 | `valet_sessions` | #9 |
 | 알림 | `push_devices`, `notifications` | #9 |
 
-#9 는 #10~#16 이 머지된 뒤, 이미 들어간 고객 테이블을 빼고 다시 올립니다.
 
 ## 관계
 
@@ -64,6 +64,16 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 | 상태: 주차 요청 · 주차 완료 · 출차 요청 · 출차 완료 | 6개 상태 | 출차 준비 중(응답 후), 취소 추가 → [valet-session.md](../planning/valet-session.md) |
 | 알림 유형 테이블 | enum | |
 | (없음) | 소셜 계정, 리프레시 토큰, 푸시 기기 | Flutter 네이티브 로그인 · FCM |
+
+## 모델 메모
+
+- **요금 기준표 · 입금 계좌**(`booth_fee_policies`, `booth_bank_accounts`)는 덮어쓰지 않고 행을 쌓습니다. `effective_from` 이 가장 최근인 행이 현재 값입니다.
+- **기준 요금** = `base_fee` (`base_minutes` 까지) + ceil((이용 시간 − `base_minutes`) ÷ `extra_unit_minutes`) × `extra_unit_fee`. 이용 시간 = 주차 완료 ~ 출차 요청 → [valet-session.md](../planning/valet-session.md#요금)
+- **티켓 버전**(`ticket_versions`)은 수정할 때마다 새 행. 업체의 최신 티켓 = 그 업체 티켓 버전 중 `created_at` 이 가장 늦은 것
+- **요원 근무 시간**(`booth_agents.work_start_time` · `work_end_time`)에 맞춰 알림을 켜고 끕니다 (`notifications_enabled`)
+- **부스 · 업체 사진**은 사진 1장 = 행 1개 (`booth_photos`, `merchant_photos`). 한 장씩 추가 · 삭제 · 순서 변경(`sort_order`)하고, 행을 지울 때 S3 파일(`path`)도 함께 지웁니다. 업체 사진은 최대 5장 (서버에서 검사)
+- **푸시 기기 · 알림**은 고객(`user_id`) 또는 staff(`staff_id`) 중 하나에만 속합니다 (서버에서 보장)
+- **알림 채널**(`notifications.channel`): 실제로 보낸 경로 `PUSH` / `ALIMTALK`. 보내지 않고 앱 알림 목록에만 남긴 경우는 비움 → [policies.md](../planning/policies.md#알림)
 
 ## 코드로 표현 못 하는 제약
 

@@ -1,0 +1,47 @@
+model Merchant {
+    id            Int       @id @default(autoincrement())
+    name          String
+    address       String
+    addressDetail String?   @map("address_detail")
+    adminId       Int       @map("admin_id")
+    createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+    deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+    admin         Staff           @relation(fields: [adminId], references: [id])
+    photos        MerchantPhoto[]
+    booths        BoothMerchant[]
+    tickets       Ticket[]
+    valetSessions ValetSession[]
+
+    @@index([name])
+    @@map("merchants")
+}
+
+model MerchantPhoto {
+    id         Int      @id @default(autoincrement())
+    merchantId Int      @map("merchant_id")
+    path       String
+    sortOrder  Int      @map("sort_order")
+    createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@index([merchantId, sortOrder])
+    @@map("merchant_photos")
+}
+
+model BoothMerchant {
+    boothId    Int                 @map("booth_id")
+    merchantId Int                 @map("merchant_id")
+    status     BoothMerchantStatus @default(PENDING)
+    createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt  DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+    booth    Booth    @relation(fields: [boothId], references: [id], onDelete: Cascade)
+    merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@id([boothId, merchantId])
+    @@index([merchantId, status])
+    @@map("booth_merchants")
+}

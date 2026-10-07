@@ -1,0 +1,37 @@
+model Staff {
+    id        Int       @id @default(autoincrement())
+    role      StaffRole
+    name      String?
+    phone     String?
+    createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+    deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+    socialAccounts StaffSocialAccount[]
+    pushDevices    PushDevice[]
+    notifications  Notification[]
+
+    boothMemberships BoothAgent[]
+    createdBooths    Booth[]      @relation("BoothCreator")
+    merchants        Merchant[]
+
+    parkedSessions    ValetSession[] @relation("SessionParkedBy")
+    respondedSessions ValetSession[] @relation("SessionRespondedBy")
+    completedSessions ValetSession[] @relation("SessionCompletedBy")
+
+    @@map("staff")
+}
+
+model StaffSocialAccount {
+    id             Int            @id @default(autoincrement())
+    staffId        Int            @map("staff_id")
+    provider       SocialProvider
+    providerUserId String         @map("provider_user_id")
+    createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerUserId])
+    @@index([staffId])
+    @@map("staff_social_accounts")
+}

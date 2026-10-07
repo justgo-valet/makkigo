@@ -1,0 +1,37 @@
+model PushDevice {
+    id        Int            @id @default(autoincrement())
+    userId    Int?           @map("user_id")
+    staffId   Int?           @map("staff_id")
+    platform  DevicePlatform
+    token     String         @unique
+    createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+    user  User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    staff Staff? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@index([staffId])
+    @@map("push_devices")
+}
+
+model Notification {
+    id             Int                  @id @default(autoincrement())
+    type           NotificationType
+    channel        NotificationChannel?
+    userId         Int?                 @map("user_id")
+    staffId        Int?                 @map("staff_id")
+    valetSessionId Int?                 @map("valet_session_id")
+    title          String
+    body           String
+    readAt         DateTime?            @map("read_at") @db.Timestamptz(3)
+    createdAt      DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    staff        Staff?        @relation(fields: [staffId], references: [id], onDelete: Cascade)
+    valetSession ValetSession? @relation(fields: [valetSessionId], references: [id], onDelete: SetNull)
+
+    @@index([userId, createdAt])
+    @@index([staffId, createdAt])
+    @@map("notifications")
+}
