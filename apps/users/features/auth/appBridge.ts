@@ -1,5 +1,3 @@
-import type { SocialLoginProvider } from "@/features/auth/socialLoginProviders";
-
 interface MakkigoAppChannel {
   postMessage: (message: string) => void;
 }
@@ -9,8 +7,16 @@ const getAppChannel = () =>
 
 const isInApp = () => getAppChannel() !== null;
 
-const requestAppSocialLogin = (provider: SocialLoginProvider) => {
-  getAppChannel()?.postMessage(JSON.stringify({ type: "socialLogin", provider }));
+const toAbsoluteUrl = (path: string) => new URL(path, window.location.origin).toString();
+
+const openAppAuthSession = ({ url, returnUrl }: { url: string; returnUrl: string }) => {
+  getAppChannel()?.postMessage(
+    JSON.stringify({
+      type: "openAuthSession",
+      url: toAbsoluteUrl(url),
+      returnUrl: toAbsoluteUrl(returnUrl),
+    }),
+  );
 };
 
-export { isInApp, requestAppSocialLogin };
+export { isInApp, openAppAuthSession };

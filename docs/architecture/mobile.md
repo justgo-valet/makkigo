@@ -35,7 +35,9 @@
 
 | 방향 | 메시지 | 앱이 하는 일 |
 |---|---|---|
-| 웹 → 앱 | `{"type":"socialLogin","provider":"kakao\|google\|apple\|naver"}` | 시스템 브라우저 창으로 `/api/v1/auth/oauth/{provider}?app_challenge=…` 를 열고, 돌아오면 웹뷰에서 `/api/v1/auth/oauth/exchange` 를 엶 → [auth.md](auth.md#흐름) |
+| 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
+
+**앱은 주소를 만들지 않습니다.** 제공자 · API 경로 · 로그인 규칙은 모두 웹이 정해 메시지로 넘깁니다. 그래서 로그인 · 회원가입 변경은 서버 배포만으로 끝나고, 앱 업데이트는 이 표의 메시지 형식이나 복귀 스킴을 바꿀 때만 필요합니다.
 
 메시지를 추가 · 변경할 때는 makkigo 와 makkigo-mobile PR 을 서로 링크합니다.
 

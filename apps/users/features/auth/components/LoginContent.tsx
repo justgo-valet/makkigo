@@ -15,7 +15,7 @@ interface LoginContentProps {
 
 export default function LoginContent({ error }: Readonly<LoginContentProps>) {
   useHiddenHeader();
-  const { providers, isRedirecting, login } = useSocialLogin();
+  const { providers, isRedirecting, error: displayedError, login } = useSocialLogin(error);
 
   return (
     <div className="flex flex-col w-full h-full max-w-md px-2 pb-[65px] mx-auto">
@@ -25,7 +25,9 @@ export default function LoginContent({ error }: Readonly<LoginContentProps>) {
         <h1 className="text-3xl font-bold tracking-tight text-(--primary-color)">MAKKIGO</h1>
       </div>
       <div className="flex flex-col gap-3">
-        {error && <FieldError className="text-center">{LOGIN_ERROR_MESSAGES[error]}</FieldError>}
+        {displayedError && (
+          <FieldError className="text-center">{LOGIN_ERROR_MESSAGES[displayedError]}</FieldError>
+        )}
         {providers.map((provider) => (
           <SocialLoginButton
             key={provider}
