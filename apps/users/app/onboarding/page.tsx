@@ -1,9 +1,11 @@
 "use client";
 
 import { Button } from "@makkigo/ui";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import AnimatedOnboarding from "@/components/features/onboarding/AnimatedOnboarding";
+import ConsentSheet from "@/components/features/onboarding/ConsentSheet";
 import { onboardingFlow } from "@/configs/onboarding/onboardingFlow";
 import useOnboarding from "@/hooks/useOnboarding";
 
@@ -12,6 +14,7 @@ import type { OnboardingFormValues } from "@/libs/onboarding/schemas/onboarding.
 export default function OnboardingContent() {
   const { onboardingStep, buttonType, handleMoveNextStep } = useOnboarding();
   const form = useFormContext<OnboardingFormValues>();
+  const [hasAgreedConsents, setHasAgreedConsents] = useState(false);
   const step = onboardingFlow[onboardingStep];
   const StepComponent = step.component;
 
@@ -41,6 +44,7 @@ export default function OnboardingContent() {
           </Button>
         </div>
       </form>
+      <ConsentSheet open={!hasAgreedConsents} onAgreed={() => setHasAgreedConsents(true)} />
     </AnimatedOnboarding>
   );
 }
