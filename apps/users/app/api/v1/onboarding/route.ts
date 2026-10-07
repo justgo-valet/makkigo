@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { completeOnboardingRequestSchema } from "@/libs/onboarding/contracts/onboarding";
 import { getCurrentUserId } from "@/server/auth/getCurrentUserId";
 import { hasRequiredConsents } from "@/server/consent/hasRequiredConsents";
-import { completeOnboarding } from "@/server/onboarding/completeOnboarding";
+import { completeUserOnboarding } from "@/server/onboarding/completeUserOnboarding";
 
 import type { NextRequest } from "next/server";
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await completeOnboarding(userId, body.data);
+    const result = await completeUserOnboarding(userId, body.data);
 
     if (!result.ok) {
       return NextResponse.json(

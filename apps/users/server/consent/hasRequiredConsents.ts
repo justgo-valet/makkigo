@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "database";
 
 import { REQUIRED_CONSENT_TYPES } from "@/libs/consent/contracts/consents";

@@ -1,3 +1,4 @@
+import "server-only";
 import { prisma } from "database";
 
 import type { RecordConsentsRequest } from "@/libs/consent/contracts/consents";

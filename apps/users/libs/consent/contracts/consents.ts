@@ -16,6 +16,9 @@ const REQUIRED_CONSENT_TYPES = [
 
 const consentTypeSchema = z.enum(CONSENT_TYPES);
 
+const isRequiredConsent = (type: ConsentType) =>
+  (REQUIRED_CONSENT_TYPES as readonly ConsentType[]).includes(type);
+
 const recordConsentsRequestSchema = z.object({
   documentVersion: z.string().trim().min(1).max(20),
   consents: z
@@ -27,5 +30,5 @@ const recordConsentsRequestSchema = z.object({
 type ConsentType = z.infer<typeof consentTypeSchema>;
 type RecordConsentsRequest = z.infer<typeof recordConsentsRequestSchema>;
 
-export { CONSENT_TYPES, REQUIRED_CONSENT_TYPES, recordConsentsRequestSchema };
+export { CONSENT_TYPES, REQUIRED_CONSENT_TYPES, isRequiredConsent, recordConsentsRequestSchema };
 export type { ConsentType, RecordConsentsRequest };

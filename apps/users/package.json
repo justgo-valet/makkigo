@@ -19,6 +19,7 @@
     "@makkigo/api-client": "workspace:*",
     "@makkigo/auth": "workspace:*",
     "@makkigo/ui": "workspace:*",
+    "@tanstack/react-query": "^5.104.1",
     "database": "workspace:*",
     "ky": "^2.1.0",
     "motion": "^13.4.4",
@@ -26,6 +27,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-hook-form": "^7.88.0",
+    "server-only": "^0.0.1",
     "zod": "^4.6.5",
     "zustand": "^5.0.15"
   },

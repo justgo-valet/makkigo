@@ -1,6 +1,7 @@
+import "server-only";
 import { prisma } from "database";
 
-import type { CarModelsResponse } from "@/libs/onboarding/contracts/carModels";
+import type { CarModelsResponse } from "@/libs/car/contracts/carModels";
 
 const koreanCollator = new Intl.Collator("ko");
 
