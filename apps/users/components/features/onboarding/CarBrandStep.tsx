@@ -15,9 +15,15 @@ const CARD_STAGGER_MS = 30;
 export default function CarBrandStep() {
   const {
     control,
+    setValue,
     formState: { errors },
   } = useFormContext<OnboardingFormValues>();
   const { field } = useController({ name: "carBrand", control });
+
+  const changeBrand = (brand: string) => {
+    if (brand !== field.value) setValue("carModel", "");
+    field.onChange(brand);
+  };
   const isCustomBrand = !carBrandLogoRegistry.some((carBrand) => carBrand.name === field.value);
   const { rootRef, revealDelays } = useStaggeredReveal<HTMLDivElement>(CARD_STAGGER_MS);
   const customBrandIndex = carBrandLogoRegistry.length;
@@ -55,7 +61,7 @@ export default function CarBrandStep() {
                 className="h-full p-4 cursor-pointer"
                 aria-label={carBrand.name}
                 aria-pressed={field.value === carBrand.name}
-                onClick={() => field.onChange(carBrand.name)}
+                onClick={() => changeBrand(carBrand.name)}
               >
                 <CardContent className="flex flex-col items-center justify-center gap-3 p-0">
                   <div className="relative h-11 w-16">
@@ -93,8 +99,9 @@ export default function CarBrandStep() {
                 aria-invalid={Boolean(errors.carBrand)}
                 aria-describedby="car-brand-error"
                 className="h-auto p-0 text-sm font-medium text-center border-0 shadow-none focus:border-0"
+                onChange={(event) => changeBrand(event.target.value)}
                 onFocus={() => {
-                  if (!isCustomBrand) field.onChange("");
+                  if (!isCustomBrand) changeBrand("");
                 }}
               />
             </CardContent>

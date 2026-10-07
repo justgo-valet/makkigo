@@ -24,7 +24,7 @@
 
 | 메서드 · 경로 | 하는 일 | 로그인 | PR |
 |---|---|---|---|
-| `GET /api/car/get-car-models?brand=` | 브랜드별 차량 모델 (아직 빈 배열) | | dev (#5) |
+| `GET /api/car/get-car-models?brand=` | 브랜드별 차량 모델 이름 (한국어 순) | | dev (#5), [#26](https://github.com/justgo-valet/makkigo/pull/26) |
 | `POST /api/v1/auth/social/{kakao\|google\|apple\|naver}` | 소셜 로그인 · 가입 | | [#11](https://github.com/justgo-valet/makkigo/pull/11) → [#23](https://github.com/justgo-valet/makkigo/pull/23) |
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
