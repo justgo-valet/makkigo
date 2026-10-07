@@ -1,0 +1,45 @@
+enum DevicePlatform {
+    IOS
+    ANDROID
+}
+
+enum StaffRole {
+    VALET_AGENT
+    MERCHANT_ADMIN
+}
+
+enum BoothAgentStatus {
+    REQUESTED
+    APPROVED
+    REJECTED
+}
+
+enum BoothMerchantStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+enum ValetSessionStatus {
+    ARRIVING
+    PARKED
+    PICKUP_REQUESTED
+    PICKUP_PREPARING
+    COMPLETED
+    CANCELLED
+}
+
+enum NotificationType {
+    ARRIVAL
+    ARRIVAL_DELAYED
+    ARRIVAL_CANCELLED
+    PARKED
+    PICKUP_REQUESTED
+    PICKUP_RESPONDED
+    PICKUP_COMPLETED
+}
+
+enum NotificationChannel {
+    PUSH
+    ALIMTALK
+}

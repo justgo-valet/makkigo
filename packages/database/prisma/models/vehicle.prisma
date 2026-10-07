@@ -9,9 +9,10 @@ model Vehicle {
     createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
     updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-    user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-    brand CarBrand? @relation(fields: [brandId], references: [id])
-    model CarModel? @relation(fields: [modelId], references: [id])
+    user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+    brand         CarBrand?      @relation(fields: [brandId], references: [id])
+    model         CarModel?      @relation(fields: [modelId], references: [id])
+    valetSessions ValetSession[]
 
     @@map("vehicles")
 }

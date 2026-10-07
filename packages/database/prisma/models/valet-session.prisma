@@ -1,0 +1,50 @@
+model ValetSession {
+    id     Int                @id @default(autoincrement())
+    status ValetSessionStatus @default(ARRIVING)
+
+    plateNumber String @map("plate_number")
+    vehicleId   Int?   @map("vehicle_id")
+    userId      Int?   @map("user_id")
+
+    merchantId      Int? @map("merchant_id")
+    boothId         Int? @map("booth_id")
+    ticketVersionId Int? @map("ticket_version_id")
+
+    arrivalDelayMinutes Int?      @map("arrival_delay_minutes")
+    arrivalDelayedAt    DateTime? @map("arrival_delayed_at") @db.Timestamptz(3)
+
+    parkedAt   DateTime? @map("parked_at") @db.Timestamptz(3)
+    parkedById Int?      @map("parked_by_id")
+
+    pickupRequestedAt DateTime? @map("pickup_requested_at") @db.Timestamptz(3)
+    baseFee           Int?      @map("base_fee")
+
+    pickupRespondedAt   DateTime? @map("pickup_responded_at") @db.Timestamptz(3)
+    pickupRespondedById Int?      @map("pickup_responded_by_id")
+    actualFee           Int?      @map("actual_fee")
+    expectedPickupAt    DateTime? @map("expected_pickup_at") @db.Timestamptz(3)
+
+    completedAt   DateTime? @map("completed_at") @db.Timestamptz(3)
+    completedById Int?      @map("completed_by_id")
+
+    cancelledAt DateTime? @map("cancelled_at") @db.Timestamptz(3)
+
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+    vehicle         Vehicle?       @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+    user            User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+    merchant        Merchant?      @relation(fields: [merchantId], references: [id])
+    booth           Booth?         @relation(fields: [boothId], references: [id])
+    ticketVersion   TicketVersion? @relation(fields: [ticketVersionId], references: [id])
+    parkedBy        Staff?         @relation("SessionParkedBy", fields: [parkedById], references: [id])
+    pickupResponder Staff?         @relation("SessionRespondedBy", fields: [pickupRespondedById], references: [id])
+    completedBy     Staff?         @relation("SessionCompletedBy", fields: [completedById], references: [id])
+    notifications   Notification[]
+
+    @@index([plateNumber, status])
+    @@index([userId, createdAt])
+    @@index([boothId, status])
+    @@index([merchantId, status])
+    @@map("valet_sessions")
+}

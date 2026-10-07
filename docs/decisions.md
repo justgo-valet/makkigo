@@ -62,3 +62,5 @@
 | 2026-10-05 | 앱 2개 모두 스토어 출시. 담당: 고객 쪽(API · 웹 · Flutter · 비회원 QR 웹) = 태균, 요원 · 업체 관리자 앱 = 지상님 | | 대화 |
 | 2026-10-05 | 알림은 **앱 푸시 우선, 미동의 · 발송 실패면 알림톡** → [policies.md](planning/policies.md#알림) | 푸시만으로는 못 받는 회원이 생김 | 대화 |
 | 2026-10-05 | Flutter 앱은 **별도 저장소 `makkigo-mobile`** 에 두 앱(고객 · 요원)을 함께 둠 (pub workspace). 고객 앱 ID `com.makkigo.user`, 이름 "마끼고", iPhone 전용 → [mobile.md](architecture/mobile.md) | 스토어 버전 · CI 를 서버와 분리, 두 앱의 공통 네이티브 코드 공유 | 대화 |
+| 2026-10-07 | 부스 · 업체 사진은 **별도 테이블**(`booth_photos`, `merchant_photos`)에 1장 = 1행, 전체 주소가 아니라 **경로만** 저장 | 사진 수정 · 삭제가 잦아 한 장씩 다루고 S3 파일과 1:1 로 맞추기 위해. 경로만 저장하면 CDN · 도메인이 바뀌어도 DB 수정 불필요 | 지상님 리뷰, 대화, [#9](https://github.com/justgo-valet/makkigo/pull/9) |
+| 2026-10-07 | 알림 내역에 **보낸 채널**(`PUSH` / `ALIMTALK`) 기록, 안 보냈으면 비움 | 푸시 우선 · 알림톡 대체 정책에서 실제 경로 추적 | 대화, [#9](https://github.com/justgo-valet/makkigo/pull/9) |
