@@ -31,6 +31,7 @@
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |
+| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37) |
 | `DELETE /api/v1/users/me` | 회원 탈퇴 | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
 | `POST /api/v1/onboarding` | 휴대폰 번호 · 차량 저장 | ✅ | [#16](https://github.com/justgo-valet/makkigo/pull/16) |
 
@@ -47,7 +48,6 @@
 
 ## 예정
 
-- 내 정보 (온보딩 완료 여부)
 - 마이페이지: 동의 상태 조회, 휴대폰·차량 번호 수정
 - 탈퇴 회원 개인정보 삭제 배치
 - 요원 쪽 인증 (로그인 후 유형 선택)
