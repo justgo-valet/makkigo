@@ -3,6 +3,7 @@ import { useFormContext } from "react-hook-form";
 
 import { useDuplicateCheck } from "@/features/onboarding/hooks/useDuplicateCheck";
 import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
+import { useOnboardingStep } from "@/features/onboarding/hooks/useOnboardingStep";
 import { useOnboardingSubmit } from "@/features/onboarding/hooks/useOnboardingSubmit";
 import { onboardingFlow } from "@/features/onboarding/onboardingFlow";
 import { useMe } from "@/features/user/hooks/useMe";
@@ -13,6 +14,7 @@ import type { FormEvent } from "react";
 const useOnboardingContent = () => {
   const { onboardingStep, buttonType, handleMoveNextStep, handleMoveToStep } = useOnboarding();
   const form = useFormContext<OnboardingFormValues>();
+  const stepProps = useOnboardingStep(onboardingStep);
   const { data: me } = useMe();
   const [hasAgreedConsents, setHasAgreedConsents] = useState(me?.requiredConsentsAgreed ?? false);
   const { verify: verifyNotDuplicated, isChecking } = useDuplicateCheck();
@@ -48,7 +50,8 @@ const useOnboardingContent = () => {
   };
 
   return {
-    StepComponent: step.component,
+    onboardingStep,
+    stepProps,
     isSubmitStep,
     isBusy,
     submitErrorMessage: isSubmitStep ? submitErrorMessage : null,

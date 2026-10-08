@@ -1,20 +1,24 @@
 import { Field, FieldLabel, Input, Label } from "@makkigo/ui";
-import { useController, useFormContext, useWatch } from "react-hook-form";
-
-import { formatPhoneNumber } from "@/libs/common/format/phoneNumber";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
+import type { ChangeEventHandler } from "react";
+import type { ControllerRenderProps, FieldError } from "react-hook-form";
 
-export default function PhoneNumberStep() {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext<OnboardingFormValues>();
-  const { field } = useController({ name: "phoneNumber", control });
-  const carNumber = useWatch({ name: "vehicleNumber", control });
+interface PhoneNumberStepProps {
+  carNumber: string;
+  field: ControllerRenderProps<OnboardingFormValues, "phoneNumber">;
+  error?: FieldError;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+}
 
+export default function PhoneNumberStep({
+  carNumber,
+  field,
+  error,
+  onChange,
+}: Readonly<PhoneNumberStepProps>) {
   return (
-    <Field data-invalid={Boolean(errors.phoneNumber)}>
+    <Field data-invalid={Boolean(error)}>
       <Label className="text-sm text-(--base-color) font-light">{carNumber}</Label>
       <FieldLabel htmlFor="phone-number" className="text-xl font-bold text-(--base-color)">
         휴대전화 번호를 알려주세요
@@ -26,14 +30,14 @@ export default function PhoneNumberStep() {
         inputMode="numeric"
         placeholder="010-1234-5678"
         autoComplete="tel"
-        aria-invalid={Boolean(errors.phoneNumber)}
+        aria-invalid={Boolean(error)}
         aria-describedby="phone-number-error"
         {...field}
-        onChange={(event) => field.onChange(formatPhoneNumber(event.target.value))}
+        onChange={onChange}
       />
-      {errors.phoneNumber && (
+      {error && (
         <p id="phone-number-error" className="text-sm text-destructive">
-          {errors.phoneNumber.message}
+          {error.message}
         </p>
       )}
     </Field>

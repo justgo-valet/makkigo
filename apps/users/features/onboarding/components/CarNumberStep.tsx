@@ -1,16 +1,15 @@
 import { Field, FieldLabel, Input } from "@makkigo/ui";
-import { useFormContext } from "react-hook-form";
 
-import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
+import type { FieldError, UseFormRegisterReturn } from "react-hook-form";
 
-export default function CarNumberStep() {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext<OnboardingFormValues>();
+interface CarNumberStepProps {
+  registration: UseFormRegisterReturn<"vehicleNumber">;
+  error?: FieldError;
+}
 
+export default function CarNumberStep({ registration, error }: Readonly<CarNumberStepProps>) {
   return (
-    <Field data-invalid={Boolean(errors.vehicleNumber)}>
+    <Field data-invalid={Boolean(error)}>
       <FieldLabel htmlFor="vehicle-number" className="text-xl font-bold text-(--base-color)">
         차량 번호를 알려주세요
       </FieldLabel>
@@ -19,13 +18,13 @@ export default function CarNumberStep() {
         id="vehicle-number"
         placeholder="12가 3456"
         autoComplete="off"
-        aria-invalid={Boolean(errors.vehicleNumber)}
+        aria-invalid={Boolean(error)}
         aria-describedby="vehicle-number-error"
-        {...register("vehicleNumber")}
+        {...registration}
       />
-      {errors.vehicleNumber && (
+      {error && (
         <p id="vehicle-number-error" className="text-sm text-destructive">
-          {errors.vehicleNumber.message}
+          {error.message}
         </p>
       )}
     </Field>
