@@ -1,37 +1,39 @@
 import { Field, FieldDescription, FieldError, FieldLabel, Input } from "@makkigo/ui";
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import { useMemo } from "react";
-import { useController, useFormContext, useWatch } from "react-hook-form";
-
-import { getCarModels } from "@/features/car/apis/getCarModels";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
+import type { FieldError as FormFieldError, ControllerRenderProps } from "react-hook-form";
 
 const SELECTED_CARD_CLASS_NAME =
   "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/10 dark:bg-primary/10";
 const IDLE_CARD_CLASS_NAME = "hover:border-primary/30 hover:bg-muted/40";
 
-export default function CarModelStep() {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext<OnboardingFormValues>();
-  const { field } = useController({ name: "carModel", control });
-  const carBrand = useWatch({ name: "carBrand", control });
-  const { data: carModels = [], status: carModelsStatus } = useQuery({
-    queryKey: ["carModels", carBrand],
-    queryFn: () => getCarModels(carBrand),
-    // 실패하면 바로 직접 입력으로 넘어가도록 재시도하지 않는다.
-    retry: false,
-  });
+interface CarModelStepProps {
+  carBrand: string;
+  carModels: string[];
+  carModelsStatus: "pending" | "error" | "success";
+  field: ControllerRenderProps<OnboardingFormValues, "carModel">;
+  error?: FormFieldError;
+  errors: (FormFieldError | undefined)[];
+  isCustomModel: boolean;
+  onSelect: (carModel: string) => void;
+  onCustomModelFocus: () => void;
+}
 
-  const isCustomModel = !carModels.includes(field.value);
-  const carModelErrors = useMemo(() => [errors.carModel], [errors.carModel]);
-
+export default function CarModelStep({
+  carBrand,
+  carModels,
+  carModelsStatus,
+  field,
+  error,
+  errors,
+  isCustomModel,
+  onSelect,
+  onCustomModelFocus,
+}: Readonly<CarModelStepProps>) {
   return (
-    <Field className="h-full min-h-0" data-invalid={Boolean(errors.carModel)}>
+    <Field className="h-full min-h-0" data-invalid={Boolean(error)}>
       <FieldLabel htmlFor="car-model" className="text-xl font-bold text-(--base-color)">
         {carBrand} 모델을 선택해주세요.
       </FieldLabel>
@@ -48,9 +50,9 @@ export default function CarModelStep() {
           >
             <button
               type="button"
-              className="h-full px-4 py-5 cursor-pointer"
+              className="h-full px-4 py-5 cursor-pointer text-nowrap whitespace-nowrap"
               aria-pressed={field.value === carModel}
-              onClick={() => field.onChange(carModel)}
+              onClick={() => onSelect(carModel)}
             >
               <CardContent className="p-0 text-sm font-medium">{carModel}</CardContent>
             </button>
@@ -72,18 +74,16 @@ export default function CarModelStep() {
                 value={isCustomModel ? field.value : ""}
                 placeholder="직접 입력 (예: 아반떼)"
                 autoComplete="off"
-                aria-invalid={Boolean(errors.carModel)}
+                aria-invalid={Boolean(error)}
                 aria-describedby="car-model-error"
                 className="h-auto p-0 text-sm font-medium border-0 shadow-none focus:border-0"
-                onFocus={() => {
-                  if (!isCustomModel) field.onChange("");
-                }}
+                onFocus={onCustomModelFocus}
               />
             </CardContent>
           </Card>
         )}
       </div>
-      <FieldError id="car-model-error" errors={carModelErrors} />
+      <FieldError id="car-model-error" errors={errors} />
     </Field>
   );
 }

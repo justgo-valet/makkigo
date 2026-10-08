@@ -1,30 +1,35 @@
 import { Field, FieldLabel, Input } from "@makkigo/ui";
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
 import Image from "next/image";
-import { useController, useFormContext } from "react-hook-form";
 
 import { carBrandLogoRegistry } from "@/features/car/carBrandLogoRegistry";
 import { useStaggeredReveal } from "@/hooks/useStaggeredReveal";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
+import type { ChangeEventHandler, FocusEventHandler } from "react";
+import type { ControllerRenderProps, FieldError } from "react-hook-form";
 
 const CARD_ENTER_CLASS_NAME =
   "animate-in fade-in slide-in-from-bottom-2 fill-mode-both animation-duration-500 motion-reduce:animate-none";
 const CARD_STAGGER_MS = 30;
 
-export default function CarBrandStep() {
-  const {
-    control,
-    setValue,
-    formState: { errors },
-  } = useFormContext<OnboardingFormValues>();
-  const { field } = useController({ name: "carBrand", control });
+interface CarBrandStepProps {
+  field: ControllerRenderProps<OnboardingFormValues, "carBrand">;
+  error?: FieldError;
+  isCustomBrand: boolean;
+  onSelect: (brand: string) => void;
+  onCustomBrandChange: ChangeEventHandler<HTMLInputElement>;
+  onCustomBrandFocus: FocusEventHandler<HTMLInputElement>;
+}
 
-  const changeBrand = (brand: string) => {
-    if (brand !== field.value) setValue("carModel", "");
-    field.onChange(brand);
-  };
-  const isCustomBrand = !carBrandLogoRegistry.some((carBrand) => carBrand.name === field.value);
+export default function CarBrandStep({
+  field,
+  error,
+  isCustomBrand,
+  onSelect,
+  onCustomBrandChange,
+  onCustomBrandFocus,
+}: Readonly<CarBrandStepProps>) {
   const { rootRef, revealDelays } = useStaggeredReveal<HTMLDivElement>(CARD_STAGGER_MS);
   const customBrandIndex = carBrandLogoRegistry.length;
 
@@ -36,7 +41,7 @@ export default function CarBrandStep() {
   });
 
   return (
-    <Field className="h-full min-h-0" data-invalid={Boolean(errors.carBrand)}>
+    <Field className="h-full min-h-0" data-invalid={Boolean(error)}>
       <FieldLabel htmlFor="car-brand" className="text-xl font-bold text-(--base-color)">
         어떤 차량인가요?
       </FieldLabel>
@@ -58,10 +63,10 @@ export default function CarBrandStep() {
             >
               <button
                 type="button"
-                className="h-full p-4 cursor-pointer"
+                className="h-full p-4 cursor-pointer text-nowrap whitespace-nowrap"
                 aria-label={carBrand.name}
                 aria-pressed={field.value === carBrand.name}
-                onClick={() => changeBrand(carBrand.name)}
+                onClick={() => onSelect(carBrand.name)}
               >
                 <CardContent className="flex flex-col items-center justify-center gap-3 p-0">
                   <div className="relative h-11 w-16">
@@ -96,13 +101,11 @@ export default function CarBrandStep() {
                 value={isCustomBrand ? field.value : ""}
                 placeholder="직접 입력"
                 autoComplete="off"
-                aria-invalid={Boolean(errors.carBrand)}
+                aria-invalid={Boolean(error)}
                 aria-describedby="car-brand-error"
                 className="h-auto p-0 text-sm font-medium text-center border-0 shadow-none focus:border-0"
-                onChange={(event) => changeBrand(event.target.value)}
-                onFocus={() => {
-                  if (!isCustomBrand) changeBrand("");
-                }}
+                onChange={onCustomBrandChange}
+                onFocus={onCustomBrandFocus}
               />
             </CardContent>
           </Card>
@@ -112,9 +115,9 @@ export default function CarBrandStep() {
           className="absolute inset-x-0 bottom-0 z-10 pointer-events-none h-14 bg-linear-to-t from-background via-background/80 to-transparent"
         />
       </div>
-      {errors.carBrand && (
+      {error && (
         <p id="car-brand-error" className="text-sm text-destructive">
-          {errors.carBrand.message}
+          {error.message}
         </p>
       )}
     </Field>
