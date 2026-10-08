@@ -17,8 +17,9 @@ import { consentItems } from "@/features/consent/consentItems";
 import { consentDocuments } from "@/features/consent/documents";
 import { useConsent } from "@/features/consent/hooks/useConsent";
 
-import type { ConsentType } from "@/libs/consent/contracts/consents";
 import ConsentPanel from "./ConsentPanel";
+
+import type { ConsentType } from "@/libs/consent/contracts/consents";
 
 interface ConsentSheetProps {
   open: boolean;
@@ -116,7 +117,13 @@ export default function ConsentSheet({ open, onAgreed }: Readonly<ConsentSheetPr
                   )}
                 </Field>
                 {document && expandedType === type && (
-                  <ConsentPanel id={`consent-${type}-document`} title={label} content={document} onAgree={() => toggleItem(type, true)} onClose={() => setExpandedType(null)} />
+                  <ConsentPanel
+                    id={`consent-${type}-document`}
+                    title={label}
+                    content={document}
+                    onAgree={() => toggleItem(type, true)}
+                    onClose={() => setExpandedType(null)}
+                  />
                 )}
               </Field>
             );
