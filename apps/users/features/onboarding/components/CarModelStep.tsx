@@ -2,6 +2,7 @@ import { Field, FieldDescription, FieldError, FieldLabel, Input } from "@makkigo
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { useMemo } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { getCarModels } from "@/features/car/apis/getCarModels";
@@ -27,6 +28,7 @@ export default function CarModelStep() {
   });
 
   const isCustomModel = !carModels.includes(field.value);
+  const carModelErrors = useMemo(() => [errors.carModel], [errors.carModel]);
 
   return (
     <Field className="h-full min-h-0" data-invalid={Boolean(errors.carModel)}>
@@ -81,7 +83,7 @@ export default function CarModelStep() {
           </Card>
         )}
       </div>
-      <FieldError id="car-model-error" errors={[errors.carModel]} />
+      <FieldError id="car-model-error" errors={carModelErrors} />
     </Field>
   );
 }

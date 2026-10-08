@@ -13,10 +13,11 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
-import ConsentDocument from "@/features/consent/components/ConsentDocument";
 import { consentItems } from "@/features/consent/consentItems";
 import { consentDocuments } from "@/features/consent/documents";
 import { useConsent } from "@/features/consent/hooks/useConsent";
+
+import ConsentPanel from "./ConsentPanel";
 
 import type { ConsentType } from "@/libs/consent/contracts/consents";
 
@@ -116,7 +117,13 @@ export default function ConsentSheet({ open, onAgreed }: Readonly<ConsentSheetPr
                   )}
                 </Field>
                 {document && expandedType === type && (
-                  <ConsentDocument id={`consent-${type}-document`} content={document} />
+                  <ConsentPanel
+                    id={`consent-${type}-document`}
+                    title={label}
+                    content={document}
+                    onAgree={() => toggleItem(type, true)}
+                    onClose={() => setExpandedType(null)}
+                  />
                 )}
               </Field>
             );

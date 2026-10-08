@@ -20,7 +20,7 @@ const consentItems: readonly ConsentItem[] = (
     { type: "APP_PUSH", label: "앱 푸시 알림 수신" },
     { type: "ALIMTALK", label: "알림톡 수신" },
   ] as const
-).map((item) => ({ ...item, required: isRequiredConsent(item.type) }));
+).map((item) => Object.assign(item, { required: isRequiredConsent(item.type) }));
 
 export { CONSENT_DOCUMENT_VERSION, consentItems };
 export type { ConsentItem };
