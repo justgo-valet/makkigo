@@ -3,7 +3,10 @@ ALTER TABLE "staff" ALTER COLUMN "role" DROP NOT NULL;
 
 ALTER TABLE "staff_social_accounts"
 ADD COLUMN "email" TEXT,
-ADD COLUMN "updated_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ADD COLUMN "updated_at" TIMESTAMPTZ(3);
+
+UPDATE "staff_social_accounts" SET "updated_at" = "created_at";
+ALTER TABLE "staff_social_accounts" ALTER COLUMN "updated_at" SET NOT NULL;
 
 CREATE TABLE "staff_refresh_tokens" (
     "id" SERIAL NOT NULL,
