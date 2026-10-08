@@ -4,7 +4,7 @@ import { jwtVerify, SignJWT } from "jose";
 
 import { ACCESS_TOKEN_TTL_SECONDS, getJwtSecret, REFRESH_TOKEN_TTL_SECONDS } from "./config";
 
-export type AuthAudience = "users";
+export type AuthAudience = "users" | "valetagents";
 
 const ISSUER = "makkigo";
 
