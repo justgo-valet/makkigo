@@ -85,7 +85,7 @@
 
 고객 리다이렉트(콜백) 주소: `https://app.makkigo.com/api/v1/auth/oauth/{kakao|google|apple|naver}/callback`. 요원 앱도 같은 도메인의 `https://app.makkigo.com/api/v1/staff/auth/oauth/{provider}/callback`을 사용하며, Caddy가 이 경로만 `valetagents`로 전달합니다. 로컬 요원 콜백은 `http://localhost:3000/api/v1/staff/auth/oauth/{provider}/callback`입니다 (애플은 HTTPS · 실제 도메인만 가능).
 
-요원 로그인 시작은 `valet.makkigo.com`, 콜백은 `app.makkigo.com`이므로 운영의 `AUTH_COOKIE_DOMAIN`은 `.makkigo.com`, `OAUTH_CALLBACK_ORIGIN`은 `https://app.makkigo.com`으로 설정합니다. Staff 쿠키는 고객 쿠키와 이름이 달라 충돌하지 않습니다.
+요원 로그인 시작은 `valet.makkigo.com`, 콜백은 `app.makkigo.com`이므로 운영의 `AUTH_COOKIE_DOMAIN`은 `.makkigo.com`, `OAUTH_CALLBACK_ORIGIN`은 `https://app.makkigo.com`으로 설정합니다. 도메인 공유 쿠키는 콜백 검증용 CSRF 값뿐입니다. 콜백은 verifier에 묶인 1회용 코드를 `valet.makkigo.com`으로 돌려보내고, Staff 액세스·리프레시 토큰은 그곳에서 host-only 쿠키로 발급합니다.
 
 | 제공자 | 할 일 |
 |---|---|

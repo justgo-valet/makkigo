@@ -11,8 +11,11 @@ const getPublicUrl = () => {
 };
 
 const toPublicUrl = (path: string) => new URL(path, getPublicUrl());
-const getOAuthCallbackOrigin = () =>
-  process.env.OAUTH_CALLBACK_ORIGIN?.trim() || getPublicUrl();
+const getOAuthCallbackOrigin = () => {
+  const value = process.env.OAUTH_CALLBACK_ORIGIN?.trim();
+  if (!value) throw new Error("환경변수 OAUTH_CALLBACK_ORIGIN 이 설정되지 않았습니다.");
+  return value;
+};
 const getOAuthRedirectUri = (provider: SocialProvider) =>
   new URL(
     `/api/v1/staff/auth/oauth/${provider.toLowerCase()}/callback`,

@@ -26,12 +26,14 @@ export const consumeStaffLoginCode = async (code: string, verifier: string) => {
   });
   if (!stored) return null;
 
+  const expected = Buffer.from(stored.appChallenge);
+  const actual = Buffer.from(hashBase64Url(verifier));
+  const matches = expected.length === actual.length && timingSafeEqual(expected, actual);
+  if (!matches || stored.expiresAt <= now || stored.usedAt || stored.staff.deletedAt) return null;
+
   const { count } = await prisma.staffLoginCode.updateMany({
     where: { id: stored.id, usedAt: null, expiresAt: { gt: now } },
     data: { usedAt: now },
   });
-  const expected = Buffer.from(stored.appChallenge);
-  const actual = Buffer.from(hashBase64Url(verifier));
-  const matches = expected.length === actual.length && timingSafeEqual(expected, actual);
-  return count === 1 && matches && !stored.staff.deletedAt ? stored.staffId : null;
+  return count === 1 ? stored.staffId : null;
 };

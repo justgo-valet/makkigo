@@ -2,7 +2,6 @@ import {
   AuthConfigError,
   completeStaffOAuth,
   createStaffLoginCode,
-  issueStaffTokens,
   parseSocialProvider,
   readStaffOAuthState,
   SocialAuthError,
@@ -10,8 +9,6 @@ import {
 import { NextResponse } from "next/server";
 
 import { createAppRedirectPage } from "@/server/auth/appRedirectPage";
-import { setAuthCookies } from "@/server/auth/authCookies";
-import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
 import { clearOAuthCsrfCookie, getOAuthCsrfCookie } from "@/server/auth/oauthCookies";
 import { getAppCallbackUrl, getLoginErrorUrl, getOAuthRedirectUri, toPublicUrl } from "@/server/auth/oauthUrls";
 
@@ -69,15 +66,19 @@ const handleCallback = async (
       nonce: state.nonce,
       redirectUri: getOAuthRedirectUri(provider),
     });
-    if (state.client === "app" && state.appChallenge) {
-      const code = await createStaffLoginCode(staffId, state.appChallenge);
+    if (!state.appChallenge) return fail(state, "failed");
+
+    const code = await createStaffLoginCode(staffId, state.appChallenge);
+    if (state.client === "app") {
       const response = createAppRedirectPage(getAppCallbackUrl({ code }));
       clearOAuthCsrfCookie(response);
       return response;
     }
-    const tokens = await issueStaffTokens(staffId, request.headers.get("user-agent"));
-    const response = NextResponse.redirect(toPublicUrl(await getPathAfterLogin(staffId)), 303);
-    setAuthCookies(response, tokens);
+
+    const response = NextResponse.redirect(
+      toPublicUrl(`/api/v1/auth/oauth/exchange?${new URLSearchParams({ code })}`),
+      303,
+    );
     clearOAuthCsrfCookie(response);
     return response;
   } catch (error) {

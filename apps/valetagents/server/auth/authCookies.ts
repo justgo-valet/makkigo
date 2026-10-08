@@ -6,12 +6,10 @@ import type { NextResponse } from "next/server";
 const ACCESS_TOKEN_COOKIE = "makkigo_staff_access_token";
 const REFRESH_TOKEN_COOKIE = "makkigo_staff_refresh_token";
 const REFRESH_TOKEN_COOKIE_PATH = "/api/v1/auth";
-const cookieDomain = process.env.AUTH_COOKIE_DOMAIN?.trim();
 const baseCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
-  ...(cookieDomain ? { domain: cookieDomain } : {}),
 } as const;
 
 const setAuthCookies = (

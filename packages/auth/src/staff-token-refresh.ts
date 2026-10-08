@@ -13,10 +13,12 @@ export const refreshStaffTokens = async (input: { refreshToken: string; userAgen
   if (!stored || stored.revokedAt || stored.expiresAt <= now || stored.staff.deletedAt) {
     throw new InvalidRefreshTokenError();
   }
-  const { count } = await prisma.staffRefreshToken.updateMany({
-    where: { id: stored.id, revokedAt: null },
-    data: { revokedAt: now, lastUsedAt: now },
+  return prisma.$transaction(async (transaction) => {
+    const { count } = await transaction.staffRefreshToken.updateMany({
+      where: { id: stored.id, revokedAt: null },
+      data: { revokedAt: now, lastUsedAt: now },
+    });
+    if (count === 0) throw new InvalidRefreshTokenError();
+    return issueStaffTokens(stored.staffId, input.userAgent, transaction);
   });
-  if (count === 0) throw new InvalidRefreshTokenError();
-  return issueStaffTokens(stored.staffId, input.userAgent);
 };
