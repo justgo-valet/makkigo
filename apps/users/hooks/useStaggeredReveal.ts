@@ -22,7 +22,7 @@ const useStaggeredReveal = <T extends HTMLElement>(staggerMs: number) => {
             observer.unobserve(entry.target);
             return Number(entry.target.getAttribute(REVEAL_INDEX_ATTRIBUTE));
           })
-          .sort((a, b) => a - b);
+          .toSorted((a, b) => a - b);
 
         if (enteredIndexes.length === 0) return;
 
