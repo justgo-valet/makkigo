@@ -41,7 +41,7 @@ const BUTTONS: Record<SocialLoginProvider, { label: string; className: string; i
     },
     apple: {
       label: "Apple로 계속하기",
-      className: "bg-[#101828] text-white hover:bg-[#101828] hover:text-white",
+      className: "bg-black text-white hover:bg-black hover:text-white",
       icon: <Image src="/images/login/apple_logo_white.png" alt="" width={19} height={24} />,
     },
   };
@@ -56,11 +56,11 @@ export default function SocialLoginButton({
   return (
     <Button
       variant="ghost"
-      className={`h-12 w-full rounded-[8px] p-0 text-[16px] font-semibold shadow-none [font-family:'Pretendard_Variable',Pretendard,sans-serif] ${className}`}
+      className={`relative h-12 w-full rounded-[8px] p-0 text-[16px] font-semibold shadow-none [font-family:'Pretendard_Variable',Pretendard,sans-serif] ${className}`}
       disabled={disabled}
       onClick={onClick}
     >
-      <span className="flex w-8 justify-center">{icon}</span>
+      <span className="absolute left-4 flex size-5 items-center justify-center">{icon}</span>
       {label}
     </Button>
   );
