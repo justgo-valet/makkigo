@@ -1,7 +1,12 @@
-import type { NextConfig } from 'next'
+import { fileURLToPath } from "node:url";
+
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@makkigo/ui'],
-}
+  agentRules: false,
+  output: "standalone",
+  outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
+  transpilePackages: ["@makkigo/ui", "@makkigo/api-client", "@makkigo/auth", "database"],
+};
 
-export default nextConfig
+export default nextConfig;

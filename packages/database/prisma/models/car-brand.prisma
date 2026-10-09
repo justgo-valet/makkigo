@@ -1,0 +1,9 @@
+model CarBrand {
+    id        Int        @id @default(autoincrement())
+    name      String     @unique
+    logoUrl   String     @map("logo_url")
+    carModels CarModel[]
+    vehicles  Vehicle[]
+
+    @@map("car_brands")
+}

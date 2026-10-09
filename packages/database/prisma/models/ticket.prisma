@@ -1,0 +1,25 @@
+model Ticket {
+    id         Int       @id @default(autoincrement())
+    merchantId Int       @map("merchant_id")
+    createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+    merchant Merchant        @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+    versions TicketVersion[]
+
+    @@index([merchantId])
+    @@map("tickets")
+}
+
+model TicketVersion {
+    id        Int      @id @default(autoincrement())
+    ticketId  Int      @map("ticket_id")
+    design    Json
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    ticket        Ticket         @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+    valetSessions ValetSession[]
+
+    @@index([ticketId, createdAt])
+    @@map("ticket_versions")
+}

@@ -1,0 +1,84 @@
+model Booth {
+    id            Int       @id @default(autoincrement())
+    name          String
+    address       String
+    addressDetail String?   @map("address_detail")
+    creatorId     Int       @map("creator_id")
+    createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+    deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+    creator       Staff              @relation("BoothCreator", fields: [creatorId], references: [id])
+    photos        BoothPhoto[]
+    agents        BoothAgent[]
+    feePolicies   BoothFeePolicy[]
+    bankAccounts  BoothBankAccount[]
+    merchants     BoothMerchant[]
+    valetSessions ValetSession[]
+
+    @@index([name])
+    @@map("booths")
+}
+
+model BoothPhoto {
+    id        Int      @id @default(autoincrement())
+    boothId   Int      @map("booth_id")
+    path      String
+    sortOrder Int      @map("sort_order")
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    booth Booth @relation(fields: [boothId], references: [id], onDelete: Cascade)
+
+    @@index([boothId, sortOrder])
+    @@map("booth_photos")
+}
+
+model BoothAgent {
+    id                   Int              @id @default(autoincrement())
+    boothId              Int              @map("booth_id")
+    staffId              Int              @map("staff_id")
+    status               BoothAgentStatus @default(REQUESTED)
+    workStartTime        DateTime?        @map("work_start_time") @db.Time(0)
+    workEndTime          DateTime?        @map("work_end_time") @db.Time(0)
+    notificationsEnabled Boolean          @default(true) @map("notifications_enabled")
+    createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+    booth Booth @relation(fields: [boothId], references: [id], onDelete: Cascade)
+    staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+    @@unique([boothId, staffId])
+    @@index([staffId, status])
+    @@map("booth_agents")
+}
+
+model BoothFeePolicy {
+    id               Int      @id @default(autoincrement())
+    boothId          Int      @map("booth_id")
+    baseMinutes      Int      @map("base_minutes")
+    baseFee          Int      @map("base_fee")
+    extraUnitMinutes Int      @map("extra_unit_minutes")
+    extraUnitFee     Int      @map("extra_unit_fee")
+    effectiveFrom    DateTime @default(now()) @map("effective_from") @db.Timestamptz(3)
+    createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    booth Booth @relation(fields: [boothId], references: [id], onDelete: Cascade)
+
+    @@index([boothId, effectiveFrom])
+    @@map("booth_fee_policies")
+}
+
+model BoothBankAccount {
+    id            Int      @id @default(autoincrement())
+    boothId       Int      @map("booth_id")
+    bankName      String   @map("bank_name")
+    accountNumber String   @map("account_number")
+    accountHolder String   @map("account_holder")
+    effectiveFrom DateTime @default(now()) @map("effective_from") @db.Timestamptz(3)
+    createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    booth Booth @relation(fields: [boothId], references: [id], onDelete: Cascade)
+
+    @@index([boothId, effectiveFrom])
+    @@map("booth_bank_accounts")
+}

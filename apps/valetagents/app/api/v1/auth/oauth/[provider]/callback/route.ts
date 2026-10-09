@@ -1,0 +1,92 @@
+import {
+  AuthConfigError,
+  completeStaffOAuth,
+  createStaffLoginCode,
+  parseSocialProvider,
+  readStaffOAuthState,
+  SocialAuthError,
+} from "@makkigo/auth";
+import { NextResponse } from "next/server";
+
+import { createAppRedirectPage } from "@/server/auth/appRedirectPage";
+import { clearOAuthCsrfCookie, getOAuthCsrfCookie } from "@/server/auth/oauthCookies";
+import { getAppCallbackUrl, getLoginErrorUrl, getOAuthRedirectUri, toPublicUrl } from "@/server/auth/oauthUrls";
+
+import type { OAuthState } from "@makkigo/auth";
+import type { LoginError } from "@/server/auth/oauthUrls";
+import type { NextRequest } from "next/server";
+
+const CANCEL_ERRORS = new Set(["access_denied", "user_cancelled_authorize", "user_cancelled"]);
+
+const readCallbackParams = async (request: NextRequest) => {
+  const params = request.method === "POST"
+    ? new URLSearchParams(
+        [...(await request.formData()).entries()].filter(
+          (entry): entry is [string, string] => typeof entry[1] === "string",
+        ),
+      )
+    : request.nextUrl.searchParams;
+  return {
+    code: params.get("code"),
+    idToken: params.get("id_token"),
+    state: params.get("state"),
+    error: params.get("error"),
+  };
+};
+
+const fail = (state: OAuthState | null, error: LoginError) => {
+  const response = state?.client === "app"
+    ? createAppRedirectPage(getAppCallbackUrl({ error }))
+    : NextResponse.redirect(getLoginErrorUrl(error), 303);
+  clearOAuthCsrfCookie(response);
+  return response;
+};
+
+const handleCallback = async (
+  request: NextRequest,
+  { params }: { params: Promise<{ provider: string }> },
+) => {
+  const provider = parseSocialProvider((await params).provider);
+  const callback = await readCallbackParams(request);
+  if (!provider) return fail(null, "failed");
+
+  const state = await readStaffOAuthState({
+    provider,
+    state: callback.state,
+    csrf: getOAuthCsrfCookie(request),
+  });
+  if (!state || !callback.state) return fail(null, "failed");
+  if (callback.error) return fail(state, CANCEL_ERRORS.has(callback.error) ? "cancelled" : "failed");
+
+  try {
+    const { staffId } = await completeStaffOAuth({
+      provider,
+      params: { code: callback.code, idToken: callback.idToken },
+      state: callback.state,
+      nonce: state.nonce,
+      redirectUri: getOAuthRedirectUri(provider),
+    });
+    if (!state.appChallenge) return fail(state, "failed");
+
+    const code = await createStaffLoginCode(staffId, state.appChallenge);
+    if (state.client === "app") {
+      const response = createAppRedirectPage(getAppCallbackUrl({ code }));
+      clearOAuthCsrfCookie(response);
+      return response;
+    }
+
+    const response = NextResponse.redirect(
+      toPublicUrl(`/api/v1/auth/oauth/exchange?${new URLSearchParams({ code })}`),
+      303,
+    );
+    clearOAuthCsrfCookie(response);
+    return response;
+  } catch (error) {
+    if (error instanceof SocialAuthError) console.warn("Staff social login rejected", error.message);
+    else if (error instanceof AuthConfigError) console.error("Auth configuration error", error.message);
+    else console.error("Failed to complete staff social login", error);
+    return fail(state, "failed");
+  }
+};
+
+export { handleCallback as GET, handleCallback as POST };

@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: makkigo-postgres
+    restart: unless-stopped
+    env_file:
+      - .env.development # 개발 환경의 환경 변수 파일을 사용합니다. 변경이 필요하면 다른 환경 파일로 교체할 수 있습니다.
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  db-setup:
+    image: node:22-alpine
+    container_name: makkigo-db-setup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env.development
+    working_dir: /app/packages/database
+    volumes:
+      - ./packages/database:/app/packages/database
+      - ./.env.development:/app/.env.development:ro
+      - /app/packages/database/node_modules # 호스트(macOS)의 node_modules 대신 컨테이너 전용 node_modules를 사용합니다.
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        export DATABASE_URL="postgresql://$${POSTGRES_USER}:$${POSTGRES_PASSWORD}@postgres:5432/$${POSTGRES_DB}"
+        npm install --no-package-lock --no-audit --no-fund
+        npx prisma migrate deploy
+        npx prisma db execute --file prisma/init/init.sql
+    restart: "no"
+
+volumes:
+  postgres_data:

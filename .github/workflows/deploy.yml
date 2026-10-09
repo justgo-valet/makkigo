@@ -1,0 +1,76 @@
+name: 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 배포할 이미지 태그 (예 sha-3d2b1a9, 1.0.0). 비우면 이 커밋을 새로 빌드
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  AWS_REGION: ap-northeast-2
+  IMAGE_PREFIX: ghcr.io/justgo-valet/makkigo
+
+jobs:
+  build:
+    name: 이미지 빌드 (${{ matrix.target }})
+    if: ${{ github.event_name == 'push' || inputs.image_tag == '' }}
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        target: [users, valetagents, migrate]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 태그 계산
+        id: tag
+        run: echo "value=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}-${{ matrix.target }}:${{ steps.tag.outputs.value }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+
+  deploy:
+    name: EC2 배포
+    needs: build
+    if: ${{ always() && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 태그 결정
+        id: tag
+        env:
+          INPUT_TAG: ${{ inputs.image_tag }}
+        run: echo "value=${INPUT_TAG:-sha-${GITHUB_SHA::7}}" >> "$GITHUB_OUTPUT"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: SSM 명령으로 배포
+        env:
+          IMAGE_TAG: ${{ steps.tag.outputs.value }}
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+        run: .github/scripts/ssm-deploy.sh

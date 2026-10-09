@@ -1,0 +1,77 @@
+name: makkigo
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      USERS_DOMAIN: ${USERS_DOMAIN:-app.makkigo.com}
+      VALET_DOMAIN: ${VALET_DOMAIN:-valet.makkigo.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      users:
+        condition: service_healthy
+      valetagents:
+        condition: service_healthy
+    logging: *logging
+
+  users:
+    image: ghcr.io/justgo-valet/makkigo-users:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
+    restart: unless-stopped
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/users.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  valetagents:
+    image: ghcr.io/justgo-valet/makkigo-valetagents:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
+    restart: unless-stopped
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/valetagents.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    logging: *logging
+
+  migrate:
+    image: ghcr.io/justgo-valet/makkigo-migrate:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
+    profiles: ["migrate"]
+    restart: "no"
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/users.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
