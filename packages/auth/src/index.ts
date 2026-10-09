@@ -16,6 +16,12 @@ export {
 export { getActiveUserIdFromAccessToken } from "./user-session";
 export { refreshUserTokens } from "./user-token-refresh";
 export { issueUserTokens } from "./user-tokens";
+export { consumeStaffLoginCode, createStaffLoginCode } from "./staff-login-code";
+export { revokeStaffRefreshToken } from "./staff-logout";
+export { completeStaffOAuth, readStaffOAuthState, startStaffOAuth } from "./staff-oauth";
+export { getActiveStaffIdFromAccessToken } from "./staff-session";
+export { refreshStaffTokens } from "./staff-token-refresh";
+export { issueStaffTokens } from "./staff-tokens";
 
 export type { OAuthCallbackParams, SocialIdentity } from "./oauth";
 export type { OAuthClient, OAuthState } from "./oauth/state";
