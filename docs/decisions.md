@@ -78,3 +78,4 @@
 | 2026-10-08 | 차량 모델 182개를 `init.sql` 에 추가. 이름은 단어면 한국어 표기(avante → 아반떼), 영문 · 숫자 코드면 공식 표기(x5 → X5, e-tron-gt → e-tron GT) | 국내 판매명 기준 | 대화 |
 | 2026-10-09 | 운영 이미지는 **`linux/arm64`** 로, GitHub **ARM 빌드 서버 `ubuntu-24.04-arm`** 에서 빌드 → [deployment.md](architecture/deployment.md#구성) | EC2 가 ARM(aarch64)이라 x86 이미지는 실행되지 않음. 비공개 저장소도 ARM 표준 러너 사용 가능(2026-01). x86 + QEMU 에뮬레이션보다 빠름 | 대화 |
 | 2026-10-09 | 배포 역할 신뢰 조건 `sub` 를 **저장소 ID 고정 형식**(`repo:justgo-valet@318992933/makkigo@1370744926:ref:refs/heads/main`)으로 → [deployment.md](architecture/deployment.md#github-actions-secrets) | 저장소가 immutable subject 를 써서 이름 형식으로는 첫 배포가 `AssumeRoleWithWebIdentity` 거부로 실패. ID 형식은 저장소 이름이 바뀌거나 같은 이름으로 다시 만들어져도 다른 저장소가 역할을 맡지 못함 | 대화 |
+| 2026-10-09 | 온보딩 중간 단계에서 새로고침하거나 주소로 바로 들어오면 **값이 비어 있는 첫 단계로 이동**. 새로고침을 막지 않고, 입력값을 브라우저에 저장하지도 않음 | 새로고침은 확인창 정도로만 막을 수 있고 웹뷰는 OS 가 다시 로드하기도 함. 휴대폰 번호를 브라우저 저장소에 남기지 않음 | 대화 |

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { useDuplicateCheck } from "@/features/onboarding/hooks/useDuplicateCheck";
 import { useOnboarding } from "@/features/onboarding/hooks/useOnboarding";
 import { useOnboardingStep } from "@/features/onboarding/hooks/useOnboardingStep";
 import { useOnboardingSubmit } from "@/features/onboarding/hooks/useOnboardingSubmit";
-import { onboardingFlow } from "@/features/onboarding/onboardingFlow";
+import { findFirstIncompleteStep, onboardingFlow } from "@/features/onboarding/onboardingFlow";
 import { useMe } from "@/features/user/hooks/useMe";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
@@ -30,6 +30,12 @@ const useOnboardingContent = () => {
   const step = onboardingFlow[onboardingStep];
   const isBusy = isSubmitting || isChecking;
   const isSubmitStep = buttonType === "SUBMIT";
+
+  useEffect(() => {
+    const incompleteStep = findFirstIncompleteStep(form.getValues(), onboardingStep);
+
+    if (incompleteStep) handleMoveToStep(incompleteStep);
+  }, [form, onboardingStep, handleMoveToStep]);
 
   // 현재 단계 입력 검증 → (마지막 단계면 저장, 아니면 중복 확인 후 다음 단계)
   const goForward = async () => {

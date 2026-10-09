@@ -1,3 +1,5 @@
+import { ONBOARDING_STEPS } from "./onboardingSteps";
+
 import type { OnboardingStep } from "./onboardingSteps";
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 
@@ -27,4 +29,9 @@ const onboardingFlow = {
   },
 } satisfies Record<OnboardingStep, OnboardingStepDefinition>;
 
-export { onboardingFlow, DEFAULT_FORM_VALUES };
+const findFirstIncompleteStep = (values: OnboardingFormValues, currentStep: OnboardingStep) =>
+  ONBOARDING_STEPS.slice(0, ONBOARDING_STEPS.indexOf(currentStep)).find((step) =>
+    onboardingFlow[step].fields.some((field) => !values[field].trim()),
+  );
+
+export { onboardingFlow, DEFAULT_FORM_VALUES, findFirstIncompleteStep };
