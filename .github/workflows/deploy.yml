@@ -27,7 +27,7 @@ jobs:
   build:
     name: 이미지 빌드 (${{ matrix.target }})
     if: ${{ github.event_name == 'push' || inputs.image_tag == '' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
         target: [users, valetagents, migrate]
@@ -46,6 +46,7 @@ jobs:
         with:
           context: .
           target: ${{ matrix.target }}
+          platforms: linux/arm64
           push: true
           tags: ${{ env.IMAGE_PREFIX }}-${{ matrix.target }}:${{ steps.tag.outputs.value }}
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}

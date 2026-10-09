@@ -3,6 +3,7 @@
 ## 구성
 
 - AWS **EC2 1대**, 서울 리전(`ap-northeast-2`). **운영 서버만** 둡니다 (개발 서버 없음).
+- 서버 CPU 는 **ARM(aarch64, Graviton)**, OS 는 Ubuntu 26.04. 그래서 이미지는 GitHub 의 **ARM 빌드 서버(`ubuntu-24.04-arm`)** 에서 `linux/arm64` 로 빌드합니다
 - 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), PostgreSQL. 직접 운영합니다.
 - DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
 - 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com` (가비아 DNS A 레코드 → EC2 탄력적 IP). 루트 `makkigo.com` 은 비워 둠
