@@ -108,9 +108,9 @@ export default function GuestVehicleStatus() {
             </section>
 
             {guest.requestedExit && (
-              <p role="status" className="mt-5 text-center text-sm font-medium text-primary">
+              <output className="mt-5 text-center text-sm font-medium text-primary">
                 출차 요청이 접수되었어요
-              </p>
+              </output>
             )}
 
             <Button
