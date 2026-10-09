@@ -69,6 +69,8 @@
 파일이 아니라 저장소 Settings → Secrets and variables → Actions 에 등록합니다. **운영 비밀값은 두지 않고 배포에 필요한 값만** 둡니다.
 Actions 는 AWS 접속 키 없이 **OIDC** 로 IAM 역할을 맡고, **SSM 명령 실행(Run Command)** 으로 EC2 에 배포합니다. SSH 포트를 열지 않습니다.
 
+배포용 역할의 신뢰 조건(`sub`)은 저장소 이름이 아니라 **ID 가 들어간 고정 형식**입니다: `repo:justgo-valet@318992933/makkigo@1370744926:ref:refs/heads/main`. 이 저장소는 GitHub 의 immutable subject 를 쓰므로 `repo:justgo-valet/makkigo:...` 로는 역할을 맡지 못합니다. 형식은 `gh api repos/justgo-valet/makkigo/actions/oidc/customization/sub` 의 `sub_claim_prefix` 로 확인합니다.
+
 | 이름 | 값 |
 |---|---|
 | `AWS_DEPLOY_ROLE_ARN` | Actions 가 맡을 IAM 역할 ARN |
