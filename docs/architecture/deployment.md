@@ -51,6 +51,7 @@
 | `/makkigo/prod/users/DATABASE_URL` | `postgresql://<사용자>:<비밀번호>@postgres:5432/<DB이름>` — 호스트는 `localhost` 가 아니라 DB 컨테이너 이름 `postgres` |
 | `/makkigo/prod/users/AUTH_JWT_SECRET` | |
 | `/makkigo/prod/users/PUBLIC_URL` | `https://app.makkigo.com` |
+| `/makkigo/prod/users/IMAGE_BASE_URL` | `https://d2lnojrmgxqgrc.cloudfront.net` (이미지 CDN, 비밀값 아님) |
 | `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수) |
 | `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |

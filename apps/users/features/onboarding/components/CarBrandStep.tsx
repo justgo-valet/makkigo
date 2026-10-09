@@ -1,11 +1,11 @@
-import { Field, FieldLabel, Input } from "@makkigo/ui";
+import { Field, FieldDescription, FieldLabel, Input } from "@makkigo/ui";
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
 import Image from "next/image";
 
-import { carBrandLogoRegistry } from "@/features/car/carBrandLogoRegistry";
 import { useStaggeredReveal } from "@/hooks/useStaggeredReveal";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
+import type { CarBrandsResponse } from "@/libs/car/contracts/carBrands";
 import type { ChangeEventHandler, FocusEventHandler } from "react";
 import type { ControllerRenderProps, FieldError } from "react-hook-form";
 
@@ -14,6 +14,8 @@ const CARD_ENTER_CLASS_NAME =
 const CARD_STAGGER_MS = 30;
 
 interface CarBrandStepProps {
+  carBrands: CarBrandsResponse;
+  carBrandsStatus: "pending" | "error" | "success";
   field: ControllerRenderProps<OnboardingFormValues, "carBrand">;
   error?: FieldError;
   isCustomBrand: boolean;
@@ -23,6 +25,8 @@ interface CarBrandStepProps {
 }
 
 export default function CarBrandStep({
+  carBrands,
+  carBrandsStatus,
   field,
   error,
   isCustomBrand,
@@ -30,8 +34,11 @@ export default function CarBrandStep({
   onCustomBrandChange,
   onCustomBrandFocus,
 }: Readonly<CarBrandStepProps>) {
-  const { rootRef, revealDelays } = useStaggeredReveal<HTMLDivElement>(CARD_STAGGER_MS);
-  const customBrandIndex = carBrandLogoRegistry.length;
+  const customBrandIndex = carBrands.length;
+  const { rootRef, revealDelays } = useStaggeredReveal<HTMLDivElement>(
+    CARD_STAGGER_MS,
+    customBrandIndex,
+  );
 
   // 보이기 전에는 첫 프레임에서 멈춰 숨겨 두고, 보이는 순간 지연 후 재생한다.
   const getRevealClassName = (index: number) =>
@@ -45,12 +52,15 @@ export default function CarBrandStep({
       <FieldLabel htmlFor="car-brand" className="text-xl font-bold text-(--base-color)">
         어떤 차량인가요?
       </FieldLabel>
+      {carBrandsStatus === "error" && (
+        <FieldDescription>브랜드 목록을 불러오지 못했어요. 직접 입력해주세요.</FieldDescription>
+      )}
       <div className="relative flex-1 min-h-0 mt-2">
         <div
           ref={rootRef}
           className="grid h-full grid-cols-3 gap-3 overflow-y-auto overscroll-contain pt-2 pb-12 scrollbar-none [&::-webkit-scrollbar]:hidden"
         >
-          {carBrandLogoRegistry.map((carBrand, index) => (
+          {carBrands.map((carBrand, index) => (
             <Card
               key={carBrand.name}
               data-reveal-index={index}
@@ -71,11 +81,11 @@ export default function CarBrandStep({
                 <CardContent className="flex flex-col items-center justify-center gap-3 p-0">
                   <div className="relative h-11 w-16">
                     <Image
-                      src={carBrand.logoSrc}
+                      src={carBrand.logoUrl}
                       alt=""
                       aria-hidden
                       fill
-                      sizes="64px"
+                      unoptimized
                       className="object-contain"
                     />
                   </div>

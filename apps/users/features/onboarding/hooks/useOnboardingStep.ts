@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 
 import { getCarModels } from "@/features/car/apis/getCarModels";
-import { carBrandLogoRegistry } from "@/features/car/carBrandLogoRegistry";
+import { useCarBrands } from "@/features/car/hooks/useCarBrands";
 import { formatPhoneNumber } from "@/libs/common/format/phoneNumber";
 
 import type { OnboardingStep } from "@/features/onboarding/onboardingSteps";
@@ -23,7 +23,8 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
     enabled: onboardingStep === "CAR_MODEL" && Boolean(selectedCarBrand.trim()),
     retry: false,
   });
-  const isCustomBrand = !carBrandLogoRegistry.some((brand) => brand.name === carBrand.field.value);
+  const { carBrands, status: carBrandsStatus } = useCarBrands();
+  const isCustomBrand = !carBrands.some((brand) => brand.name === carBrand.field.value);
   const isCustomModel = !carModels.includes(carModel.field.value);
 
   const changeCarBrand = useCallback(
@@ -66,6 +67,8 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
       onChange: handlePhoneNumberChange,
     },
     carBrand: {
+      carBrands,
+      carBrandsStatus,
       field: carBrand.field,
       error: form.formState.errors.carBrand,
       isCustomBrand,
