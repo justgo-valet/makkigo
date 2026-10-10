@@ -54,7 +54,7 @@ export default function BoothSearch({
       <div className="relative z-10 h-14" onBlur={combobox.handleBlur}>
         <div
           className={cn(
-            "absolute inset-x-0 top-0 overflow-hidden rounded-3xl border border-[#d8d8d8] bg-white",
+            "absolute inset-x-0 top-0 overflow-hidden rounded-lg border border-[#d8d8d8] bg-white",
             combobox.expanded && "shadow-[2px_-1px_16px_rgba(0,0,0,0.2)]",
           )}
         >
@@ -153,7 +153,7 @@ export default function BoothSearch({
           <OnboardingLinks
             canReturnToPending={canReturnToPending}
             onShowPending={onShowPending}
-            className="mt-auto flex-col gap-3 pt-8 pb-[25px] text-xl"
+            className="mt-auto flex-col gap-3 pt-8 pb-[25px] text-base"
           />
         </>
       )}

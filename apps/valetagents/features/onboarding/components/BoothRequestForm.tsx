@@ -126,7 +126,7 @@ export default function BoothRequestForm({
         <OnboardingLinks
           canReturnToPending={canReturnToPending}
           onShowPending={onShowPending}
-          className="mt-[15px] text-base"
+          className="mt-[15px] text-sm"
         />
       </div>
 
