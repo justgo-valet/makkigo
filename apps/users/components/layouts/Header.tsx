@@ -42,8 +42,13 @@ export default function Header() {
                 : ""
           }
         >
-          {/* TODO: 로고 확정 시 변경 */}
-          <span className="text-xl font-bold tracking-tight text-(--primary-color)">MAKKIGO</span>
+          <Image
+            src="/images/brand/makkigo_logo.svg"
+            alt="마끼고"
+            width={95}
+            height={39}
+            priority
+          />
         </div>
       )}
 
