@@ -1,11 +1,8 @@
 import "server-only";
 
-import { prisma } from "database";
+import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
 
 export const getPathAfterLogin = async (staffId: number) => {
-  const staff = await prisma.staff.findUniqueOrThrow({
-    where: { id: staffId },
-    select: { role: true },
-  });
-  return staff.role ? "/" : "/onboarding";
+  const onboarding = await getStaffOnboardingState(staffId);
+  return onboarding?.nextPath ?? "/onboarding";
 };

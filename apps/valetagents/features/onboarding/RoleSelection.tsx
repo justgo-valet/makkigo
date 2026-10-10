@@ -24,7 +24,7 @@ export default function RoleSelection() {
         body: JSON.stringify({ role }),
       });
       if (!response.ok) throw new Error("onboarding failed");
-      router.replace("/");
+      router.replace("/onboarding");
       router.refresh();
     } catch {
       setError("역할을 저장하지 못했어요. 다시 시도해주세요.");
