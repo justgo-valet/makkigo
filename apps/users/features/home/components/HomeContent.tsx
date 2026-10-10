@@ -8,10 +8,14 @@ import HomeActionItem from "@/features/home/components/HomeActionItem";
 import ValetStatusHeader from "@/features/home/components/ValetStatusHeader";
 import { useHome } from "@/features/home/hooks/useHome";
 import { useHomeHeader } from "@/features/home/hooks/useHomeHeader";
+import ArrivalConfirmSheet from "@/features/merchant/components/ArrivalConfirmSheet";
+import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSheet";
+import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
 
 export default function HomeContent() {
   useHomeHeader();
   const home = useHome();
+  const merchantSearch = useMerchantSearchFlow();
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none [&::-webkit-scrollbar]:hidden">
@@ -42,9 +46,25 @@ export default function HomeContent() {
           발렛 티켓 보러가기
         </Button>
         {home.actions.map((action) => (
-          <HomeActionItem key={action.key} action={action} />
+          <HomeActionItem
+            key={action.key}
+            action={action}
+            onClick={action.key === "MERCHANT_SEARCH" ? merchantSearch.open : undefined}
+          />
         ))}
       </div>
+
+      <MerchantSearchSheet
+        open={merchantSearch.isSearchOpen}
+        onClose={merchantSearch.close}
+        onSelect={merchantSearch.pickMerchant}
+      />
+      <ArrivalConfirmSheet
+        open={merchantSearch.isArrivalOpen}
+        merchantName={merchantSearch.pickedMerchant?.name ?? null}
+        onSend={merchantSearch.sendArrival}
+        onClose={merchantSearch.close}
+      />
     </div>
   );
 }
