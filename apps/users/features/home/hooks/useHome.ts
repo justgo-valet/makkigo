@@ -9,6 +9,7 @@ import {
   formatWon,
 } from "@/features/home/homeFormat";
 import { getHomePreview, PREVIEW_PARAM } from "@/features/home/homePreview";
+import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
 
 import type { HomePreview, HomeStatus } from "@/features/home/homePreview";
 
@@ -28,6 +29,8 @@ interface ExitSummary {
   canSeeFeeDetail: boolean;
   accountNumber: string | null;
 }
+
+const BEFORE_SESSION_STATUSES = new Set<HomeStatus>(["NONE", "MERCHANT_SELECTED"]);
 
 const MINUTE_MS = 60 * 1000;
 const COPIED_RESET_MS = 2000;
@@ -103,7 +106,15 @@ const getExitSummary = (preview: HomePreview, now: number): ExitSummary | null =
 
 const useHome = () => {
   const searchParams = useSearchParams();
-  const preview = getHomePreview(searchParams.get(PREVIEW_PARAM));
+  const basePreview = getHomePreview(searchParams.get(PREVIEW_PARAM));
+  const selectedMerchant = useSelectedMerchantValue();
+  const preview: HomePreview = BEFORE_SESSION_STATUSES.has(basePreview.status)
+    ? {
+        ...basePreview,
+        status: selectedMerchant ? "MERCHANT_SELECTED" : "NONE",
+        merchantName: selectedMerchant?.name ?? null,
+      }
+    : basePreview;
   const [now] = useState(() => Date.now());
   const [isAccountCopied, setIsAccountCopied] = useState(false);
 

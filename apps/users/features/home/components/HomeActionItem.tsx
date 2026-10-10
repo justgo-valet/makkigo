@@ -5,12 +5,15 @@ import type { HomeAction } from "@/features/home/homeActions";
 
 interface HomeActionItemProps {
   action: HomeAction;
+  onClick?: () => void;
 }
 
-export default function HomeActionItem({ action }: Readonly<HomeActionItemProps>) {
+export default function HomeActionItem({ action, onClick }: Readonly<HomeActionItemProps>) {
   return (
     <Button
+      type="button"
       variant="outline"
+      onClick={onClick}
       className="h-auto w-full justify-between gap-4 rounded-xl px-4 py-4 shadow-none"
     >
       <span className="flex items-center gap-4">
