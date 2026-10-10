@@ -1,9 +1,12 @@
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
-import { Button } from "@makkigo/ui";
 import Image from "next/image";
 
-import type { SocialLoginProvider } from "@/features/auth/socialLoginProviders";
+import { appleLogo, googleLogo, kakaoSymbol, naverLogo } from "../../../assets";
+import { Button } from "../../ui/button";
+
 import type { ReactNode } from "react";
+
+type SocialLoginProvider = "kakao" | "google" | "apple" | "naver";
 
 interface SocialLoginButtonProps {
   provider: SocialLoginProvider;
@@ -16,12 +19,12 @@ const BUTTONS: Record<SocialLoginProvider, { label: string; className: string; i
     kakao: {
       label: "카카오로 계속하기",
       className: "bg-[#FBE200] text-[#333333] hover:bg-[#FBE200] hover:text-[#333333]",
-      icon: <Image src="/images/login/kakao_symbol.svg" alt="" width={18} height={18} />,
+      icon: <Image src={kakaoSymbol} alt="" width={18} height={18} />,
     },
     naver: {
       label: "네이버로 계속하기",
       className: "bg-[#1BC500] text-white hover:bg-[#1BC500] hover:text-white",
-      icon: <Image src="/images/login/naver_logo.png" alt="" width={18} height={18} />,
+      icon: <Image src={naverLogo} alt="" width={18} height={18} />,
     },
     google: {
       label: "Google로 계속하기",
@@ -30,7 +33,7 @@ const BUTTONS: Record<SocialLoginProvider, { label: string; className: string; i
       icon: (
         <span className="relative size-5 overflow-hidden">
           <Image
-            src="/images/login/google_logo_square.png"
+            src={googleLogo}
             alt=""
             width={160}
             height={160}
@@ -42,15 +45,11 @@ const BUTTONS: Record<SocialLoginProvider, { label: string; className: string; i
     apple: {
       label: "Apple로 계속하기",
       className: "bg-black text-white hover:bg-black hover:text-white",
-      icon: <Image src="/images/login/apple_logo_white.png" alt="" width={19} height={24} />,
+      icon: <Image src={appleLogo} alt="" width={19} height={24} />,
     },
   };
 
-export default function SocialLoginButton({
-  provider,
-  disabled,
-  onClick,
-}: Readonly<SocialLoginButtonProps>) {
+function SocialLoginButton({ provider, disabled, onClick }: Readonly<SocialLoginButtonProps>) {
   const { label, className, icon } = BUTTONS[provider];
 
   return (
@@ -65,3 +64,6 @@ export default function SocialLoginButton({
     </Button>
   );
 }
+
+export { SocialLoginButton };
+export type { SocialLoginProvider };

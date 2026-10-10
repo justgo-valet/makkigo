@@ -2,7 +2,7 @@ import { Ubuntu } from "next/font/google";
 
 import './globals.css';
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 const ubuntu = Ubuntu({
@@ -14,6 +14,12 @@ const ubuntu = Ubuntu({
 export const metadata: Metadata = {
   title: 'Valet Agents',
   description: 'Makkigo 발렛 에이전트 애플리케이션',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
