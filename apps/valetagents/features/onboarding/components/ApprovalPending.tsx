@@ -2,7 +2,13 @@
 
 import { Button, FieldError, cn } from "@makkigo/ui";
 
-import { REQUEST_STATUS_LABELS, formatFeePolicy, formatWorkTime } from "../formatters";
+import {
+  REQUEST_STATUS_LABELS,
+  formatAddress,
+  formatFeePolicy,
+  formatWorkTime,
+  getRequestActionLabel,
+} from "../formatters";
 
 import type { AgentRequestSummary } from "../schemas/onboarding";
 
@@ -47,9 +53,7 @@ export default function ApprovalPending({
                 <h2 className="truncate text-lg leading-6 font-medium text-(--base-color)">
                   {request.booth.name}
                 </h2>
-                <p className="text-xs leading-6 text-[#717171]">
-                  {[request.booth.address, request.booth.addressDetail].filter(Boolean).join(" ")}
-                </p>
+                <p className="text-xs leading-6 text-[#717171]">{formatAddress(request.booth)}</p>
               </div>
               <span
                 className={cn(
@@ -77,7 +81,7 @@ export default function ApprovalPending({
                 className="mt-4 h-12 w-full rounded-[6px] border-[#d8d8d8] text-base font-medium text-(--base-color) shadow-none"
                 onClick={() => onEdit(request)}
               >
-                {request.status === "REJECTED" ? "다시 요청하기" : "요청 내용 수정"}
+                {getRequestActionLabel(request.status)}
               </Button>
             )}
           </li>
