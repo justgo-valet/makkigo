@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { createAppLoginSession } from "@/features/auth/apis/createAppLoginSession";
 import { isInApp, openAppAuthSession } from "@/features/auth/appBridge";
@@ -18,6 +18,15 @@ const useSocialLogin = (error: LoginError | null) => {
     () => null,
   );
   const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setIsRedirecting(false);
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
   const {
     mutate: startAppLogin,
     isPending: isStartingAppLogin,

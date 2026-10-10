@@ -3,6 +3,7 @@ set -euo pipefail
 
 REGION="${AWS_REGION:-ap-northeast-2}"
 REPO="${GITHUB_REPO:-justgo-valet/makkigo}"
+OIDC_SUB_PREFIX="${OIDC_SUB_PREFIX:-repo:justgo-valet@318992933/makkigo@1370744926}"
 INSTANCE_ID="${EC2_INSTANCE_ID:?EC2_INSTANCE_ID 가 필요합니다 (예: i-0b8a5131b7af49a02)}"
 DEPLOY_ROLE="${DEPLOY_ROLE:-makkigo-github-deploy}"
 EC2_ROLE="${EC2_ROLE:-makkigo-prod-ec2}"
@@ -37,7 +38,7 @@ cat >/tmp/deploy-trust.json <<JSON
     "Condition": {
       "StringEquals": {
         "${OIDC_HOST}:aud": "sts.amazonaws.com",
-        "${OIDC_HOST}:sub": "repo:${REPO}:ref:refs/heads/main"
+        "${OIDC_HOST}:sub": "${OIDC_SUB_PREFIX}:ref:refs/heads/main"
       }
     }
   }]

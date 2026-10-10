@@ -34,9 +34,8 @@ const useConsent = (onAgreed: () => void) => {
   };
 
   const toggleItem = (type: ConsentType, checked: boolean) => {
-    field.onChange(
-      checked ? [...agreedTypes, type] : agreedTypes.filter((agreedType) => agreedType !== type),
-    );
+    const otherTypes = agreedTypes.filter((agreedType) => agreedType !== type);
+    field.onChange(checked ? [...otherTypes, type] : otherTypes);
   };
 
   const handleSubmit = form.handleSubmit((values) => {

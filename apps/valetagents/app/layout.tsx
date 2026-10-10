@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return <html lang="ko" className={ubuntu.variable}>
-    <body className="flex flex-col items-center w-screen h-screen">
+    <body className="flex flex-col items-center w-full h-screen">
       <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4">
         <section className="min-h-0 w-full flex-1">
           {children}

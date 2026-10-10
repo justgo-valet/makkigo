@@ -5,7 +5,7 @@ import QueryProvider from "@/components/providers/QueryProvider";
 
 import "./globals.css";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 const ubuntu = Ubuntu({
@@ -19,10 +19,16 @@ export const metadata: Metadata = {
   description: "Makkigo 사용자 애플리케이션",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="ko" className={ubuntu.variable}>
-      <body className="flex flex-col items-center w-screen h-screen">
+      <body className="flex flex-col items-center w-full h-screen">
         <QueryProvider>
           <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4">
             <Header />

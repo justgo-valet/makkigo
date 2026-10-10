@@ -1,11 +1,11 @@
-import { Button } from "@makkigo/ui";
+import { Suspense } from "react";
 
-export default function Home() {
+import HomeContent from "@/features/home/components/HomeContent";
+
+export default function HomePage() {
   return (
-    <main>
-      <h1>Users</h1>
-      <p>사용자 앱이 준비되었습니다.</p>
-      <Button>시작하기</Button>
-    </main>
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }

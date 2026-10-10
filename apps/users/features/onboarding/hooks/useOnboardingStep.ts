@@ -36,9 +36,10 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
   );
   const handlePhoneNumberChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
+      form.clearErrors("phoneNumber");
       phoneNumber.field.onChange(formatPhoneNumber(event.target.value));
     },
-    [phoneNumber.field],
+    [form, phoneNumber.field],
   );
   const handleCustomBrandChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => changeCarBrand(event.target.value),
@@ -57,7 +58,9 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
 
   return {
     carNumber: {
-      registration: form.register("vehicleNumber"),
+      registration: form.register("vehicleNumber", {
+        onChange: () => form.clearErrors("vehicleNumber"),
+      }),
       error: form.formState.errors.vehicleNumber,
     },
     phoneNumber: {
