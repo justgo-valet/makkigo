@@ -23,7 +23,6 @@ interface BoothRequestFormProps {
   staffId: number;
   booth: SelectedBooth;
   request: AgentRequestSummary | null;
-  notice: string | null;
   kakaoMapAppKey: string;
   canReturnToPending: boolean;
   onShowPending: () => void;
@@ -39,13 +38,12 @@ export default function BoothRequestForm({
   staffId,
   booth,
   request,
-  notice,
   kakaoMapAppKey,
   canReturnToPending,
   onShowPending,
   onSaved,
 }: Readonly<BoothRequestFormProps>) {
-  const form = useBoothRequestForm({ staffId, booth, request, notice, onSaved });
+  const form = useBoothRequestForm({ staffId, booth, request, onSaved });
   const feePolicy = booth.feePolicy;
   const pickerCopy = TIME_PICKER_COPY[form.editingField ?? "start"];
 
@@ -105,9 +103,9 @@ export default function BoothRequestForm({
       </fieldset>
 
       <div aria-live="polite">
-        {form.notice && (
+        {form.rejectedNotice && (
           <p className="mx-auto mt-5 max-w-[304px] rounded-lg bg-[rgba(129,169,218,0.2)] px-3 py-2 text-center text-xs leading-6 text-(--base-color)">
-            {form.notice}
+            {form.rejectedNotice}
           </p>
         )}
       </div>

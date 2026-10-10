@@ -3,6 +3,7 @@
 import ApprovalPending from "./ApprovalPending";
 import BoothRequestForm from "./BoothRequestForm";
 import BoothSearch from "./BoothSearch";
+import OnboardingToast from "./OnboardingToast";
 import { useOnboardingFlow } from "../hooks/useOnboardingFlow";
 
 import type { OnboardingStatusResponse } from "../schemas/onboarding";
@@ -48,7 +49,6 @@ export default function OnboardingShell({
               staffId={staffId}
               booth={flow.selection.booth}
               request={flow.selection.request}
-              notice={flow.notice}
               kakaoMapAppKey={kakaoMapAppKey}
               canReturnToPending={flow.hasRequests}
               onShowPending={flow.showPending}
@@ -57,6 +57,7 @@ export default function OnboardingShell({
           )}
         </BoothSearch>
       )}
+      <OnboardingToast toast={flow.toast} />
     </div>
   );
 }

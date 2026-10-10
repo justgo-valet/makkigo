@@ -96,9 +96,6 @@ export default function ApprovalPending({
         >
           다른 부스 요청하기
         </Button>
-        <p className="mt-[15px] text-center text-xs leading-6 text-[#717171]">
-          요청 취소 기능은 아직 제공되지 않습니다.
-        </p>
       </div>
     </div>
   );

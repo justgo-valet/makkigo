@@ -17,21 +17,16 @@ interface UseBoothRequestFormOptions {
   staffId: number;
   booth: SelectedBooth;
   request: AgentRequestSummary | null;
-  notice: string | null;
   onSaved: (result: AgentRequestResponse) => void;
 }
 
-const getStatusNotice = (booth: SelectedBooth, request: AgentRequestSummary | null) => {
-  if (request?.status === "REQUESTED") return `${booth.name}에 요원 등록을 요청했어요`;
-  if (request?.status === "REJECTED") return "등록 요청이 거절됐어요. 다시 요청할 수 있어요";
-  return null;
-};
+const getRejectedNotice = (request: AgentRequestSummary | null) =>
+  request?.status === "REJECTED" ? "등록 요청이 거절됐어요. 다시 요청할 수 있어요" : null;
 
 const useBoothRequestForm = ({
   staffId,
   booth,
   request,
-  notice,
   onSaved,
 }: UseBoothRequestFormOptions) => {
   const [workStartTime, setWorkStartTime] = useState<string | null>(request?.workStartTime ?? null);
@@ -53,8 +48,7 @@ const useBoothRequestForm = ({
     canSubmit,
     isSaving: agentRequest.isSaving,
     errorMessage: agentRequest.errorMessage,
-    // 방금 저장한 결과 안내가 있으면 그것을, 없으면 요청 상태 안내를 보여 준다.
-    notice: notice ?? getStatusNotice(booth, request),
+    rejectedNotice: getRejectedNotice(request),
     openPicker: (field: WorkTimeField) => {
       agentRequest.resetError();
       setEditingField(field);
@@ -72,5 +66,5 @@ const useBoothRequestForm = ({
   };
 };
 
-export { getStatusNotice, useBoothRequestForm };
+export { getRejectedNotice, useBoothRequestForm };
 export type { WorkTimeField };
