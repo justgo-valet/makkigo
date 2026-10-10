@@ -4,12 +4,16 @@ import { Button, FieldError, cn } from "@makkigo/ui";
 import { Checkbox } from "@makkigo/ui/components/ui/checkbox";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 
-import { useAgentReview } from "../hooks/useAgentReview";
-import { useBoothAgents } from "../hooks/useBoothAgents";
+import {
+  REGISTRATION_STATUS_LABELS,
+  formatAgentName,
+  formatWorkStatus,
+  formatWorkTime,
+} from "../formatters";
+import { useAgentManagement } from "../hooks/useAgentManagement";
 
-import type { BoothAgent, BoothAgentListResponse, BoothAgentReviewBody } from "../schemas/agents";
+import type { BoothAgentListResponse } from "../schemas/agents";
 
 interface AgentManagementProps {
   staffId: number;
@@ -17,72 +21,17 @@ interface AgentManagementProps {
   initialData: BoothAgentListResponse;
 }
 
-const STATUS_LABELS: Record<BoothAgent["status"], string> = {
-  APPROVED: "등록",
-  REQUESTED: "요청 중",
-  REJECTED: "거절",
-};
-
-const REVIEW_NOTICES: Record<BoothAgentReviewBody["status"], string> = {
-  APPROVED: "등록을 수락했어요",
-  REJECTED: "등록을 거절했어요",
-};
-
 const CHECKBOX_CLASS =
   "block size-3 rounded-[4px] border-black bg-[#f7f4f4] shadow-none data-[state=checked]:border-black data-[state=checked]:bg-[#6676de] [&_svg]:hidden";
 const HEADER_CELL_CLASS = "border-b border-black pt-0.5 align-top font-medium";
 const BODY_CELL_CLASS = "border-b border-[#c2c2c2]";
-
-const formatWorkTime = ({ workStartTime, workEndTime }: BoothAgent) =>
-  workStartTime && workEndTime ? `${workStartTime} ~ ${workEndTime}` : "미설정";
-
-const formatWorkStatus = ({ status, working }: BoothAgent) => {
-  if (status !== "APPROVED") return "-";
-  return working ? "근무 중" : "근무 외";
-};
 
 export default function AgentManagement({
   staffId,
   boothId,
   initialData,
 }: Readonly<AgentManagementProps>) {
-  const [page, setPage] = useState(initialData.page);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [notice, setNotice] = useState<string | null>(null);
-  const list = useBoothAgents({ staffId, boothId, page, initialData });
-  const review = useAgentReview({
-    staffId,
-    boothId,
-    onReviewed: ({ status, agents }) => {
-      setSelectedIds([]);
-      setNotice(`${agents.length}명의 ${REVIEW_NOTICES[status]}`);
-    },
-  });
-
-  const selectedAgents = list.agents.filter(({ id }) => selectedIds.includes(id));
-  const allSelected = list.agents.length > 0 && selectedAgents.length === list.agents.length;
-  // 등록된 요원은 거절할 수 없고, 다시 수락할 것도 없다.
-  const hasApprovedSelected = selectedAgents.some(({ status }) => status === "APPROVED");
-  const onlyApprovedSelected = selectedAgents.every(({ status }) => status === "APPROVED");
-
-  const changeSelection = (ids: number[]) => {
-    review.resetError();
-    setNotice(null);
-    setSelectedIds(ids);
-  };
-
-  const toggle = (id: number) =>
-    changeSelection(
-      selectedIds.includes(id) ? selectedIds.filter((selected) => selected !== id) : [...selectedIds, id],
-    );
-
-  const submit = (status: BoothAgentReviewBody["status"]) => {
-    setNotice(null);
-    review.review({
-      status,
-      agents: selectedAgents.map(({ id, updatedAt }) => ({ id, updatedAt })),
-    });
-  };
+  const management = useAgentManagement({ staffId, boothId, initialData });
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-[25px] pb-8">
@@ -117,11 +66,9 @@ export default function AgentManagement({
                 <Checkbox
                   aria-label="이 페이지의 요원 모두 선택"
                   className={CHECKBOX_CLASS}
-                  checked={allSelected}
-                  disabled={list.agents.length === 0}
-                  onCheckedChange={(checked) =>
-                    changeSelection(checked === true ? list.agents.map(({ id }) => id) : [])
-                  }
+                  checked={management.allSelected}
+                  disabled={management.agents.length === 0}
+                  onCheckedChange={(checked) => management.toggleAll(checked === true)}
                 />
               </th>
               <th scope="col" className={cn(HEADER_CELL_CLASS, "pl-[7px]")}>이름</th>
@@ -131,73 +78,81 @@ export default function AgentManagement({
             </tr>
           </thead>
           <tbody>
-            {list.agents.map((agent) => (
-              <tr key={agent.id} className="h-12 cursor-pointer" onClick={() => toggle(agent.id)}>
+            {management.agents.map((agent) => (
+              <tr
+                key={agent.id}
+                className="h-12 cursor-pointer"
+                onClick={() => management.toggle(agent.id)}
+              >
                 <td className="p-0">
                   <Checkbox
-                    aria-label={`${agent.name ?? "이름 없음"} 선택`}
+                    aria-label={`${formatAgentName(agent)} 선택`}
                     className={cn(CHECKBOX_CLASS, "relative top-0.5")}
-                    checked={selectedIds.includes(agent.id)}
-                    onCheckedChange={() => toggle(agent.id)}
+                    checked={management.isSelected(agent.id)}
+                    onCheckedChange={() => management.toggle(agent.id)}
                     onClick={(event) => event.stopPropagation()}
                   />
                 </td>
-                <td className={cn(BODY_CELL_CLASS, "truncate pl-[7px]")}>{agent.name ?? "이름 없음"}</td>
+                <td className={cn(BODY_CELL_CLASS, "truncate pl-[7px]")}>{formatAgentName(agent)}</td>
                 <td className={BODY_CELL_CLASS}>{formatWorkTime(agent)}</td>
                 <td className={BODY_CELL_CLASS}>{formatWorkStatus(agent)}</td>
-                <td className={BODY_CELL_CLASS}>{STATUS_LABELS[agent.status]}</td>
+                <td className={BODY_CELL_CLASS}>{REGISTRATION_STATUS_LABELS[agent.status]}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {list.errorMessage ? (
+      {management.listErrorMessage ? (
         <div className="mt-10 text-center">
-          <FieldError>{list.errorMessage}</FieldError>
-          <button type="button" className="mt-2 text-base text-[#575757] underline" onClick={() => void list.retry()}>
+          <FieldError>{management.listErrorMessage}</FieldError>
+          <button
+            type="button"
+            className="mt-2 text-base text-[#575757] underline"
+            onClick={management.retryList}
+          >
             다시 시도
           </button>
         </div>
       ) : (
-        list.agents.length === 0 && (
+        management.agents.length === 0 && (
           <p className="mt-10 text-center text-lg text-[#575757]">등록을 요청한 요원이 없어요.</p>
         )
       )}
 
       <div className="mt-auto pt-0.5">
         <div aria-live="polite">
-          {review.errorMessage && (
-            <FieldError className="mb-3 text-center">{review.errorMessage}</FieldError>
+          {management.reviewErrorMessage && (
+            <FieldError className="mb-3 text-center">{management.reviewErrorMessage}</FieldError>
           )}
-          {hasApprovedSelected && (
+          {management.rejectBlockedByApproved && (
             <p className="mb-3 text-center text-xs leading-6 text-[#717171]">
               등록된 요원은 거절할 수 없어요
             </p>
           )}
-          {notice && (
+          {management.notice && (
             <p className="mx-auto mb-3 max-w-[304px] rounded-lg bg-[rgba(129,169,218,0.2)] px-3 py-2 text-center text-xs leading-6 text-(--base-color)">
-              {notice}
+              {management.notice}
             </p>
           )}
         </div>
 
-        {selectedAgents.length > 0 && (
+        {management.hasSelection && (
           <div className="flex gap-[5px]">
             <Button
               type="button"
               variant="secondary"
               className="h-[65px] flex-1 rounded-[6px] text-lg font-medium text-white"
-              disabled={review.isReviewing || hasApprovedSelected}
-              onClick={() => submit("REJECTED")}
+              disabled={!management.canReject}
+              onClick={management.reject}
             >
               거절하기
             </Button>
             <Button
               type="button"
               className="h-[65px] flex-1 rounded-[6px] text-lg font-medium"
-              disabled={review.isReviewing || onlyApprovedSelected}
-              onClick={() => submit("APPROVED")}
+              disabled={!management.canAccept}
+              onClick={management.accept}
             >
               수락하기
             </Button>
@@ -205,19 +160,16 @@ export default function AgentManagement({
         )}
 
         <nav aria-label="페이지" className="mt-[50px] flex justify-center gap-2">
-          {Array.from({ length: list.totalPages }, (_, index) => index + 1).map((pageNumber) => (
+          {management.pages.map((pageNumber) => (
             <button
               key={pageNumber}
               type="button"
-              aria-current={pageNumber === page ? "page" : undefined}
+              aria-current={pageNumber === management.page ? "page" : undefined}
               className={cn(
                 "size-8 rounded text-lg leading-6 font-medium text-(--base-color)",
-                pageNumber === page && "bg-primary text-white",
+                pageNumber === management.page && "bg-primary text-white",
               )}
-              onClick={() => {
-                changeSelection([]);
-                setPage(pageNumber);
-              }}
+              onClick={() => management.changePage(pageNumber)}
             >
               {pageNumber}
             </button>
