@@ -19,6 +19,9 @@
 | API 목록과 각 PR, 프론트에서 API 부르는 법 | [architecture/api.md](architecture/api.md) |
 | 서버 구성, 운영 환경변수(SSM Parameter Store) 이름 규칙 · 목록 | [architecture/deployment.md](architecture/deployment.md) |
 | Flutter 앱 폴더 · 앱 ID · 웹뷰 규칙 · 스토어 조건 | [architecture/mobile.md](architecture/mobile.md) |
+| 운영 자원 목록 — AWS · 도메인 · GitHub · 외부 서비스가 어디에 무엇으로 있나 | [operations/infrastructure.md](operations/infrastructure.md) |
+| 운영 방법 — 서버 접속 · 배포 · 되돌리기 · 로그 · DB 백업 · 장애 대응 | [operations/runbook.md](operations/runbook.md) |
+| 프로젝트를 넘겨받을 때 — 읽는 순서 · 넘길 계정 · 비밀값 위치 | [handover.md](handover.md) |
 | "전에 뭐라고 정했지?" — 날짜순 결정 기록 | [decisions.md](decisions.md) |
 
 ## 우선순위
