@@ -77,5 +77,5 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 
 ## 코드로 표현 못 하는 제약
 
-- **같은 차량 번호로 진행 중인 세션은 하나만**: 부분 유니크 인덱스가 필요하지만 Prisma 스키마로 표현할 수 없어 서버 코드에서 검사합니다.
+- **같은 차량 번호로 진행 중인 세션은 하나만**: 부분 유니크 인덱스가 필요하지만 Prisma 스키마로 표현할 수 없어 서버 코드에서 검사합니다. 동시 요청을 막기 위해 세션을 만드는 트랜잭션은 **먼저 `lockPlateNumber(tx, 차량 번호)`** (`database` 패키지, PostgreSQL advisory lock) 를 걸고 진행 중 세션(`ACTIVE_VALET_SESSION_STATUSES`)을 확인합니다. 요원 앱의 차량 추가도 같은 함수를 써야 서로 막힙니다.
 - 고객 소셜 계정과 staff 소셜 계정은 테이블을 나눴습니다. 요원도 다른 곳에선 고객이라 같은 소셜 계정으로 양쪽에 가입할 수 있어야 합니다.
