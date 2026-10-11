@@ -89,3 +89,6 @@
 | 2026-10-10 | 요원 알림은 지금 **알림 내역만** 기록(채널 비움), FCM 발송은 별도 작업 | FCM 연동 미구축, 도착 알림 API 를 먼저 열기 위해 | 대화 |
 | 2026-10-10 | 같은 차량 번호의 세션 생성은 **advisory lock**(`lockPlateNumber`)으로 직렬화. 고객 도착 알림 · 요원 차량 추가가 같은 함수를 씀 | 진행 중 세션 하나 규칙을 DB 인덱스로 못 걸어 동시 요청 시 중복 생성 가능 | 대화 |
 | 2026-10-11 | 기본 글꼴 순서를 `Ubuntu → Apple SD Gothic Neo → system-ui → sans-serif` 로 (users · valetagents) | iOS 26 WebKit 에서 `system-ui` 가 한글을 못 그려 앱 웹뷰 · Safari 의 한글이 전부 네모로 깨짐. Apple SD Gothic Neo 는 iOS · macOS 기본 한글 글꼴이라 모양은 같고, 없는 Android 는 기존대로 system-ui | 대화 |
+| 2026-10-11 | 앱 푸시는 **FCM**, Firebase 프로젝트 `makkigo-3d555` 하나에 고객 · 요원 앱을 모두 등록. 애널리틱스는 끔 | 앱 둘을 한 서버 키로 보냄. 애널리틱스는 처리방침에 없는 수집 | 대화 |
+| 2026-10-11 | 푸시 토큰은 **웹을 거쳐** 등록: 웹이 `requestPushToken` → 앱이 토큰 이벤트 → 웹이 `POST /api/v1/push-devices`. 알림 권한 팝업은 **앱 푸시 동의 회원에게만** | 앱은 로그인 쿠키를 모름. 미동의 회원에게 OS 팝업을 띄우지 않기 위해 | 대화 |
+| 2026-10-11 | 발송 코드는 공용 패키지 `@makkigo/push` (`sendUserNotification`). 고객 알림(주차 완료 등)은 요원 앱 서버에서 보내기 때문. 회원 탈퇴 시 푸시 기기 삭제 | 두 앱이 같은 규칙으로 보내야 함. 탈퇴 회원에게 알림 방지 | 대화 |

@@ -1,0 +1,22 @@
+{
+  "name": "@makkigo/push",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "database": "workspace:*",
+    "firebase-admin": "^14.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "typescript": "6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
