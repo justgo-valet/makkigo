@@ -4,7 +4,6 @@ import { prisma } from "database";
 
 type BoothManagerFailure = "BOOTH_NOT_FOUND" | "BOOTH_MANAGER_REQUIRED";
 
-// 부스 관리자는 별도 계정 유형이 아니라 부스를 만든 사람이다.
 const getBoothManagerFailure = async (
   staffId: number,
   boothId: number,
