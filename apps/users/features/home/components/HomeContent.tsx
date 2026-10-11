@@ -14,7 +14,9 @@ import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSh
 import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
+import CancelArrivalSheet from "@/features/valet/components/CancelArrivalSheet";
 import LocationConsentSheet from "@/features/valet/components/LocationConsentSheet";
+import { useCancelArrivalFlow } from "@/features/valet/hooks/useCancelArrivalFlow";
 
 import type { HomeActionKey } from "@/features/home/homeActions";
 
@@ -24,8 +26,10 @@ export default function HomeContent() {
   const merchantSearch = useMerchantSearchFlow();
   const pushPermissionBanner = usePushPermissionBanner();
 
+  const cancelArrival = useCancelArrivalFlow(home.status === "ready" ? home.sessionId : null);
   const actionHandlers: Partial<Record<HomeActionKey, () => void>> = {
     ARRIVAL: merchantSearch.startArrival,
+    CANCEL_ARRIVAL: cancelArrival.open,
     MERCHANT_SEARCH: merchantSearch.open,
   };
 
@@ -95,6 +99,13 @@ export default function HomeContent() {
         errorMessage={merchantSearch.sendErrorMessage}
         onSend={merchantSearch.sendArrival}
         onClose={merchantSearch.close}
+      />
+      <CancelArrivalSheet
+        open={cancelArrival.isOpen}
+        isCancelling={cancelArrival.isCancelling}
+        errorMessage={cancelArrival.errorMessage}
+        onConfirm={cancelArrival.confirm}
+        onClose={cancelArrival.close}
       />
       <LocationConsentSheet
         open={merchantSearch.isLocationConsentOpen}
