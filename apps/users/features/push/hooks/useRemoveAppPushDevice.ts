@@ -17,4 +17,4 @@ const removeRegisteredPushDevice = async () => {
 
 const useRemoveAppPushDevice = () => useMutation({ mutationFn: removeRegisteredPushDevice });
 
-export { useRemoveAppPushDevice };
+export { removeRegisteredPushDevice, useRemoveAppPushDevice };
