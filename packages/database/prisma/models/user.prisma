@@ -13,6 +13,7 @@ enum ConsentType {
     ALIMTALK
     AGE_14_OR_OVER
     PRIVACY_THIRD_PARTY
+    LOCATION_BASED_SERVICE
 }
 
 model User {
@@ -23,14 +24,15 @@ model User {
     deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(3)
     personalDataPurgeAt DateTime? @map("personal_data_purge_at") @db.Timestamptz(3)
 
-    socialAccounts UserSocialAccount[]
-    refreshTokens  UserRefreshToken[]
-    loginCodes     UserLoginCode[]
-    consents       UserConsent[]
-    pushDevices    PushDevice[]
-    notifications  Notification[]
-    valetSessions  ValetSession[]
-    vehicle        Vehicle?
+    socialAccounts  UserSocialAccount[]
+    refreshTokens   UserRefreshToken[]
+    loginCodes      UserLoginCode[]
+    consents        UserConsent[]
+    pushDevices     PushDevice[]
+    notifications   Notification[]
+    valetSessions   ValetSession[]
+    locationUseLogs LocationUseLog[]
+    vehicle         Vehicle?
 
     @@index([personalDataPurgeAt])
     @@map("users")
