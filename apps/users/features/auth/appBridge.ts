@@ -22,11 +22,8 @@ const toAppPushToken = (event: Event): AppPushToken | null => {
   return token && platform ? { token, platform } : null;
 };
 
-const onAppPushToken = (listener: (pushToken: AppPushToken) => void) => {
-  const handleEvent = (event: Event) => {
-    const pushToken = toAppPushToken(event);
-    if (pushToken) listener(pushToken);
-  };
+const onAppPushToken = (listener: (pushToken: AppPushToken | null) => void) => {
+  const handleEvent = (event: Event) => listener(toAppPushToken(event));
 
   window.addEventListener(PUSH_TOKEN_EVENT, handleEvent);
 

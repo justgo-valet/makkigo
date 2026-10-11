@@ -37,7 +37,7 @@
 |---|---|---|
 | 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 
-| 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform }`, 권한 거부면 `token: null`). 토큰이 바뀌면 같은 이벤트를 다시 보냄 → [푸시](#푸시) |
+| 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform }`, 권한 거부면 `token: null`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
 
 **앱은 주소를 만들지 않습니다.** 제공자 · API 경로 · 로그인 규칙은 모두 웹이 정해 메시지로 넘깁니다. 그래서 로그인 · 회원가입 변경은 서버 배포만으로 끝나고, 앱 업데이트는 이 표의 메시지 형식이나 복귀 스킴을 바꿀 때만 필요합니다.
 
@@ -50,6 +50,7 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 | 단계 | 하는 곳 |
 |---|---|
 | 앱 푸시 동의한 회원이 로그인하면 웹이 `requestPushToken` 을 보냄 → 그때 OS 알림 권한 팝업 | 웹 `useAppPushRegistration` (`MemberGate`) |
+| 앱이 다시 화면에 나오면(홈 · 설정 앱에서 복귀) 현재 권한을 확인해 토큰 이벤트를 다시 보냄. `token: null`(설정에서 알림 끔)이면 웹이 이 기기 등록을 지움 → 다음 알림부터 알림톡 대상 | 앱 `didChangeAppLifecycleState`, 웹 `useAppPushRegistration` |
 | 받은 토큰을 `POST /api/v1/push-devices` 로 등록, 로그아웃 때 `DELETE` | 웹 (등록한 토큰은 기기 `localStorage` 에 기억) |
 | 발송: 앱 푸시 동의 확인 → 기기 토큰으로 FCM 발송 → 없는 토큰 삭제 → 알림 내역(`notifications`) 기록 | 서버 `@makkigo/push` 의 `sendUserNotification` |
 | 알림 데이터 `link`(웹 경로)를 누르면 그 화면을 웹뷰로 엶 | 앱 |
