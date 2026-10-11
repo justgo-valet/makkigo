@@ -8,8 +8,6 @@ type HomeStatus =
 
 interface HomePreview {
   status: HomeStatus;
-  vehicleNumber: string;
-  carImageUrl: string;
   merchantName: string | null;
   arrivalNotifiedMinutesAgo: number | null;
   parkedMinutesAgo: number | null;
@@ -23,8 +21,6 @@ interface HomePreview {
 const PREVIEW_PARAM = "preview";
 
 const BASE_PREVIEW = {
-  vehicleNumber: "12가3456",
-  carImageUrl: "https://d2lnojrmgxqgrc.cloudfront.net/cars/hyundai/tucson.png",
   merchantName: null,
   arrivalNotifiedMinutesAgo: null,
   parkedMinutesAgo: null,
