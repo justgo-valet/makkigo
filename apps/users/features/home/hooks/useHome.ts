@@ -10,6 +10,7 @@ import {
 } from "@/features/home/homeFormat";
 import { getHomePreview, PREVIEW_PARAM } from "@/features/home/homePreview";
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
+import { useMyVehicle } from "@/features/user/hooks/useMyVehicle";
 
 import type { HomePreview, HomeStatus } from "@/features/home/homePreview";
 
@@ -44,27 +45,27 @@ const STATUS_BADGES: Partial<Record<HomeStatus, StatusBadge>> = {
 
 const minutesAgo = (now: number, minutes: number) => now - minutes * MINUTE_MS;
 
-const getMetaItems = (preview: HomePreview, now: number) => {
-  const vehicleNumber = formatVehicleNumber(preview.vehicleNumber);
-
+const getStatusMetaItems = (preview: HomePreview, now: number) => {
   if (preview.parkedMinutesAgo !== null) {
     return [
-      vehicleNumber,
       `${formatClockTime(minutesAgo(now, preview.parkedMinutesAgo))} 입차`,
       `${formatElapsed(preview.parkedMinutesAgo)} 경과`,
     ];
   }
 
   if (preview.arrivalNotifiedMinutesAgo !== null) {
-    return [
-      vehicleNumber,
-      `${formatClockTime(minutesAgo(now, preview.arrivalNotifiedMinutesAgo))} 도착 알림`,
-    ];
+    return [`${formatClockTime(minutesAgo(now, preview.arrivalNotifiedMinutesAgo))} 도착 알림`];
   }
 
-  if (preview.status === "MERCHANT_SELECTED") return [vehicleNumber, "도착 알림 전"];
+  if (preview.status === "MERCHANT_SELECTED") return ["도착 알림 전"];
 
-  return [vehicleNumber];
+  return [];
+};
+
+const getMetaItems = (preview: HomePreview, vehicleNumber: string | null, now: number) => {
+  const items = getStatusMetaItems(preview, now);
+
+  return vehicleNumber ? [vehicleNumber, ...items] : items;
 };
 
 const getExitSummary = (preview: HomePreview, now: number): ExitSummary | null => {
@@ -108,6 +109,8 @@ const useHome = () => {
   const searchParams = useSearchParams();
   const basePreview = getHomePreview(searchParams.get(PREVIEW_PARAM));
   const selectedMerchant = useSelectedMerchantValue();
+  const { data: vehicle } = useMyVehicle();
+  const vehicleNumber = vehicle ? formatVehicleNumber(vehicle.plateNumber) : null;
   const preview: HomePreview = BEFORE_SESSION_STATUSES.has(basePreview.status)
     ? {
         ...basePreview,
@@ -135,9 +138,9 @@ const useHome = () => {
   return {
     title: preview.merchantName ?? "장소 미정",
     badge: STATUS_BADGES[preview.status] ?? null,
-    metaItems: getMetaItems(preview, now),
-    carImageUrl: preview.carImageUrl,
-    carImageAlt: `${formatVehicleNumber(preview.vehicleNumber)} 차량`,
+    metaItems: getMetaItems(preview, vehicleNumber, now),
+    carImageUrl: vehicle?.carImageUrl ?? null,
+    carImageAlt: vehicleNumber ? `${vehicleNumber} 차량` : "내 차량",
     exitSummary: getExitSummary(preview, now),
     actions: getHomeActions(preview.status),
     isAccountCopied,

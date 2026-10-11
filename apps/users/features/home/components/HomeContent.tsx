@@ -22,14 +22,16 @@ export default function HomeContent() {
       <ValetStatusHeader title={home.title} badge={home.badge} metaItems={home.metaItems} />
 
       <div className="relative mx-auto aspect-[16/9] w-full max-w-sm">
-        <Image
-          src={home.carImageUrl}
-          alt={home.carImageAlt}
-          fill
-          unoptimized
-          priority
-          className="object-contain"
-        />
+        {home.carImageUrl && (
+          <Image
+            src={home.carImageUrl}
+            alt={home.carImageAlt}
+            fill
+            unoptimized
+            priority
+            className="object-contain"
+          />
+        )}
       </div>
 
       {home.exitSummary && (

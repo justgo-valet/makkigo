@@ -36,6 +36,7 @@
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |
 | `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37) |
+| `GET /api/v1/users/me/vehicle` | 내 차량: 차량 번호(`plateNumber`), 차량 이미지 전체 주소(`carImageUrl`). 온보딩에서 목록의 모델을 골랐으면 그 모델 이미지, 브랜드 · 모델을 직접 입력했으면 기본 이미지(`cars/_default.png`). 차량 없음은 404 `VEHICLE_NOT_FOUND` | ✅ | 이 PR |
 | `DELETE /api/v1/users/me` | 회원 탈퇴 | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
 | `POST /api/v1/onboarding` | 휴대폰 번호 · 차량 저장 | ✅ | [#16](https://github.com/justgo-valet/makkigo/pull/16) |
 | `POST /api/v1/onboarding/phone-number/check` | 온보딩 휴대폰 번호 단계에서 다음으로 넘어가기 전 중복 확인 (204 사용 가능 · 409 `DUPLICATE_PHONE`, 내 번호는 통과) | ✅ | 이 PR |
