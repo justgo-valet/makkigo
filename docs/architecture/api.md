@@ -35,7 +35,7 @@
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |
-| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`), 앱 푸시 동의 여부(`appPushAgreed`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37), 이 PR |
+| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`), 앱 푸시 동의 여부(`appPushAgreed`), 위치기반서비스 동의 여부(`locationAgreed`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37), 이 PR |
 | `GET /api/v1/users/me/vehicle` | 내 차량 목록 조회(차량 번호, 브랜드, 모델, 차량 이미지 `carImageUrl`). 브랜드 · 모델을 직접 입력했으면 `carImageUrl` 은 기본 이미지(`cars/_default.png`) | ✅ | [#67](https://github.com/justgo-valet/makkigo/pull/67) |
 | `DELETE /api/v1/users/me` | 회원 탈퇴 (푸시 기기도 삭제) | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
 | `POST /api/v1/push-devices` | 앱 푸시 기기 등록: `{ token, platform: "IOS" \| "ANDROID" }`. 같은 토큰이 있으면 지금 회원으로 옮김 (204) | ✅ | 이 PR |
