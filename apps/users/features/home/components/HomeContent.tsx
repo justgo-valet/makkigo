@@ -11,11 +11,14 @@ import { useHomeHeader } from "@/features/home/hooks/useHomeHeader";
 import ArrivalConfirmSheet from "@/features/merchant/components/ArrivalConfirmSheet";
 import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSheet";
 import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
+import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
+import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
 
 export default function HomeContent() {
   useHomeHeader();
   const home = useHome();
   const merchantSearch = useMerchantSearchFlow();
+  const pushPermissionBanner = usePushPermissionBanner();
 
   if (home.status === "loading") return null;
 
@@ -32,6 +35,9 @@ export default function HomeContent() {
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none [&::-webkit-scrollbar]:hidden">
+      {pushPermissionBanner.isVisible && (
+        <PushPermissionBanner onOpenSettings={pushPermissionBanner.openSettings} />
+      )}
       <ValetStatusHeader title={home.title} badge={home.badge} metaItems={home.metaItems} />
 
       <div className="relative mx-auto aspect-[16/9] w-full max-w-sm">
