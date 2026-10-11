@@ -88,6 +88,32 @@ describe("saveAgentRequest", () => {
     expect(transaction.boothAgent.create).not.toHaveBeenCalled();
   });
 
+  it("only returns the fee policy that is already in effect", async () => {
+    vi.useFakeTimers({ now: new Date("2026-06-01T00:00:00.000Z") });
+    const transaction = createTransaction();
+    database.transaction.mockImplementation((callback) => callback(transaction));
+
+    try {
+      await saveAgentRequest(7, 3, body);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    expect(transaction.boothAgent.findUniqueOrThrow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          booth: {
+            select: expect.objectContaining({
+              feePolicies: expect.objectContaining({
+                where: { effectiveFrom: { lte: new Date("2026-06-01T00:00:00.000Z") } },
+              }),
+            }),
+          },
+        }),
+      }),
+    );
+  });
+
   it("never modifies an approved request", async () => {
     const transaction = createTransaction();
     transaction.boothAgent.findUnique.mockResolvedValueOnce({ id: 9, status: "APPROVED" });
