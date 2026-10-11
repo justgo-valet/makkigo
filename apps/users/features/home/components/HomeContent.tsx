@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@makkigo/ui";
+import { Button, FieldError } from "@makkigo/ui";
 import Image from "next/image";
 
 import ExitSummaryCard from "@/features/home/components/ExitSummaryCard";
@@ -16,6 +16,19 @@ export default function HomeContent() {
   useHomeHeader();
   const home = useHome();
   const merchantSearch = useMerchantSearchFlow();
+
+  if (home.status === "loading") return null;
+
+  if (home.status === "error") {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-3">
+        <FieldError>{home.errorMessage}</FieldError>
+        <Button variant="outline" onClick={home.retry}>
+          다시 시도
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none [&::-webkit-scrollbar]:hidden">

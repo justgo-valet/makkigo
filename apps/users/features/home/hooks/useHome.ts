@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@makkigo/api-client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ import {
 } from "@/features/home/homeFormat";
 import { getHomePreview, PREVIEW_PARAM } from "@/features/home/homePreview";
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
+import { useVehicles } from "@/features/vehicle/hooks/useVehicles";
 
 import type { HomePreview, HomeStatus } from "@/features/home/homePreview";
 
@@ -34,6 +36,7 @@ const BEFORE_SESSION_STATUSES = new Set<HomeStatus>(["NONE", "MERCHANT_SELECTED"
 
 const MINUTE_MS = 60 * 1000;
 const COPIED_RESET_MS = 2000;
+const FALLBACK_ERROR_MESSAGE = "차량 정보를 불러오지 못했습니다.";
 
 const STATUS_BADGES: Partial<Record<HomeStatus, StatusBadge>> = {
   ARRIVAL_SCHEDULED: { label: "도착 예정", tone: "info" },
@@ -44,12 +47,12 @@ const STATUS_BADGES: Partial<Record<HomeStatus, StatusBadge>> = {
 
 const minutesAgo = (now: number, minutes: number) => now - minutes * MINUTE_MS;
 
-const getMetaItems = (preview: HomePreview, now: number) => {
-  const vehicleNumber = formatVehicleNumber(preview.vehicleNumber);
+const getMetaItems = (preview: HomePreview, vehicleNumber: string, now: number) => {
+  const formattedVehicleNumber = formatVehicleNumber(vehicleNumber);
 
   if (preview.parkedMinutesAgo !== null) {
     return [
-      vehicleNumber,
+      formattedVehicleNumber,
       `${formatClockTime(minutesAgo(now, preview.parkedMinutesAgo))} 입차`,
       `${formatElapsed(preview.parkedMinutesAgo)} 경과`,
     ];
@@ -57,14 +60,16 @@ const getMetaItems = (preview: HomePreview, now: number) => {
 
   if (preview.arrivalNotifiedMinutesAgo !== null) {
     return [
-      vehicleNumber,
+      formattedVehicleNumber,
       `${formatClockTime(minutesAgo(now, preview.arrivalNotifiedMinutesAgo))} 도착 알림`,
     ];
   }
 
-  if (preview.status === "MERCHANT_SELECTED") return [vehicleNumber, "도착 알림 전"];
+  if (preview.status === "MERCHANT_SELECTED") {
+    return [formattedVehicleNumber, "도착 알림 전"];
+  }
 
-  return [vehicleNumber];
+  return [formattedVehicleNumber];
 };
 
 const getExitSummary = (preview: HomePreview, now: number): ExitSummary | null => {
@@ -115,8 +120,10 @@ const useHome = () => {
         merchantName: selectedMerchant?.name ?? null,
       }
     : basePreview;
+  const { data: vehicles, error, isError, isPending, refetch } = useVehicles();
   const [now] = useState(() => Date.now());
   const [isAccountCopied, setIsAccountCopied] = useState(false);
+  const vehicle = vehicles?.[0];
 
   useEffect(() => {
     if (!isAccountCopied) return;
@@ -132,12 +139,31 @@ const useHome = () => {
     void navigator.clipboard.writeText(preview.accountNumber).then(() => setIsAccountCopied(true));
   };
 
+  if (isPending) return { status: "loading" } as const;
+
+  if (isError) {
+    return {
+      status: "error",
+      errorMessage: getErrorMessage(error, FALLBACK_ERROR_MESSAGE),
+      retry: () => void refetch(),
+    } as const;
+  }
+
+  if (!vehicle) {
+    return {
+      status: "error",
+      errorMessage: "등록된 차량이 없습니다.",
+      retry: () => void refetch(),
+    } as const;
+  }
+
   return {
+    status: "ready" as const,
     title: preview.merchantName ?? "장소 미정",
     badge: STATUS_BADGES[preview.status] ?? null,
-    metaItems: getMetaItems(preview, now),
-    carImageUrl: preview.carImageUrl,
-    carImageAlt: `${formatVehicleNumber(preview.vehicleNumber)} 차량`,
+    metaItems: getMetaItems(preview, vehicle.plateNumber, now),
+    carImageUrl: vehicle.carImageUrl,
+    carImageAlt: `${formatVehicleNumber(vehicle.plateNumber)} 차량`,
     exitSummary: getExitSummary(preview, now),
     actions: getHomeActions(preview.status),
     isAccountCopied,
