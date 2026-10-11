@@ -54,7 +54,11 @@
 
 ## 로그인 화면
 
-목업(카톡으로 받은 시안) 기준 (decisions 2026-10-09).
+목업(카톡으로 받은 시안) 기준 (decisions 2026-10-09). **고객 앱 · 업체 · 발렛요원 앱이 같은 화면**을 씁니다 (decisions 2026-10-10).
+
+- 화면 · 버튼 · 그림 · 로고: `packages/ui` 의 `components/common/login/LoginScreen.tsx` · `SocialLoginButton.tsx`, 이미지는 `src/assets/` (`@makkigo/ui/assets` 로 가져옴)
+- 각 앱에는 동작만: 기기별 버튼 목록, 로그인 시작(웹 OAuth / 앱 브리지), 오류 문구 — `features/auth/hooks/useSocialLogin.ts` → `LoginScreen` 에 넘김
+
 
 - 화면 너비(최대 448px)만 파란 바탕 `#0970E9`, 양옆은 기존처럼 `--surface-color`
 - 위: 흰 로고 `brand/makkigo_logo_white.svg` + 문구 "주차는 **맡기고,** 편하게 가세요"(맡기고만 노랑 `#F5C518`). 로고는 반짝이를 빼고 '마끼고' 글자가 가운데 오도록 오른쪽으로 20px 옮김
@@ -66,7 +70,7 @@
 
 ## 로그인 버튼
 
-**버튼 4개를 같은 틀**로 코드에서 그립니다 (decisions 2026-10-08). 로고는 각 사 공식 리소스에서 가져왔습니다 (`apps/users/public/images/login/`).
+**버튼 4개를 같은 틀**로 코드에서 그립니다 (decisions 2026-10-08). 로고는 각 사 공식 리소스에서 가져왔습니다 (`packages/ui/src/assets/login/`).
 
 - 공통: 높이 48px, 모서리 8px, 버튼 간격 12px, Pretendard(`pretendard` 패키지, 쓰는 글자만 받는 dynamic subset) 16px SemiBold
 - 로고는 왼쪽 16px 에 고정(20px 칸 가운데), 문구는 버튼 정가운데 (decisions 2026-10-09)

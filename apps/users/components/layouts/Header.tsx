@@ -1,5 +1,6 @@
 "use client";
 
+import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -42,13 +43,7 @@ export default function Header() {
                 : ""
           }
         >
-          <Image
-            src="/images/brand/makkigo_logo.svg"
-            alt="마끼고"
-            width={95}
-            height={39}
-            priority
-          />
+          <Image src={makkigoLogo} alt="마끼고" width={95} height={39} priority />
         </div>
       )}
 

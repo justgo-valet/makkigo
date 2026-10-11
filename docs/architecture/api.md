@@ -35,13 +35,17 @@
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |
-| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37) |
-| `DELETE /api/v1/users/me` | 회원 탈퇴 | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
+| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`), 앱 푸시 동의 여부(`appPushAgreed`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37), 이 PR |
+| `GET /api/v1/users/me/vehicle` | 내 차량 목록 조회(차량 번호, 브랜드, 모델, 차량 이미지 `carImageUrl`). 브랜드 · 모델을 직접 입력했으면 `carImageUrl` 은 기본 이미지(`cars/_default.png`) | ✅ | [#67](https://github.com/justgo-valet/makkigo/pull/67) |
+| `DELETE /api/v1/users/me` | 회원 탈퇴 (푸시 기기도 삭제) | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
+| `POST /api/v1/push-devices` | 앱 푸시 기기 등록: `{ token, platform: "IOS" \| "ANDROID" }`. 같은 토큰이 있으면 지금 회원으로 옮김 (204) | ✅ | 이 PR |
+| `DELETE /api/v1/push-devices` | 앱 푸시 기기 삭제: `{ token }` (내 기기만, 204). 로그아웃 때 부름 | ✅ | 이 PR |
 | `POST /api/v1/onboarding` | 휴대폰 번호 · 차량 저장 | ✅ | [#16](https://github.com/justgo-valet/makkigo/pull/16) |
 | `POST /api/v1/onboarding/phone-number/check` | 온보딩 휴대폰 번호 단계에서 다음으로 넘어가기 전 중복 확인 (204 사용 가능 · 409 `DUPLICATE_PHONE`, 내 번호는 통과) | ✅ | 이 PR |
 | `POST /api/v1/onboarding/vehicle-number/check` | 온보딩 차량 번호 단계에서 다음으로 넘어가기 전 중복 확인 (204 사용 가능 · 409 `DUPLICATE_VEHICLE`, 내 차량은 통과) | ✅ | 이 PR |
 | `GET /api/v1/merchants?q=` | 업체 검색: 이름 · 주소에 검색어가 들어간 업체 중 **승인된 부스 계약이 있는** 곳만 (삭제 제외, 이름 순 최대 20개). `q` 없음 · 50자 초과는 400 | ✅ | [#72](https://github.com/justgo-valet/makkigo/pull/72) |
-| `POST /api/v1/valet-sessions` | 도착 알림 보내기: `{ merchantId }` → 도착 예정 세션 생성(201 `{ id }`) + 받을 요원에게 알림 기록. 403 `VEHICLE_REQUIRED` · 404 `MERCHANT_NOT_FOUND` · 409 `ACTIVE_SESSION_EXISTS` · 422 `NO_AVAILABLE_BOOTH` | ✅ | 이 PR |
+| `POST /api/v1/valet-sessions` | 도착 알림 보내기: `{ merchantId }` → 도착 예정 세션 생성(201 `{ id }`) + 받을 요원에게 알림 기록. 403 `VEHICLE_REQUIRED` · 404 `MERCHANT_NOT_FOUND` · 409 `ACTIVE_SESSION_EXISTS` · 422 `NO_AVAILABLE_BOOTH` | ✅ | [#73](https://github.com/justgo-valet/makkigo/pull/73) |
+| `POST /api/v1/valet-sessions/{id}/cancel` | 도착 알림 취소: 내 도착 예정 세션 → 취소(204) + 도착 알림을 받았던 요원에게 취소 알림 기록. 404 `SESSION_NOT_FOUND` · 409 `NOT_CANCELLABLE`(이미 취소 · 주차 시작) | ✅ | 이 PR |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
 

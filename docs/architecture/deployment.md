@@ -52,6 +52,7 @@
 | `/makkigo/prod/users/AUTH_JWT_SECRET` | |
 | `/makkigo/prod/users/PUBLIC_URL` | `https://app.makkigo.com` |
 | `/makkigo/prod/users/IMAGE_BASE_URL` | `https://d2lnojrmgxqgrc.cloudfront.net` (이미지 CDN, 비밀값 아님) |
+| `/makkigo/prod/users/FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase 서비스 계정 키 JSON 을 **한 줄로** (`jq -c . <키 파일>.json`), SecureString. 앱 푸시 발송용 |
 | `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수) |
 | `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
@@ -59,6 +60,11 @@
 | `/makkigo/prod/users/APPLE_SERVICES_ID` | |
 | `/makkigo/prod/users/NAVER_CLIENT_ID` | |
 | `/makkigo/prod/users/NAVER_CLIENT_SECRET` | |
+| `/makkigo/prod/valetagents/DATABASE_URL` · `AUTH_JWT_SECRET` · `PUBLIC_URL` | 요원 앱. `PUBLIC_URL` = `https://valet.makkigo.com` |
+| `/makkigo/prod/valetagents/OAUTH_CALLBACK_ORIGIN` | 소셜 제공자 콜백 주소의 기준 URL |
+| `/makkigo/prod/valetagents/APP_CALLBACK_URL` | Flutter 요원 앱 복귀 주소 (`com.makkigo.valetagent://auth`) |
+| `/makkigo/prod/valetagents/AUTH_COOKIE_DOMAIN` | `.makkigo.com` (콜백 CSRF 쿠키를 두 서브도메인에 공유) |
+| `/makkigo/prod/valetagents/` 소셜 7개 | 고객 앱과 같은 이름 (`KAKAO_REST_API_KEY` … `NAVER_CLIENT_SECRET`) |
 | `/makkigo/prod/valetagents/KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 키 (부스 위치 지도). 브라우저에 보이는 값이지만 다른 값과 같이 런타임에 읽음. 카카오 콘솔에 `https://valet.makkigo.com` 등록 · 카카오맵 사용 설정 필요. 없으면 지도 대신 안내 문구가 뜸 |
 | `/makkigo/prod/deploy/GHCR_USERNAME` | 서버가 GHCR 비공개 이미지를 받을 GitHub 계정 |
 | `/makkigo/prod/deploy/GHCR_TOKEN` | GitHub Personal Access Token (classic), 권한 `read:packages` 만 |
@@ -148,8 +154,9 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | 헬스 체크 `GET /api/health` (두 앱) | ✅ #33 |
 | Dockerfile — users · valetagents(standalone) · migrate | ✅ #34 |
 | 운영 compose · Caddy · SSM 환경변수 스크립트 · 배포 스크립트 (`deploy/`) | ✅ #36 |
-| 배포 Actions — main 머지 시 이미지 빌드 → GHCR → OIDC + SSM 명령으로 배포, 수동 배포 · 되돌리기 | `.github/workflows/deploy.yml` |
-| AWS 준비 — GitHub OIDC 공급자, 배포용 IAM 역할, EC2 IAM 역할, 서버 Docker · AWS CLI, GHCR 토큰 | 스크립트 준비됨 (`deploy/aws/`), 실행은 아래 "처음 한 번" |
+| 배포 Actions — main 머지 시 이미지 빌드 → GHCR → OIDC + SSM 명령으로 배포, 수동 배포 · 되돌리기 | ✅ #42 · #57 (ARM) · #59 (OIDC 형식) |
+| AWS 준비 — GitHub OIDC 공급자, 배포용 IAM 역할, EC2 IAM 역할, 서버 Docker · AWS CLI, GHCR 토큰 | ✅ 2026-10-09 |
+| 첫 운영 배포 | ✅ 2026-10-09 (#58), 이후 #69 → [runbook.md](../operations/runbook.md) |
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
 | 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리 | 미정 |
