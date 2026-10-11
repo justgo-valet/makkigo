@@ -1,13 +1,23 @@
-import { boothMerchantPageSchema } from "@/libs/booth/contracts/booth-merchants";
+import {
+  boothMerchantPageSchema,
+  boothMerchantReviewBodySchema,
+} from "@/libs/booth/contracts/booth-merchants";
 import { getCurrentStaffId } from "@/server/auth/getCurrentStaffId";
 import { listBoothMerchants } from "@/server/booth/listBoothMerchants";
-import { apiError, privateJson } from "@/server/common/apiResponse";
+import { reviewBoothMerchants } from "@/server/booth/reviewBoothMerchants";
+import { apiError, NO_STORE_HEADERS, privateJson } from "@/server/common/apiResponse";
 
 import type { NextRequest } from "next/server";
 
 const ERROR_RESPONSES = {
   BOOTH_NOT_FOUND: { status: 404, message: "부스를 찾을 수 없습니다." },
   BOOTH_MANAGER_REQUIRED: { status: 403, message: "부스 관리자만 업체를 관리할 수 있습니다." },
+  MERCHANT_NOT_FOUND: { status: 404, message: "업체를 찾을 수 없습니다." },
+  MERCHANT_ALREADY_APPROVED: { status: 409, message: "이미 등록된 업체는 거절할 수 없습니다." },
+  MERCHANT_CHANGED: {
+    status: 409,
+    message: "계약 상태가 바뀌었습니다. 목록을 다시 확인해 주세요.",
+  },
 } as const;
 
 const parseBoothId = (value: string) => {
@@ -40,5 +50,32 @@ export async function GET(
   } catch (error) {
     console.error("Failed to list booth merchants", error);
     return apiError("INTERNAL_ERROR", "업체 목록을 불러오지 못했습니다.", 500);
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ boothId: string }> },
+) {
+  try {
+    const staffId = await getCurrentStaffId(request);
+    if (!staffId) return apiError("AUTH_REQUIRED", "로그인이 필요합니다.", 401);
+
+    const boothId = parseBoothId((await params).boothId);
+    if (!boothId) return apiError("INVALID_REQUEST", "올바른 부스 ID가 필요합니다.", 400);
+
+    const body = boothMerchantReviewBodySchema.safeParse(await request.json().catch(() => null));
+    if (!body.success) return apiError("INVALID_REQUEST", "요청 본문이 올바르지 않습니다.", 400);
+
+    const result = await reviewBoothMerchants(staffId, boothId, body.data);
+    if (!result.ok) {
+      const error = ERROR_RESPONSES[result.reason];
+      return apiError(result.reason, error.message, error.status);
+    }
+
+    return new Response(null, { status: 204, headers: NO_STORE_HEADERS });
+  } catch (error) {
+    console.error("Failed to review booth merchants", error);
+    return apiError("INTERNAL_ERROR", "업체 계약 상태를 바꾸지 못했습니다.", 500);
   }
 }
