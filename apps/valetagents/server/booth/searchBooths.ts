@@ -4,6 +4,7 @@ import { prisma } from "database";
 
 import { BOOTH_SEARCH_RESULT_LIMIT } from "@/libs/booth/contracts/booths";
 
+import { selectCurrentFeePolicy } from "./currentFeePolicy";
 import { serializeRequestWithoutBooth, serializeSelectedBooth } from "./serializeBooth";
 
 import type { BoothSearchResponse } from "@/libs/booth/contracts/agent-request";
@@ -22,17 +23,7 @@ const searchBooths = async (staffId: number, query: string): Promise<BoothSearch
       name: true,
       address: true,
       addressDetail: true,
-      feePolicies: {
-        select: {
-          baseMinutes: true,
-          baseFee: true,
-          extraUnitMinutes: true,
-          extraUnitFee: true,
-          effectiveFrom: true,
-        },
-        orderBy: [{ effectiveFrom: "desc" }, { id: "desc" }],
-        take: 1,
-      },
+      feePolicies: selectCurrentFeePolicy(new Date()),
       agents: {
         where: { staffId },
         select: {
