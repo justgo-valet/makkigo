@@ -88,3 +88,4 @@
 | 2026-10-10 | 도착 알림 API `POST /api/v1/valet-sessions`: 받는 요원 = 승인된 계약 부스의 승인된 요원 중 알림 켜진 사람(중복 제거). 승인된 계약 부스가 없는 업체는 422 거부. 같은 번호로 진행 중 세션이 있으면 409. 티켓은 주차 처리 때 → [valet-session.md](planning/valet-session.md#도착-알림) | 받을 사람이 없는 세션 방지. 시나리오 A 기준 | 대화 |
 | 2026-10-10 | 요원 알림은 지금 **알림 내역만** 기록(채널 비움), FCM 발송은 별도 작업 | FCM 연동 미구축, 도착 알림 API 를 먼저 열기 위해 | 대화 |
 | 2026-10-10 | 같은 차량 번호의 세션 생성은 **advisory lock**(`lockPlateNumber`)으로 직렬화. 고객 도착 알림 · 요원 차량 추가가 같은 함수를 씀 | 진행 중 세션 하나 규칙을 DB 인덱스로 못 걸어 동시 요청 시 중복 생성 가능 | 대화 |
+| 2026-10-11 | 기본 글꼴 순서를 `Ubuntu → Apple SD Gothic Neo → system-ui → sans-serif` 로 (users · valetagents) | iOS 26 WebKit 에서 `system-ui` 가 한글을 못 그려 앱 웹뷰 · Safari 의 한글이 전부 네모로 깨짐. Apple SD Gothic Neo 는 iOS · macOS 기본 한글 글꼴이라 모양은 같고, 없는 Android 는 기존대로 system-ui | 대화 |
