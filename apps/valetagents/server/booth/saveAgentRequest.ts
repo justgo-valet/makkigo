@@ -2,6 +2,7 @@ import "server-only";
 
 import { Prisma, prisma } from "database";
 
+import { selectCurrentFeePolicy } from "./currentFeePolicy";
 import { parseWorkTime } from "./workTime";
 import { serializeRequest } from "./serializeBooth";
 
@@ -25,33 +26,24 @@ type SaveAgentRequestResult =
 const MAX_TRANSACTION_ATTEMPTS = 3;
 const RETRYABLE_PRISMA_CODES = new Set(["P2002", "P2034"]);
 
-const requestSelection = {
-  id: true,
-  status: true,
-  workStartTime: true,
-  workEndTime: true,
-  createdAt: true,
-  updatedAt: true,
-  booth: {
-    select: {
-      id: true,
-      name: true,
-      address: true,
-      addressDetail: true,
-      feePolicies: {
-        select: {
-          baseMinutes: true,
-          baseFee: true,
-          extraUnitMinutes: true,
-          extraUnitFee: true,
-          effectiveFrom: true,
-        },
-        orderBy: [{ effectiveFrom: "desc" }, { id: "desc" }],
-        take: 1,
+const selectRequest = (now: Date) =>
+  ({
+    id: true,
+    status: true,
+    workStartTime: true,
+    workEndTime: true,
+    createdAt: true,
+    updatedAt: true,
+    booth: {
+      select: {
+        id: true,
+        name: true,
+        address: true,
+        addressDetail: true,
+        feePolicies: selectCurrentFeePolicy(now),
       },
     },
-  },
-} satisfies Prisma.BoothAgentSelect;
+  }) satisfies Prisma.BoothAgentSelect;
 
 class ConcurrentAgentRequestError extends Error {}
 
@@ -118,7 +110,7 @@ const saveInTransaction = async (
 
   const saved = await transaction.boothAgent.findUniqueOrThrow({
     where: { boothId_staffId: { boothId, staffId } },
-    select: requestSelection,
+    select: selectRequest(new Date()),
   });
 
   if (saved.status === "APPROVED") return { ok: false, reason: "ALREADY_APPROVED" };
