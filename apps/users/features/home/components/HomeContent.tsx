@@ -13,12 +13,21 @@ import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSh
 import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
+import PickupRequestSheets from "@/features/valet/components/PickupRequestSheets";
+import { usePickupRequestFlow } from "@/features/valet/hooks/usePickupRequestFlow";
+
+import type { HomeActionKey } from "@/features/home/homeActions";
 
 export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKey: string }>) {
   useHomeHeader();
   const home = useHome();
   const merchantSearch = useMerchantSearchFlow();
   const pushPermissionBanner = usePushPermissionBanner();
+  const pickupRequest = usePickupRequestFlow();
+  const actionHandlers: Partial<Record<HomeActionKey, () => void>> = {
+    EXIT_REQUEST: pickupRequest.open,
+    MERCHANT_SEARCH: merchantSearch.open,
+  };
 
   if (home.status === "loading") return null;
 
@@ -56,6 +65,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
           summary={home.exitSummary}
           isAccountCopied={home.isAccountCopied}
           onCopyAccountNumber={home.copyAccountNumber}
+          onFeeDetailClick={pickupRequest.openFeeDetail}
         />
       )}
 
@@ -65,11 +75,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
           발렛 티켓 보러가기
         </Button>
         {home.actions.map((action) => (
-          <HomeActionItem
-            key={action.key}
-            action={action}
-            onClick={action.key === "MERCHANT_SEARCH" ? merchantSearch.open : undefined}
-          />
+          <HomeActionItem key={action.key} action={action} onClick={actionHandlers[action.key]} />
         ))}
       </div>
 
@@ -88,6 +94,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         onSend={merchantSearch.sendArrival}
         onClose={merchantSearch.close}
       />
+      <PickupRequestSheets flow={pickupRequest} />
     </div>
   );
 }
