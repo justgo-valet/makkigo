@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "database";
 
+import { selectCurrentFeePolicy } from "@/server/booth/currentFeePolicy";
 import { serializeRequest } from "@/server/booth/serializeBooth";
 
 import type {
@@ -49,17 +50,7 @@ const getStaffOnboardingState = async (
               name: true,
               address: true,
               addressDetail: true,
-              feePolicies: {
-                select: {
-                  baseMinutes: true,
-                  baseFee: true,
-                  extraUnitMinutes: true,
-                  extraUnitFee: true,
-                  effectiveFrom: true,
-                },
-                orderBy: [{ effectiveFrom: "desc" }, { id: "desc" }],
-                take: 1,
-              },
+              feePolicies: selectCurrentFeePolicy(new Date()),
             },
           },
         },

@@ -49,6 +49,35 @@ describe("getStaffOnboardingState", () => {
     await expect(getStaffOnboardingState(7)).resolves.toBeNull();
   });
 
+  it("only selects booth fee policies that are already in effect", async () => {
+    vi.useFakeTimers({ now: new Date("2026-06-01T00:00:00.000Z") });
+    database.findFirst.mockResolvedValue(null);
+
+    try {
+      await getStaffOnboardingState(7);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    expect(database.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          boothMemberships: expect.objectContaining({
+            select: expect.objectContaining({
+              booth: {
+                select: expect.objectContaining({
+                  feePolicies: expect.objectContaining({
+                    where: { effectiveFrom: { lte: new Date("2026-06-01T00:00:00.000Z") } },
+                  }),
+                }),
+              },
+            }),
+          }),
+        }),
+      }),
+    );
+  });
+
   it("orders requests by status, then recent update, and reports any approval as complete", async () => {
     database.findFirst.mockResolvedValue({
       role: "VALET_AGENT",
