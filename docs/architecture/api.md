@@ -49,6 +49,7 @@
 | `POST /api/v1/valet-sessions/{id}/cancel` | 도착 알림 취소: 내 도착 예정 세션 → 취소(204) + 도착 알림을 받았던 요원에게 취소 알림 기록. 404 `SESSION_NOT_FOUND` · 409 `NOT_CANCELLABLE`(이미 취소 · 주차 시작) | ✅ | 이 PR |
 | `GET /api/v1/valet-sessions/current` | 현재 세션 조회: 내 세션 중 출차 완료 · 취소가 아닌 가장 최근 것 → `{ session }`(없으면 `null`). 업체 · 부스 이름, 도착 알림 · 지연, 입차 · 출차 요청 시각, 같은 부스 출차 대기 대수(`waitingPickupCount`), 요금(`fee`: 주차 완료는 지금 기준, 출차 요청 이후는 출차 요청 시각 기준), 실제 요금 · 예상 출차 시각, 출차 요청 이후 부스 계좌(`bankAccount`). 형식은 `libs/valet/contracts/currentSession.ts` | ✅ | 이 PR |
 | `POST /api/v1/valet-sessions/{id}/pickup-request` | 출차 요청: 내 주차 완료 세션 → 출차 요청(출차 요청 시각 · 기준 요금 저장) + 세션 부스의 승인된 요원 중 알림 켜진 사람에게 알림 기록 → 200 `{ session }`(현재 세션 조회와 같은 형식, 계좌 포함). 요금 기준표가 없는 부스면 기준 요금을 비워 두고 접수. 404 `SESSION_NOT_FOUND`(남의 세션 · 끝난 세션) · 409 `NOT_PARKED`(도착 예정) · 409 `ALREADY_REQUESTED`(이미 요청 · 출차 준비 중, 동시 요청의 나머지) · 422 `NO_BOOTH`(부스 없는 세션) | ✅ | 이 PR |
+| `POST /api/v1/valet-sessions/{id}/delay` | 지연 알림 보내기: `{ minutes: 5 \| 10 \| 15 }`(15 = 15분 이상) → 내 도착 예정 세션의 지연 시간 · 시각 저장(204, 다시 보내면 덮어씀) + 도착 알림을 받았던 요원에게 지연 알림 기록. 400 잘못된 `minutes` · 404 `SESSION_NOT_FOUND` · 409 `NOT_DELAYABLE`(이미 취소 · 주차 시작) | ✅ | 이 PR |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
 
