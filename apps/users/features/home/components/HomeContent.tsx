@@ -9,17 +9,25 @@ import ValetStatusHeader from "@/features/home/components/ValetStatusHeader";
 import { useHome } from "@/features/home/hooks/useHome";
 import { useHomeHeader } from "@/features/home/hooks/useHomeHeader";
 import ArrivalConfirmSheet from "@/features/merchant/components/ArrivalConfirmSheet";
+import MerchantRequiredSheet from "@/features/merchant/components/MerchantRequiredSheet";
 import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSheet";
 import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
 import LocationConsentSheet from "@/features/valet/components/LocationConsentSheet";
 
+import type { HomeActionKey } from "@/features/home/homeActions";
+
 export default function HomeContent() {
   useHomeHeader();
   const home = useHome();
   const merchantSearch = useMerchantSearchFlow();
   const pushPermissionBanner = usePushPermissionBanner();
+
+  const actionHandlers: Partial<Record<HomeActionKey, () => void>> = {
+    ARRIVAL: merchantSearch.startArrival,
+    MERCHANT_SEARCH: merchantSearch.open,
+  };
 
   if (home.status === "loading") return null;
 
@@ -66,11 +74,7 @@ export default function HomeContent() {
           발렛 티켓 보러가기
         </Button>
         {home.actions.map((action) => (
-          <HomeActionItem
-            key={action.key}
-            action={action}
-            onClick={action.key === "MERCHANT_SEARCH" ? merchantSearch.open : undefined}
-          />
+          <HomeActionItem key={action.key} action={action} onClick={actionHandlers[action.key]} />
         ))}
       </div>
 
@@ -78,6 +82,11 @@ export default function HomeContent() {
         open={merchantSearch.isSearchOpen}
         onClose={merchantSearch.close}
         onSelect={merchantSearch.pickMerchant}
+      />
+      <MerchantRequiredSheet
+        open={merchantSearch.isMerchantRequiredOpen}
+        onSearch={merchantSearch.open}
+        onClose={merchantSearch.close}
       />
       <ArrivalConfirmSheet
         open={merchantSearch.isArrivalOpen}

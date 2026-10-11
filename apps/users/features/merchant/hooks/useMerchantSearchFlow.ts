@@ -7,12 +7,13 @@ import { useSendArrival } from "@/features/valet/hooks/useSendArrival";
 
 import type { Merchant } from "@/libs/merchant/contracts/merchants";
 
-type MerchantSearchStep = "search" | "arrival" | "locationConsent";
+type MerchantSearchStep = "search" | "merchantRequired" | "arrival" | "locationConsent";
 
 const useMerchantSearchFlow = () => {
   const [step, setStep] = useState<MerchantSearchStep | null>(null);
   const [pickedMerchant, setPickedMerchant] = useState<Merchant | null>(null);
   const selectMerchant = useSelectedMerchant((state) => state.selectMerchant);
+  const selectedMerchant = useSelectedMerchant((state) => state.merchant);
   const { data: me } = useMe();
   const arrival = useSendArrival(() => setStep(null));
 
@@ -28,6 +29,18 @@ const useMerchantSearchFlow = () => {
     selectMerchant(merchant);
     setPickedMerchant(merchant);
     arrival.resetError();
+    setStep("arrival");
+  };
+
+  const startArrival = () => {
+    arrival.resetError();
+
+    if (!selectedMerchant) {
+      setStep("merchantRequired");
+      return;
+    }
+
+    setPickedMerchant(selectedMerchant);
     setStep("arrival");
   };
 
@@ -55,6 +68,7 @@ const useMerchantSearchFlow = () => {
 
   return {
     isSearchOpen: step === "search",
+    isMerchantRequiredOpen: step === "merchantRequired",
     isArrivalOpen: step === "arrival",
     isLocationConsentOpen: step === "locationConsent",
     pickedMerchant,
@@ -62,6 +76,7 @@ const useMerchantSearchFlow = () => {
     sendErrorMessage: arrival.errorMessage,
     open,
     close,
+    startArrival,
     pickMerchant,
     sendArrival,
     agreeLocationAndSend: () => sendWithLocationConsent(true),
