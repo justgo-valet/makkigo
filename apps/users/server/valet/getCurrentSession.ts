@@ -2,8 +2,10 @@ import "server-only";
 import { ACTIVE_VALET_SESSION_STATUSES, prisma } from "database";
 
 import { calculateValetFee } from "@/server/valet/calculateValetFee";
+import { findFeePolicy } from "@/server/valet/findFeePolicy";
 
 import type { CurrentSession } from "@/libs/valet/contracts/currentSession";
+import type { Prisma } from "database";
 
 const ARRIVAL_SESSION_GAP_MS = 1000;
 
@@ -24,13 +26,6 @@ const getArrivalNotifiedAt = (session: {
     : null;
 };
 
-const findFeePolicy = (boothId: number, baseTime: Date) =>
-  prisma.boothFeePolicy.findFirst({
-    where: { boothId, effectiveFrom: { lte: baseTime } },
-    orderBy: [{ effectiveFrom: "desc" }, { id: "desc" }],
-    select: { baseMinutes: true, baseFee: true, extraUnitMinutes: true, extraUnitFee: true },
-  });
-
 const findBankAccount = (boothId: number, now: Date) =>
   prisma.boothBankAccount.findFirst({
     where: { boothId, effectiveFrom: { lte: now } },
@@ -38,12 +33,12 @@ const findBankAccount = (boothId: number, now: Date) =>
     select: { bankName: true, accountNumber: true, accountHolder: true },
   });
 
-const getCurrentSession = async (
-  userId: number,
-  now: Date = new Date(),
+const findSessionView = async (
+  where: Prisma.ValetSessionWhereInput,
+  now: Date,
 ): Promise<CurrentSession | null> => {
   const session = await prisma.valetSession.findFirst({
-    where: { userId, status: { in: [...ACTIVE_VALET_SESSION_STATUSES] } },
+    where: { ...where, status: { in: [...ACTIVE_VALET_SESSION_STATUSES] } },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     select: {
       id: true,
@@ -106,4 +101,10 @@ const getCurrentSession = async (
   };
 };
 
-export { getCurrentSession };
+const getCurrentSession = (userId: number, now: Date = new Date()) =>
+  findSessionView({ userId }, now);
+
+const getMyActiveSession = (userId: number, valetSessionId: number, now: Date = new Date()) =>
+  findSessionView({ id: valetSessionId, userId }, now);
+
+export { getCurrentSession, getMyActiveSession };
