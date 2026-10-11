@@ -53,7 +53,7 @@
 | `/makkigo/prod/users/PUBLIC_URL` | `https://app.makkigo.com` |
 | `/makkigo/prod/users/IMAGE_BASE_URL` | `https://d2lnojrmgxqgrc.cloudfront.net` (이미지 CDN, 비밀값 아님) |
 | `/makkigo/prod/users/FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase 서비스 계정 키 JSON 을 **한 줄로** (`jq -c . <키 파일>.json`), SecureString. 앱 푸시 발송용 |
-| `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수) |
+| `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수). 같은 키로 카카오모빌리티 길찾기 · 카카오 로컬(주소 검색)도 호출 |
 | `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
 | `/makkigo/prod/users/GOOGLE_CLIENT_SECRET` | |
