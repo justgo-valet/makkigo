@@ -56,12 +56,22 @@ interface TimeColumnProps {
 
 const ROW_HEIGHT = 54;
 const SCROLL_SETTLE_MS = 100;
+const DRAG_THRESHOLD_PX = 4;
+
+interface ColumnDrag {
+  pointerId: number;
+  startY: number;
+  startScrollTop: number;
+  moved: boolean;
+}
 
 function TimeColumn({ label, options, value, onChange }: TimeColumnProps) {
   const listRef = React.useRef<HTMLDivElement>(null);
   const optionRefs = React.useRef(new Map<number, HTMLButtonElement>());
   const scrollTimerRef = React.useRef<number | undefined>(undefined);
   const mountedRef = React.useRef(false);
+  const dragRef = React.useRef<ColumnDrag | null>(null);
+  const suppressClickRef = React.useRef(false);
   const selectedIndex = options.indexOf(value);
 
   React.useLayoutEffect(() => {
@@ -79,12 +89,57 @@ function TimeColumn({ label, options, value, onChange }: TimeColumnProps) {
     window.clearTimeout(scrollTimerRef.current);
     scrollTimerRef.current = window.setTimeout(() => {
       const list = listRef.current;
-      if (!list) return;
+      if (!list || dragRef.current?.moved) return;
 
       const index = Math.round(list.scrollTop / ROW_HEIGHT);
       const centered = options[Math.min(options.length - 1, Math.max(0, index))];
       if (centered !== value) onChange(centered);
     }, SCROLL_SETTLE_MS);
+  };
+
+  // 터치는 브라우저 스크롤로 굴러가지만 마우스는 끌어도 굴러가지 않아 직접 굴린다.
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    suppressClickRef.current = false;
+    if (event.pointerType === "touch" || event.button !== 0) return;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startScrollTop: event.currentTarget.scrollTop,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    const list = event.currentTarget;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const distance = event.clientY - drag.startY;
+    if (!drag.moved) {
+      if (Math.abs(distance) < DRAG_THRESHOLD_PX) return;
+      drag.moved = true;
+      list.setPointerCapture(event.pointerId);
+      // 끄는 동안에는 줄에 달라붙지 않고 손을 따라오게 한다.
+      list.style.scrollSnapType = "none";
+    }
+    list.scrollTop = drag.startScrollTop - distance;
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    const list = event.currentTarget;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    dragRef.current = null;
+    if (!drag.moved) return;
+
+    // 끌다 놓은 자리에서 눌림으로 처리되지 않게 하고, 가장 가까운 줄로 맞춘다.
+    suppressClickRef.current = true;
+    list.style.scrollSnapType = "";
+    const index = Math.min(options.length - 1, Math.max(0, Math.round(list.scrollTop / ROW_HEIGHT)));
+    list.scrollTo({ top: index * ROW_HEIGHT, behavior: "smooth" });
+    if (options[index] !== value) onChange(options[index]);
   };
 
   const selectAndFocus = (nextValue: number) => {
@@ -122,7 +177,16 @@ function TimeColumn({ label, options, value, onChange }: TimeColumnProps) {
   return (
     <div
       aria-label={label}
-      className="relative h-full w-22 snap-y snap-mandatory overflow-y-auto py-[54px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="relative h-full w-22 cursor-grab snap-y snap-mandatory overflow-y-auto py-[54px] select-none [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+      onClickCapture={(event) => {
+        if (!suppressClickRef.current) return;
+        suppressClickRef.current = false;
+        event.stopPropagation();
+      }}
+      onPointerCancel={handlePointerEnd}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
       onScroll={handleScroll}
       ref={listRef}
       role="listbox"
@@ -203,7 +267,7 @@ export function TimePickerSheet({
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
       <SheetContent
-        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] px-[27px] pt-[39px] pb-[max(19px,env(safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)]"
+        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] px-[27px] pt-[39px] pb-[max(19px,env(safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
         onCloseAutoFocus={restoreFocus}
         overlayClassName="bg-transparent"
         showCloseButton={false}
