@@ -29,6 +29,29 @@ describe("searchBooths", () => {
     );
   });
 
+  it("only selects the newest fee policy that is already in effect", async () => {
+    vi.useFakeTimers({ now: new Date("2026-06-01T00:00:00.000Z") });
+    database.findMany.mockResolvedValue([]);
+
+    try {
+      await searchBooths(7, "강남");
+    } finally {
+      vi.useRealTimers();
+    }
+
+    expect(database.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          feePolicies: expect.objectContaining({
+            where: { effectiveFrom: { lte: new Date("2026-06-01T00:00:00.000Z") } },
+            orderBy: [{ effectiveFrom: "desc" }, { id: "desc" }],
+            take: 1,
+          }),
+        }),
+      }),
+    );
+  });
+
   it("serializes only the newest fee policy and current request", async () => {
     database.findMany.mockResolvedValue([
       {
