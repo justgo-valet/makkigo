@@ -11,7 +11,7 @@
 | [privacyCollection.ts](../../apps/users/features/consent/documents/privacyCollection.ts) 개인정보 수집 · 이용 | 고객 | `PRIVACY_COLLECTION` | 필수 |
 | [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
 | [appPush.ts](../../apps/users/features/consent/documents/appPush.ts) · [alimtalk.ts](../../apps/users/features/consent/documents/alimtalk.ts) 알림 수신 | 고객 | `APP_PUSH`, `ALIMTALK` | 선택 |
-| [location-terms.md](location-terms.md) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
+| [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
 | [privacy-policy.md](privacy-policy.md) 개인정보 처리방침 | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
 | [staff-terms.md](staff-terms.md) 파트너 이용약관 | 요원 · 업체 관리자 | 요원 앱 (미정) | 필수 |
 | [staff-privacy-collection.md](staff-privacy-collection.md) 파트너 개인정보 수집 · 이용 | 요원 · 업체 관리자 | 요원 앱 (미정) | 필수 |
@@ -55,7 +55,7 @@
 |---|---|---|
 | 위치기반서비스사업 신고 (방송통신위원회, 제9조) | 회사 | 미정 — 처리 기간을 확인해 출시일(10/31) 전에 끝나는지 봐야 함 |
 | 위치정보관리책임자 지정 | 회사 | 빈칸 |
-| 위치기반서비스 이용약관 명시 · 동의 (제18조) | 코드 | [location-terms.md](location-terms.md) 초안, 선택 동의 |
+| 위치기반서비스 이용약관 명시 · 동의 (제18조) | 코드 | 온보딩 약관 시트, 선택 동의 ([본문](../../apps/users/features/consent/documents/locationBasedService.ts)) |
 | 수집 · 이용 · 제공 사실 확인자료 자동 기록 · 보존 (제16조 제2항) | 코드 | 위치 이용 기록 테이블. 좌표는 남기지 않음 |
 | 목적 달성 후 개인위치정보 파기 | 코드 | 좌표는 계산에만 쓰고 저장하지 않음 |
 | 처리방침에 위치정보 · 길찾기 API 제공사(카카오모빌리티) 반영 | 문서 | [privacy-policy.md](privacy-policy.md) |
