@@ -7,6 +7,9 @@ const recordUserConsents = async (userId: number, request: RecordConsentsRequest
   const withdrawsLocation = request.consents.some(
     ({ type, agreed }) => type === "LOCATION_BASED_SERVICE" && !agreed,
   );
+  const withdrawsAppPush = request.consents.some(
+    ({ type, agreed }) => type === "APP_PUSH" && !agreed,
+  );
 
   await prisma.$transaction([
     prisma.userConsent.createMany({
@@ -18,6 +21,7 @@ const recordUserConsents = async (userId: number, request: RecordConsentsRequest
       })),
     }),
     ...(withdrawsLocation ? [prisma.locationUseLog.deleteMany({ where: { userId } })] : []),
+    ...(withdrawsAppPush ? [prisma.pushDevice.deleteMany({ where: { userId } })] : []),
   ]);
 };
 
