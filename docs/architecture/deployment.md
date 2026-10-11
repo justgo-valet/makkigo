@@ -65,6 +65,7 @@
 | `/makkigo/prod/valetagents/APP_CALLBACK_URL` | Flutter 요원 앱 복귀 주소 (`com.makkigo.valetagent://auth`) |
 | `/makkigo/prod/valetagents/AUTH_COOKIE_DOMAIN` | `.makkigo.com` (콜백 CSRF 쿠키를 두 서브도메인에 공유) |
 | `/makkigo/prod/valetagents/` 소셜 7개 | 고객 앱과 같은 이름 (`KAKAO_REST_API_KEY` … `NAVER_CLIENT_SECRET`) |
+| `/makkigo/prod/valetagents/KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 키 (부스 위치 지도). 브라우저에 보이는 값이지만 다른 값과 같이 런타임에 읽음. 카카오 콘솔에 `https://valet.makkigo.com` 등록 · 카카오맵 사용 설정 필요. 없으면 지도 대신 안내 문구가 뜸 |
 | `/makkigo/prod/deploy/GHCR_USERNAME` | 서버가 GHCR 비공개 이미지를 받을 GitHub 계정 |
 | `/makkigo/prod/deploy/GHCR_TOKEN` | GitHub Personal Access Token (classic), 권한 `read:packages` 만 |
 
