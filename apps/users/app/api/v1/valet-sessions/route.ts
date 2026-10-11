@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: ERROR_MESSAGES.INVALID_REQUEST }, { status: 400 });
     }
 
-    const result = await createArrivalSession(userId, body.data.merchantId);
+    const result = await createArrivalSession(userId, body.data);
 
     if (!result.ok) {
       return NextResponse.json(

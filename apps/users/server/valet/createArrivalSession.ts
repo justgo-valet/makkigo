@@ -1,7 +1,10 @@
 import "server-only";
 import { ACTIVE_VALET_SESSION_STATUSES, lockPlateNumber, prisma } from "database";
 
-import type { ArrivalErrorCode } from "@/libs/valet/contracts/arrival";
+import { hasAgreedToConsent } from "@/server/consent/hasRequiredConsents";
+import { estimateArrivalAt } from "@/server/location/estimateArrivalAt";
+
+import type { ArrivalErrorCode, SendArrivalRequest } from "@/libs/valet/contracts/arrival";
 
 type CreateArrivalSessionResult =
   | { ok: true; valetSessionId: number }
@@ -27,14 +30,18 @@ const findArrivalRecipientIds = async (merchantId: number) => {
 
 const createArrivalSession = async (
   userId: number,
-  merchantId: number,
+  { merchantId, location }: SendArrivalRequest,
 ): Promise<CreateArrivalSessionResult> => {
   const [vehicle, merchant] = await Promise.all([
     prisma.vehicle.findUnique({ where: { userId }, select: { id: true, plateNumber: true } }),
     prisma.merchant.findFirst({
       where: { id: merchantId, deletedAt: null },
       select: {
+        id: true,
         name: true,
+        address: true,
+        latitude: true,
+        longitude: true,
         _count: {
           select: { booths: { where: { status: "APPROVED", booth: { deletedAt: null } } } },
         },
@@ -46,7 +53,12 @@ const createArrivalSession = async (
   if (!merchant) return { ok: false, reason: "MERCHANT_NOT_FOUND" };
   if (merchant._count.booths === 0) return { ok: false, reason: "NO_AVAILABLE_BOOTH" };
 
-  const recipientIds = await findArrivalRecipientIds(merchantId);
+  const [recipientIds, locationAgreed] = await Promise.all([
+    findArrivalRecipientIds(merchantId),
+    location ? hasAgreedToConsent(userId, "LOCATION_BASED_SERVICE") : false,
+  ]);
+  const usesLocation = location !== undefined && locationAgreed;
+  const expectedArrivalAt = usesLocation ? await estimateArrivalAt(location, merchant) : null;
 
   return prisma.$transaction(async (tx) => {
     await lockPlateNumber(tx, vehicle.plateNumber);
@@ -59,18 +71,27 @@ const createArrivalSession = async (
       select: { id: true },
     });
 
-    if (activeSession) return { ok: false, reason: "ACTIVE_SESSION_EXISTS" } as const;
+    const session = activeSession
+      ? null
+      : await tx.valetSession.create({
+          data: {
+            status: "ARRIVING",
+            plateNumber: vehicle.plateNumber,
+            vehicleId: vehicle.id,
+            userId,
+            merchantId,
+            expectedArrivalAt,
+          },
+          select: { id: true },
+        });
 
-    const session = await tx.valetSession.create({
-      data: {
-        status: "ARRIVING",
-        plateNumber: vehicle.plateNumber,
-        vehicleId: vehicle.id,
-        userId,
-        merchantId,
-      },
-      select: { id: true },
-    });
+    if (usesLocation) {
+      await tx.locationUseLog.create({
+        data: { userId, valetSessionId: session?.id ?? null, purpose: "ARRIVAL_ETA" },
+      });
+    }
+
+    if (!session) return { ok: false, reason: "ACTIVE_SESSION_EXISTS" } as const;
 
     await tx.notification.createMany({
       data: recipientIds.map((staffId) => ({
