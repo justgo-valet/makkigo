@@ -18,8 +18,6 @@ type CreateBoothResult =
 
 const MAX_TRANSACTION_ATTEMPTS = 3;
 
-// 직렬화 실패는 문장 실행 중에 나면 P2034 로 오지만, COMMIT 에서 나면 Prisma 가 바꾸지 않은
-// 드라이버 오류(cause.kind 가 P2034 로 바뀌는 바로 그 값)로 온다.
 const isSerializationFailure = (error: unknown) => {
   if (typeof error !== "object" || error === null) return false;
   if ("code" in error && error.code === "P2034") return true;
@@ -37,7 +35,6 @@ const createInTransaction = async (
   staffId: number,
   body: CreateBoothBody,
 ): Promise<CreateBoothResult> => {
-  // 이 읽기가 트랜잭션 밖에서 일어나면 동시에 온 두 요청이 모두 통과해 부스가 2개 생긴다.
   const staff = await transaction.staff.findFirst({
     where: { id: staffId, deletedAt: null },
     select: {
