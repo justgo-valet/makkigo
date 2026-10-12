@@ -67,6 +67,12 @@
 | `/makkigo/prod/valetagents/AUTH_COOKIE_DOMAIN` | `.makkigo.com` (콜백 CSRF 쿠키를 두 서브도메인에 공유) |
 | `/makkigo/prod/valetagents/` 소셜 7개 | 고객 앱과 같은 이름 (`KAKAO_REST_API_KEY` … `NAVER_CLIENT_SECRET`) |
 | `/makkigo/prod/valetagents/KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 키 (부스 위치 지도). 브라우저에 보이는 값이지만 다른 값과 같이 런타임에 읽음. 카카오 콘솔에 `https://valet.makkigo.com` 등록 · 카카오맵 사용 설정 필요. 없으면 지도 대신 안내 문구가 뜸 |
+| `/makkigo/prod/valetagents/AWS_REGION` | `ap-northeast-2` |
+| `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |
+| `/makkigo/prod/valetagents/IMAGE_BASE_URL` | CloudFront 공개 기준 URL. 브라우저 빌드 변수가 아니라 서버 런타임 값 |
+| `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
+| `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
+| `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` | 승인된 운영 채널 webhook. 준비 전에는 cleanup enable 금지 |
 | `/makkigo/prod/deploy/GHCR_USERNAME` | 서버가 GHCR 비공개 이미지를 받을 GitHub 계정 |
 | `/makkigo/prod/deploy/GHCR_TOKEN` | GitHub Personal Access Token (classic), 권한 `read:packages` 만 |
 
@@ -174,6 +180,11 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 1. 이미지 3개(users · valetagents · migrate) 빌드 → GHCR `ghcr.io/justgo-valet/makkigo-<이름>:sha-<커밋 7자리>` (태그를 지정한 수동 실행이면 빌드 생략)
 2. OIDC 로 AWS 배포용 역할을 맡음 (AWS 접속 키 없음, **main 브랜치에서만** 맡을 수 있음)
 3. SSM 명령으로 EC2 에 `deploy/` 파일을 보내고 `deploy.sh` 실행 → 결과 로그를 Actions 에 출력
+
+업체 이미지 cleanup runner는 요원 앱과 **같은 이미지**를 사용합니다. 외부 포트는 없고 내부
+`/api/internal/merchant-uploads/cleanup`만 bearer token으로 호출합니다. Caddy는 이 경로를
+공개 요청에서 403으로 차단합니다. 배포는 Caddy validate/reload와 disabled 상태의 one-off
+dry-run이 성공하지 않으면 완료되지 않습니다.
 
 같은 시각에 배포가 두 개 겹치지 않게 순서대로 실행됩니다.
 

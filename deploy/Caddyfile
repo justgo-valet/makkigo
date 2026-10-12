@@ -10,5 +10,10 @@
 
 {$VALET_DOMAIN} {
 	encode zstd gzip
-	reverse_proxy valetagents:3000
+	handle /api/internal/merchant-uploads/* {
+		respond 403
+	}
+	handle {
+		reverse_proxy valetagents:3000
+	}
 }

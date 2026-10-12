@@ -13,6 +13,7 @@
                                                 ├ caddy        :80 · :443  HTTPS, 주소별 연결
                                                 ├ users        :3001       고객 앱  app.makkigo.com
                                                 ├ valetagents  :3000       요원 앱  valet.makkigo.com
+                                                ├ merchant-upload-cleanup  내부 hourly runner (포트 없음)
                                                 └ postgres     :5432       DB (허용 IP 만)
 GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
               └─OIDC + SSM 명령──▶ EC2 (deploy.sh)
@@ -64,7 +65,7 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 |---|---|---|
 | `postgres/` | 3 | `POSTGRES_USER` `POSTGRES_PASSWORD` `POSTGRES_DB` |
 | `users/` | 11 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `IMAGE_BASE_URL` `KAKAO_REST_API_KEY` `KAKAO_CLIENT_SECRET` `GOOGLE_CLIENT_ID` `GOOGLE_CLIENT_SECRET` `APPLE_SERVICES_ID` `NAVER_CLIENT_ID` `NAVER_CLIENT_SECRET` |
-| `valetagents/` | 13 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `OAUTH_CALLBACK_ORIGIN` `APP_CALLBACK_URL` `AUTH_COOKIE_DOMAIN` + 소셜 7개(고객 앱과 같은 이름) |
+| `valetagents/` | 20 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `OAUTH_CALLBACK_ORIGIN` `APP_CALLBACK_URL` `AUTH_COOKIE_DOMAIN` + 소셜 7개 + `KAKAO_MAP_APP_KEY` + 업체 이미지/cleanup 6개(`AWS_REGION` `S3_IMAGE_BUCKET` `IMAGE_BASE_URL` `MERCHANT_UPLOAD_CLEANUP_TOKEN` `MERCHANT_UPLOAD_CLEANUP_ENABLED` `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL`) |
 | `deploy/` | 2 | `GHCR_USERNAME` `GHCR_TOKEN` (`read:packages` 만 있는 GitHub 토큰) |
 
 ### 이미지 CDN
@@ -76,6 +77,40 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 | 키 | `brands/{브랜드}.png`, `cars/{브랜드}/{모델}.png`, `cars/_default.png` |
 
 DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAGE_BASE_URL` 과 합쳐 응답합니다.
+
+### 업체 이미지 업로드 IAM · CORS 제안 (아직 운영 적용 안 됨)
+
+운영 적용은 별도 승인과 staging 검증 뒤 수행합니다. EC2 실행 역할에 정적 access key를 넣지
+않고 default credential chain을 사용하며, 아래 prefix 밖은 거부합니다.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+    "Resource": [
+      "arn:aws:s3:::makkigo-prod-image-apne2/merchants/staging/*",
+      "arn:aws:s3:::makkigo-prod-image-apne2/merchants/final/*"
+    ]
+  }]
+}
+```
+
+- 브라우저 presigned POST는 `merchants/staging/{staffId}/{sessionId}/...`에만 발급합니다.
+- final write는 서버 conditional CopyObject만 허용합니다. 브라우저/IAM에 final PutObject를
+  허용하지 않는 별도 bucket policy 검증이 release gate입니다.
+- 앱은 Head/Get range 검증과 조건부 copy/delete에 같은 `s3:GetObject`/`DeleteObject` 권한을
+  사용합니다. 버킷 전체 `ListBucket`은 cleanup에 필요하지 않습니다.
+
+제안 CORS(실제 origin과 local origin을 staging에서 확정):
+
+```json
+[{"AllowedOrigins":["https://valet.makkigo.com","http://localhost:3000"],"AllowedMethods":["POST"],"AllowedHeaders":["Content-Type","x-amz-*"],"MaxAgeSeconds":300}]
+```
+
+버킷은 private, CloudFront 읽기는 기존 OAC/OAI를 유지합니다. CORS는 인증/쓰기 권한을 부여하지
+않으며, 실제 policy/IAM/CORS 적용과 조건부 요청 검증은 아직 미수행입니다.
 
 ### Route 53
 
