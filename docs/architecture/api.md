@@ -47,6 +47,7 @@
 | `GET /api/v1/merchants?q=` | 업체 검색: 이름 · 주소에 검색어가 들어간 업체 중 **계약이 승인되고 현재 요금이 등록된 부스가 있는** 곳만 (삭제 제외, 이름 순 최대 20개). `q` 없음 · 50자 초과는 400 | ✅ | [#72](https://github.com/justgo-valet/makkigo/pull/72) |
 | `POST /api/v1/valet-sessions` | 도착 알림 보내기: `{ merchantId, location? }` → 도착 예정 세션 생성(201 `{ id }`) + 받을 요원에게 알림 기록. `location`(`{ latitude, longitude }`)이 있고 위치기반서비스에 동의했으면 예상 도착 시각을 계산해 저장(실패해도 세션은 만듦, **예정**). 403 `VEHICLE_REQUIRED` · 404 `MERCHANT_NOT_FOUND` · 409 `ACTIVE_SESSION_EXISTS` · 422 `NO_AVAILABLE_BOOTH` | ✅ | [#73](https://github.com/justgo-valet/makkigo/pull/73) |
 | `POST /api/v1/valet-sessions/{id}/cancel` | 도착 알림 취소: 내 도착 예정 세션 → 취소(204) + 도착 알림을 받았던 요원에게 취소 알림 기록. 404 `SESSION_NOT_FOUND` · 409 `NOT_CANCELLABLE`(이미 취소 · 주차 시작) | ✅ | 이 PR |
+| `GET /api/v1/notifications?cursor=` | 내 알림 내역: 최신순 20개씩 `{ notifications: [{ id, type, title, body, valetSessionId, readAt, createdAt }], nextCursor }`. 다음 페이지는 `nextCursor` 를 `cursor` 로 넘김(없으면 `null`). 잘못된 `cursor` 는 400 `INVALID_CURSOR` | ✅ | 이 PR |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
 
