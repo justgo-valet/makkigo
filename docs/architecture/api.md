@@ -54,6 +54,7 @@
 | 메서드 · 경로 | 하는 일 | 로그인 | PR |
 |---|---|---|---|
 | `GET /api/v1/booths?q=` | 부스 검색: 이름 · 주소에 검색어가 들어간 부스 (삭제 제외, 이름 순 최대 20개) + 최신 요금 정책 + **내** 등록 요청. `q` 없음 · 50자 초과는 400 `INVALID_QUERY`, 요원이 아니면 403 `VALET_AGENT_REQUIRED` | ✅ 요원 | 이 PR |
+| `POST /api/v1/booths` | 부스 생성: `{ name, address, addressDetail? }` (앞뒤 공백 제거 후 이름 1~50자 · 주소 1~200자 · 상세 주소 100자 이하, 비면 `null`) → 201 `{ id }`. **온보딩을 마치지 않은 요원만** 만들 수 있고, 만든 사람은 같은 트랜잭션에서 그 부스의 승인된 요원(근무 시간 없음)이 되어 온보딩이 끝남. 주소가 지도에서 찾아지는지는 화면에서만 확인. 400 `INVALID_REQUEST`(모르는 키 포함) · 403 `VALET_AGENT_REQUIRED` · `ALREADY_ONBOARDED` · 409 `REQUEST_CONFLICT` | ✅ 요원 | 이 PR |
 | `PUT /api/v1/booths/{boothId}/agent-request` | 부스 등록 요청: `{ workStartTime, workEndTime }` (HH:mm). 처음이면 201 `CREATED`, 대기 중이면 근무시간만 바꿔 200 `UPDATED`, 거절됐으면 다시 요청 상태로 200 `REOPENED`. 400 `INVALID_REQUEST` · `INVALID_WORK_TIME` · 403 `VALET_AGENT_REQUIRED` · 404 `BOOTH_NOT_FOUND` · 409 `ALREADY_APPROVED` · `REQUEST_CONFLICT` | ✅ 요원 | 이 PR |
 | `GET /api/v1/onboarding/status` | 온보딩 상태: `role`, `state`(`ROLE_REQUIRED` · `BOOTH_REQUIRED` · `AWAITING_APPROVAL` · `COMPLETE`), `nextPath`, 내 등록 요청 목록(부스 · 최신 요금 정책 포함). 승인된 소속이 하나라도 있으면 `COMPLETE` | ✅ | 이 PR |
 | `GET /api/v1/booths/{boothId}/agents?page=` | 부스 요원 목록: 이름 · 근무시간 · 근무 중 여부(`working`) · 등록 상태, 등록 순 10명씩 (`page`, `totalPages`). 탈퇴한 요원 제외. 400 `INVALID_PAGE` · 403 `BOOTH_MANAGER_REQUIRED` · 404 `BOOTH_NOT_FOUND` | ✅ 부스 관리자 | 이 PR |
