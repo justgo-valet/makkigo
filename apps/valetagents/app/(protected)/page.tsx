@@ -6,11 +6,13 @@ import AppHeader from "@/components/layouts/AppHeader";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
 import { getStaffMenuAccess } from "@/server/auth/getStaffMenuAccess";
+import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
 
 export default async function Home() {
   const token = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   const staffId = token ? await getActiveStaffIdFromAccessToken(token) : null;
   if (!staffId) redirect("/login");
+  await requireProtectedStaff(staffId);
   if ((await getPathAfterLogin(staffId)) === "/onboarding") redirect("/onboarding");
 
   const menu = await getStaffMenuAccess(staffId);

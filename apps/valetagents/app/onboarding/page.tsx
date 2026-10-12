@@ -21,6 +21,7 @@ export default async function OnboardingPage({ searchParams }: Readonly<Onboardi
   if (!initialStatus) redirect("/login");
   if (initialStatus.state === "COMPLETE") redirect("/");
   if (initialStatus.state === "ROLE_REQUIRED") return <RoleSelection />;
+  if (initialStatus.role === "MERCHANT_ADMIN") redirect("/onboarding/merchant");
 
   const requestedView = (await searchParams).view;
   const initialView = requestedView === "search" ? "search" : null;

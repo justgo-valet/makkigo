@@ -17,6 +17,8 @@ describe("getPathAfterLogin", () => {
     ["ROLE_REQUIRED", "/onboarding"],
     ["BOOTH_REQUIRED", "/onboarding"],
     ["AWAITING_APPROVAL", "/onboarding"],
+    ["MERCHANT_REGISTRATION_REQUIRED", "/onboarding"],
+    ["MERCHANT_APPROVAL_PENDING", "/onboarding"],
     ["COMPLETE", "/"],
   ] as const)("uses the shared %s onboarding decision", async (state, nextPath) => {
     onboarding.getStaffOnboardingState.mockResolvedValue({ state, nextPath });
