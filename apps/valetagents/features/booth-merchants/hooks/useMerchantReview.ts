@@ -8,7 +8,7 @@ import { boothMerchantsQueryKey } from "./useBoothMerchants";
 
 import type { BoothMerchantReviewBody } from "../schemas/merchants";
 
-const REVIEW_ERROR_MESSAGE = "계약 상태를 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.";
+const REVIEW_ERROR_MESSAGE = "등록 상태를 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.";
 
 interface UseMerchantReviewOptions {
   staffId: number;

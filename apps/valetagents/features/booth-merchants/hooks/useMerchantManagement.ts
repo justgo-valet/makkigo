@@ -20,8 +20,8 @@ interface UseMerchantManagementOptions {
 }
 
 const REVIEW_NOTICES: Record<ReviewStatus, string> = {
-  APPROVED: "계약을 수락했어요",
-  REJECTED: "계약을 거절했어요",
+  APPROVED: "등록을 수락했어요",
+  REJECTED: "등록을 거절했어요",
 };
 
 const getReviewAvailability = (selectedMerchants: Pick<BoothMerchant, "status">[]) => {

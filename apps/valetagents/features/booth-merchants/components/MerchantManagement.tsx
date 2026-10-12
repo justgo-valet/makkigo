@@ -109,7 +109,7 @@ export default function MerchantManagement({
         </div>
       ) : (
         management.merchants.length === 0 && (
-          <p className="mt-10 text-center text-lg text-[#575757]">계약을 요청한 업체가 없어요.</p>
+          <p className="mt-10 text-center text-lg text-[#575757]">등록을 요청한 업체가 없어요.</p>
         )
       )}
 
