@@ -40,6 +40,16 @@ const createTransaction = () => ({
 
 const body = { workStartTime: "22:00", workEndTime: "06:00" };
 
+const driverAdapterError = (cause: { kind: string; originalCode?: string; originalMessage?: string }) =>
+  Object.assign(new Error(cause.kind), { name: "DriverAdapterError", cause });
+
+const commitWriteConflict = () =>
+  driverAdapterError({
+    originalCode: "40001",
+    originalMessage: "could not serialize access due to read/write dependencies among transactions",
+    kind: "TransactionWriteConflict",
+  });
+
 describe("saveAgentRequest", () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -153,5 +163,18 @@ describe("saveAgentRequest", () => {
       reason: "REQUEST_CONFLICT",
     });
     expect(database.transaction).toHaveBeenCalledTimes(3);
+  });
+
+  it("retries a serialization failure raised at commit", async () => {
+    const transaction = createTransaction();
+    database.transaction
+      .mockImplementation((callback) => callback(transaction))
+      .mockRejectedValueOnce(commitWriteConflict());
+
+    await expect(saveAgentRequest(7, 3, body)).resolves.toMatchObject({
+      ok: true,
+      value: { outcome: "CREATED" },
+    });
+    expect(database.transaction).toHaveBeenCalledTimes(2);
   });
 });
