@@ -117,7 +117,7 @@ export default function BoothRegistrationForm({
       </div>
 
       <p className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
-      <div className={cn(BOX_CLASS, "mt-[3px] flex h-[105px] flex-col items-center justify-center bg-[#e8e8e8]")}>
+      <div aria-hidden className={cn(BOX_CLASS, "mt-[3px] flex h-[105px] flex-col items-center justify-center bg-[#e8e8e8]")}>
         <Image src="/icons/upload.svg" alt="" width={24} height={26} className="ml-px" />
         <p className="mt-[15px] text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</p>
       </div>
