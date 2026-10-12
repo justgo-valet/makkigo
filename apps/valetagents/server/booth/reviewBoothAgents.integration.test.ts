@@ -38,6 +38,75 @@ const statusOf = async (membershipId: number) =>
   (await prisma.boothAgent.findUniqueOrThrow({ where: { id: membershipId }, select: { status: true } }))
     .status;
 
+const createDeferred = <T = void>() => {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  const promise = new Promise<T>((next) => {
+    resolve = next;
+  });
+  return { promise, resolve };
+};
+
+const waitForWaiters = async (lockHolderPid: number, expected: number) => {
+  const deadline = Date.now() + 5_000;
+
+  while (Date.now() < deadline) {
+    const sessions = await prisma.$queryRaw<{ pid: number; blockers: number[] }[]>`
+      SELECT pid, pg_blocking_pids(pid) AS blockers
+      FROM pg_stat_activity
+      WHERE datname = current_database() AND cardinality(pg_blocking_pids(pid)) > 0
+    `;
+    // 두 번째로 기다리는 요청은 잠금을 쥔 쪽이 아니라 먼저 기다리던 요청 뒤에 선다.
+    const waiting = new Set([lockHolderPid]);
+    for (let found = true; found; ) {
+      found = false;
+      for (const { pid, blockers } of sessions) {
+        if (!waiting.has(pid) && blockers.some((blocker) => waiting.has(blocker))) {
+          waiting.add(pid);
+          found = true;
+        }
+      }
+    }
+    if (waiting.size - 1 >= expected) return;
+    await new Promise<void>((resolve) => setImmediate(resolve));
+  }
+
+  throw new Error(`Timed out waiting for ${expected} reviews blocked behind PID ${lockHolderPid}`);
+};
+
+// 등록 행 하나를 잠가 둔 채 두 요청을 시작하고, 둘 다 그 잠금 뒤에 선 것을 확인한 다음에 푼다.
+// 그래서 두 요청은 반드시 같은 행 상태를 읽은 뒤에 겹쳐서 쓴다.
+const reviewTogether = async (
+  lockedMembershipId: number,
+  bodies: [Parameters<typeof ReviewBoothAgents>[2], Parameters<typeof ReviewBoothAgents>[2]],
+) => {
+  const locked = createDeferred<number>();
+  const release = createDeferred();
+
+  const lockHolder = prisma.$transaction(async (transaction) => {
+    const [connection] = await transaction.$queryRaw<[{ pid: number }]>`
+      SELECT pg_backend_pid() AS pid
+      FROM booth_agents
+      WHERE id = ${lockedMembershipId}
+      FOR UPDATE
+    `;
+    if (!connection) throw new Error("Could not lock the membership row");
+    locked.resolve(connection.pid);
+    await release.promise;
+  });
+
+  const lockHolderPid = await locked.promise;
+  const reviews = bodies.map((body) => reviewBoothAgents(managerId, boothId, body));
+
+  try {
+    await waitForWaiters(lockHolderPid, reviews.length);
+  } finally {
+    release.resolve();
+  }
+
+  await lockHolder;
+  return Promise.allSettled(reviews);
+};
+
 beforeAll(async () => {
   process.env.DATABASE_URL = requireTestDatabaseUrl();
   ({ prisma } = await import("database"));
@@ -145,6 +214,38 @@ describe("reviewBoothAgents database integration", () => {
 
     expect(await statusOf(untouched.id)).toBe("REQUESTED");
     expect(await statusOf(edited.id)).toBe("REQUESTED");
+  });
+
+  it("lets only one of an overlapping approval and rejection of the same agent through", async () => {
+    const pending = await createMembership(agentIds[0], "REQUESTED");
+
+    const results = await reviewTogether(pending.id, [
+      { status: "APPROVED", agents: [pending] },
+      { status: "REJECTED", agents: [pending] },
+    ]);
+
+    expect(results.map((result) => result.status)).toEqual(["fulfilled", "fulfilled"]);
+    const [approval, rejection] = results.map((result) => result.status === "fulfilled" && result.value);
+    expect([approval, rejection]).toContainEqual({ ok: true });
+    expect([approval, rejection]).toContainEqual({ ok: false, reason: "AGENT_CHANGED" });
+    expect(await statusOf(pending.id)).toBe(approval && approval.ok ? "APPROVED" : "REJECTED");
+  });
+
+  it("settles overlapping reviews that name the same agents in opposite order", async () => {
+    const first = await createMembership(agentIds[0], "REQUESTED");
+    const second = await createMembership(agentIds[1], "REQUESTED");
+
+    const results = await reviewTogether(first.id, [
+      { status: "APPROVED", agents: [first, second] },
+      { status: "APPROVED", agents: [second, first] },
+    ]);
+
+    expect(results.map((result) => result.status)).toEqual(["fulfilled", "fulfilled"]);
+    const values = results.map((result) => result.status === "fulfilled" && result.value);
+    expect(values).toContainEqual({ ok: true });
+    expect(values).toContainEqual({ ok: false, reason: "AGENT_CHANGED" });
+    expect(await statusOf(first.id)).toBe("APPROVED");
+    expect(await statusOf(second.id)).toBe("APPROVED");
   });
 
   it("does not let an approved agent be re-requested by a stale agent save", async () => {

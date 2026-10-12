@@ -22,6 +22,8 @@ class ReviewAbortedError extends Error {
 // 고른 요원 전부를 한 번에 바꾸거나 하나도 바꾸지 않는다.
 // 관리자가 목록을 본 뒤 요원이 요청을 고쳤으면(updatedAt 이 다르면) 바꾸지 않고 다시 확인하게 한다.
 // 이미 등록된 요원은 거절할 수 없다.
+// 겹친 두 요청이 같은 등록 행들을 서로 다른 순서로 잠가 교착되지 않도록 등록 id 순으로 처리한다.
+// 늦은 쪽은 updatedAt 조건에 걸려 AGENT_CHANGED 로 끝난다.
 const reviewBoothAgents = async (
   staffId: number,
   boothId: number,
@@ -32,7 +34,7 @@ const reviewBoothAgents = async (
 
   try {
     await prisma.$transaction(async (transaction) => {
-      for (const agent of agents) {
+      for (const agent of [...agents].sort((left, right) => left.id - right.id)) {
         const seenUpdatedAt = new Date(agent.updatedAt);
         const current = await transaction.boothAgent.findFirst({
           where: { id: agent.id, boothId, staff: { deletedAt: null } },
