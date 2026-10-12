@@ -2,6 +2,12 @@ import { z } from "zod";
 
 const sendArrivalRequestSchema = z.object({
   merchantId: z.number().int().positive(),
+  location: z
+    .object({
+      latitude: z.number().min(-90).max(90),
+      longitude: z.number().min(-180).max(180),
+    })
+    .optional(),
 });
 
 const sendArrivalResponseSchema = z.object({

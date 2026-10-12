@@ -10,6 +10,8 @@ model ValetSession {
     boothId         Int? @map("booth_id")
     ticketVersionId Int? @map("ticket_version_id")
 
+    expectedArrivalAt DateTime? @map("expected_arrival_at") @db.Timestamptz(3)
+
     arrivalDelayMinutes Int?      @map("arrival_delay_minutes")
     arrivalDelayedAt    DateTime? @map("arrival_delayed_at") @db.Timestamptz(3)
 
@@ -32,15 +34,16 @@ model ValetSession {
     createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
     updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-    vehicle         Vehicle?       @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
-    user            User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
-    merchant        Merchant?      @relation(fields: [merchantId], references: [id])
-    booth           Booth?         @relation(fields: [boothId], references: [id])
-    ticketVersion   TicketVersion? @relation(fields: [ticketVersionId], references: [id])
-    parkedBy        Staff?         @relation("SessionParkedBy", fields: [parkedById], references: [id])
-    pickupResponder Staff?         @relation("SessionRespondedBy", fields: [pickupRespondedById], references: [id])
-    completedBy     Staff?         @relation("SessionCompletedBy", fields: [completedById], references: [id])
+    vehicle         Vehicle?         @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+    user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+    merchant        Merchant?        @relation(fields: [merchantId], references: [id])
+    booth           Booth?           @relation(fields: [boothId], references: [id])
+    ticketVersion   TicketVersion?   @relation(fields: [ticketVersionId], references: [id])
+    parkedBy        Staff?           @relation("SessionParkedBy", fields: [parkedById], references: [id])
+    pickupResponder Staff?           @relation("SessionRespondedBy", fields: [pickupRespondedById], references: [id])
+    completedBy     Staff?           @relation("SessionCompletedBy", fields: [completedById], references: [id])
     notifications   Notification[]
+    locationUseLogs LocationUseLog[]
 
     @@index([plateNumber, status])
     @@index([userId, createdAt])
