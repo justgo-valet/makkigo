@@ -1,0 +1,18 @@
+enum LocationUsePurpose {
+    ARRIVAL_ETA
+}
+
+model LocationUseLog {
+    id             Int                @id @default(autoincrement())
+    userId         Int                @map("user_id")
+    valetSessionId Int?               @map("valet_session_id")
+    purpose        LocationUsePurpose
+    createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    valetSession ValetSession? @relation(fields: [valetSessionId], references: [id], onDelete: SetNull)
+
+    @@index([userId, createdAt])
+    @@index([createdAt])
+    @@map("location_use_logs")
+}
