@@ -16,7 +16,7 @@ const ERROR_RESPONSES = {
   MERCHANT_ALREADY_APPROVED: { status: 409, message: "이미 등록된 업체는 거절할 수 없습니다." },
   MERCHANT_CHANGED: {
     status: 409,
-    message: "계약 상태가 바뀌었습니다. 목록을 다시 확인해 주세요.",
+    message: "등록 상태가 바뀌었습니다. 목록을 다시 확인해 주세요.",
   },
 } as const;
 
@@ -76,6 +76,6 @@ export async function PATCH(
     return new Response(null, { status: 204, headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error("Failed to review booth merchants", error);
-    return apiError("INTERNAL_ERROR", "업체 계약 상태를 바꾸지 못했습니다.", 500);
+    return apiError("INTERNAL_ERROR", "업체 등록 상태를 바꾸지 못했습니다.", 500);
   }
 }
