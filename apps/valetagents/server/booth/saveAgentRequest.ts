@@ -47,8 +47,17 @@ const selectRequest = (now: Date) =>
 
 class ConcurrentAgentRequestError extends Error {}
 
+const isCommitWriteConflict = (error: unknown) =>
+  error instanceof Error &&
+  error.name === "DriverAdapterError" &&
+  typeof error.cause === "object" &&
+  error.cause !== null &&
+  "kind" in error.cause &&
+  error.cause.kind === "TransactionWriteConflict";
+
 const isRetryableTransactionError = (error: unknown) =>
   error instanceof ConcurrentAgentRequestError ||
+  isCommitWriteConflict(error) ||
   (typeof error === "object" &&
     error !== null &&
     "code" in error &&
