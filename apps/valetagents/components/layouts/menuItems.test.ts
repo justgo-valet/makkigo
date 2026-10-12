@@ -3,9 +3,10 @@ import { describe, expect, it } from "vitest";
 import { getMenuItems } from "./menuItems";
 
 describe("getMenuItems", () => {
-  it("sends a booth manager to the agent management of the booth they created", () => {
+  it("sends a booth manager to the agent and merchant management of the booth they created", () => {
     expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: 3 })).toEqual([
       { label: "요원 관리", href: "/booths/3/agents" },
+      { label: "업체 관리", href: "/booths/3/merchants" },
       { label: "설정", href: "/settings" },
     ]);
   });
