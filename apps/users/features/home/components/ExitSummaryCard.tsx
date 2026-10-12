@@ -7,12 +7,14 @@ interface ExitSummaryCardProps {
   summary: ExitSummary;
   isAccountCopied: boolean;
   onCopyAccountNumber: () => void;
+  onFeeDetailClick: () => void;
 }
 
 export default function ExitSummaryCard({
   summary,
   isAccountCopied,
   onCopyAccountNumber,
+  onFeeDetailClick,
 }: Readonly<ExitSummaryCardProps>) {
   return (
     <div className="flex flex-col rounded-xl border bg-(--surface-color) px-4">
@@ -26,10 +28,15 @@ export default function ExitSummaryCard({
         </p>
       </div>
       <Separator />
-      <div className="flex items-center justify-between py-4">
-        <p className="text-(--tertiary-color)">{summary.feeLabel}</p>
-        <div className="flex items-center gap-1">
-          <p className="text-lg font-bold text-(--base-color)">{summary.fee}</p>
+      <button
+        type="button"
+        disabled={!summary.canSeeFeeDetail}
+        className="flex items-center justify-between py-4 text-left"
+        onClick={onFeeDetailClick}
+      >
+        <span className="text-(--tertiary-color)">{summary.feeLabel}</span>
+        <span className="flex items-center gap-1">
+          <span className="text-lg font-bold text-(--base-color)">{summary.fee}</span>
           {summary.canSeeFeeDetail && (
             <Image
               src="/icons/chevron_right.svg"
@@ -39,8 +46,8 @@ export default function ExitSummaryCard({
               height={20}
             />
           )}
-        </div>
-      </div>
+        </span>
+      </button>
       {summary.accountNumber && (
         <>
           <Separator />
