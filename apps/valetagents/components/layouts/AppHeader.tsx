@@ -22,11 +22,14 @@ export default function AppHeader({ menu, backHref }: Readonly<AppHeaderProps>) 
           <Image src="/icons/chevron_left.svg" alt="" width={24} height={24} />
         </Link>
       )}
+      {/* 프레임의 글자 가운데(x 193.5)가 헤더 가운데(196.5)보다 3px 왼쪽이다 */}
       <Image
         src={makkigoLogo}
         alt="마끼고"
+        width={95}
+        height={39}
         priority
-        className="absolute left-1/2 h-6 w-[105px] -translate-x-[calc(50%+3px)] object-contain"
+        className="absolute top-1/2 left-1/2 h-[39px] -translate-x-[calc(50%+3px)] -translate-y-1/2"
       />
       <Sheet>
         <SheetTrigger aria-label="메뉴" className="-mr-1 ml-auto">

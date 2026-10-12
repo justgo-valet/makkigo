@@ -21,7 +21,7 @@ const requireTestDatabaseUrl = () => {
   return value;
 };
 
-const createStaff = async (label: string, role: StaffRole, deletedAt: Date | null = null) => {
+const createStaff = async (label: string, role: StaffRole | null, deletedAt: Date | null = null) => {
   const { id } = await prisma.staff.create({
     data: { role, name: `integration-${label}-${suffix}`, deletedAt },
     select: { id: true },
@@ -83,6 +83,15 @@ describe("getStaffMenuAccess database integration", () => {
 
     await expect(getStaffMenuAccess(adminId)).resolves.toEqual({
       role: "MERCHANT_ADMIN",
+      managedBoothId: null,
+    });
+  });
+
+  it("returns a null role for a staff member who has not chosen one", async () => {
+    const staffId = await createStaff("no-role", null);
+
+    await expect(getStaffMenuAccess(staffId)).resolves.toEqual({
+      role: null,
       managedBoothId: null,
     });
   });
