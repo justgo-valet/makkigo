@@ -32,7 +32,7 @@ const reviewBoothAgents = async (
 
   try {
     await prisma.$transaction(async (transaction) => {
-      for (const agent of agents) {
+      for (const agent of [...agents].sort((left, right) => left.id - right.id)) {
         const seenUpdatedAt = new Date(agent.updatedAt);
         const current = await transaction.boothAgent.findFirst({
           where: { id: agent.id, boothId, staff: { deletedAt: null } },
