@@ -24,7 +24,6 @@ const useMerchantReview = ({ staffId, boothId, onReviewed, onFailed }: UseMercha
     retry: false,
     onSuccess: (_result, body) => onReviewed(body),
     onError: onFailed,
-    // 실패해도 목록을 다시 받아, 바뀐 계약 상태를 관리자가 보고 다시 고르게 한다. 낡은 선택은 풀어 둔다.
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: boothMerchantsQueryKey(staffId, boothId) }),
   });
