@@ -2,8 +2,8 @@
 
 import { Button, FieldError, cn } from "@makkigo/ui";
 import { Checkbox } from "@makkigo/ui/components/ui/checkbox";
-import Image from "next/image";
-import Link from "next/link";
+
+import AppHeader from "@/components/layouts/AppHeader";
 
 import {
   REGISTRATION_STATUS_LABELS,
@@ -13,12 +13,14 @@ import {
 } from "../formatters";
 import { useAgentManagement } from "../hooks/useAgentManagement";
 
+import type { MenuAccess } from "@/components/layouts/menuItems";
 import type { BoothAgentListResponse } from "../schemas/agents";
 
 interface AgentManagementProps {
   staffId: number;
   boothId: number;
   initialData: BoothAgentListResponse;
+  menu: MenuAccess;
 }
 
 const CHECKBOX_CLASS =
@@ -30,24 +32,15 @@ export default function AgentManagement({
   staffId,
   boothId,
   initialData,
+  menu,
 }: Readonly<AgentManagementProps>) {
   const management = useAgentManagement({ staffId, boothId, initialData });
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-[25px] pb-8">
+    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-8">
       <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
 
-      <header className="relative flex h-6 items-center justify-between">
-        <Link href="/" aria-label="뒤로 가기">
-          <Image src="/icons/chevron_left.svg" alt="" width={24} height={24} />
-        </Link>
-        <p className="absolute left-1/2 -translate-x-1/2 text-[32px] leading-none font-bold tracking-[-0.3px] text-(--primary-color)">
-          MAKKIGO
-        </p>
-        <button type="button" aria-label="메뉴" className="-mr-1" disabled>
-          <Image src="/icons/menu.svg" alt="" width={24} height={24} />
-        </button>
-      </header>
+      <AppHeader menu={menu} backHref="/" />
 
       <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">요원 관리</h1>
 
