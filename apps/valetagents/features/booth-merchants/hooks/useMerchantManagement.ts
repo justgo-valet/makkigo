@@ -24,7 +24,6 @@ const REVIEW_NOTICES: Record<ReviewStatus, string> = {
   REJECTED: "계약을 거절했어요",
 };
 
-// 등록된 업체는 거절할 수 없고, 다시 수락할 것도 없다.
 const getReviewAvailability = (selectedMerchants: Pick<BoothMerchant, "status">[]) => {
   const hasApproved = selectedMerchants.some(({ status }) => status === "APPROVED");
 
@@ -35,13 +34,11 @@ const getReviewAvailability = (selectedMerchants: Pick<BoothMerchant, "status">[
   };
 };
 
-// 상세는 눌러서 고른 행 하나로만 정해진다. 체크박스 선택과는 상관없다.
 const getDetail = <Merchant extends Pick<BoothMerchant, "id">>(
   merchants: Merchant[],
   detailId: number | null,
 ) => merchants.find(({ id }) => id === detailId) ?? null;
 
-// 체크한 업체 가운데 지금 보이는 쪽에 있는 것만 수락 · 거절 대상이다.
 const getSelectedMerchants = <Merchant extends Pick<BoothMerchant, "id">>(
   merchants: Merchant[],
   selectedIds: number[],
