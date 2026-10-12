@@ -21,7 +21,7 @@ interface BoothRegistrationFormProps {
 const LABEL_CLASS = "text-base leading-6 font-medium text-(--base-color)";
 const INPUT_CLASS =
   "mt-1.5 h-12 w-full rounded-lg border border-[#d8d8d8] bg-white px-3 text-base text-(--base-color) outline-none placeholder:text-sm placeholder:text-[#717171] focus-visible:border-(--primary-color)";
-const BOX_CLASS = "h-[180px] rounded-lg border border-[#999] bg-[#e8e8e8]";
+const BOX_CLASS = "rounded-lg border border-[#999]";
 
 export default function BoothRegistrationForm({
   returnPath,
@@ -95,7 +95,7 @@ export default function BoothRegistrationForm({
         onChange={(event) => form.changeAddressDetail(event.target.value)}
       />
 
-      <div className={cn(BOX_CLASS, "relative mt-1.5 overflow-hidden")}>
+      <div className={cn(BOX_CLASS, "relative mt-1.5 h-[180px] overflow-hidden bg-white")}>
         <div
           ref={mapContainerRef}
           className={cn("h-full w-full", form.mapView !== "ready" && "invisible")}
@@ -117,9 +117,9 @@ export default function BoothRegistrationForm({
       </div>
 
       <p className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
-      <div className={cn(BOX_CLASS, "mt-[3px] flex flex-col items-center pt-[66px]")}>
+      <div className={cn(BOX_CLASS, "mt-[3px] flex h-[105px] flex-col items-center justify-center bg-[#e8e8e8]")}>
         <Image src="/icons/upload.svg" alt="" width={24} height={26} className="ml-px" />
-        <p className="mt-3.5 text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</p>
+        <p className="mt-[15px] text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</p>
       </div>
 
       <div className="mt-auto pt-0.5">
