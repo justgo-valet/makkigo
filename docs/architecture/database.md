@@ -72,6 +72,7 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 - **기준 요금** = `base_fee` (`base_minutes` 까지) + ceil((이용 시간 − `base_minutes`) ÷ `extra_unit_minutes`) × `extra_unit_fee`. 이용 시간 = 주차 완료 ~ 출차 요청 → [valet-session.md](../planning/valet-session.md#요금)
 - **티켓 버전**(`ticket_versions`)은 수정할 때마다 새 행. 업체의 최신 티켓 = 그 업체 티켓 버전 중 `created_at` 이 가장 늦은 것
 - **요원 근무 시간**(`booth_agents.work_start_time` · `work_end_time`)에 맞춰 알림을 켜고 끕니다 (`notifications_enabled`)
+- **업체 관리의 등록일자**는 `APPROVED` 인 `booth_merchants.updated_at` 입니다 (따로 컬럼을 두지 않음). 이 표에서 바뀌는 컬럼이 `status` 뿐이라 `APPROVED` 행의 `updated_at` 이 마지막으로 수락한 시각입니다. `APPROVED` 행을 다시 쓰는 코드를 넣게 되면 그 전에 `approved_at` 컬럼을 만들어 `updated_at` 값을 옮깁니다
 - **부스 · 업체 사진**은 사진 1장 = 행 1개 (`booth_photos`, `merchant_photos`). 한 장씩 추가 · 삭제 · 순서 변경(`sort_order`)하고, 행을 지울 때 S3 파일(`path`)도 함께 지웁니다. 업체 사진은 최대 5장 (서버에서 검사)
 - **푸시 기기 · 알림**은 고객(`user_id`) 또는 staff(`staff_id`) 중 하나에만 속합니다 (서버에서 보장)
 - **업체 좌표**(`merchants.latitude` · `longitude`): 예상 도착 시각 계산의 목적지. 비어 있으면 예상 시각은 미정
