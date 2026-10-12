@@ -19,11 +19,6 @@ class ReviewAbortedError extends Error {
   }
 }
 
-// 고른 업체 전부를 한 번에 바꾸거나 하나도 바꾸지 않는다.
-// 관리자가 목록을 본 뒤 계약 행이 바뀌었으면(updatedAt 이 다르면) 바꾸지 않고 다시 확인하게 한다.
-// 이미 등록된 업체는 거절할 수 없다.
-// 겹친 두 요청이 같은 계약 행들을 서로 다른 순서로 잠가 교착되지 않도록 업체 id 순으로 처리한다.
-// 늦은 쪽은 updatedAt 조건에 걸려 MERCHANT_CHANGED 로 끝난다.
 const reviewBoothMerchants = async (
   staffId: number,
   boothId: number,
