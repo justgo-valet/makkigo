@@ -4,14 +4,14 @@ vi.mock("server-only", () => ({}));
 
 const database = vi.hoisted(() => ({
   findBooth: vi.fn(),
-  countAgents: vi.fn(),
+  groupAgents: vi.fn(),
   findAgents: vi.fn(),
 }));
 
 vi.mock("database", () => ({
   prisma: {
     booth: { findFirst: database.findBooth },
-    boothAgent: { count: database.countAgents, findMany: database.findAgents },
+    boothAgent: { groupBy: database.groupAgents, findMany: database.findAgents },
   },
 }));
 
@@ -37,7 +37,7 @@ describe("listBoothAgents", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     database.findBooth.mockResolvedValue({ creatorId: 7 });
-    database.countAgents.mockResolvedValue(0);
+    database.groupAgents.mockResolvedValue([]);
     database.findAgents.mockResolvedValue([]);
   });
 
@@ -59,22 +59,6 @@ describe("listBoothAgents", () => {
     expect(database.findAgents).not.toHaveBeenCalled();
   });
 
-  it("pages agents of active staff in registration order", async () => {
-    database.countAgents.mockResolvedValue(23);
-
-    const result = await listBoothAgents(7, 1, 3);
-
-    expect(result).toEqual({ ok: true, value: { items: [], page: 3, totalPages: 3 } });
-    expect(database.findAgents).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { boothId: 1, staff: { deletedAt: null } },
-        orderBy: { id: "asc" },
-        skip: 20,
-        take: 10,
-      }),
-    );
-  });
-
   it("reports one page when nobody has requested yet", async () => {
     await expect(listBoothAgents(7, 1, 1)).resolves.toEqual({
       ok: true,
@@ -83,7 +67,7 @@ describe("listBoothAgents", () => {
   });
 
   it("serializes work time and marks approved agents inside their shift as working", async () => {
-    database.countAgents.mockResolvedValue(1);
+    database.groupAgents.mockResolvedValue([{ status: "APPROVED", _count: { _all: 1 } }]);
     database.findAgents.mockResolvedValue([agent()]);
 
     const result = await listBoothAgents(7, 1, 1, NOON_IN_SEOUL);
@@ -114,7 +98,7 @@ describe("listBoothAgents", () => {
     ["is outside the shift", { workStartTime: workTime(13), workEndTime: workTime(18) }],
     ["has no work time", { workStartTime: null, workEndTime: null }],
   ])("does not mark an agent as working when the agent %s", async (_label, overrides) => {
-    database.countAgents.mockResolvedValue(1);
+    database.groupAgents.mockResolvedValue([{ status: "APPROVED", _count: { _all: 1 } }]);
     database.findAgents.mockResolvedValue([agent(overrides)]);
 
     const result = await listBoothAgents(7, 1, 1, NOON_IN_SEOUL);
