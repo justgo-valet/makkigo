@@ -19,6 +19,11 @@ const useBoothMap = (address: string, appKey: string) => {
   const [retryKey, setRetryKey] = useState(0);
   const [result, setResult] = useState<MapResult | null>(null);
   const mapKey = `${address}:${retryKey}`;
+  const [lookupKey, setLookupKey] = useState(mapKey);
+  if (lookupKey !== mapKey) {
+    setLookupKey(mapKey);
+    setResult(null);
+  }
   const state: MapState = result?.key === mapKey ? result.state : "loading";
 
   useEffect(() => {
