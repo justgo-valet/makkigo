@@ -1,6 +1,3 @@
--- Existing merchants remain readable. New registration code requires this
--- value, but the column stays nullable until an authorized legacy-data
--- inventory and backfill prove that a later NOT NULL migration is safe.
 ALTER TABLE "merchants"
 ADD COLUMN "postal_code" TEXT;
 
@@ -87,8 +84,6 @@ ON "merchants"("admin_id", "deleted_at");
 CREATE UNIQUE INDEX "merchant_registration_sessions_staff_id_idempotency_key_key"
 ON "merchant_registration_sessions"("staff_id", "idempotency_key");
 
--- This is the single authoritative active-submission predicate. Expiry alone
--- does not free this slot; the session must first reach a terminal state.
 CREATE UNIQUE INDEX "merchant_registration_sessions_one_active_per_staff_key"
 ON "merchant_registration_sessions"("staff_id")
 WHERE "state" IN ('OPEN', 'PROCESSING', 'RETRYABLE');
@@ -108,8 +103,6 @@ ON "merchant_image_uploads"("staging_key");
 CREATE UNIQUE INDEX "merchant_image_uploads_final_key_key"
 ON "merchant_image_uploads"("final_key");
 
--- Revoked and tombstoned reservations release their logical slot. Every other
--- state continues to own it, including ATTACHED records.
 CREATE UNIQUE INDEX "merchant_image_uploads_one_live_slot_key"
 ON "merchant_image_uploads"("session_id", "slot")
 WHERE "state" NOT IN ('REVOKED', 'TOMBSTONED');
