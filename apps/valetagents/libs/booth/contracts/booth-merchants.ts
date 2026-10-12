@@ -19,11 +19,24 @@ const boothMerchantListResponseSchema = z.object({
   totalPages: z.number().int().positive(),
 });
 
+const boothMerchantReviewBodySchema = z
+  .object({
+    status: z.enum(["APPROVED", "REJECTED"]),
+    merchants: z
+      .array(z.object({ id: z.number().int().positive(), updatedAt: z.string().datetime() }).strict())
+      .min(1)
+      .max(BOOTH_MERCHANT_PAGE_SIZE)
+      .refine((merchants) => new Set(merchants.map(({ id }) => id)).size === merchants.length),
+  })
+  .strict();
+
 export {
   BOOTH_MERCHANT_PAGE_SIZE,
   boothMerchantListResponseSchema,
   boothMerchantPageSchema,
+  boothMerchantReviewBodySchema,
   boothMerchantSchema,
 };
 export type BoothMerchant = z.infer<typeof boothMerchantSchema>;
 export type BoothMerchantListResponse = z.infer<typeof boothMerchantListResponseSchema>;
+export type BoothMerchantReviewBody = z.infer<typeof boothMerchantReviewBodySchema>;

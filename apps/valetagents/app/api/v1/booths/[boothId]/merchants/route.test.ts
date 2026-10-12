@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const auth = vi.hoisted(() => ({ getCurrentStaffId: vi.fn() }));
-const merchantService = vi.hoisted(() => ({ listBoothMerchants: vi.fn() }));
+const merchantService = vi.hoisted(() => ({
+  listBoothMerchants: vi.fn(),
+  reviewBoothMerchants: vi.fn(),
+}));
 
 vi.mock("@/server/auth/getCurrentStaffId", () => ({
   getCurrentStaffId: auth.getCurrentStaffId,
@@ -11,16 +14,34 @@ vi.mock("@/server/auth/getCurrentStaffId", () => ({
 vi.mock("@/server/booth/listBoothMerchants", () => ({
   listBoothMerchants: merchantService.listBoothMerchants,
 }));
+vi.mock("@/server/booth/reviewBoothMerchants", () => ({
+  reviewBoothMerchants: merchantService.reviewBoothMerchants,
+}));
 
 import { NextRequest } from "next/server";
 
-import { GET } from "./route";
+import { GET, PATCH } from "./route";
 
 const URL_BASE = "http://localhost/api/v1/booths/3/merchants";
 const context = (boothId = "3") => ({ params: Promise.resolve({ boothId }) });
 
 const callGet = (query = "", boothId?: string) =>
   GET(new NextRequest(`${URL_BASE}${query}`), context(boothId));
+
+const callPatch = (body: unknown, boothId?: string) =>
+  PATCH(
+    new NextRequest(URL_BASE, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+    context(boothId),
+  );
+
+const reviewBody = {
+  status: "APPROVED",
+  merchants: [{ id: 5, updatedAt: "2026-10-10T01:00:00.000Z" }],
+};
 
 const merchantPage = {
   items: [
@@ -66,5 +87,37 @@ describe("GET /api/v1/booths/:boothId/merchants", () => {
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toMatchObject({ code: "BOOTH_MANAGER_REQUIRED" });
+  });
+});
+
+describe("PATCH /api/v1/booths/:boothId/merchants", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    auth.getCurrentStaffId.mockResolvedValue(7);
+    merchantService.reviewBoothMerchants.mockResolvedValue({ ok: true });
+  });
+
+  it("returns 204 without a body when every merchant was reviewed", async () => {
+    const response = await callPatch(reviewBody);
+
+    expect(response.status).toBe(204);
+    expect(merchantService.reviewBoothMerchants).toHaveBeenCalledWith(7, 3, reviewBody);
+  });
+
+  it("rejects an invalid body without calling the service", async () => {
+    const response = await callPatch({ status: "APPROVED", merchants: [] });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({ code: "INVALID_REQUEST" });
+    expect(merchantService.reviewBoothMerchants).not.toHaveBeenCalled();
+  });
+
+  it("maps MERCHANT_CHANGED to 409", async () => {
+    merchantService.reviewBoothMerchants.mockResolvedValue({ ok: false, reason: "MERCHANT_CHANGED" });
+
+    const response = await callPatch(reviewBody);
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({ code: "MERCHANT_CHANGED" });
   });
 });
