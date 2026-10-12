@@ -20,7 +20,6 @@ interface BoothRegistrationAddress {
   mapState: BoothMapState;
 }
 
-// 주소를 치기 전에는 지도 상자를 비워 두고, 지오코더에 넘긴 주소가 지금 입력된 주소일 때만 그 결과를 쓴다.
 const getBoothRegistrationMapView = ({
   address,
   geocodedAddress,
@@ -31,7 +30,6 @@ const getBoothRegistrationMapView = ({
   return typedAddress === geocodedAddress ? mapState : "loading";
 };
 
-// 지도에서 찾지 못한 주소로는 부스를 등록할 수 없다.
 const getBoothRegistrationAvailability = ({
   name,
   isSaving,
@@ -72,7 +70,6 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
   const mutation = useMutation({
     mutationFn: createBooth,
     onSuccess: goHome,
-    // 두 번 눌러 진 쪽은 부스가 이미 만들어졌으므로 똑같이 홈으로 간다.
     onError: (error) => {
       if (isAlreadyOnboardedError(error)) goHome();
     },

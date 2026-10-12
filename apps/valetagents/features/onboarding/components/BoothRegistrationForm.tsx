@@ -30,7 +30,6 @@ export default function BoothRegistrationForm({
   const { mapContainerRef, ...form } = useBoothRegistrationForm(kakaoMapAppKey);
 
   return (
-    // 위 여백: 레이아웃 16px + pt-2 = 24px (Figma 41px 에서 상태바 몫 17px 을 뺀 값)
     <form
       className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2 pb-[calc(17px+env(safe-area-inset-bottom))]"
       onSubmit={(event) => {
@@ -118,7 +117,6 @@ export default function BoothRegistrationForm({
       </div>
 
       <p className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
-      {/* 사진 저장소가 생기기 전까지 자리만 그린다. 눌러도 아무 일도 일어나지 않는다. */}
       <div className={cn(BOX_CLASS, "mt-[3px] flex flex-col items-center pt-[66px]")}>
         <Image src="/icons/upload.svg" alt="" width={24} height={26} className="ml-px" />
         <p className="mt-3.5 text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</p>
