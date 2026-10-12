@@ -2,7 +2,7 @@ import "server-only";
 
 import { prisma } from "database";
 
-import type { MenuAccess } from "@/components/layouts/menuItems";
+import type { MenuAccess } from "@/libs/auth/menuItems";
 
 const getStaffMenuAccess = async (staffId: number): Promise<MenuAccess | null> => {
   const staff = await prisma.staff.findFirst({
