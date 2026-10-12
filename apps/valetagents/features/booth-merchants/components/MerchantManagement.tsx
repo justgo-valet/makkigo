@@ -9,7 +9,7 @@ import { CONTRACT_STATUS_LABELS, formatMerchantAddress, formatRegisteredDate } f
 import { useMerchantManagement } from "../hooks/useMerchantManagement";
 
 import type { BoothMerchantListResponse } from "../schemas/merchants";
-import type { MenuAccess } from "@/components/layouts/menuItems";
+import type { MenuAccess } from "@/libs/auth/menuItems";
 
 interface MerchantManagementProps {
   staffId: number;
