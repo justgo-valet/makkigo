@@ -59,6 +59,7 @@
 | `GET /api/v1/onboarding/status` | 온보딩 상태: `role`, `state`(`ROLE_REQUIRED` · `BOOTH_REQUIRED` · `AWAITING_APPROVAL` · `COMPLETE`), `nextPath`, 내 등록 요청 목록(부스 · 최신 요금 정책 포함). 승인된 소속이 하나라도 있으면 `COMPLETE` | ✅ | 이 PR |
 | `GET /api/v1/booths/{boothId}/agents?page=` | 부스 요원 목록: 이름 · 근무시간 · 근무 중 여부(`working`) · 등록 상태, 등록 순 10명씩 (`page`, `totalPages`). 탈퇴한 요원 제외. 400 `INVALID_PAGE` · 403 `BOOTH_MANAGER_REQUIRED` · 404 `BOOTH_NOT_FOUND` | ✅ 부스 관리자 | 이 PR |
 | `PATCH /api/v1/booths/{boothId}/agents` | 요원 등록 수락 · 거절: `{ status: "APPROVED" \| "REJECTED", agents: [{ id, updatedAt }] }` → 204. 고른 요원 전부를 한 번에 바꾸거나 하나도 바꾸지 않음. **이미 등록된 요원은 거절할 수 없음**(409 `AGENT_ALREADY_APPROVED`). 목록을 본 뒤 요원이 요청을 고쳤으면 409 `AGENT_CHANGED`. 400 `INVALID_REQUEST` · 403 `BOOTH_MANAGER_REQUIRED` · 404 `BOOTH_NOT_FOUND` · `AGENT_NOT_FOUND` | ✅ 부스 관리자 | 이 PR |
+| `GET /api/v1/booths/{boothId}/merchants?page=` | 부스 계약 업체 목록: 부스와 계약 행이 있는 업체의 업체명 · 주소 · 상세 주소 · 계약 상태(`APPROVED` 등록 · `PENDING` 대기 · `REJECTED` 거절) · `updatedAt`, 계약 요청 순 5곳씩 (`page`, `totalPages`). 거절된 업체도 남고 삭제된 업체는 제외. 등록일자 필드는 없고 화면이 `status` + `updatedAt` 으로 만듦. 400 `INVALID_REQUEST` · `INVALID_PAGE` · 403 `BOOTH_MANAGER_REQUIRED` · 404 `BOOTH_NOT_FOUND` | ✅ 부스 관리자 | 이 PR |
 
 ## 기반 PR
 
