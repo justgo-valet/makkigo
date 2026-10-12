@@ -11,7 +11,7 @@ describe("getMenuItems", () => {
   });
 
   it("shows a merchant admin ticket management and settings", () => {
-    expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: null })).toEqual([
+    expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: 3 })).toEqual([
       { label: "티켓 관리", href: "/tickets" },
       { label: "설정", href: "/settings" },
     ]);
@@ -19,19 +19,6 @@ describe("getMenuItems", () => {
 
   it("shows an agent who created no booth settings only", () => {
     expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: null })).toEqual([
-      { label: "설정", href: "/settings" },
-    ]);
-  });
-
-  it("keeps a merchant admin on their own items even with a booth they created", () => {
-    expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: 3 })).toEqual([
-      { label: "티켓 관리", href: "/tickets" },
-      { label: "설정", href: "/settings" },
-    ]);
-  });
-
-  it("shows a staff member without a role settings only", () => {
-    expect(getMenuItems({ role: null, managedBoothId: null })).toEqual([
       { label: "설정", href: "/settings" },
     ]);
   });

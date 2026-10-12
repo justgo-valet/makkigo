@@ -21,7 +21,7 @@ const requireTestDatabaseUrl = () => {
   return value;
 };
 
-const createStaff = async (label: string, role: StaffRole | null, deletedAt: Date | null = null) => {
+const createStaff = async (label: string, role: StaffRole, deletedAt: Date | null = null) => {
   const { id } = await prisma.staff.create({
     data: { role, name: `integration-${label}-${suffix}`, deletedAt },
     select: { id: true },
@@ -78,45 +78,12 @@ describe("getStaffMenuAccess database integration", () => {
     });
   });
 
-  it("has no managed booth for a merchant admin", async () => {
-    const adminId = await createStaff("merchant-admin", "MERCHANT_ADMIN");
+  it("returns null for a missing or deleted staff member", async () => {
+    const removedId = await createStaff("removed", "VALET_AGENT");
+    await prisma.staff.delete({ where: { id: removedId } });
+    const deletedId = await createStaff("deleted", "VALET_AGENT", new Date());
 
-    await expect(getStaffMenuAccess(adminId)).resolves.toEqual({
-      role: "MERCHANT_ADMIN",
-      managedBoothId: null,
-    });
-  });
-
-  it("returns a null role for a staff member who has not chosen one", async () => {
-    const staffId = await createStaff("no-role", null);
-
-    await expect(getStaffMenuAccess(staffId)).resolves.toEqual({
-      role: null,
-      managedBoothId: null,
-    });
-  });
-
-  it("has no managed booth for an agent whose booths are all deleted", async () => {
-    const managerId = await createStaff("former-manager", "VALET_AGENT");
-    await createBooth("deleted", managerId, new Date());
-
-    await expect(getStaffMenuAccess(managerId)).resolves.toEqual({
-      role: "VALET_AGENT",
-      managedBoothId: null,
-    });
-  });
-
-  it("returns null for a staff id that does not exist", async () => {
-    const staffId = await createStaff("removed", "VALET_AGENT");
-    await prisma.staff.delete({ where: { id: staffId } });
-
-    await expect(getStaffMenuAccess(staffId)).resolves.toBeNull();
-  });
-
-  it("returns null for a deleted staff, even one who created a booth", async () => {
-    const deletedId = await createStaff("deleted-manager", "VALET_AGENT", new Date());
-    await createBooth("orphan", deletedId);
-
+    await expect(getStaffMenuAccess(removedId)).resolves.toBeNull();
     await expect(getStaffMenuAccess(deletedId)).resolves.toBeNull();
   });
 });

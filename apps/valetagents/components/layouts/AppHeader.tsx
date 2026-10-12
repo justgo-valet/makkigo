@@ -7,7 +7,8 @@ import Link from "next/link";
 
 import AppMenu from "./AppMenu";
 
-import type { MenuAccess } from "./menuItems";
+import type { MenuAccess } from "@/libs/auth/menuItems";
+
 
 interface AppHeaderProps {
   menu: MenuAccess;
@@ -22,7 +23,6 @@ export default function AppHeader({ menu, backHref }: Readonly<AppHeaderProps>) 
           <Image src="/icons/chevron_left.svg" alt="" width={24} height={24} />
         </Link>
       )}
-      {/* 프레임의 글자 가운데(x 193.5)가 헤더 가운데(196.5)보다 3px 왼쪽이다 */}
       <Image
         src={makkigoLogo}
         alt="마끼고"
