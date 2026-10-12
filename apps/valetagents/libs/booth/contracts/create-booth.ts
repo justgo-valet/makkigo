@@ -19,6 +19,13 @@ const createBoothBodySchema = z
 
 const createBoothResponseSchema = z.object({ id: z.number().int().positive() });
 
-export { createBoothBodySchema, createBoothResponseSchema };
+export {
+  BOOTH_ADDRESS_DETAIL_MAX_LENGTH,
+  BOOTH_ADDRESS_MAX_LENGTH,
+  BOOTH_NAME_MAX_LENGTH,
+  createBoothBodySchema,
+  createBoothResponseSchema,
+};
 export type CreateBoothBody = z.infer<typeof createBoothBodySchema>;
+export type CreateBoothInput = z.input<typeof createBoothBodySchema>;
 export type CreateBoothResponse = z.infer<typeof createBoothResponseSchema>;
