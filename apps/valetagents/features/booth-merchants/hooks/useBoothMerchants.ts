@@ -31,8 +31,6 @@ const useBoothMerchants = ({ staffId, boothId, page, initialData }: UseBoothMerc
   return {
     merchants: query.data?.items ?? [],
     totalPages: query.data?.totalPages ?? 1,
-    // 지금 보는 쪽을 실제로 받아 왔을 때만 값이 있다. 앞 쪽을 임시로 보여 주는 동안과 실패했을 때는 null.
-    loadedTotalPages: query.isSuccess && !query.isPlaceholderData ? query.data.totalPages : null,
     errorMessage: query.isError ? getErrorMessage(query.error, LIST_ERROR_MESSAGE) : null,
     retry: query.refetch,
   };

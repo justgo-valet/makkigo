@@ -41,9 +41,11 @@ const getDetail = <Merchant extends Pick<BoothMerchant, "id">>(
   detailId: number | null,
 ) => merchants.find(({ id }) => id === detailId) ?? null;
 
-// 보던 쪽이 없어졌으면(그 쪽의 업체가 삭제됨) 남아 있는 마지막 쪽을 본다.
-const getReachablePage = (page: number, loadedTotalPages: number | null) =>
-  loadedTotalPages === null ? page : Math.min(page, loadedTotalPages);
+// 체크한 업체 가운데 지금 보이는 쪽에 있는 것만 수락 · 거절 대상이다.
+const getSelectedMerchants = <Merchant extends Pick<BoothMerchant, "id">>(
+  merchants: Merchant[],
+  selectedIds: number[],
+) => merchants.filter(({ id }) => selectedIds.includes(id));
 
 const useMerchantManagement = ({ staffId, boothId, initialData }: UseMerchantManagementOptions) => {
   const [page, setPage] = useState(initialData.page);
@@ -58,12 +60,10 @@ const useMerchantManagement = ({ staffId, boothId, initialData }: UseMerchantMan
       setSelectedIds([]);
       setNotice(`${merchants.length}곳의 ${REVIEW_NOTICES[status]}`);
     },
+    onFailed: () => setSelectedIds([]),
   });
 
-  const reachablePage = getReachablePage(page, list.loadedTotalPages);
-  if (reachablePage !== page) setPage(reachablePage);
-
-  const selectedMerchants = list.merchants.filter(({ id }) => selectedIds.includes(id));
+  const selectedMerchants = getSelectedMerchants(list.merchants, selectedIds);
   const availability = getReviewAvailability(selectedMerchants);
 
   const changeSelection = (ids: number[]) => {
@@ -111,4 +111,4 @@ const useMerchantManagement = ({ staffId, boothId, initialData }: UseMerchantMan
   };
 };
 
-export { getDetail, getReachablePage, getReviewAvailability, useMerchantManagement };
+export { getDetail, getReviewAvailability, getSelectedMerchants, useMerchantManagement };

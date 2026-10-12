@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getDetail, getReachablePage, getReviewAvailability } from "./useMerchantManagement";
+import { getDetail, getReviewAvailability, getSelectedMerchants } from "./useMerchantManagement";
 
 const merchants = (...statuses: ("PENDING" | "APPROVED" | "REJECTED")[]) =>
   statuses.map((status) => ({ status }));
@@ -60,18 +60,15 @@ describe("getDetail", () => {
   });
 });
 
-describe("getReachablePage", () => {
-  it("stays on the page while it exists", () => {
-    expect(getReachablePage(2, 3)).toBe(2);
-    expect(getReachablePage(3, 3)).toBe(3);
+describe("getSelectedMerchants", () => {
+  const page = [{ id: 4 }, { id: 7 }, { id: 9 }];
+
+  it("keeps the checked merchants in the order of the page", () => {
+    expect(getSelectedMerchants(page, [9, 4])).toEqual([{ id: 4 }, { id: 9 }]);
   });
 
-  it("falls back to the last page when the one being viewed is gone", () => {
-    expect(getReachablePage(3, 2)).toBe(2);
-    expect(getReachablePage(2, 1)).toBe(1);
-  });
-
-  it("does not move while the page has not been loaded", () => {
-    expect(getReachablePage(3, null)).toBe(3);
+  it("drops checked merchants that are no longer on the page", () => {
+    expect(getSelectedMerchants(page, [7, 12])).toEqual([{ id: 7 }]);
+    expect(getSelectedMerchants([], [7])).toEqual([]);
   });
 });

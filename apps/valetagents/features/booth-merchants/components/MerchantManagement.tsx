@@ -33,14 +33,14 @@ export default function MerchantManagement({
   const { detail } = management;
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[18px]">
+    <div className="mx-auto flex h-full w-full max-w-md flex-col px-2 pb-[35px]">
       <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
 
       <AppHeader menu={menu} />
 
       <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">업체 관리</h1>
 
-      <table className="mt-5 mr-px -ml-px table-fixed border-separate border-spacing-0 text-left text-base leading-6 font-medium whitespace-nowrap text-(--base-color)">
+      <table className="mt-5 -ml-px w-full table-fixed border-separate border-spacing-0 text-left text-base leading-6 font-medium whitespace-nowrap text-(--base-color)">
         <colgroup>
           <col className="w-[38px]" />
           <col className="w-[123px]" />
@@ -123,7 +123,7 @@ export default function MerchantManagement({
 
       <section
         aria-label="업체 상세"
-        className="mt-auto -mr-[3px] ml-[3px] flex h-56 min-h-24 flex-col justify-center rounded-[8px] bg-[#d9d9d9] px-5"
+        className="mt-auto -mr-[3px] ml-[3px] flex h-56 min-h-24 shrink flex-col justify-center rounded-[8px] bg-[#d9d9d9] px-5"
       >
         {detail && (
           <>
@@ -138,7 +138,7 @@ export default function MerchantManagement({
         )}
       </section>
 
-      <div aria-live="polite" className="flex min-h-[42px] flex-col justify-center">
+      <div aria-live="polite" className="flex min-h-[42px] shrink-0 flex-col justify-center">
         {management.reviewErrorMessage && (
           <FieldError className="text-center">{management.reviewErrorMessage}</FieldError>
         )}
@@ -152,7 +152,7 @@ export default function MerchantManagement({
         )}
       </div>
 
-      <div className="mr-px -ml-px flex gap-[5px]">
+      <div className="mr-px -ml-px flex shrink-0 gap-[5px]">
         <Button
           type="button"
           variant="secondary"
