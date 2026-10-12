@@ -12,7 +12,6 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
   const staffId = token ? await getActiveStaffIdFromAccessToken(token) : null;
   if (!staffId) redirect("/login");
 
-  // Early shell UX only. Every protected page and API performs its own fresh check.
   await requireProtectedStaff(staffId);
   return children;
 }
