@@ -13,7 +13,7 @@ import {
 } from "../formatters";
 import { useAgentManagement } from "../hooks/useAgentManagement";
 
-import type { MenuAccess } from "@/components/layouts/menuItems";
+import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { BoothAgentListResponse } from "../schemas/agents";
 
 interface AgentManagementProps {
