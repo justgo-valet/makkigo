@@ -49,7 +49,7 @@ export default function MerchantManagement({
         </colgroup>
         <thead>
           <tr className="h-8">
-            <th className="border-b border-black py-0 pr-0 pl-[7px]">
+            <th scope="col" className="border-b border-black py-0 pr-0 pl-[7px]">
               <Checkbox
                 aria-label="이 페이지의 업체 모두 선택"
                 className={CHECKBOX_CLASS}
@@ -79,7 +79,16 @@ export default function MerchantManagement({
                   onClick={(event) => event.stopPropagation()}
                 />
               </td>
-              <td className={cn(BODY_CELL_CLASS, "truncate")}>{merchant.name}</td>
+              <td className={cn(BODY_CELL_CLASS, "truncate")}>
+                <button
+                  type="button"
+                  aria-pressed={detail?.id === merchant.id}
+                  className="block w-full cursor-pointer truncate text-left"
+                  onClick={() => management.showDetail(merchant.id)}
+                >
+                  {merchant.name}
+                </button>
+              </td>
               <td className={BODY_CELL_CLASS}>{CONTRACT_STATUS_LABELS[merchant.status]}</td>
               <td className={BODY_CELL_CLASS}>{formatRegisteredDate(merchant)}</td>
             </tr>
