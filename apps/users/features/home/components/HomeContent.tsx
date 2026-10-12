@@ -14,7 +14,7 @@ import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSear
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
 
-export default function HomeContent() {
+export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKey: string }>) {
   useHomeHeader();
   const home = useHome();
   const merchantSearch = useMerchantSearchFlow();
@@ -75,8 +75,12 @@ export default function HomeContent() {
 
       <MerchantSearchSheet
         open={merchantSearch.isSearchOpen}
+        detailMerchantId={merchantSearch.detailMerchantId}
+        kakaoMapAppKey={kakaoMapAppKey}
         onClose={merchantSearch.close}
-        onSelect={merchantSearch.pickMerchant}
+        onViewMerchant={merchantSearch.viewMerchant}
+        onBackToList={merchantSearch.backToList}
+        onChooseMerchant={merchantSearch.chooseMerchant}
       />
       <ArrivalConfirmSheet
         open={merchantSearch.isArrivalOpen}
