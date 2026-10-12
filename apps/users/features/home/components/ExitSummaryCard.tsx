@@ -17,11 +17,11 @@ export default function ExitSummaryCard({
   return (
     <div className="flex flex-col rounded-xl border bg-(--surface-color) px-4">
       <div className="flex items-center justify-between gap-3 py-4">
-        <p className="font-bold text-(--base-color)">
+        <p className="shrink-0 font-bold text-(--base-color)">
           {summary.headline}
           {summary.emphasis && <span className="ml-1.5 text-primary">{summary.emphasis}</span>}
         </p>
-        <p className="text-right text-sm text-(--tertiary-color)">{summary.note}</p>
+        <p className="text-right text-sm break-keep text-(--tertiary-color)">{summary.note}</p>
       </div>
       <Separator />
       <div className="flex items-center justify-between py-4">

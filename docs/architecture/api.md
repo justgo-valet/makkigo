@@ -44,7 +44,8 @@
 | `POST /api/v1/onboarding/phone-number/check` | 온보딩 휴대폰 번호 단계에서 다음으로 넘어가기 전 중복 확인 (204 사용 가능 · 409 `DUPLICATE_PHONE`, 내 번호는 통과) | ✅ | 이 PR |
 | `POST /api/v1/onboarding/vehicle-number/check` | 온보딩 차량 번호 단계에서 다음으로 넘어가기 전 중복 확인 (204 사용 가능 · 409 `DUPLICATE_VEHICLE`, 내 차량은 통과) | ✅ | 이 PR |
 | `GET /api/v1/merchants?q=` | 업체 검색: 이름 · 주소에 검색어가 들어간 업체 중 **승인된 부스 계약이 있는** 곳만 (삭제 제외, 이름 순 최대 20개). `q` 없음 · 50자 초과는 400 | ✅ | [#72](https://github.com/justgo-valet/makkigo/pull/72) |
-| `POST /api/v1/valet-sessions` | 도착 알림 보내기: `{ merchantId, location? }` → 도착 예정 세션 생성(201 `{ id }`) + 받을 요원에게 알림 기록. `location`(`{ latitude, longitude }`)이 있고 위치기반서비스에 동의했으면 예상 도착 시각을 계산해 저장(실패해도 세션은 만듦, **예정**). 403 `VEHICLE_REQUIRED` · 404 `MERCHANT_NOT_FOUND` · 409 `ACTIVE_SESSION_EXISTS` · 422 `NO_AVAILABLE_BOOTH` | ✅ | [#73](https://github.com/justgo-valet/makkigo/pull/73) |
+| `POST /api/v1/valet-sessions` | 도착 알림 보내기: `{ merchantId, location? }` → 도착 예정 세션 생성(201 `{ id }`) + 받을 요원에게 알림 기록. `location`(`{ latitude, longitude }`)이 있고 위치기반서비스에 동의했으면 카카오모빌리티 길찾기로 예상 도착 시각을 계산해 저장하고 위치 이용 기록을 남김(업체 좌표가 없으면 주소로 찾아 저장, 실패해도 세션은 만듦). 403 `VEHICLE_REQUIRED` · 404 `MERCHANT_NOT_FOUND` · 409 `ACTIVE_SESSION_EXISTS` · 422 `NO_AVAILABLE_BOOTH` | ✅ | [#73](https://github.com/justgo-valet/makkigo/pull/73), [#100](https://github.com/justgo-valet/makkigo/pull/100) |
+| `GET /api/v1/valet-sessions/current` | 메인 화면용 내 진행 중 세션: `{ session }` (없으면 `null`). `status`(`ARRIVING` · `PARKED` · `PICKUP_REQUESTED` · `PICKUP_PREPARING`), 업체명, 도착 알림 시각(도착 예정일 때), 입차 시각, 같은 부스 출차 대기 대수(주차 완료일 때), 요금(주차 완료면 부스 요금 기준표로 지금까지 요금, 출차 요청 이후면 기준 요금), 실제 요금 · 예상 출차 시각, 입금 계좌(출차 준비 중일 때 `"은행 계좌번호"`) | ✅ | 이 PR |
 | `POST /api/v1/valet-sessions/{id}/cancel` | 도착 알림 취소: 내 도착 예정 세션 → 취소(204) + 도착 알림을 받았던 요원에게 취소 알림 기록. 404 `SESSION_NOT_FOUND` · 409 `NOT_CANCELLABLE`(이미 취소 · 주차 시작) | ✅ | 이 PR |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
