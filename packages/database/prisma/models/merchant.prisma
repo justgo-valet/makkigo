@@ -3,6 +3,7 @@ model Merchant {
     name          String
     address       String
     addressDetail String?   @map("address_detail")
+    postalCode    String?   @map("postal_code")
     latitude      Float?
     longitude     Float?
     adminId       Int       @map("admin_id")
@@ -15,8 +16,10 @@ model Merchant {
     booths        BoothMerchant[]
     tickets       Ticket[]
     valetSessions ValetSession[]
+    registrationSession MerchantRegistrationSession?
 
     @@index([name])
+    @@index([adminId, deletedAt])
     @@map("merchants")
 }
 

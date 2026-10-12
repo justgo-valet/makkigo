@@ -20,6 +20,26 @@ enum BoothMerchantStatus {
     REJECTED
 }
 
+enum MerchantRegistrationSessionState {
+    OPEN
+    PROCESSING
+    RETRYABLE
+    COMMITTED
+    FAILED
+    EXPIRED
+}
+
+enum MerchantImageUploadState {
+    RESERVED
+    READY
+    CLAIMED
+    COPYING
+    VALIDATED
+    ATTACHED
+    REVOKED
+    TOMBSTONED
+}
+
 enum ValetSessionStatus {
     ARRIVING
     PARKED
