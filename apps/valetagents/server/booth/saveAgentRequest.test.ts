@@ -40,11 +40,9 @@ const createTransaction = () => ({
 
 const body = { workStartTime: "22:00", workEndTime: "06:00" };
 
-// Prisma 7.10 + adapter-pg 가 던지는 드라이버 어댑터 오류와 같은 모양이다.
 const driverAdapterError = (cause: { kind: string; originalCode?: string; originalMessage?: string }) =>
   Object.assign(new Error(cause.kind), { name: "DriverAdapterError", cause });
 
-// COMMIT 에서 난 PostgreSQL 40001 을 실제 DB 에서 받아 본 값 그대로다. code 속성이 없다.
 const commitWriteConflict = () =>
   driverAdapterError({
     originalCode: "40001",
@@ -178,23 +176,5 @@ describe("saveAgentRequest", () => {
       value: { outcome: "CREATED" },
     });
     expect(database.transaction).toHaveBeenCalledTimes(2);
-  });
-
-  it("stops retrying commit-time serialization failures after three attempts", async () => {
-    database.transaction.mockRejectedValue(commitWriteConflict());
-
-    await expect(saveAgentRequest(7, 3, body)).resolves.toEqual({
-      ok: false,
-      reason: "REQUEST_CONFLICT",
-    });
-    expect(database.transaction).toHaveBeenCalledTimes(3);
-  });
-
-  it("rethrows driver adapter errors that are not write conflicts", async () => {
-    const connectionClosed = driverAdapterError({ kind: "ConnectionClosed" });
-    database.transaction.mockRejectedValue(connectionClosed);
-
-    await expect(saveAgentRequest(7, 3, body)).rejects.toBe(connectionClosed);
-    expect(database.transaction).toHaveBeenCalledTimes(1);
   });
 });

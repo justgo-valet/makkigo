@@ -47,7 +47,6 @@ const selectRequest = (now: Date) =>
 
 class ConcurrentAgentRequestError extends Error {}
 
-// COMMIT 에서 난 직렬화 실패는 P2034 로 바뀌지 않고 드라이버 어댑터 오류 그대로 올라온다.
 const isCommitWriteConflict = (error: unknown) =>
   error instanceof Error &&
   error.name === "DriverAdapterError" &&
