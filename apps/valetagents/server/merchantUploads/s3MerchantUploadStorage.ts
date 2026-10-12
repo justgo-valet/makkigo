@@ -230,9 +230,6 @@ const createS3MerchantUploadStorage = (
       try {
         await client.send(new DeleteObjectCommand(commandInput), { abortSignal });
       } catch (error) {
-        // Cleanup is deliberately repeatable: a prior attempt (or lifecycle rule)
-        // may already have removed this exact recorded key. Preconditions that
-        // fail with 412 are not ignored because they indicate a different object.
         if (!isMissingObjectError(error)) throw error;
       }
     },
