@@ -24,6 +24,7 @@ const MESSAGES = {
   photos: "사진을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.",
   booth: "선택한 부스를 찾을 수 없어요. 다른 부스를 선택해 주세요.",
   restart: "업체를 등록하지 못했어요. 사진을 다시 올린 뒤 시도해 주세요.",
+  uploads: "올린 사진을 더 쓸 수 없어요. 사진을 다시 올려 주세요.",
 } as const;
 
 interface UseMerchantRegistrationFormOptions {
@@ -87,7 +88,10 @@ const useMerchantRegistrationForm = ({
 
   const booth = useMerchantBoothField(staffId);
   const { containerRef, triggerRef, ...address } = useMerchantAddress(kakaoMapAppKey);
-  const photos = useMerchantPhotos(sessionId);
+  const photos = useMerchantPhotos(sessionId, () => {
+    setFailure("uploads");
+    openSession();
+  });
 
   const registration = useMutation({
     mutationFn: async (input: { submission: MerchantRegistrationSubmission; fresh: boolean }) => {
@@ -150,7 +154,9 @@ const useMerchantRegistrationForm = ({
   else if (isDelayed) notice = MESSAGES.delayed;
   else if (session.isError) notice = MESSAGES.session;
   else if (isBlocked) notice = MESSAGES.blocked;
-  else if (failure) notice = MESSAGES[failure];
+  else if (failure && !(failure === "uploads" && photos.photos.length > 0)) {
+    notice = MESSAGES[failure];
+  }
 
   return {
     name,

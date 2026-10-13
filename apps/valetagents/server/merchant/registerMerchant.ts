@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 
 import { Prisma, prisma } from "database";
 
+import { runSerializable } from "@/server/common/runSerializable";
 import { terminalizeExpiredSession } from "@/server/merchantUploads/merchantUploadSessions";
 import {
   StaleMerchantUploadError,
@@ -14,7 +15,6 @@ import type { MerchantRegistrationBody } from "@/libs/merchant/contracts/registr
 import type { MerchantUploadStorage } from "@/server/merchantUploads/storage";
 
 const REGISTRATION_LEASE_MS = 2 * 60 * 1_000;
-const MAX_TRANSACTION_ATTEMPTS = 3;
 
 type CanonicalRegistrationPayload = MerchantRegistrationBody;
 
@@ -173,32 +173,6 @@ const parseReplayResponse = (
   };
 };
 
-const isWriteConflictCause = (cause: unknown) =>
-  typeof cause === "object" &&
-  cause !== null &&
-  "kind" in cause &&
-  cause.kind === "TransactionWriteConflict";
-
-const isRetryableTransactionError = (error: unknown) => {
-  if (typeof error !== "object" || error === null) return false;
-  if ("name" in error && error.name === "DriverAdapterError" && "cause" in error) {
-    return isWriteConflictCause(error.cause);
-  }
-  if (!("code" in error)) return false;
-  if (error.code === "P2034") return true;
-  if (error.code !== "P2010" || !("meta" in error)) return false;
-
-  const { meta } = error;
-  if (typeof meta !== "object" || meta === null || !("driverAdapterError" in meta)) return false;
-  const { driverAdapterError } = meta;
-  return (
-    typeof driverAdapterError === "object" &&
-    driverAdapterError !== null &&
-    "cause" in driverAdapterError &&
-    isWriteConflictCause(driverAdapterError.cause)
-  );
-};
-
 const isDefinitiveUploadError = (error: unknown) =>
   error instanceof StaleMerchantUploadError ||
   isMissingObjectError(error) ||
@@ -206,21 +180,6 @@ const isDefinitiveUploadError = (error: unknown) =>
     (error.message.includes("metadata does not match") ||
       error.message.includes("signature does not match") ||
       error.message.includes("immutable upload manifest")));
-
-const runSerializable = async <T>(work: (transaction: Prisma.TransactionClient) => Promise<T>) => {
-  for (let attempt = 0; attempt < MAX_TRANSACTION_ATTEMPTS; attempt += 1) {
-    try {
-      return await prisma.$transaction(work, {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      });
-    } catch (error) {
-      if (!isRetryableTransactionError(error) || attempt === MAX_TRANSACTION_ATTEMPTS - 1) {
-        throw error;
-      }
-    }
-  }
-  throw new Error("Serializable transaction retry budget exhausted");
-};
 
 const prismaMerchantRegistrationRepository: MerchantRegistrationRepository = {
   async findExisting({ staffId, idempotencyKey, payloadHash }) {

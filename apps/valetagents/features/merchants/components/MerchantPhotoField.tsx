@@ -92,15 +92,15 @@ export default function MerchantPhotoField({ photos, disabled }: Readonly<Mercha
                 className="size-full object-cover"
               />
             </button>
-            {photo.status === "uploading" && (
+            {(photo.removing || photo.status === "uploading") && (
               <p
                 role="status"
                 className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 text-xs text-white"
               >
-                올리는 중
+                {photo.removing ? "지우는 중" : "올리는 중"}
               </p>
             )}
-            {photo.status === "failed" && !disabled && (
+            {photo.status === "failed" && !photo.removing && !disabled && (
               <button
                 type="button"
                 className="absolute inset-0 rounded-lg bg-black/60 text-xs text-white underline"
@@ -112,6 +112,7 @@ export default function MerchantPhotoField({ photos, disabled }: Readonly<Mercha
             {!disabled && (
               <button
                 type="button"
+                aria-disabled={photo.removing}
                 aria-label={`사진 ${index + 1} 삭제`}
                 className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-black/70 text-xs leading-none text-white"
                 onClick={() => void photos.remove(photo.key)}

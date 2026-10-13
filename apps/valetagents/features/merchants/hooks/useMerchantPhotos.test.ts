@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { MAX_MERCHANT_IMAGE_BYTES } from "@/libs/merchant/contracts/image-upload";
 
-import { getMerchantImageError, moveItem } from "./useMerchantPhotos";
+import { arePhotosReady, getMerchantImageError, moveItem } from "./useMerchantPhotos";
 
 describe("getMerchantImageError", () => {
   it("accepts supported images from 1 byte up to the size limit", () => {
@@ -29,5 +29,14 @@ describe("moveItem", () => {
     const items = ["a", "b"];
     expect(moveItem(items, 0, 2)).toBe(items);
     expect(moveItem(items, -1, 0)).toBe(items);
+  });
+});
+
+describe("arePhotosReady", () => {
+  it("is false while an uploaded photo is being removed", () => {
+    const ready = { status: "ready" as const, removing: false };
+
+    expect(arePhotosReady([ready, ready])).toBe(true);
+    expect(arePhotosReady([ready, { ...ready, removing: true }])).toBe(false);
   });
 });
