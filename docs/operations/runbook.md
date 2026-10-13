@@ -54,14 +54,16 @@ docker restart makkigo-users-1                 # 한 컨테이너 재시작
 
 ## 업체 이미지 cleanup
 
-cleanup은 DB에 기록된 ATTACHED staging key와 TOMBSTONED staging/final key만 처리합니다. 버킷
-전체를 list하지 않으며 ATTACHED final은 절대 삭제하지 않습니다. tombstone은 외부 요청의 늦은
-완료를 다시 찾을 수 있도록 성공 후에도 보존하고 매시간 재검사합니다.
+cleanup은 DB에 기록된 ATTACHED · REVOKED staging key와 TOMBSTONED staging/final key만 처리합니다.
+버킷 전체를 list하지 않으며 ATTACHED final은 절대 삭제하지 않습니다. 실행할 때마다 만료 시각이
+지난 등록 세션을 먼저 닫아(`EXPIRED`, 한 번에 100개까지) 그 사진을 TOMBSTONED로 넘깁니다.
+REVOKED · TOMBSTONED 행은 외부 요청의 늦은 완료를 찾도록 한 시간 뒤 한 번 더 지우고, 그 뒤로는
+다시 검사하지 않습니다(행은 보존). 삭제에는 ETag 조건을 붙이지 않습니다.
 
 ### 배포 전 필수 gate
 
 1. 실제 운영 on-call 담당자와 `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` 수신 채널 기록
-2. isolated staging에서 presigned POST, conditional copy/delete, IAM prefix deny, CORS 검증
+2. isolated staging에서 presigned POST, conditional copy, delete, IAM prefix deny, CORS 검증
 3. Caddy 설정 반영 후 다음 명령 모두 성공
 
 ```bash
@@ -79,7 +81,9 @@ docker compose -f docker-compose.prod.yml run --rm --no-deps merchant-upload-cle
 ```
 
 dry-run은 cleanup이 disabled여도 200이어야 하며 DB claim/write와 S3 삭제를 하지 않습니다.
-같은 명령의 `--execute`는 disabled 상태에서 503/non-zero여야 합니다.
+세션도 닫지 않으므로, 아직 닫히지 않은 만료 세션의 사진은 dry-run의 `eligibleCount`에 잡히지
+않습니다. 같은 명령에서 `--dry-run`을 `--execute`로 바꾸면 disabled 상태에서 503/non-zero여야
+합니다. 두 옵션을 함께 주면 서버에 묻지 않고 거절하므로 이 확인이 되지 않습니다.
 
 배포(`deploy.sh`)도 같은 dry-run을 돌립니다. cleanup이 꺼져 있으면 실패해도 경고만 남기고 배포를
 끝내므로, `MERCHANT_UPLOAD_CLEANUP_TOKEN`(32바이트 이상)을 SSM에 넣기 전에는 배포 로그에
@@ -93,9 +97,13 @@ runner heartbeat 확인이 실패하면 배포가 실패합니다.
 3. `docker compose -f docker-compose.prod.yml up -d --force-recreate valetagents merchant-upload-cleanup`
 4. 두 컨테이너 health, runner enabled heartbeat, 새 `lastSuccessfulSweepAt`, backlog 감소 확인
 
-단순 `docker restart`는 env_file을 다시 읽지 않으므로 인정하지 않습니다. oldest eligible age가
-48시간을 넘거나 S3 삭제 실패/heartbeat 75분 누락 시 지정 on-call이 실제 webhook/플랫폼 경보를
-받는지 staging에서 주입 검증합니다.
+처음 켠 직후에는 만료 세션이 닫히면서 `eligibleCount`가 먼저 늘어난 뒤 줄어듭니다. runner는 밀린
+건이 있으면 한 번 깨어났을 때 100건씩 최대 20번까지 이어서 처리하고, 묶음마다 heartbeat를 남깁니다.
+
+단순 `docker restart`는 env_file을 다시 읽지 않으므로 인정하지 않습니다. webhook은 세 가지를
+보냅니다: `cleanup-age-breach`(oldest eligible age 48시간 초과), `cleanup-delete-failure`(S3 삭제
+실패 건수), `cleanup-failure`(요청 자체 실패). 이 셋과 heartbeat 75분 누락 때 지정 on-call이 실제
+webhook/플랫폼 경보를 받는지 staging에서 주입 검증합니다.
 
 ### Disable / rollback
 

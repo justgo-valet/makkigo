@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const repository = vi.hoisted(() => ({
+  expireSessions: vi.fn(),
   inspect: vi.fn(),
   claim: vi.fn(),
   complete: vi.fn(),

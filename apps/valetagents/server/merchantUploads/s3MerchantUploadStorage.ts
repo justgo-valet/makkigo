@@ -13,7 +13,6 @@ import { MAX_MERCHANT_IMAGE_BYTES } from "@/libs/merchant/contracts/image-upload
 
 import type {
   CopyObjectCommandInput,
-  DeleteObjectCommandInput,
   GetObjectCommandOutput,
   HeadObjectCommandOutput,
 } from "@aws-sdk/client-s3";
@@ -221,14 +220,9 @@ const createS3MerchantUploadStorage = (
       }
     },
 
-    async deleteObject({ key, etag, abortSignal }) {
-      const commandInput = {
-        Bucket: bucket,
-        Key: key,
-        ...(etag ? { IfMatch: etag } : {}),
-      } satisfies DeleteObjectCommandInput;
+    async deleteObject({ key, abortSignal }) {
       try {
-        await client.send(new DeleteObjectCommand(commandInput), { abortSignal });
+        await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }), { abortSignal });
       } catch (error) {
         if (!isMissingObjectError(error)) throw error;
       }

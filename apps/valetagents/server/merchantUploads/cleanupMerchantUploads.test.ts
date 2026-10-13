@@ -11,8 +11,7 @@ const attached: CleanupCandidate = {
   state: "ATTACHED",
   stagingKey: "merchants/staging/a",
   finalKey: "merchants/final/a",
-  sourceETag: '"source-a"',
-  finalETag: '"final-a"',
+  sweptBefore: false,
 };
 const tombstoned: CleanupCandidate = {
   ...attached,
@@ -30,6 +29,7 @@ const revoked: CleanupCandidate = {
 };
 
 const repository = (): CleanupRepository => ({
+  expireSessions: vi.fn().mockResolvedValue(undefined),
   inspect: vi.fn().mockResolvedValue({
     eligibleCount: 2,
     oldestEligibleAt: new Date("2026-10-10T00:00:00.000Z"),
@@ -64,12 +64,13 @@ describe("cleanupMerchantUploads", () => {
       partial: true,
       nextSweepAfterSeconds: 3_600,
     });
+    expect(repo.expireSessions).not.toHaveBeenCalled();
     expect(repo.claim).not.toHaveBeenCalled();
     expect(repo.complete).not.toHaveBeenCalled();
     expect(storage.deleteObject).not.toHaveBeenCalled();
   });
 
-  it("never deletes an ATTACHED final and conditionally deletes tombstoned keys", async () => {
+  it("never deletes an ATTACHED final and deletes both tombstoned keys", async () => {
     const repo = repository();
     const cleanup = createMerchantUploadCleanupService({
       repository: repo,
@@ -81,13 +82,38 @@ describe("cleanupMerchantUploads", () => {
     await expect(cleanup({ dryRun: false })).resolves.toMatchObject({ cleaned: 2, failed: 0 });
     expect(storage.deleteObject).toHaveBeenCalledTimes(3);
     expect(storage.deleteObject).toHaveBeenCalledWith(
-      expect.objectContaining({ key: attached.stagingKey, etag: attached.sourceETag }),
+      expect.objectContaining({ key: attached.stagingKey }),
     );
     expect(storage.deleteObject).not.toHaveBeenCalledWith(
       expect.objectContaining({ key: attached.finalKey }),
     );
     expect(storage.deleteObject).toHaveBeenCalledWith(
-      expect.objectContaining({ key: tombstoned.finalKey, etag: tombstoned.finalETag }),
+      expect.objectContaining({ key: tombstoned.finalKey }),
+    );
+  });
+
+  it("closes overdue sessions before claiming and stops re-sweeping after one re-check", async () => {
+    const repo = repository();
+    vi.mocked(repo.claim).mockResolvedValue([tombstoned, { ...revoked, sweptBefore: true }]);
+    const cleanup = createMerchantUploadCleanupService({
+      repository: repo,
+      storage,
+      createClaimId: () => "018f47a3-7b4c-7b1f-8db8-743c634d9659",
+      now: fixedNow,
+    });
+
+    await cleanup({ dryRun: false });
+    expect(vi.mocked(repo.expireSessions).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(repo.claim).mock.invocationCallOrder[0] ?? 0,
+    );
+    expect(repo.complete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        uploadId: tombstoned.id,
+        nextSweepAt: new Date("2026-10-10T02:00:00.000Z"),
+      }),
+    );
+    expect(repo.complete).toHaveBeenCalledWith(
+      expect.objectContaining({ uploadId: revoked.id, nextSweepAt: null }),
     );
   });
 
