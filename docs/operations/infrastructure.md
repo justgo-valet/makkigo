@@ -78,10 +78,16 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 
 DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAGE_BASE_URL` 과 합쳐 응답합니다.
 
-### 업체 이미지 업로드 IAM · CORS 제안 (아직 운영 적용 안 됨)
+### 업체 이미지 업로드 IAM · CORS · 버킷 정책
 
-운영 적용은 별도 승인과 staging 검증 뒤 수행합니다. EC2 실행 역할에 정적 access key를 넣지
-않고 default credential chain을 사용하며, 아래 prefix 밖은 거부합니다.
+| 항목 | 상태 (2026-10-13) |
+|---|---|
+| 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `https://valet.makkigo.com` 의 POST 가 허용되는 것을 확인 |
+| EC2 역할의 S3 권한 | **확인 안 됨** — `deploy/aws/setup-iam.sh` 가 만드는 `makkigo-prod-ec2` 에는 아래 권한이 들어 있지 않음. 운영에 올리기 전에 붙어 있는지 확인해야 업로드가 됨 |
+| staging 을 CloudFront 로 읽지 못하게 막기 | **아직 없음** — 아래 "staging 비공개" |
+
+EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain을 사용하며, 아래 prefix 밖은
+거부합니다.
 
 ```json
 {
@@ -103,14 +109,44 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 - 앱은 Head/Get range 검증과 조건부 copy, 삭제에 같은 `s3:GetObject`/`DeleteObject` 권한을
   사용합니다. 버킷 전체 `ListBucket`은 cleanup에 필요하지 않습니다.
 
-제안 CORS(실제 origin과 local origin을 staging에서 확정):
+CORS 는 기존 GET · HEAD 규칙에 POST 규칙을 하나 더한 형태입니다:
 
 ```json
-[{"AllowedOrigins":["https://valet.makkigo.com","http://localhost:3000"],"AllowedMethods":["POST"],"AllowedHeaders":["Content-Type","x-amz-*"],"MaxAgeSeconds":300}]
+{"AllowedOrigins":["https://valet.makkigo.com","http://localhost:3000"],"AllowedMethods":["POST"],"AllowedHeaders":["*"],"MaxAgeSeconds":300}
 ```
 
-버킷은 private, CloudFront 읽기는 기존 OAC/OAI를 유지합니다. CORS는 인증/쓰기 권한을 부여하지
-않으며, 실제 policy/IAM/CORS 적용과 조건부 요청 검증은 아직 미수행입니다.
+CORS 는 인증 · 쓰기 권한을 주지 않습니다. 2026-10-13 에 로컬 요원 앱에서 이 버킷으로 presigned POST,
+조건부 copy, 삭제, 업체 등록까지 실제로 돌려 확인했습니다(로컬 전용 IAM 사용자의 키 사용).
+
+#### staging 비공개 (아직 적용 안 됨)
+
+버킷은 private 이지만 CloudFront 가 버킷 전체를 읽을 수 있어, 검증 전 업로드
+(`merchants/staging/*`)도 키를 알면 `IMAGE_BASE_URL` 로 열립니다(2026-10-13 확인: staging 키가
+CloudFront 에서 200). 업체 관리자로 가입한 사람이 이미지로 표시만 한 임의의 파일을 올려 공개 주소를
+얻을 수 있으므로, 버킷 정책에 아래 Deny 를 더합니다. `Principal` 과 `Condition` 은 버킷 정책에 이미
+있는 CloudFront Allow 문의 것을 그대로 옮깁니다(아래는 OAC 일 때, OAI 면 그 OAI 의 ARN).
+
+```json
+{
+  "Sid": "DenyCloudFrontReadOfMerchantStaging",
+  "Effect": "Deny",
+  "Principal": { "Service": "cloudfront.amazonaws.com" },
+  "Action": "s3:GetObject",
+  "Resource": "arn:aws:s3:::makkigo-prod-image-apne2/merchants/staging/*",
+  "Condition": {
+    "StringEquals": { "AWS:SourceArn": "arn:aws:cloudfront::<계정 ID>:distribution/E37YXLP0UK5UIL" }
+  }
+}
+```
+
+앱은 IAM 자격 증명으로 직접 읽으므로 이 Deny 의 영향을 받지 않습니다. 적용 뒤 확인:
+
+```bash
+# 사진을 올리기만 한 뒤(등록 전) 그 staging 키 — 403 이어야 함
+curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/merchants/staging/<키>
+# 등록이 끝난 사진의 final 키 — 200 이어야 함
+curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/merchants/final/<키>
+```
 
 ### Route 53
 
