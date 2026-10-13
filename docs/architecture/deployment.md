@@ -183,8 +183,11 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 
 업체 이미지 cleanup runner는 요원 앱과 **같은 이미지**를 사용합니다. 외부 포트는 없고 내부
 `/api/internal/merchant-uploads/cleanup`만 bearer token으로 호출합니다. Caddy는 이 경로를
-공개 요청에서 403으로 차단합니다. 배포는 Caddy validate/reload와 disabled 상태의 one-off
-dry-run이 성공하지 않으면 완료되지 않습니다.
+공개 요청에서 403으로 차단합니다. 배포는 Caddy validate/reload와 runner heartbeat 확인이
+성공하지 않으면 완료되지 않습니다. one-off dry-run도 배포 때 돌리지만 cleanup이 켜져 있을 때만
+실패로 치고, 꺼져 있으면(`MERCHANT_UPLOAD_CLEANUP_TOKEN` 미설정 포함) 경고만 남기고 배포를
+끝냅니다. runner가 없는 이전 이미지로 되돌리면 cleanup 컨테이너를 띄우지 않고 heartbeat ·
+dry-run 확인도 건너뜁니다.
 
 같은 시각에 배포가 두 개 겹치지 않게 순서대로 실행됩니다.
 
