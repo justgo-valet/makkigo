@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const auth = vi.hoisted(() => ({ getCurrentStaffId: vi.fn() }));
+const protectedAccess = vi.hoisted(() => ({ getProtectedStaffAccess: vi.fn() }));
 const merchantService = vi.hoisted(() => ({
   listBoothMerchants: vi.fn(),
   reviewBoothMerchants: vi.fn(),
@@ -10,6 +11,9 @@ const merchantService = vi.hoisted(() => ({
 
 vi.mock("@/server/auth/getCurrentStaffId", () => ({
   getCurrentStaffId: auth.getCurrentStaffId,
+}));
+vi.mock("@/server/onboarding/getProtectedStaffAccess", () => ({
+  getProtectedStaffAccess: protectedAccess.getProtectedStaffAccess,
 }));
 vi.mock("@/server/booth/listBoothMerchants", () => ({
   listBoothMerchants: merchantService.listBoothMerchants,
@@ -62,7 +66,18 @@ describe("GET /api/v1/booths/:boothId/merchants", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     auth.getCurrentStaffId.mockResolvedValue(7);
+    protectedAccess.getProtectedStaffAccess.mockResolvedValue({ ok: true });
     merchantService.listBoothMerchants.mockResolvedValue({ ok: true, value: merchantPage });
+  });
+
+  it("rejects incomplete merchants before ownership lookup", async () => {
+    protectedAccess.getProtectedStaffAccess.mockResolvedValue({
+      ok: false,
+      reason: "MERCHANT_ONBOARDING_REQUIRED",
+    });
+    const response = await callGet();
+    expect(response.status).toBe(403);
+    expect(merchantService.listBoothMerchants).not.toHaveBeenCalled();
   });
 
   it("returns the merchant page", async () => {
@@ -94,6 +109,7 @@ describe("PATCH /api/v1/booths/:boothId/merchants", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     auth.getCurrentStaffId.mockResolvedValue(7);
+    protectedAccess.getProtectedStaffAccess.mockResolvedValue({ ok: true });
     merchantService.reviewBoothMerchants.mockResolvedValue({ ok: true });
   });
 

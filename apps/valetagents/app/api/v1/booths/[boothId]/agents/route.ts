@@ -3,6 +3,7 @@ import { getCurrentStaffId } from "@/server/auth/getCurrentStaffId";
 import { listBoothAgents } from "@/server/booth/listBoothAgents";
 import { reviewBoothAgents } from "@/server/booth/reviewBoothAgents";
 import { apiError, NO_STORE_HEADERS, privateJson } from "@/server/common/apiResponse";
+import { getProtectedStaffAccess } from "@/server/onboarding/getProtectedStaffAccess";
 
 import type { NextRequest } from "next/server";
 
@@ -31,6 +32,12 @@ export async function GET(
     const staffId = await getCurrentStaffId(request);
     if (!staffId) return apiError("AUTH_REQUIRED", "로그인이 필요합니다.", 401);
 
+    const access = await getProtectedStaffAccess(staffId);
+    if (!access.ok) {
+      const status = access.reason === "AUTH_REQUIRED" ? 401 : 403;
+      return apiError(access.reason, "업체 온보딩을 완료해 주세요.", status);
+    }
+
     const boothId = parseBoothId((await params).boothId);
     if (!boothId) return apiError("INVALID_REQUEST", "올바른 부스 ID가 필요합니다.", 400);
 
@@ -57,6 +64,12 @@ export async function PATCH(
   try {
     const staffId = await getCurrentStaffId(request);
     if (!staffId) return apiError("AUTH_REQUIRED", "로그인이 필요합니다.", 401);
+
+    const access = await getProtectedStaffAccess(staffId);
+    if (!access.ok) {
+      const status = access.reason === "AUTH_REQUIRED" ? 401 : 403;
+      return apiError(access.reason, "업체 온보딩을 완료해 주세요.", status);
+    }
 
     const boothId = parseBoothId((await params).boothId);
     if (!boothId) return apiError("INVALID_REQUEST", "올바른 부스 ID가 필요합니다.", 400);
