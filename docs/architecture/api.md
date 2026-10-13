@@ -68,6 +68,7 @@
 | `PATCH /api/v1/booths/{boothId}/merchants` | 업체 계약 수락 · 거절: `{ status: "APPROVED" \| "REJECTED", merchants: [{ id, updatedAt }] }` (업체 1~5곳, `id` 는 업체 id) → 204. 고른 업체 전부를 한 번에 바꾸거나 하나도 바꾸지 않음. **이미 등록된 업체는 거절할 수 없음**(409 `MERCHANT_ALREADY_APPROVED`), 거절된 업체는 다시 수락할 수 있음. 목록을 본 뒤 계약 행이 바뀌었으면 409 `MERCHANT_CHANGED` (겹친 두 요청도 한쪽만 성공). 이미 그 상태인 업체는 건드리지 않음. 400 `INVALID_REQUEST` · 403 `BOOTH_MANAGER_REQUIRED` · 404 `BOOTH_NOT_FOUND` · `MERCHANT_NOT_FOUND` | ✅ 부스 관리자 | 이 PR |
 | `GET /api/v1/merchant-booths?query=` | 업체 등록용 부스 검색: 이름 · 주소에 검색어가 들어간 부스의 `id` · `name` · `address` 만 (삭제 제외, 이름 순 최대 20개). 요원용 `GET /api/v1/booths` 와 달리 요금 정책 · 등록 요청을 싣지 않음. 승인 대기 중인 업체 관리자는 403 `MERCHANT_APPROVAL_PENDING`. 400 `INVALID_QUERY`(없음 · 50자 초과) · 403 `MERCHANT_ADMIN_REQUIRED` | ✅ 업체 관리자 | 이 PR |
 | `GET /api/v1/merchants/me` | 내 업체 목록: 삭제되지 않은 내 업체의 업체명 · 주소 · 상세 주소 · 우편번호 · 좌표 · 사진 URL(등록한 순서) · 계약한 부스와 계약 상태(`PENDING` · `APPROVED` · `REJECTED`). 승인 대기 중에도 볼 수 있음. 403 `MERCHANT_ADMIN_REQUIRED` | ✅ 업체 관리자 | 이 PR |
+| `POST /api/v1/merchant-registration-sessions` | 업체 등록 세션 열기: 등록 화면을 열 때 한 번 부름. 새로 만들면 201 `SESSION_CREATED`, 쓰던 세션이 있으면 200 `SESSION_RESUMED` (이때 앞서 예약만 해 둔 사진은 취소됨). 세션은 24시간 뒤 만료, 한 사람에 진행 중인 세션은 1개. 제출이 처리 중이면 409 `UNRESOLVED_SUBMISSION`. 403 `MERCHANT_ADMIN_REQUIRED` · `MERCHANT_APPROVAL_PENDING` | ✅ 업체 관리자 | 이 PR |
 
 ## 기반 PR
 
