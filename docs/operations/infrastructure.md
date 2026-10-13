@@ -84,7 +84,7 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 |---|---|
 | 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `https://valet.makkigo.com` 의 POST 가 허용되는 것을 확인 |
 | EC2 역할의 S3 권한 | **확인 안 됨** — `deploy/aws/setup-iam.sh` 가 만드는 `makkigo-prod-ec2` 에는 아래 권한이 들어 있지 않음. 운영에 올리기 전에 붙어 있는지 확인해야 업로드가 됨 |
-| staging 을 CloudFront 로 읽지 못하게 막기 | **아직 없음** — 아래 "staging 비공개" |
+| staging 을 CloudFront 로 읽지 못하게 막기 | 적용됨 — staging 키는 CloudFront 에서 403, final 키와 기존 이미지는 200, 앱의 직접 읽기는 그대로인 것을 확인 (아래 "staging 비공개") |
 
 EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain을 사용하며, 아래 prefix 밖은
 거부합니다.
@@ -118,13 +118,13 @@ CORS 는 기존 GET · HEAD 규칙에 POST 규칙을 하나 더한 형태입니�
 CORS 는 인증 · 쓰기 권한을 주지 않습니다. 2026-10-13 에 로컬 요원 앱에서 이 버킷으로 presigned POST,
 조건부 copy, 삭제, 업체 등록까지 실제로 돌려 확인했습니다(로컬 전용 IAM 사용자의 키 사용).
 
-#### staging 비공개 (아직 적용 안 됨)
+#### staging 비공개
 
 버킷은 private 이지만 CloudFront 가 버킷 전체를 읽을 수 있어, 검증 전 업로드
-(`merchants/staging/*`)도 키를 알면 `IMAGE_BASE_URL` 로 열립니다(2026-10-13 확인: staging 키가
+(`merchants/staging/*`)도 키를 알면 `IMAGE_BASE_URL` 로 열렸습니다(2026-10-13 확인: staging 키가
 CloudFront 에서 200). 업체 관리자로 가입한 사람이 이미지로 표시만 한 임의의 파일을 올려 공개 주소를
-얻을 수 있으므로, 버킷 정책에 아래 Deny 를 더합니다. `Principal` 과 `Condition` 은 버킷 정책에 이미
-있는 CloudFront Allow 문의 것을 그대로 옮깁니다(아래는 OAC 일 때, OAI 면 그 OAI 의 ARN).
+얻을 수 있어, 같은 날 버킷 정책에 아래 Deny 를 더했습니다. 버킷 정책을 다시 만들 때는 `Principal` 과
+`Condition` 을 CloudFront Allow 문의 것과 같게 둡니다(아래는 OAC 일 때, OAI 면 그 OAI 의 ARN).
 
 ```json
 {
@@ -139,7 +139,7 @@ CloudFront 에서 200). 업체 관리자로 가입한 사람이 이미지로 표
 }
 ```
 
-앱은 IAM 자격 증명으로 직접 읽으므로 이 Deny 의 영향을 받지 않습니다. 적용 뒤 확인:
+앱은 IAM 자격 증명으로 직접 읽으므로 이 Deny 의 영향을 받지 않습니다. 확인 방법:
 
 ```bash
 # 사진을 올리기만 한 뒤(등록 전) 그 staging 키 — 403 이어야 함
