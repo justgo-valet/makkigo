@@ -118,20 +118,22 @@ interface MerchantUploadSessionRepository {
   abandonReservation(input: { uploadId: string; now: Date }): Promise<void>;
 }
 
+const expirableSessionWhere = (now: Date) =>
+  ({
+    expiresAt: { lte: now },
+    OR: [
+      { state: { in: ["OPEN", "RETRYABLE"] } },
+      { state: "PROCESSING", OR: [{ leaseUntil: null }, { leaseUntil: { lte: now } }] },
+    ],
+  }) satisfies Prisma.MerchantRegistrationSessionWhereInput;
+
 const terminalizeExpiredSession = async (
   transaction: Prisma.TransactionClient,
   sessionId: string,
   now: Date,
 ) => {
   const expired = await transaction.merchantRegistrationSession.updateMany({
-    where: {
-      id: sessionId,
-      expiresAt: { lte: now },
-      OR: [
-        { state: { in: ["OPEN", "RETRYABLE"] } },
-        { state: "PROCESSING", OR: [{ leaseUntil: null }, { leaseUntil: { lte: now } }] },
-      ],
-    },
+    where: { id: sessionId, ...expirableSessionWhere(now) },
     data: { state: "EXPIRED", generation: { increment: 1 }, leaseUntil: null },
   });
   if (expired.count !== 1) return false;
@@ -375,6 +377,7 @@ export {
   SESSION_LIFETIME_MS,
   buildMerchantUploadKeys,
   createMerchantUploadSessionService,
+  expirableSessionWhere,
   extensionForMimeType,
   prismaMerchantUploadSessionRepository,
   serializeSession,

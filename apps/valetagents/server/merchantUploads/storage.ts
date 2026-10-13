@@ -27,7 +27,6 @@ interface CopyUploadInput {
 
 interface DeleteUploadObjectInput {
   key: string;
-  etag?: string | null;
   abortSignal?: AbortSignal;
 }
 

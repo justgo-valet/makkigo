@@ -5,6 +5,7 @@ const HOUR_MS = 60 * 60 * 1_000;
 const HTTP_TIMEOUT_MS = 90_000;
 const ALERT_TIMEOUT_MS = 15_000;
 const HEALTH_MAX_AGE_MS = 75 * 60 * 1_000;
+const MAX_BATCHES_PER_SWEEP = 20;
 const HEARTBEAT_PATH = "/tmp/merchant-cleanup-heartbeat.json";
 
 let stopping = false;
@@ -83,6 +84,27 @@ const runCleanupWithRetry = async (dryRun) => {
   }
 };
 
+const sweep = async (onBatch) => {
+  const runBatch = async () => {
+    const result = await runCleanupWithRetry(false);
+    if (typeof result.failed !== "number") throw new Error("cleanup response has no failure count");
+    await onBatch();
+    return result;
+  };
+  const first = await runBatch();
+  let last = first;
+  let failed = first.failed;
+  for (
+    let batch = 1;
+    batch < MAX_BATCHES_PER_SWEEP && !stopping && last.partial && last.claimed > 0;
+    batch += 1
+  ) {
+    last = await runBatch();
+    failed += last.failed;
+  }
+  return { oldestEligibleAgeSeconds: first.oldestEligibleAgeSeconds, failed };
+};
+
 const runLoop = async () => {
   let lastSuccessfulSweepAt = null;
   while (!stopping) {
@@ -100,8 +122,18 @@ const runLoop = async () => {
         if (!process.env.MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL) {
           throw new Error("cleanup alert webhook is required while enabled");
         }
-        const result = await runCleanupWithRetry(false);
+        const result = await sweep(() =>
+          writeHeartbeat({
+            mode: "enabled",
+            healthy: true,
+            lastLoopAt: new Date().toISOString(),
+            lastSuccessfulSweepAt,
+          }),
+        );
         lastSuccessfulSweepAt = new Date().toISOString();
+        if (result.failed > 0) {
+          await sendAlert({ kind: "cleanup-delete-failure", failed: result.failed });
+        }
         if ((result.oldestEligibleAgeSeconds ?? 0) > 48 * 60 * 60) {
           await sendAlert({
             kind: "cleanup-age-breach",
@@ -142,6 +174,9 @@ const main = async (arguments_) => {
   if (args.has("--healthcheck")) return healthcheck();
   if (args.has("--loop")) return runLoop();
   const execute = args.has("--execute");
+  if (execute && args.has("--dry-run")) {
+    throw new Error("--execute and --dry-run cannot be combined");
+  }
   const result = await runCleanupWithRetry(!execute);
   process.stdout.write(`${JSON.stringify(result)}\n`);
 };
@@ -164,4 +199,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   });
 }
 
-export { healthcheck, main, requestCleanup, runLoop, writeHeartbeat };
+export { healthcheck, main, requestCleanup, runLoop, sweep, writeHeartbeat };

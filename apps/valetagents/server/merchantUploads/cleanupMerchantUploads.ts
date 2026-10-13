@@ -5,14 +5,14 @@ import type { MerchantUploadStorage } from "./storage";
 const DEFAULT_BATCH_SIZE = 100;
 const DEFAULT_IO_TIMEOUT_MS = 15_000;
 const DEFAULT_START_BUDGET_MS = 45_000;
+const RECHECK_DELAY_MS = 60 * 60 * 1_000;
 
 interface CleanupCandidate {
   id: string;
   state: "ATTACHED" | "REVOKED" | "TOMBSTONED";
   stagingKey: string;
   finalKey: string;
-  sourceETag: string | null;
-  finalETag: string | null;
+  sweptBefore: boolean;
 }
 
 interface CleanupInspection {
@@ -21,6 +21,7 @@ interface CleanupInspection {
 }
 
 interface CleanupRepository {
+  expireSessions(input: { now: Date; limit: number }): Promise<void>;
   inspect(now: Date): Promise<CleanupInspection>;
   claim(input: {
     claimId: string;
@@ -63,7 +64,7 @@ const addMilliseconds = (date: Date, milliseconds: number) =>
 
 const deleteWithTimeout = async (
   storage: CleanupDependencies["storage"],
-  target: { key: string; etag: string | null },
+  key: string,
   timeoutMs: number,
   requestSignal?: AbortSignal,
 ) => {
@@ -73,7 +74,7 @@ const deleteWithTimeout = async (
   const timer = setTimeout(() => controller.abort(new Error("S3 cleanup request timed out")), timeoutMs);
   try {
     await Promise.race([
-      storage.deleteObject({ ...target, abortSignal: controller.signal }),
+      storage.deleteObject({ key, abortSignal: controller.signal }),
       new Promise<never>((_, reject) => {
         controller.signal.addEventListener(
           "abort",
@@ -96,6 +97,9 @@ const createMerchantUploadCleanupService = (dependencies: CleanupDependencies) =
   return async ({ dryRun, batchSize = DEFAULT_BATCH_SIZE, signal }: CleanupRequest) => {
     const boundedBatchSize = Math.max(1, Math.min(DEFAULT_BATCH_SIZE, batchSize));
     const startedAt = now();
+    if (!dryRun) {
+      await dependencies.repository.expireSessions({ now: startedAt, limit: boundedBatchSize });
+    }
     const inspection = await dependencies.repository.inspect(startedAt);
     const oldestEligibleAgeSeconds = inspection.oldestEligibleAt
       ? Math.max(0, Math.floor((startedAt.getTime() - inspection.oldestEligibleAt.getTime()) / 1_000))
@@ -130,16 +134,14 @@ const createMerchantUploadCleanupService = (dependencies: CleanupDependencies) =
         stoppedForBudget = true;
         break;
       }
-      const targets = [
-        { key: candidate.stagingKey, etag: candidate.sourceETag },
-        ...(candidate.state === "TOMBSTONED"
-          ? [{ key: candidate.finalKey, etag: candidate.finalETag }]
-          : []),
+      const keys = [
+        candidate.stagingKey,
+        ...(candidate.state === "TOMBSTONED" ? [candidate.finalKey] : []),
       ];
 
       try {
-        for (const target of targets) {
-          await deleteWithTimeout(dependencies.storage, target, ioTimeoutMs, signal);
+        for (const key of keys) {
+          await deleteWithTimeout(dependencies.storage, key, ioTimeoutMs, signal);
         }
         const completed = await dependencies.repository.complete({
           uploadId: candidate.id,
@@ -147,7 +149,9 @@ const createMerchantUploadCleanupService = (dependencies: CleanupDependencies) =
           state: candidate.state,
           now: now(),
           nextSweepAt:
-            candidate.state === "ATTACHED" ? null : addMilliseconds(now(), 60 * 60 * 1_000),
+            candidate.state === "ATTACHED" || candidate.sweptBefore
+              ? null
+              : addMilliseconds(now(), RECHECK_DELAY_MS),
         });
         if (!completed) throw new Error("Cleanup claim was lost before completion");
         cleaned += 1;
@@ -157,7 +161,7 @@ const createMerchantUploadCleanupService = (dependencies: CleanupDependencies) =
           uploadId: candidate.id,
           claimId,
           now: now(),
-          nextSweepAt: addMilliseconds(now(), 60 * 60 * 1_000),
+          nextSweepAt: addMilliseconds(now(), RECHECK_DELAY_MS),
         });
       }
     }

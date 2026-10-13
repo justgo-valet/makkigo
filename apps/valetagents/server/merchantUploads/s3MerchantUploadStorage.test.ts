@@ -226,26 +226,19 @@ describe("S3 merchant upload storage", () => {
     ).rejects.toBeInstanceOf(StaleMerchantUploadError);
   });
 
-  it("passes an ETag condition to deletion", async () => {
+  it("deletes by key without an ETag condition", async () => {
     send.mockResolvedValue({});
     const storage = createS3MerchantUploadStorage({ client: { send }, signer: signer as never });
-    await storage.deleteObject({ key: "final/key", etag: '"final"' });
+    await storage.deleteObject({ key: "final/key" });
     const command = send.mock.calls[0]?.[0] as DeleteObjectCommand;
     expect(command).toBeInstanceOf(DeleteObjectCommand);
-    expect(command.input).toMatchObject({ Key: "final/key", IfMatch: '"final"' });
+    expect(command.input).toEqual({ Bucket: expect.any(String), Key: "final/key" });
   });
 
-  it("treats an already-missing cleanup object as success but preserves precondition failures", async () => {
+  it("treats an already-missing cleanup object as success", async () => {
     const storage = createS3MerchantUploadStorage({ client: { send }, signer: signer as never });
     send.mockRejectedValueOnce({ name: "NoSuchKey", $metadata: { httpStatusCode: 404 } });
-    await expect(storage.deleteObject({ key: "staging/missing", etag: '"old"' })).resolves.toBe(
-      undefined,
-    );
-
-    send.mockRejectedValueOnce({ name: "PreconditionFailed", $metadata: { httpStatusCode: 412 } });
-    await expect(storage.deleteObject({ key: "staging/replaced", etag: '"old"' })).rejects.toEqual(
-      expect.objectContaining({ name: "PreconditionFailed" }),
-    );
+    await expect(storage.deleteObject({ key: "staging/missing" })).resolves.toBe(undefined);
   });
 });
 
