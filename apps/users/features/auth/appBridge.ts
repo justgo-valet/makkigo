@@ -50,6 +50,46 @@ const openAppNotificationSettings = () => {
   getAppChannel()?.postMessage(JSON.stringify({ type: "openNotificationSettings" }));
 };
 
+const LOCATION_EVENT = "makkigo:location";
+const LOCATION_TIMEOUT_MS = 15 * 1000;
+
+interface AppLocation {
+  latitude: number;
+  longitude: number;
+}
+
+type LocationEventDetail = {
+  latitude: number | null;
+  longitude: number | null;
+};
+
+const toAppLocation = (event: Event): AppLocation | null => {
+  const { latitude, longitude } = (event as CustomEvent<LocationEventDetail>).detail ?? {};
+
+  return typeof latitude === "number" && typeof longitude === "number"
+    ? { latitude, longitude }
+    : null;
+};
+
+const requestAppLocation = () =>
+  new Promise<AppLocation | null>((resolve) => {
+    if (!isInApp()) {
+      resolve(null);
+      return;
+    }
+
+    const finish = (location: AppLocation | null) => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener(LOCATION_EVENT, handleEvent);
+      resolve(location);
+    };
+    const handleEvent = (event: Event) => finish(toAppLocation(event));
+    const timeoutId = window.setTimeout(() => finish(null), LOCATION_TIMEOUT_MS);
+
+    window.addEventListener(LOCATION_EVENT, handleEvent);
+    getAppChannel()?.postMessage(JSON.stringify({ type: "requestLocation" }));
+  });
+
 const toAbsoluteUrl = (path: string) => new URL(path, window.location.origin).toString();
 
 const openAppAuthSession = ({ url, returnUrl }: { url: string; returnUrl: string }) => {
@@ -68,5 +108,6 @@ export {
   onAppPushToken,
   openAppAuthSession,
   openAppNotificationSettings,
+  requestAppLocation,
 };
-export type { AppPushState, AppPushToken };
+export type { AppLocation, AppPushState, AppPushToken };
