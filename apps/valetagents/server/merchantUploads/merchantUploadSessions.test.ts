@@ -172,4 +172,27 @@ describe("merchant upload session helpers", () => {
         "/api/v1/merchant-registration-sessions/018f47a3-7b4c-7b1f-8db8-743c634d9651",
     });
   });
+
+  it("reports a lapsed open session as expired when its status is read", async () => {
+    const repo = repository();
+    vi.mocked(repo.getOwned).mockResolvedValue({
+      kind: "FOUND",
+      session: {
+        id: "018f47a3-7b4c-7b1f-8db8-743c634d9651",
+        state: "OPEN",
+        expiresAt: fixedNow,
+        merchantId: null,
+        replayResponse: null,
+      },
+    });
+    const service = createMerchantUploadSessionService({
+      repository: repo,
+      storage: { createUploadPost: vi.fn() },
+      now: () => fixedNow,
+    });
+
+    await expect(
+      service.getOwned(7, "018f47a3-7b4c-7b1f-8db8-743c634d9651"),
+    ).resolves.toMatchObject({ kind: "FOUND", session: { state: "EXPIRED" } });
+  });
 });

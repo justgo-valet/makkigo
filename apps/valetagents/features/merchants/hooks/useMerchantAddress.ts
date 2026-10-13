@@ -81,7 +81,7 @@ const useMerchantAddress = (kakaoMapAppKey: string) => {
     loadKakaoMaps(kakaoMapAppKey)
       .then((maps) => {
         new maps.services.Geocoder().addressSearch(roadAddress, (results, status) => {
-          const [first] = results;
+          const [first] = results ?? [];
           const found = { latitude: Number(first?.y), longitude: Number(first?.x) };
           finish(
             status === maps.services.Status.OK &&

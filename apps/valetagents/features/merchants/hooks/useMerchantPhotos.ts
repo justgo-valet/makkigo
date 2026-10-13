@@ -3,6 +3,7 @@
 import { isHTTPError } from "ky";
 import { useEffect, useRef, useState } from "react";
 
+import { createUuid } from "@/libs/common/createUuid";
 import {
   MAX_MERCHANT_IMAGE_BYTES,
   MAX_MERCHANT_IMAGES,
@@ -138,7 +139,7 @@ const useMerchantPhotos = (sessionId: string | null, onStale: () => void) => {
           continue;
         }
         accepted.push({
-          key: crypto.randomUUID(),
+          key: createUuid(),
           file,
           previewUrl: URL.createObjectURL(file),
           status: "uploading",

@@ -75,6 +75,8 @@ class StaleMerchantUploadError extends Error {
   override name = "StaleMerchantUploadError";
 }
 
+let sharedClient: S3CommandTransport | undefined;
+
 const createS3MerchantUploadStorage = (
   options?: Partial<S3MerchantUploadStorageOptions>,
 ): MerchantUploadStorage => {
@@ -82,7 +84,10 @@ const createS3MerchantUploadStorage = (
   const bucket = options?.bucket ?? config.bucket;
   const client =
     options?.client ??
-    (new S3Client({ region: config.region, maxAttempts: 2 }) as unknown as S3CommandTransport);
+    (sharedClient ??= new S3Client({
+      region: config.region,
+      maxAttempts: 2,
+    }) as unknown as S3CommandTransport);
   const signer = options?.signer ?? createPresignedPost;
 
   return {

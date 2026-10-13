@@ -204,6 +204,7 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
           await terminalizeExpiredSession(transaction, session.id, now);
           return { kind: "SESSION_EXPIRED" as const };
         }
+        if (session.state === "EXPIRED") return { kind: "SESSION_EXPIRED" as const };
         if (session.state !== "OPEN") return { kind: "SESSION_FROZEN" as const };
 
         const expiresAt = new Date(
@@ -214,7 +215,7 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
             where: { id: uploadId },
           });
           if (!upload) return { kind: "UPLOAD_NOT_FOUND" as const };
-          if (upload.sessionId !== sessionId) return { kind: "UPLOAD_FORBIDDEN" as const };
+          if (upload.sessionId !== session.id) return { kind: "UPLOAD_FORBIDDEN" as const };
           if (upload.state !== "RESERVED") return { kind: "UPLOAD_NOT_REFRESHABLE" as const };
           if (upload.declaredMimeType !== contentType || upload.declaredSize !== size) {
             return { kind: "UPLOAD_MISMATCH" as const };
@@ -227,7 +228,7 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
         }
 
         const occupied = await transaction.merchantImageUpload.findMany({
-          where: { sessionId, state: { in: [...LIVE_UPLOAD_STATES] } },
+          where: { sessionId: session.id, state: { in: [...LIVE_UPLOAD_STATES] } },
           select: { slot: true },
         });
         const occupiedSlots = new Set(occupied.map(({ slot }) => slot));
@@ -236,14 +237,14 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
 
         const { stagingKey, finalKey } = buildMerchantUploadKeys({
           staffId,
-          sessionId,
+          sessionId: session.id,
           uploadId,
           contentType,
         });
         const upload = await transaction.merchantImageUpload.create({
           data: {
             id: uploadId,
-            sessionId,
+            sessionId: session.id,
             slot,
             stagingKey,
             finalKey,
@@ -273,17 +274,18 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
         await terminalizeExpiredSession(transaction, session.id, now);
         return { kind: "SESSION_EXPIRED" as const };
       }
+      if (session.state === "EXPIRED") return { kind: "SESSION_EXPIRED" as const };
       if (session.state !== "OPEN") return { kind: "SESSION_FROZEN" as const };
 
       const upload = await transaction.merchantImageUpload.findUnique({ where: { id: uploadId } });
       if (!upload) return { kind: "UPLOAD_NOT_FOUND" as const };
-      if (upload.sessionId !== sessionId) return { kind: "UPLOAD_FORBIDDEN" as const };
+      if (upload.sessionId !== session.id) return { kind: "UPLOAD_FORBIDDEN" as const };
       if (upload.state === "REVOKED") return { kind: "REVOKED" as const, uploadId };
       if (upload.state !== "RESERVED" && upload.state !== "READY") {
         return { kind: "UPLOAD_NOT_REMOVABLE" as const };
       }
       const revoked = await transaction.merchantImageUpload.updateMany({
-        where: { id: uploadId, sessionId, state: { in: ["RESERVED", "READY"] } },
+        where: { id: uploadId, sessionId: session.id, state: { in: ["RESERVED", "READY"] } },
         data: { state: "REVOKED", nextSweepAt: now, lastOutcome: "REVOKED_BY_OWNER" },
       });
       return revoked.count === 1
@@ -310,8 +312,17 @@ const createMerchantUploadSessionService = (dependencies: {
   const createId = dependencies.createId ?? randomUUID;
   return {
     createOrResume: (staffId: number) => dependencies.repository.createOrResume({ staffId, now: now() }),
-    getOwned: (staffId: number, sessionId: string) =>
-      dependencies.repository.getOwned({ staffId, sessionId }),
+    async getOwned(staffId: number, sessionId: string) {
+      const result = await dependencies.repository.getOwned({ staffId, sessionId });
+      if (
+        result.kind !== "FOUND" ||
+        (result.session.state !== "OPEN" && result.session.state !== "RETRYABLE") ||
+        result.session.expiresAt > now()
+      ) {
+        return result;
+      }
+      return { kind: "FOUND" as const, session: { ...result.session, state: "EXPIRED" as const } };
+    },
     revoke: (staffId: number, sessionId: string, uploadId: string) =>
       dependencies.repository.revoke({ staffId, sessionId, uploadId, now: now() }),
     async reserveAndSign(input: {

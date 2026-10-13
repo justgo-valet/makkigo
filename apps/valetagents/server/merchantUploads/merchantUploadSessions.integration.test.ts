@@ -84,4 +84,49 @@ describe("merchant upload session database integration", () => {
       results.flatMap((result) => (result.kind === "RESERVED" ? [result.upload.slot] : [])).sort(),
     ).toEqual([0, 1, 2, 3, 4]);
   });
+
+  it("extends a reservation when the session id arrives in upper case", async () => {
+    const staffId = await createStaff();
+    const now = new Date();
+    const opened = await repository.createOrResume({ staffId, now });
+    const reservation = {
+      staffId,
+      sessionId: opened.session.id.toUpperCase(),
+      uploadId: crypto.randomUUID(),
+      contentType: "image/jpeg" as const,
+      size: 3,
+      now,
+    };
+
+    const reserved = await repository.reserve({ ...reservation, refresh: false });
+    expect(reserved).toMatchObject({
+      kind: "RESERVED",
+      upload: { stagingKey: expect.stringContaining(opened.session.id) },
+    });
+    await expect(repository.reserve({ ...reservation, refresh: true })).resolves.toMatchObject({
+      kind: "RESERVED",
+    });
+  });
+
+  it("keeps answering expired after a session has lapsed", async () => {
+    const staffId = await createStaff();
+    const now = new Date();
+    const session = await prisma.merchantRegistrationSession.create({
+      data: { staffId, expiresAt: new Date(now.getTime() - 1_000) },
+      select: { id: true },
+    });
+    const reserve = () =>
+      repository.reserve({
+        staffId,
+        sessionId: session.id,
+        uploadId: crypto.randomUUID(),
+        refresh: false,
+        contentType: "image/jpeg",
+        size: 3,
+        now,
+      });
+
+    await expect(reserve()).resolves.toEqual({ kind: "SESSION_EXPIRED" });
+    await expect(reserve()).resolves.toEqual({ kind: "SESSION_EXPIRED" });
+  });
 });
