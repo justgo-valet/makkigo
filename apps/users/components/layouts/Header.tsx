@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import NotificationBellButton from "@/features/notification/components/NotificationBellButton";
 import { useLayout } from "@/stores/layout";
 
 export default function Header() {
@@ -50,9 +51,7 @@ export default function Header() {
 
       {showRightMenu && (
         <nav className="flex items-center gap-3">
-          <button type="button" aria-label="알림" className="cursor-pointer">
-            <Image src="/icons/alarm.svg" alt="" aria-hidden="true" width={24} height={24} />
-          </button>
+          <NotificationBellButton />
           <Link href="/mypage" aria-label="마이페이지" className="cursor-pointer">
             <Image src="/icons/profile.svg" alt="" aria-hidden="true" width={24} height={24} />
           </Link>
