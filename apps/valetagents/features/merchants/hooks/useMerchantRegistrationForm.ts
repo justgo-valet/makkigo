@@ -93,6 +93,8 @@ const useMerchantRegistrationForm = ({
     openSession();
   });
 
+  if (failure === "uploads" && photos.photos.length > 0) setFailure(null);
+
   const registration = useMutation({
     mutationFn: async (input: { submission: MerchantRegistrationSubmission; fresh: boolean }) => {
       const extended = await photos.extend();
@@ -154,9 +156,7 @@ const useMerchantRegistrationForm = ({
   else if (isDelayed) notice = MESSAGES.delayed;
   else if (session.isError) notice = MESSAGES.session;
   else if (isBlocked) notice = MESSAGES.blocked;
-  else if (failure && !(failure === "uploads" && photos.photos.length > 0)) {
-    notice = MESSAGES[failure];
-  }
+  else if (failure) notice = MESSAGES[failure];
 
   return {
     name,
