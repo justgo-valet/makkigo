@@ -22,6 +22,23 @@ compose --profile migrate pull
 compose up -d postgres
 compose run --rm migrate
 compose up -d --remove-orphans
+
+compose exec -T caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+
+attempt=0
+until compose exec -T merchant-upload-cleanup \
+  node apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs --healthcheck; do
+  attempt=$((attempt + 1))
+  if [ "$attempt" -ge 120 ]; then
+    echo "merchant-upload-cleanup heartbeat did not become healthy within 240 seconds" >&2
+    exit 1
+  fi
+  sleep 2
+done
+
+compose run --rm --no-deps merchant-upload-cleanup \
+  node apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs --once --dry-run
 docker image prune -f
 
 compose ps

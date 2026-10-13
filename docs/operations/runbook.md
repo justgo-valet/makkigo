@@ -18,6 +18,7 @@ docker ps                     # 컨테이너 상태
 | `makkigo-caddy-1` | HTTPS 프록시 |
 | `makkigo-users-1` | 고객 앱 |
 | `makkigo-valetagents-1` | 요원 앱 |
+| `makkigo-merchant-upload-cleanup-1` | 업체 이미지 cleanup hourly runner (요원 앱과 같은 이미지) |
 | `makkigo-postgres-1` | DB |
 
 ## 배포 · 되돌리기
@@ -49,6 +50,58 @@ docker restart makkigo-users-1                 # 한 컨테이너 재시작
    - 배포 때 `load-env.sh` 가 SSM 값을 새로 읽습니다. 컨테이너 재시작만으로는 반영되지 않습니다.
 
 새 변수를 추가할 때는 코드 · `.env.production.example` · [infrastructure.md](infrastructure.md) 목록도 함께 고칩니다.
+
+## 업체 이미지 cleanup
+
+cleanup은 DB에 기록된 ATTACHED staging key와 TOMBSTONED staging/final key만 처리합니다. 버킷
+전체를 list하지 않으며 ATTACHED final은 절대 삭제하지 않습니다. tombstone은 외부 요청의 늦은
+완료를 다시 찾을 수 있도록 성공 후에도 보존하고 매시간 재검사합니다.
+
+### 배포 전 필수 gate
+
+1. 실제 운영 on-call 담당자와 `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` 수신 채널 기록
+2. isolated staging에서 presigned POST, conditional copy/delete, IAM prefix deny, CORS 검증
+3. Caddy 설정 반영 후 다음 명령 모두 성공
+
+```bash
+cd /opt/makkigo/deploy
+export IMAGE_TAG=<현재 이미지 태그> ENV_DIR=/opt/makkigo/env
+docker compose -f docker-compose.prod.yml exec -T caddy \
+  caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+docker compose -f docker-compose.prod.yml exec -T caddy \
+  caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
+# 외부 valet origin의 internal path는 403이어야 함
+curl -i -X POST https://valet.makkigo.com/api/internal/merchant-uploads/cleanup
+# 서버가 healthy인 상태에서만; --no-deps는 서버를 시작하지 않음
+docker compose -f docker-compose.prod.yml run --rm --no-deps merchant-upload-cleanup \
+  node apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs --once --dry-run
+```
+
+dry-run은 cleanup이 disabled여도 200이어야 하며 DB claim/write와 S3 삭제를 하지 않습니다.
+같은 명령의 `--execute`는 disabled 상태에서 503/non-zero여야 합니다.
+
+### Enable
+
+1. `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED=true`를 SSM에 저장
+2. `./load-env.sh`
+3. `docker compose -f docker-compose.prod.yml up -d --force-recreate valetagents merchant-upload-cleanup`
+4. 두 컨테이너 health, runner enabled heartbeat, 새 `lastSuccessfulSweepAt`, backlog 감소 확인
+
+단순 `docker restart`는 env_file을 다시 읽지 않으므로 인정하지 않습니다. oldest eligible age가
+48시간을 넘거나 S3 삭제 실패/heartbeat 75분 누락 시 지정 on-call이 실제 webhook/플랫폼 경보를
+받는지 staging에서 주입 검증합니다.
+
+### Disable / rollback
+
+1. 필요하면 runner를 즉시 stop
+2. SSM 값을 `false`로 저장 → `./load-env.sh`
+3. `docker compose ... up -d --force-recreate valetagents merchant-upload-cleanup`
+4. server execute가 503, disabled heartbeat가 기록되고 성공 sweep 시간이 증가하지 않음을 확인
+5. `docker compose -f docker-compose.prod.yml stop merchant-upload-cleanup`
+6. stopped+disabled 상태에서도 one-off dry-run 200 확인
+
+schema와 tombstone은 삭제하지 않습니다. IAM/CORS나 object integrity가 의심되면 signing/runner를
+비활성화하되 업체 onboarding guard와 pending read 화면은 유지합니다.
 
 ## 운영 DB 접속
 
