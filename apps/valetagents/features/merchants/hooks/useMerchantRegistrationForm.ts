@@ -4,6 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { createUuid } from "@/libs/common/createUuid";
+
 import { openRegistrationSession } from "../apis/openRegistrationSession";
 import { submitMerchantRegistration } from "../apis/submitMerchantRegistration";
 import { runMerchantRegistration } from "../runMerchantRegistration";
@@ -198,7 +200,7 @@ const useMerchantRegistrationForm = ({
       mutate({
         fresh: true,
         submission: {
-          idempotencyKey: crypto.randomUUID(),
+          idempotencyKey: createUuid(),
           body: {
             sessionId,
             name: name.trim(),
