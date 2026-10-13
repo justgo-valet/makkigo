@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { Prisma, prisma } from "database";
 
 import { activeMerchantRegistrationSessionStates } from "@/libs/merchant/contracts/registration-session";
+import { runSerializable } from "@/server/common/runSerializable";
 
 import type { MerchantImageMimeType } from "@/libs/merchant/contracts/image-upload";
 import type { MerchantRegistrationSessionState } from "@/libs/merchant/contracts/registration-session";
@@ -146,7 +147,7 @@ const terminalizeExpiredSession = async (
 
 const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
   async createOrResume({ staffId, now }) {
-    return prisma.$transaction(
+    return runSerializable(
       async (transaction) => {
         await transaction.$queryRaw(Prisma.sql`
           SELECT "id" FROM "staff" WHERE "id" = ${staffId} FOR UPDATE
@@ -176,7 +177,7 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
         });
         return { kind: "OPEN" as const, session, resumed: false };
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      { retryUniqueViolation: true },
     );
   },
 
@@ -188,7 +189,7 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
   },
 
   async reserve({ staffId, sessionId, uploadId, refresh, contentType, size, now }) {
-    return prisma.$transaction(
+    return runSerializable(
       async (transaction) => {
         await transaction.$queryRaw(Prisma.sql`
           SELECT "id" FROM "merchant_registration_sessions"
@@ -253,45 +254,42 @@ const prismaMerchantUploadSessionRepository: MerchantUploadSessionRepository = {
         });
         return { kind: "RESERVED" as const, upload };
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      { retryUniqueViolation: true },
     );
   },
 
   async revoke({ staffId, sessionId, uploadId, now }) {
-    return prisma.$transaction(
-      async (transaction) => {
-        await transaction.$queryRaw(Prisma.sql`
-          SELECT "id" FROM "merchant_registration_sessions"
-          WHERE "id" = ${sessionId}::uuid FOR UPDATE
-        `);
-        const session = await transaction.merchantRegistrationSession.findUnique({
-          where: { id: sessionId },
-        });
-        if (!session) return { kind: "SESSION_NOT_FOUND" as const };
-        if (session.staffId !== staffId) return { kind: "SESSION_FORBIDDEN" as const };
-        if (session.state === "OPEN" && session.expiresAt <= now) {
-          await terminalizeExpiredSession(transaction, session.id, now);
-          return { kind: "SESSION_EXPIRED" as const };
-        }
-        if (session.state !== "OPEN") return { kind: "SESSION_FROZEN" as const };
+    return runSerializable(async (transaction) => {
+      await transaction.$queryRaw(Prisma.sql`
+        SELECT "id" FROM "merchant_registration_sessions"
+        WHERE "id" = ${sessionId}::uuid FOR UPDATE
+      `);
+      const session = await transaction.merchantRegistrationSession.findUnique({
+        where: { id: sessionId },
+      });
+      if (!session) return { kind: "SESSION_NOT_FOUND" as const };
+      if (session.staffId !== staffId) return { kind: "SESSION_FORBIDDEN" as const };
+      if (session.state === "OPEN" && session.expiresAt <= now) {
+        await terminalizeExpiredSession(transaction, session.id, now);
+        return { kind: "SESSION_EXPIRED" as const };
+      }
+      if (session.state !== "OPEN") return { kind: "SESSION_FROZEN" as const };
 
-        const upload = await transaction.merchantImageUpload.findUnique({ where: { id: uploadId } });
-        if (!upload) return { kind: "UPLOAD_NOT_FOUND" as const };
-        if (upload.sessionId !== sessionId) return { kind: "UPLOAD_FORBIDDEN" as const };
-        if (upload.state === "REVOKED") return { kind: "REVOKED" as const, uploadId };
-        if (upload.state !== "RESERVED" && upload.state !== "READY") {
-          return { kind: "UPLOAD_NOT_REMOVABLE" as const };
-        }
-        const revoked = await transaction.merchantImageUpload.updateMany({
-          where: { id: uploadId, sessionId, state: { in: ["RESERVED", "READY"] } },
-          data: { state: "REVOKED", nextSweepAt: now, lastOutcome: "REVOKED_BY_OWNER" },
-        });
-        return revoked.count === 1
-          ? { kind: "REVOKED" as const, uploadId }
-          : { kind: "UPLOAD_NOT_REMOVABLE" as const };
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
+      const upload = await transaction.merchantImageUpload.findUnique({ where: { id: uploadId } });
+      if (!upload) return { kind: "UPLOAD_NOT_FOUND" as const };
+      if (upload.sessionId !== sessionId) return { kind: "UPLOAD_FORBIDDEN" as const };
+      if (upload.state === "REVOKED") return { kind: "REVOKED" as const, uploadId };
+      if (upload.state !== "RESERVED" && upload.state !== "READY") {
+        return { kind: "UPLOAD_NOT_REMOVABLE" as const };
+      }
+      const revoked = await transaction.merchantImageUpload.updateMany({
+        where: { id: uploadId, sessionId, state: { in: ["RESERVED", "READY"] } },
+        data: { state: "REVOKED", nextSweepAt: now, lastOutcome: "REVOKED_BY_OWNER" },
+      });
+      return revoked.count === 1
+        ? { kind: "REVOKED" as const, uploadId }
+        : { kind: "UPLOAD_NOT_REMOVABLE" as const };
+    });
   },
 
   async abandonReservation({ uploadId, now }) {
