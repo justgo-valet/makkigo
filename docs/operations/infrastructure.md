@@ -31,7 +31,7 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 | 디스크 | EBS 20GB gp3, 스왑 2GB (`/swapfile`) |
 | 탄력적 IP | `13.209.92.174` |
 | 서버 파일 | `/opt/makkigo/deploy` (배포 때 Actions 가 덮어씀), `/opt/makkigo/env` (SSM 에서 꺼낸 env 파일, 권한 600) |
-| IAM 역할 | `makkigo-prod-ec2` — SSM 연결(`AmazonSSMManagedInstanceCore`) + `/makkigo/prod/*` 파라미터 읽기 |
+| IAM 역할 | `makkigo-prod-ec2` — SSM 연결(`AmazonSSMManagedInstanceCore`) + `/makkigo/prod/*` 파라미터 읽기 + 업체 사진 S3(`merchants/staging/*` · `merchants/final/*`) |
 
 **이미지는 ARM(`linux/arm64`) 전용**입니다. x86 서버로 옮기면 빌드 설정(`deploy.yml` 의 러너 · 플랫폼)도 바꿔야 합니다.
 
@@ -83,11 +83,11 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 | 항목 | 상태 (2026-10-13) |
 |---|---|
 | 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `https://valet.makkigo.com` 의 POST 가 허용되는 것을 확인 |
-| EC2 역할의 S3 권한 | **확인 안 됨** — `deploy/aws/setup-iam.sh` 가 만드는 `makkigo-prod-ec2` 에는 아래 권한이 들어 있지 않음. 운영에 올리기 전에 붙어 있는지 확인해야 업로드가 됨 |
+| EC2 역할의 S3 권한 | **적용 확인 안 됨** — `deploy/aws/setup-iam.sh` 가 아래 권한을 인라인 정책 `makkigo-prod-merchant-images` 로 붙임. 이 정책이 생기기 전에 만든 역할에는 없으므로, 운영에 올리기 전에 스크립트를 다시 실행해야 업로드가 됨 |
 | staging 을 CloudFront 로 읽지 못하게 막기 | 적용됨 — staging 키는 CloudFront 에서 403, final 키와 기존 이미지는 200, 앱의 직접 읽기는 그대로인 것을 확인 (아래 "staging 비공개") |
 
 EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain을 사용하며, 아래 prefix 밖은
-거부합니다.
+거부합니다. 버킷 이름은 `setup-iam.sh` 의 `IMAGE_BUCKET`(기본 `makkigo-prod-image-apne2`)으로 바꿉니다.
 
 ```json
 {

@@ -7,6 +7,7 @@ OIDC_SUB_PREFIX="${OIDC_SUB_PREFIX:-repo:justgo-valet@318992933/makkigo@13707449
 INSTANCE_ID="${EC2_INSTANCE_ID:?EC2_INSTANCE_ID 가 필요합니다 (예: i-0b8a5131b7af49a02)}"
 DEPLOY_ROLE="${DEPLOY_ROLE:-makkigo-github-deploy}"
 EC2_ROLE="${EC2_ROLE:-makkigo-prod-ec2}"
+IMAGE_BUCKET="${IMAGE_BUCKET:-makkigo-prod-image-apne2}"
 
 ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 OIDC_HOST="token.actions.githubusercontent.com"
@@ -73,7 +74,7 @@ else
 fi
 aws iam put-role-policy --role-name "$DEPLOY_ROLE" --policy-name ssm-deploy --policy-document file:///tmp/deploy-policy.json
 
-echo "== 3. EC2 역할 (SSM 연결 + /makkigo/prod/* 읽기)"
+echo "== 3. EC2 역할 (SSM 연결 + /makkigo/prod/* 읽기 + 업체 사진 S3)"
 cat >/tmp/ec2-params-policy.json <<JSON
 {
   "Version": "2012-10-17",
@@ -81,6 +82,19 @@ cat >/tmp/ec2-params-policy.json <<JSON
     "Effect": "Allow",
     "Action": ["ssm:GetParametersByPath", "ssm:GetParameters", "ssm:GetParameter"],
     "Resource": ["${PARAM_ARN}", "arn:aws:ssm:${REGION}:${ACCOUNT_ID}:parameter/makkigo/prod"]
+  }]
+}
+JSON
+cat >/tmp/ec2-merchant-images-policy.json <<JSON
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+    "Resource": [
+      "arn:aws:s3:::${IMAGE_BUCKET}/merchants/staging/*",
+      "arn:aws:s3:::${IMAGE_BUCKET}/merchants/final/*"
+    ]
   }]
 }
 JSON
@@ -115,6 +129,7 @@ JSON
 fi
 aws iam attach-role-policy --role-name "$EC2_ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
 aws iam put-role-policy --role-name "$EC2_ROLE" --policy-name makkigo-prod-params --policy-document file:///tmp/ec2-params-policy.json
+aws iam put-role-policy --role-name "$EC2_ROLE" --policy-name makkigo-prod-merchant-images --policy-document file:///tmp/ec2-merchant-images-policy.json
 
 echo
 echo "완료. GitHub Secrets 에 넣을 값:"
