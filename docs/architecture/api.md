@@ -34,9 +34,12 @@
 | `GET /api/v1/auth/oauth/exchange?code=` (또는 `?error=`) | 앱 웹뷰에서 1회용 코드 + `verifier` 쿠키 → 로그인 쿠키 + 이동 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
-| `POST /api/v1/consents` | 약관 동의 기록 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14) |
-| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`), 앱 푸시 동의 여부(`appPushAgreed`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37), 이 PR |
+| `POST /api/v1/consents` | 약관 동의 기록 (선택 항목 동의 · 철회도 같은 API, 필수 항목 철회는 400). 앱 푸시를 철회하면 그 회원의 푸시 기기를, 위치기반서비스를 철회하면 위치 이용 기록을 모두 삭제 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14), 이 PR |
+| `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`), 앱 푸시 동의 여부(`appPushAgreed`), 위치기반서비스 동의 여부(`locationAgreed`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37), 이 PR |
 | `GET /api/v1/users/me/vehicle` | 내 차량 목록 조회(차량 번호, 브랜드, 모델, 차량 이미지 `carImageUrl`). 브랜드 · 모델을 직접 입력했으면 `carImageUrl` 은 기본 이미지(`cars/_default.png`) | ✅ | [#67](https://github.com/justgo-valet/makkigo/pull/67) |
+| `GET /api/v1/users/me/profile` | 마이페이지 내 정보: 휴대폰 번호(`phoneNumber`), 차량 번호(`plateNumber`), 연동 계정(`socialAccounts`: 제공자 · 이메일), 선택 동의 상태(`consents`: `appPush` · `alimtalk` · `locationBasedService`) | ✅ | 이 PR |
+| `PATCH /api/v1/users/me/phone-number` | 휴대폰 번호 수정: `{ phoneNumber }` (하이픈 · 공백 허용, 숫자만 저장) → 204. 다른 회원(탈퇴 후 보관 중 포함) 번호면 409 `DUPLICATE_PHONE`, 형식 오류 400 | ✅ | 이 PR |
+| `PATCH /api/v1/users/me/vehicle` | 차량 번호 수정: `{ vehicleNumber }` → 204. 브랜드 · 모델은 그대로. 다른 회원 차량이면 409 `DUPLICATE_VEHICLE`, 진행 중인 발렛 세션(완료 · 취소 아님)이 있으면 409 `ACTIVE_SESSION_EXISTS`, 차량 없음 404 `VEHICLE_REQUIRED`, 형식 오류 400 | ✅ | 이 PR |
 | `DELETE /api/v1/users/me` | 회원 탈퇴 (푸시 기기도 삭제) | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
 | `POST /api/v1/push-devices` | 앱 푸시 기기 등록: `{ token, platform: "IOS" \| "ANDROID" }`. 같은 토큰이 있으면 지금 회원으로 옮김 (204) | ✅ | 이 PR |
 | `DELETE /api/v1/push-devices` | 앱 푸시 기기 삭제: `{ token }` (내 기기만, 204). 로그아웃 때 부름 | ✅ | 이 PR |
@@ -82,7 +85,6 @@
 
 ## 예정
 
-- 마이페이지: 동의 상태 조회, 휴대폰·차량 번호 수정
 - 탈퇴 회원 개인정보 삭제 배치
 - 요원 쪽 인증 (로그인 후 유형 선택)
 - 애플 로그인 회원 탈퇴 때 애플 토큰 철회
