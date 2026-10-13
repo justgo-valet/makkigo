@@ -1,14 +1,11 @@
 import "server-only";
 import { prisma } from "database";
 
+import { formatArrivalDelay } from "@/libs/valet/arrivalDelay";
+
 import type { DelayArrivalErrorCode, DelayArrivalRequest } from "@/libs/valet/contracts/arrival";
 
 type DelayArrivalSessionResult = { ok: true } | { ok: false; reason: DelayArrivalErrorCode };
-
-const MAX_DELAY_MINUTES = 15;
-
-const formatDelay = (minutes: number) =>
-  minutes >= MAX_DELAY_MINUTES ? `${minutes}분 이상` : `${minutes}분`;
 
 const delayArrivalSession = async (
   userId: number,
@@ -43,7 +40,7 @@ const delayArrivalSession = async (
         staffId,
         valetSessionId,
         title: "도착 지연",
-        body: `${place}${session.plateNumber} 차량이 ${formatDelay(minutes)} 늦게 도착해요`,
+        body: `${place}${session.plateNumber} 차량이 ${formatArrivalDelay(minutes)} 늦게 도착해요`,
       })),
     });
 

@@ -13,8 +13,11 @@ import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSh
 import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
+import ArrivalDelaySheet from "@/features/valet/components/ArrivalDelaySheet";
 import LocationConsentSheet from "@/features/valet/components/LocationConsentSheet";
 import PickupRequestSheets from "@/features/valet/components/PickupRequestSheets";
+import ValetNoticeSheet from "@/features/valet/components/ValetNoticeSheet";
+import { useArrivalDelayFlow } from "@/features/valet/hooks/useArrivalDelayFlow";
 import { usePickupRequestFlow } from "@/features/valet/hooks/usePickupRequestFlow";
 
 import type { HomeActionKey } from "@/features/home/homeActions";
@@ -25,9 +28,11 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
   const merchantSearch = useMerchantSearchFlow();
   const pushPermissionBanner = usePushPermissionBanner();
   const pickupRequest = usePickupRequestFlow();
+  const arrivalDelay = useArrivalDelayFlow({ onStartArrival: merchantSearch.open });
   const actionHandlers: Partial<Record<HomeActionKey, () => void>> = {
     EXIT_REQUEST: pickupRequest.open,
     MERCHANT_SEARCH: merchantSearch.open,
+    DELAY: arrivalDelay.open,
   };
 
   if (home.status === "loading") return null;
@@ -106,6 +111,34 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         onClose={merchantSearch.close}
       />
       <PickupRequestSheets flow={pickupRequest} />
+      <ValetNoticeSheet
+        open={arrivalDelay.isArrivalRequiredOpen}
+        title="도착 알림을 먼저 해주세요"
+        description="도착 알림을 보낸 뒤에 지연 알림을 보낼 수 있어요"
+        confirmLabel="도착 알림 하러 가기"
+        closeLabel="닫기"
+        onConfirm={arrivalDelay.startArrival}
+        onClose={arrivalDelay.close}
+      />
+      <ArrivalDelaySheet
+        open={arrivalDelay.isSelectOpen}
+        expectedArrivalTime={arrivalDelay.expectedArrivalTime}
+        options={arrivalDelay.options}
+        selectedMinutes={arrivalDelay.selectedMinutes}
+        isSending={arrivalDelay.isSending}
+        errorMessage={arrivalDelay.errorMessage}
+        onSelect={arrivalDelay.select}
+        onSend={arrivalDelay.send}
+        onClose={arrivalDelay.close}
+      />
+      <ValetNoticeSheet
+        open={arrivalDelay.isSentOpen}
+        title="지연 알림을 보냈어요"
+        description={`요원님께 ${arrivalDelay.sentDelayText ?? ""} 늦어진다고 알렸어요`}
+        confirmLabel="확인"
+        onConfirm={arrivalDelay.close}
+        onClose={arrivalDelay.close}
+      />
     </div>
   );
 }
