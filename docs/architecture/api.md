@@ -70,6 +70,7 @@
 | `GET /api/v1/merchants/me` | 내 업체 목록: 삭제되지 않은 내 업체의 업체명 · 주소 · 상세 주소 · 우편번호 · 좌표 · 사진 URL(등록한 순서) · 계약한 부스와 계약 상태(`PENDING` · `APPROVED` · `REJECTED`). 승인 대기 중에도 볼 수 있음. 403 `MERCHANT_ADMIN_REQUIRED` | ✅ 업체 관리자 | 이 PR |
 | `POST /api/v1/merchant-registration-sessions` | 업체 등록 세션 열기: 등록 화면을 열 때 한 번 부름. 새로 만들면 201 `SESSION_CREATED`, 쓰던 세션이 있으면 200 `SESSION_RESUMED` (이때 앞서 예약만 해 둔 사진은 취소됨). 세션은 24시간 뒤 만료, 한 사람에 진행 중인 세션은 1개. 제출이 처리 중이면 409 `UNRESOLVED_SUBMISSION`. 403 `MERCHANT_ADMIN_REQUIRED` · `MERCHANT_APPROVAL_PENDING` | ✅ 업체 관리자 | 이 PR |
 | `GET /api/v1/merchant-registration-sessions/{sessionId}` | 업체 등록 세션 상태: `state`(`OPEN` · `PROCESSING` · `RETRYABLE` · `COMMITTED` · `FAILED`) 와, 등록이 끝났으면 `merchantId`. 승인 대기 중에도 볼 수 있음. 만료된 세션은 410 `SESSION_EXPIRED`. 403 `MERCHANT_ADMIN_REQUIRED` · `SESSION_FORBIDDEN`(남의 세션) · 404 `SESSION_NOT_FOUND` | ✅ 업체 관리자 | 이 PR |
+| `POST /api/v1/merchant-image-uploads/presign` | 업체 사진 업로드 예약: `{ sessionId, contentType, size, uploadId? }` (JPEG · PNG · WebP, 1바이트~5MiB) → 201 `{ uploadId, slot, expiresAt, upload: { url, fields } }`. 받은 `fields` 를 그대로 넣고 파일을 마지막에 붙여 S3 로 직접 POST. 예약은 5분 동안 유효하고 세션마다 5장까지(409 `SLOTS_FULL`). `uploadId` 를 주면 같은 예약의 유효 시간만 늘림(200). 400 `INVALID_INPUT` · 403 `SESSION_FORBIDDEN` · `UPLOAD_FORBIDDEN` · 404 `SESSION_NOT_FOUND` · `UPLOAD_NOT_FOUND` · 409 `SESSION_FROZEN` · `UPLOAD_NOT_REFRESHABLE` · `UPLOAD_MISMATCH` · 410 `SESSION_EXPIRED` · 503 `UPLOAD_SIGNING_FAILED` | ✅ 업체 관리자 | 이 PR |
 
 ## 기반 PR
 
