@@ -14,17 +14,25 @@ interface UseBoothValetSessionsOptions {
   staffId: number;
   boothId: number;
   initialData: BoothValetSessionListResponse;
+  initialDataUpdatedAt: number;
 }
 
 const boothValetSessionsQueryKey = (staffId: number, boothId: number) =>
   ["staff", staffId, "booth-valet-sessions", boothId] as const;
 
-const useBoothValetSessions = ({ staffId, boothId, initialData }: UseBoothValetSessionsOptions) => {
+const useBoothValetSessions = ({
+  staffId,
+  boothId,
+  initialData,
+  initialDataUpdatedAt,
+}: UseBoothValetSessionsOptions) => {
   const query = useQuery({
     queryKey: boothValetSessionsQueryKey(staffId, boothId),
     queryFn: ({ signal }) => getBoothValetSessions(boothId, signal),
     initialData,
+    initialDataUpdatedAt,
     retry: false,
+    networkMode: "always",
     refetchInterval: BOOTH_VALET_SESSIONS_POLL_INTERVAL_MS,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
@@ -33,8 +41,8 @@ const useBoothValetSessions = ({ staffId, boothId, initialData }: UseBoothValetS
 
   return {
     sessions: query.data.items,
+    updatedAt: Math.max(query.dataUpdatedAt, query.errorUpdatedAt),
     errorMessage: query.isError ? getErrorMessage(query.error, LIST_ERROR_MESSAGE) : null,
-    retry: query.refetch,
   };
 };
 
