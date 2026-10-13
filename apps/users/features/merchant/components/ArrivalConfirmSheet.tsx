@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@makkigo/ui";
+import { Button, FieldError } from "@makkigo/ui";
 import {
   Sheet,
   SheetContent,
@@ -13,6 +13,8 @@ import {
 interface ArrivalConfirmSheetProps {
   open: boolean;
   merchantName: string | null;
+  isSending: boolean;
+  errorMessage: string | null;
   onSend: () => void;
   onClose: () => void;
 }
@@ -20,6 +22,8 @@ interface ArrivalConfirmSheetProps {
 export default function ArrivalConfirmSheet({
   open,
   merchantName,
+  isSending,
+  errorMessage,
   onSend,
   onClose,
 }: Readonly<ArrivalConfirmSheetProps>) {
@@ -47,14 +51,22 @@ export default function ArrivalConfirmSheet({
           </SheetDescription>
         </SheetHeader>
         <SheetFooter className="px-5 pt-4 pb-6">
-          <Button type="button" size="lg" className="h-12 w-full shadow-none" onClick={onSend}>
-            도착 알림 보내기
+          <FieldError>{errorMessage}</FieldError>
+          <Button
+            type="button"
+            size="lg"
+            className="h-12 w-full shadow-none"
+            disabled={isSending}
+            onClick={onSend}
+          >
+            {isSending ? "보내는 중…" : "도착 알림 보내기"}
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="lg"
             className="h-12 w-full text-(--tertiary-color)"
+            disabled={isSending}
             onClick={onClose}
           >
             나중에 할게요

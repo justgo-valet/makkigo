@@ -12,6 +12,7 @@ const withdrawUser = async (userId: number) => {
   await prisma.$transaction([
     prisma.userSocialAccount.deleteMany({ where: { userId } }),
     prisma.pushDevice.deleteMany({ where: { userId } }),
+    prisma.locationUseLog.deleteMany({ where: { userId } }),
     prisma.userRefreshToken.updateMany({
       where: { userId, revokedAt: null },
       data: { revokedAt: now },
