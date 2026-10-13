@@ -14,6 +14,7 @@ import { getBeforeSessionSnapshot, toHomeSnapshot } from "@/features/home/homeSn
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
 import { useCurrentSession } from "@/features/valet/hooks/useCurrentSession";
 import { useVehicles } from "@/features/vehicle/hooks/useVehicles";
+import { formatArrivalDelay } from "@/libs/valet/arrivalDelay";
 
 import type { HomeSnapshot, HomeStatus } from "@/features/home/homeSnapshot";
 
@@ -67,7 +68,7 @@ const getMetaItems = (snapshot: HomeSnapshot, vehicleNumber: string, now: number
     return [
       formattedVehicleNumber,
       `${formatClockTime(snapshot.arrivalNotifiedAt)} 도착 알림`,
-      ...(delayMinutes > 0 ? [`${formatElapsed(delayMinutes)} 지연`] : []),
+      ...(delayMinutes > 0 ? [`${formatArrivalDelay(delayMinutes)} 지연`] : []),
     ];
   }
 
