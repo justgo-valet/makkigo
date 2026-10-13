@@ -10,6 +10,7 @@ const protectedPages = [
   "../../app/(protected)/booths/[boothId]/merchants/page.tsx",
   "../../app/(protected)/settings/page.tsx",
   "../../app/(protected)/tickets/page.tsx",
+  "../../app/(protected)/merchants/page.tsx",
 ] as const;
 
 describe("protected route inventory", () => {
