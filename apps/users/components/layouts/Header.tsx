@@ -2,6 +2,7 @@
 
 import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useLayout } from "@/stores/layout";
@@ -52,9 +53,9 @@ export default function Header() {
           <button type="button" aria-label="알림" className="cursor-pointer">
             <Image src="/icons/alarm.svg" alt="" aria-hidden="true" width={24} height={24} />
           </button>
-          <button type="button" aria-label="프로필" className="cursor-pointer">
+          <Link href="/mypage" aria-label="마이페이지" className="cursor-pointer">
             <Image src="/icons/profile.svg" alt="" aria-hidden="true" width={24} height={24} />
-          </button>
+          </Link>
         </nav>
       )}
     </header>
