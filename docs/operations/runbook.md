@@ -31,6 +31,7 @@ docker ps                     # 컨테이너 상태
 
 - `dev → main` 을 **스쿼시로 머지하면 안 됩니다.** 이력이 갈라져 다음 반영 때 충돌합니다.
 - 되돌려도 **DB 마이그레이션은 되돌아가지 않습니다.** 옛 코드가 새 DB 구조에서 동작하는지 확인하고 되돌립니다.
+- 업체 이미지 cleanup 이 들어가기 전 이미지로 되돌리면 배포가 `makkigo-merchant-upload-cleanup-1` 을 내리고 띄우지 않습니다. runner 가 든 버전을 다시 배포하면 돌아옵니다. 되돌린 상태에서 손으로 `docker compose up -d` 를 하면 이 컨테이너가 다시 떠서 재시작을 반복합니다.
 - 배포 결과 로그는 Actions 의 "EC2 배포" 단계에 출력됩니다.
 
 ## 로그 보기 · 재시작
@@ -79,6 +80,11 @@ docker compose -f docker-compose.prod.yml run --rm --no-deps merchant-upload-cle
 
 dry-run은 cleanup이 disabled여도 200이어야 하며 DB claim/write와 S3 삭제를 하지 않습니다.
 같은 명령의 `--execute`는 disabled 상태에서 503/non-zero여야 합니다.
+
+배포(`deploy.sh`)도 같은 dry-run을 돌립니다. cleanup이 꺼져 있으면 실패해도 경고만 남기고 배포를
+끝내므로, `MERCHANT_UPLOAD_CLEANUP_TOKEN`(32바이트 이상)을 SSM에 넣기 전에는 배포 로그에
+`dry-run failed; continuing because cleanup is disabled`가 남습니다. 켜져 있을 때는 dry-run이나
+runner heartbeat 확인이 실패하면 배포가 실패합니다.
 
 ### Enable
 

@@ -7,6 +7,8 @@ cd "$(dirname "$0")"
 ENV_DIR="${ENV_DIR:-/opt/makkigo/env}"
 export IMAGE_TAG ENV_DIR
 
+CLEANUP_RUNNER=apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs
+
 compose() {
   docker compose -f docker-compose.prod.yml "$@"
 }
@@ -19,26 +21,50 @@ set +a
 printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 
 compose --profile migrate pull
+
+if compose run --rm --no-deps merchant-upload-cleanup test -f "$CLEANUP_RUNNER"; then
+  has_cleanup_runner=true
+else
+  compose run --rm --no-deps merchant-upload-cleanup test ! -e "$CLEANUP_RUNNER" || {
+    echo "could not determine whether image $IMAGE_TAG has the merchant-upload-cleanup runner" >&2
+    exit 1
+  }
+  has_cleanup_runner=false
+fi
+
 compose up -d postgres
 compose run --rm migrate
-compose up -d --remove-orphans
+
+if [ "$has_cleanup_runner" = true ]; then
+  compose up -d --remove-orphans
+else
+  echo "image $IMAGE_TAG has no merchant-upload-cleanup runner; starting without the cleanup container"
+  compose up -d --remove-orphans --scale merchant-upload-cleanup=0
+fi
 
 compose exec -T caddy caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 
-attempt=0
-until compose exec -T merchant-upload-cleanup \
-  node apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs --healthcheck; do
-  attempt=$((attempt + 1))
-  if [ "$attempt" -ge 120 ]; then
-    echo "merchant-upload-cleanup heartbeat did not become healthy within 240 seconds" >&2
-    exit 1
-  fi
-  sleep 2
-done
+if [ "$has_cleanup_runner" = true ]; then
+  attempt=0
+  until compose exec -T merchant-upload-cleanup node "$CLEANUP_RUNNER" --healthcheck; do
+    attempt=$((attempt + 1))
+    if [ "$attempt" -ge 120 ]; then
+      echo "merchant-upload-cleanup heartbeat did not become healthy within 240 seconds" >&2
+      exit 1
+    fi
+    sleep 2
+  done
 
-compose run --rm --no-deps merchant-upload-cleanup \
-  node apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs --once --dry-run
+  if ! compose run --rm --no-deps merchant-upload-cleanup node "$CLEANUP_RUNNER" --once --dry-run; then
+    if grep -q '^MERCHANT_UPLOAD_CLEANUP_ENABLED=.*true' "$ENV_DIR/valetagents.env"; then
+      echo "merchant-upload-cleanup dry-run failed while cleanup is enabled" >&2
+      exit 1
+    fi
+    echo "merchant-upload-cleanup dry-run failed; continuing because cleanup is disabled"
+  fi
+fi
+
 docker image prune -f
 
 compose ps
