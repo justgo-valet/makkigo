@@ -100,7 +100,7 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 - 브라우저 presigned POST는 `merchants/staging/{staffId}/{sessionId}/...`에만 발급합니다.
 - final write는 서버 conditional CopyObject만 허용합니다. 브라우저/IAM에 final PutObject를
   허용하지 않는 별도 bucket policy 검증이 release gate입니다.
-- 앱은 Head/Get range 검증과 조건부 copy/delete에 같은 `s3:GetObject`/`DeleteObject` 권한을
+- 앱은 Head/Get range 검증과 조건부 copy, 삭제에 같은 `s3:GetObject`/`DeleteObject` 권한을
   사용합니다. 버킷 전체 `ListBucket`은 cleanup에 필요하지 않습니다.
 
 제안 CORS(실제 origin과 local origin을 staging에서 확정):
