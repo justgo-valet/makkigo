@@ -13,6 +13,7 @@ import MerchantSearchSheet from "@/features/merchant/components/MerchantSearchSh
 import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSearchFlow";
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
+import LocationConsentSheet from "@/features/valet/components/LocationConsentSheet";
 
 export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKey: string }>) {
   useHomeHeader();
@@ -85,7 +86,17 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
       <ArrivalConfirmSheet
         open={merchantSearch.isArrivalOpen}
         merchantName={merchantSearch.pickedMerchant?.name ?? null}
+        isSending={merchantSearch.isSending}
+        errorMessage={merchantSearch.sendErrorMessage}
         onSend={merchantSearch.sendArrival}
+        onClose={merchantSearch.close}
+      />
+      <LocationConsentSheet
+        open={merchantSearch.isLocationConsentOpen}
+        isSending={merchantSearch.isSending}
+        errorMessage={merchantSearch.sendErrorMessage}
+        onAgreeAndSend={merchantSearch.agreeLocationAndSend}
+        onSendWithoutLocation={merchantSearch.sendWithoutLocation}
         onClose={merchantSearch.close}
       />
     </div>
