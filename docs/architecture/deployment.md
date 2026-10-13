@@ -197,7 +197,7 @@ dry-run 확인도 건너뜁니다.
    ```bash
    EC2_INSTANCE_ID=i-0b8a5131b7af49a02 bash setup-iam.sh
    ```
-   GitHub OIDC 공급자, 배포용 역할 `makkigo-github-deploy`(이 인스턴스에 SSM 명령만), EC2 역할(SSM 연결 + `/makkigo/prod/*` 읽기)을 만들고 인스턴스에 연결합니다. 다시 실행해도 안전합니다. 마지막에 GitHub Secrets 값이 출력됩니다.
+   GitHub OIDC 공급자, 배포용 역할 `makkigo-github-deploy`(이 인스턴스에 SSM 명령만), EC2 역할(SSM 연결 + `/makkigo/prod/*` 읽기 + 업체 사진 S3 `merchants/staging/*` · `merchants/final/*`)을 만들고 인스턴스에 연결합니다. 다시 실행해도 안전합니다. 마지막에 GitHub Secrets 값이 출력됩니다.
 2. **서버 준비** — 같은 CloudShell 에서 `deploy/aws/bootstrap-server.sh` 실행 (Docker · compose · AWS CLI 설치, `/opt/makkigo` 생성)
 3. **GHCR 토큰** — GitHub → Settings → Developer settings → Personal access tokens (classic), 권한 `read:packages` 만. CloudShell 에서 SSM 에 저장
    ```bash
