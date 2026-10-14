@@ -9,12 +9,13 @@ import AppHeader from "@/components/layouts/AppHeader";
 import { formatPlateNumber, formatSessionLabel } from "../formatters";
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
+import { useCompletePickup } from "../hooks/useCompletePickup";
 import { useParkValetSession } from "../hooks/useParkValetSession";
 import { useRespondPickup } from "../hooks/useRespondPickup";
 
 import AddVehicleSheet from "./AddVehicleSheet";
-import ParkSheet from "./ParkSheet";
 import PickupResponseSheet from "./PickupResponseSheet";
+import PlateConfirmSheet from "./PlateConfirmSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
@@ -52,6 +53,13 @@ export default function VehicleManagement({
     onResponded: () => setResponseTarget(null),
   });
 
+  const [completeTarget, setCompleteTarget] = useState<BoothValetSession | null>(null);
+  const completing = useCompletePickup({
+    staffId,
+    boothId,
+    onCompleted: () => setCompleteTarget(null),
+  });
+
   const selectSession = (session: BoothValetSession) => {
     if (session.status === "ARRIVING") {
       parking.resetError();
@@ -59,6 +67,9 @@ export default function VehicleManagement({
     } else if (session.status === "PICKUP_REQUESTED") {
       responding.resetError();
       setResponseTarget(session);
+    } else if (session.status === "PICKUP_PREPARING") {
+      completing.resetError();
+      setCompleteTarget(session);
     }
   };
 
@@ -106,7 +117,7 @@ export default function VehicleManagement({
 
           return (
             <li key={session.id}>
-              {session.status === "ARRIVING" || session.status === "PICKUP_REQUESTED" ? (
+              {session.status !== "PARKED" ? (
                 <button type="button" className={cellClass} onClick={() => selectSession(session)}>
                   {car}
                 </button>
@@ -135,12 +146,23 @@ export default function VehicleManagement({
         </Button>
       </div>
 
-      <ParkSheet
+      <PlateConfirmSheet
+        title="주차 완료"
+        description="확인을 누르면 이 차량을 주차 완료로 처리해요."
         plateNumber={parkTarget?.plateNumber ?? null}
-        isParking={parking.isParking}
+        isPending={parking.isParking}
         errorMessage={parking.errorMessage}
         onConfirm={() => parkTarget && parking.park(parkTarget.id)}
         onClose={() => !parking.isParking && setParkTarget(null)}
+      />
+      <PlateConfirmSheet
+        title="출차 완료"
+        description="확인을 누르면 이 차량을 출차 완료로 처리해요."
+        plateNumber={completeTarget?.plateNumber ?? null}
+        isPending={completing.isCompleting}
+        errorMessage={completing.errorMessage}
+        onConfirm={() => completeTarget && completing.complete(completeTarget.id)}
+        onClose={() => !completing.isCompleting && setCompleteTarget(null)}
       />
       <PickupResponseSheet
         session={responseTarget}
