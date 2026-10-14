@@ -10,7 +10,8 @@ const formatSessionLabel = (session: BoothValetSession, now: number) => {
   switch (session.status) {
     case "ARRIVING": {
       if (!session.expectedArrivalAt) return "도착 시간 미정";
-      const minutes = minutesBetween(now, Date.parse(session.expectedArrivalAt));
+      const delayMs = (session.arrivalDelayMinutes ?? 0) * MINUTE_MS;
+      const minutes = minutesBetween(now, Date.parse(session.expectedArrivalAt) + delayMs);
       return minutes > 0 ? `${minutes}분 후 도착` : "곧 도착";
     }
     case "PARKED": {

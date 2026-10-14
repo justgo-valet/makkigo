@@ -13,6 +13,7 @@ const boothValetSessionSchema = z.object({
   plateNumber: z.string(),
   carImageUrl: z.string().url(),
   expectedArrivalAt: z.string().datetime().nullable(),
+  arrivalDelayMinutes: z.number().int().positive().nullable(),
   parkedAt: z.string().datetime().nullable(),
   expectedPickupAt: z.string().datetime().nullable(),
 });
