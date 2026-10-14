@@ -17,5 +17,15 @@ const getBoothAgentFailure = async (
   return booth.agents.length > 0 ? null : "BOOTH_AGENT_REQUIRED";
 };
 
-export { getBoothAgentFailure };
+const findApprovedBoothId = async (staffId: number) => {
+  const agent = await prisma.boothAgent.findFirst({
+    where: { staffId, status: "APPROVED", booth: { deletedAt: null } },
+    orderBy: { id: "asc" },
+    select: { boothId: true },
+  });
+
+  return agent?.boothId ?? null;
+};
+
+export { findApprovedBoothId, getBoothAgentFailure };
 export type { BoothAgentFailure };
