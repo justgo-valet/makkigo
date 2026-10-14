@@ -68,7 +68,7 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 
 ## 모델 메모
 
-- **요금 기준표 · 입금 계좌**(`booth_fee_policies`, `booth_bank_accounts`)는 덮어쓰지 않고 행을 쌓습니다. `effective_from` 이 가장 최근인 행이 현재 값입니다.
+- **요금 기준표 · 입금 계좌**(`booth_fee_policies`, `booth_bank_accounts`)는 덮어쓰지 않고 행을 쌓습니다. `effective_from` 이 지금 이전인 행 중 가장 최근 행이 현재 값입니다.
 - **기준 요금** = `base_fee` (`base_minutes` 까지) + ceil((이용 시간 − `base_minutes`) ÷ `extra_unit_minutes`) × `extra_unit_fee`. 이용 시간 = 주차 완료 ~ 출차 요청 → [valet-session.md](../planning/valet-session.md#요금)
 - **티켓 버전**(`ticket_versions`)은 수정할 때마다 새 행. 업체의 최신 티켓 = 그 업체 티켓 버전 중 `created_at` 이 가장 늦은 것
 - **요원 근무 시간**(`booth_agents.work_start_time` · `work_end_time`)에 맞춰 알림을 켜고 끕니다 (`notifications_enabled`)

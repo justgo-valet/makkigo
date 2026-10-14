@@ -17,6 +17,7 @@ const getMenuItems = ({ role, managedBoothId }: MenuAccess): MenuItem[] => {
     return [
       { label: "요원 관리", href: `/booths/${managedBoothId}/agents` },
       { label: "업체 관리", href: `/booths/${managedBoothId}/merchants` },
+      { label: "요금 · 계좌", href: `/booths/${managedBoothId}/payment-settings` },
       SETTINGS_ITEM,
     ];
   }

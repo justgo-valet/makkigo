@@ -8,6 +8,7 @@ const protectedPages = [
   "../../app/(protected)/booths/new/page.tsx",
   "../../app/(protected)/booths/[boothId]/agents/page.tsx",
   "../../app/(protected)/booths/[boothId]/merchants/page.tsx",
+  "../../app/(protected)/booths/[boothId]/payment-settings/page.tsx",
   "../../app/(protected)/settings/page.tsx",
   "../../app/(protected)/tickets/page.tsx",
   "../../app/(protected)/merchants/page.tsx",
