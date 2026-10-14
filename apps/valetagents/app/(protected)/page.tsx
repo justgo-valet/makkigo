@@ -8,19 +8,28 @@ import VehicleManagement from "@/features/valet/components/VehicleManagement";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
 import { getStaffMenuAccess } from "@/server/auth/getStaffMenuAccess";
-import { findApprovedBoothId } from "@/server/booth/boothAgent";
+import { findApprovedMembership } from "@/server/booth/boothAgent";
 import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
 import { listBoothValetSessions } from "@/server/valet/listBoothValetSessions";
 
 const loadBoothSessions = async (staffId: number) => {
-  const boothId = await findApprovedBoothId(staffId);
-  if (!boothId) return null;
+  const membership = await findApprovedMembership(staffId);
+  if (!membership) return null;
+  const { boothId } = membership;
 
   const imageBaseUrl = process.env.IMAGE_BASE_URL;
   if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required");
 
   const sessions = await listBoothValetSessions(staffId, boothId, imageBaseUrl);
-  return sessions.ok ? { boothId, data: sessions.value, loadedAt: Date.now() } : null;
+  return sessions.ok
+    ? {
+        boothId,
+        data: sessions.value,
+        loadedAt: Date.now(),
+        notificationsEnabled: membership.notificationsEnabled,
+        hasWorkTime: membership.workStartTime !== null && membership.workEndTime !== null,
+      }
+    : null;
 };
 
 export default async function Home() {
@@ -43,6 +52,8 @@ export default async function Home() {
           boothId={booth.boothId}
           initialData={booth.data}
           initialDataUpdatedAt={booth.loadedAt}
+          initialNotificationsEnabled={booth.notificationsEnabled}
+          hasWorkTime={booth.hasWorkTime}
           menu={menu}
         />
       </QueryProvider>
