@@ -12,6 +12,7 @@ const session = (fields: Partial<BoothValetSession>): BoothValetSession => ({
   plateNumber: "68오8269",
   carImageUrl: "https://images.example.com/cars/_default.png",
   expectedArrivalAt: null,
+  arrivalDelayMinutes: null,
   parkedAt: null,
   expectedPickupAt: null,
   ...fields,
@@ -23,6 +24,12 @@ describe("valet session formatters", () => {
     expect(
       formatSessionLabel(session({ expectedArrivalAt: "2026-10-14T03:05:00.000Z" }), NOW),
     ).toBe("5분 후 도착");
+    expect(
+      formatSessionLabel(
+        session({ expectedArrivalAt: "2026-10-14T03:05:00.000Z", arrivalDelayMinutes: 10 }),
+        NOW,
+      ),
+    ).toBe("15분 후 도착");
     expect(formatSessionLabel(session({}), NOW)).toBe("도착 시간 미정");
     expect(
       formatSessionLabel(session({ status: "PARKED", parkedAt: "2026-10-14T01:05:00.000Z" }), NOW),
