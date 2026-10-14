@@ -7,9 +7,11 @@ import { useState } from "react";
 import AppHeader from "@/components/layouts/AppHeader";
 
 import { formatPlateNumber, formatSessionLabel } from "../formatters";
+import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useParkValetSession } from "../hooks/useParkValetSession";
 
+import AddVehicleSheet from "./AddVehicleSheet";
 import ParkSheet from "./ParkSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
@@ -38,7 +40,9 @@ export default function VehicleManagement({
   });
   const pickupRequest = sessions.find(({ status }) => status === "PICKUP_REQUESTED");
   const [parkTarget, setParkTarget] = useState<BoothValetSession | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
   const parking = useParkValetSession({ staffId, boothId, onParked: () => setParkTarget(null) });
+  const adding = useAddVehicle({ staffId, boothId, onAdded: () => setAddOpen(false) });
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(14px+env(safe-area-inset-bottom))]">
@@ -108,7 +112,14 @@ export default function VehicleManagement({
       </h2>
 
       <div className="mt-auto -mr-px ml-px pt-6">
-        <Button type="button" className="h-14 w-full rounded-[6px] text-lg font-medium">
+        <Button
+          type="button"
+          className="h-14 w-full rounded-[6px] text-lg font-medium"
+          onClick={() => {
+            adding.resetError();
+            setAddOpen(true);
+          }}
+        >
           차량 추가하기
         </Button>
       </div>
@@ -119,6 +130,13 @@ export default function VehicleManagement({
         errorMessage={parking.errorMessage}
         onConfirm={() => parkTarget && parking.park(parkTarget.id)}
         onClose={() => !parking.isParking && setParkTarget(null)}
+      />
+      <AddVehicleSheet
+        open={addOpen}
+        isAdding={adding.isAdding}
+        errorMessage={adding.errorMessage}
+        onAdd={adding.add}
+        onClose={() => !adding.isAdding && setAddOpen(false)}
       />
     </div>
   );
