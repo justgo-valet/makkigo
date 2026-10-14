@@ -19,3 +19,5 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export { ACTIVE_VALET_SESSION_STATUSES, lockPlateNumber } from "./valetSession";
+export { calculateValetFee, findFeePolicy } from "./valetFee";
+export type { ValetFee, ValetFeePolicy } from "./valetFee";

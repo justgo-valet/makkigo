@@ -1,8 +1,5 @@
 import "server-only";
-import { prisma } from "database";
-
-import { calculateValetFee } from "@/server/valet/calculateValetFee";
-import { findFeePolicy } from "@/server/valet/findFeePolicy";
+import { calculateValetFee, findFeePolicy, prisma } from "database";
 
 import type { PickupRequestErrorCode } from "@/libs/valet/contracts/pickupRequest";
 
@@ -46,7 +43,7 @@ const requestPickup = async (
 
     if (boothId === null) return { ok: false, reason: "NO_BOOTH" } as const;
 
-    const feePolicy = await findFeePolicy(boothId, now, tx);
+    const feePolicy = await findFeePolicy(tx, boothId, now);
     const baseFee =
       feePolicy && parkedAt ? calculateValetFee(feePolicy, parkedAt, now).total : null;
 
