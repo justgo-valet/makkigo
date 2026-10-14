@@ -1,6 +1,6 @@
 import "server-only";
 
-import { prisma } from "database";
+import { calculateValetFee, findFeePolicy, prisma } from "database";
 
 import { boothValetSessionListResponseSchema } from "@/libs/valet/contracts/sessions";
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
@@ -41,15 +41,27 @@ const listBoothValetSessions = async (
       expectedArrivalAt: true,
       arrivalDelayMinutes: true,
       parkedAt: true,
+      pickupRequestedAt: true,
+      baseFee: true,
       expectedPickupAt: true,
       vehicle: { select: { model: { select: { imageUrl: true } } } },
     },
   });
 
+  const fees = await Promise.all(
+    sessions.map(async ({ status, parkedAt, pickupRequestedAt, baseFee }) => {
+      if (status !== "PICKUP_REQUESTED" || !parkedAt || !pickupRequestedAt || baseFee === null) {
+        return null;
+      }
+      const policy = await findFeePolicy(prisma, boothId, pickupRequestedAt);
+      return policy ? { ...calculateValetFee(policy, parkedAt, pickupRequestedAt), total: baseFee } : null;
+    }),
+  );
+
   return {
     ok: true,
     value: boothValetSessionListResponseSchema.parse({
-      items: sessions.map((session) => ({
+      items: sessions.map((session, index) => ({
         id: session.id,
         status: session.status,
         plateNumber: session.plateNumber,
@@ -60,6 +72,8 @@ const listBoothValetSessions = async (
         expectedArrivalAt: session.expectedArrivalAt?.toISOString() ?? null,
         arrivalDelayMinutes: session.arrivalDelayMinutes,
         parkedAt: session.parkedAt?.toISOString() ?? null,
+        pickupRequestedAt: session.pickupRequestedAt?.toISOString() ?? null,
+        fee: fees[index],
         expectedPickupAt: session.expectedPickupAt?.toISOString() ?? null,
       })),
     }),

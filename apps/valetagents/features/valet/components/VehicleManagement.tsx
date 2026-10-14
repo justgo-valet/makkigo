@@ -10,9 +10,11 @@ import { formatPlateNumber, formatSessionLabel } from "../formatters";
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useParkValetSession } from "../hooks/useParkValetSession";
+import { useRespondPickup } from "../hooks/useRespondPickup";
 
 import AddVehicleSheet from "./AddVehicleSheet";
 import ParkSheet from "./ParkSheet";
+import PickupResponseSheet from "./PickupResponseSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
@@ -43,6 +45,22 @@ export default function VehicleManagement({
   const [addOpen, setAddOpen] = useState(false);
   const parking = useParkValetSession({ staffId, boothId, onParked: () => setParkTarget(null) });
   const adding = useAddVehicle({ staffId, boothId, onAdded: () => setAddOpen(false) });
+  const [responseTarget, setResponseTarget] = useState<BoothValetSession | null>(null);
+  const responding = useRespondPickup({
+    staffId,
+    boothId,
+    onResponded: () => setResponseTarget(null),
+  });
+
+  const selectSession = (session: BoothValetSession) => {
+    if (session.status === "ARRIVING") {
+      parking.resetError();
+      setParkTarget(session);
+    } else if (session.status === "PICKUP_REQUESTED") {
+      responding.resetError();
+      setResponseTarget(session);
+    }
+  };
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(14px+env(safe-area-inset-bottom))]">
@@ -88,15 +106,8 @@ export default function VehicleManagement({
 
           return (
             <li key={session.id}>
-              {session.status === "ARRIVING" ? (
-                <button
-                  type="button"
-                  className={cellClass}
-                  onClick={() => {
-                    parking.resetError();
-                    setParkTarget(session);
-                  }}
-                >
+              {session.status === "ARRIVING" || session.status === "PICKUP_REQUESTED" ? (
+                <button type="button" className={cellClass} onClick={() => selectSession(session)}>
                   {car}
                 </button>
               ) : (
@@ -130,6 +141,14 @@ export default function VehicleManagement({
         errorMessage={parking.errorMessage}
         onConfirm={() => parkTarget && parking.park(parkTarget.id)}
         onClose={() => !parking.isParking && setParkTarget(null)}
+      />
+      <PickupResponseSheet
+        session={responseTarget}
+        now={updatedAt}
+        isResponding={responding.isResponding}
+        errorMessage={responding.errorMessage}
+        onRespond={(body) => responseTarget && responding.respond(responseTarget.id, body)}
+        onClose={() => !responding.isResponding && setResponseTarget(null)}
       />
       <AddVehicleSheet
         open={addOpen}
