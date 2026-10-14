@@ -41,6 +41,7 @@ const useBoothValetSessions = ({
 
   return {
     sessions: query.data.items,
+    completed: query.data.completed,
     updatedAt: Math.max(query.dataUpdatedAt, query.errorUpdatedAt),
     errorMessage: query.isError ? getErrorMessage(query.error, LIST_ERROR_MESSAGE) : null,
   };

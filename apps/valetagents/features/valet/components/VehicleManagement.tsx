@@ -20,6 +20,31 @@ import PlateConfirmSheet from "./PlateConfirmSheet";
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
 
+interface CarFigureProps {
+  imageUrl: string;
+  plateNumber: string;
+  label: string;
+  gray: boolean;
+}
+
+function CarFigure({ imageUrl, plateNumber, label, gray }: Readonly<CarFigureProps>) {
+  return (
+    <>
+      <span className="relative -mt-4 block aspect-[8/5] w-[120px]">
+        <Image
+          src={imageUrl}
+          alt=""
+          fill
+          unoptimized
+          className={cn("object-contain", gray && "grayscale")}
+        />
+      </span>
+      <span className="-mt-0.5 text-sm leading-5">{formatPlateNumber(plateNumber)}</span>
+      <span className="text-[11px] leading-3">{label}</span>
+    </>
+  );
+}
+
 interface VehicleManagementProps {
   staffId: number;
   boothId: number;
@@ -35,7 +60,7 @@ export default function VehicleManagement({
   initialDataUpdatedAt,
   menu,
 }: Readonly<VehicleManagementProps>) {
-  const { sessions, updatedAt, errorMessage } = useBoothValetSessions({
+  const { sessions, completed, updatedAt, errorMessage } = useBoothValetSessions({
     staffId,
     boothId,
     initialData,
@@ -100,19 +125,12 @@ export default function VehicleManagement({
               "bg-[#ff7777]",
           );
           const car = (
-            <>
-              <span className="relative -mt-4 block aspect-[8/5] w-[120px]">
-                <Image
-                  src={session.carImageUrl}
-                  alt=""
-                  fill
-                  unoptimized
-                  className={cn("object-contain", session.status === "ARRIVING" && "grayscale")}
-                />
-              </span>
-              <span className="-mt-0.5 text-sm leading-5">{formatPlateNumber(session.plateNumber)}</span>
-              <span className="text-[11px] leading-3">{formatSessionLabel(session, updatedAt)}</span>
-            </>
+            <CarFigure
+              imageUrl={session.carImageUrl}
+              plateNumber={session.plateNumber}
+              label={formatSessionLabel(session, updatedAt)}
+              gray={session.status === "ARRIVING"}
+            />
           );
 
           return (
@@ -132,6 +150,19 @@ export default function VehicleManagement({
       <h2 className="-mr-[7px] -ml-0.5 mt-[58px] -indent-0.5 border-b-2 border-(--primary-color) pb-0.5 text-xl leading-6 font-medium text-(--base-color)">
         출차 완료 차량
       </h2>
+
+      <ul className="-mx-5 -mt-1 grid grid-cols-3 gap-y-[22px] text-(--base-color)">
+        {completed.map((session) => (
+          <li key={session.id} className="flex h-24 flex-col items-center">
+            <CarFigure
+              imageUrl={session.carImageUrl}
+              plateNumber={session.plateNumber}
+              label="출차 완료"
+              gray
+            />
+          </li>
+        ))}
+      </ul>
 
       <div className="mt-auto -mr-px ml-px pt-6">
         <Button
