@@ -274,6 +274,9 @@ importers:
       '@makkigo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@makkigo/push':
+        specifier: workspace:*
+        version: link:../../packages/push
       '@makkigo/ui':
         specifier: workspace:*
         version: link:../../packages/ui

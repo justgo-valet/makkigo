@@ -70,6 +70,7 @@
 | `/makkigo/prod/valetagents/AWS_REGION` | `ap-northeast-2` |
 | `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |
 | `/makkigo/prod/valetagents/IMAGE_BASE_URL` | CloudFront 공개 기준 URL. 브라우저 빌드 변수가 아니라 서버 런타임 값 |
+| `/makkigo/prod/valetagents/FIREBASE_SERVICE_ACCOUNT_JSON` | 고객 앱과 같은 값(한 줄 JSON, SecureString). 요원이 주차 처리 · 차량 추가를 하면 요원 앱 서버가 고객에게 주차 완료 푸시를 보냄. 없으면 알림 내역만 남고 푸시는 나가지 않음(요청은 성공) |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` | 승인된 운영 채널 webhook. 준비 전에는 cleanup enable 금지 |
