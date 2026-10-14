@@ -7,27 +7,36 @@ interface ExitSummaryCardProps {
   summary: ExitSummary;
   isAccountCopied: boolean;
   onCopyAccountNumber: () => void;
+  onFeeDetailClick: () => void;
 }
 
 export default function ExitSummaryCard({
   summary,
   isAccountCopied,
   onCopyAccountNumber,
+  onFeeDetailClick,
 }: Readonly<ExitSummaryCardProps>) {
   return (
     <div className="flex flex-col rounded-xl border bg-(--surface-color) px-4">
       <div className="flex items-center justify-between gap-3 py-4">
-        <p className="font-bold text-(--base-color)">
+        <p className="shrink-0 font-bold whitespace-nowrap text-(--base-color)">
           {summary.headline}
           {summary.emphasis && <span className="ml-1.5 text-primary">{summary.emphasis}</span>}
         </p>
-        <p className="text-right text-sm text-(--tertiary-color)">{summary.note}</p>
+        <p className="min-w-0 text-right text-sm break-keep text-(--tertiary-color)">
+          {summary.note}
+        </p>
       </div>
       <Separator />
-      <div className="flex items-center justify-between py-4">
-        <p className="text-(--tertiary-color)">{summary.feeLabel}</p>
-        <div className="flex items-center gap-1">
-          <p className="text-lg font-bold text-(--base-color)">{summary.fee}</p>
+      <button
+        type="button"
+        disabled={!summary.canSeeFeeDetail}
+        className="flex items-center justify-between py-4 text-left"
+        onClick={onFeeDetailClick}
+      >
+        <span className="text-(--tertiary-color)">{summary.feeLabel}</span>
+        <span className="flex items-center gap-1">
+          <span className="text-lg font-bold text-(--base-color)">{summary.fee}</span>
           {summary.canSeeFeeDetail && (
             <Image
               src="/icons/chevron_right.svg"
@@ -37,8 +46,8 @@ export default function ExitSummaryCard({
               height={20}
             />
           )}
-        </div>
-      </div>
+        </span>
+      </button>
       {summary.accountNumber && (
         <>
           <Separator />
