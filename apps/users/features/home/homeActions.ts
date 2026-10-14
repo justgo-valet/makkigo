@@ -1,4 +1,4 @@
-import type { HomeStatus } from "@/features/home/homePreview";
+import type { HomeStatus } from "@/features/home/homeSnapshot";
 
 type HomeActionKey = "EXIT_REQUEST" | "ARRIVAL" | "CANCEL_ARRIVAL" | "DELAY" | "MERCHANT_SEARCH";
 
