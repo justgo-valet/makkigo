@@ -14,6 +14,7 @@
                                                 ├ users        :3001       고객 앱  app.makkigo.com
                                                 ├ valetagents  :3000       요원 앱  valet.makkigo.com
                                                 ├ merchant-upload-cleanup  내부 hourly runner (포트 없음)
+                                                ├ agent-notification-sync  내부 1분 runner (포트 없음)
                                                 └ postgres     :5432       DB (허용 IP 만)
 GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
               └─OIDC + SSM 명령──▶ EC2 (deploy.sh)
@@ -65,7 +66,7 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 |---|---|---|
 | `postgres/` | 3 | `POSTGRES_USER` `POSTGRES_PASSWORD` `POSTGRES_DB` |
 | `users/` | 11 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `IMAGE_BASE_URL` `KAKAO_REST_API_KEY` `KAKAO_CLIENT_SECRET` `GOOGLE_CLIENT_ID` `GOOGLE_CLIENT_SECRET` `APPLE_SERVICES_ID` `NAVER_CLIENT_ID` `NAVER_CLIENT_SECRET` |
-| `valetagents/` | 20 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `OAUTH_CALLBACK_ORIGIN` `APP_CALLBACK_URL` `AUTH_COOKIE_DOMAIN` + 소셜 7개 + `KAKAO_MAP_APP_KEY` + 업체 이미지/cleanup 6개(`AWS_REGION` `S3_IMAGE_BUCKET` `IMAGE_BASE_URL` `MERCHANT_UPLOAD_CLEANUP_TOKEN` `MERCHANT_UPLOAD_CLEANUP_ENABLED` `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL`) |
+| `valetagents/` | 22 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `OAUTH_CALLBACK_ORIGIN` `APP_CALLBACK_URL` `AUTH_COOKIE_DOMAIN` + 소셜 7개 + `KAKAO_MAP_APP_KEY` + 업체 이미지/cleanup 6개(`AWS_REGION` `S3_IMAGE_BUCKET` `IMAGE_BASE_URL` `MERCHANT_UPLOAD_CLEANUP_TOKEN` `MERCHANT_UPLOAD_CLEANUP_ENABLED` `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL`) + 알림 2개(`FIREBASE_SERVICE_ACCOUNT_JSON` `AGENT_NOTIFICATION_SYNC_TOKEN`) |
 | `deploy/` | 2 | `GHCR_USERNAME` `GHCR_TOKEN` (`read:packages` 만 있는 GitHub 토큰) |
 
 ### 이미지 CDN

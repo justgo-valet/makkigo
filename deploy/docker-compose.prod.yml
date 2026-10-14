@@ -64,6 +64,24 @@ services:
       start_period: 2m
     logging: *logging
 
+  agent-notification-sync:
+    image: ghcr.io/justgo-valet/makkigo-valetagents:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
+    init: true
+    restart: unless-stopped
+    command: ["node", "apps/valetagents/scripts/agent-notification-sync-runner.mjs", "--loop"]
+    stop_grace_period: 40s
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/valetagents.env
+    depends_on:
+      valetagents:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "apps/valetagents/scripts/agent-notification-sync-runner.mjs", "--healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 2m
+    logging: *logging
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped

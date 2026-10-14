@@ -74,6 +74,7 @@
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` | 승인된 운영 채널 webhook. 준비 전에는 cleanup enable 금지 |
+| `/makkigo/prod/valetagents/AGENT_NOTIFICATION_SYNC_TOKEN` | 요원 알림 자동 전환 runner 가 내부 route 를 부를 때 쓰는 256-bit 임의 값(`openssl rand -base64 32`). SecureString. **없으면 runner 가 매번 실패해 배포의 heartbeat 확인이 실패합니다** |
 | `/makkigo/prod/deploy/GHCR_USERNAME` | 서버가 GHCR 비공개 이미지를 받을 GitHub 계정 |
 | `/makkigo/prod/deploy/GHCR_TOKEN` | GitHub Personal Access Token (classic), 권한 `read:packages` 만 |
 
@@ -189,6 +190,12 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 실패로 치고, 꺼져 있으면(`MERCHANT_UPLOAD_CLEANUP_TOKEN` 미설정 포함) 경고만 남기고 배포를
 끝냅니다. runner가 없는 이전 이미지로 되돌리면 cleanup 컨테이너를 띄우지 않고 heartbeat ·
 dry-run 확인도 건너뜁니다.
+
+요원 알림 자동 전환 runner(`agent-notification-sync`)도 같은 이미지로 1분마다 내부
+`/api/internal/agent-notifications/sync` 를 bearer token 으로 부릅니다. 근무 시작 · 끝 시각이 지난 지 10분 안이면
+그 요원의 알림을 켜거나 끄고, 경계 뒤에 소속 행이 바뀌었으면(요원이 직접 켜고 끈 경우 등) 건드리지 않습니다. Caddy 는 `/api/internal/*` 전체를 공개
+요청에서 403 으로 막습니다. 배포는 이 runner 의 heartbeat(5분 안에 성공한 호출)를 확인하고, runner 가 없는 이전
+이미지로 되돌리면 이 컨테이너를 띄우지 않습니다.
 
 같은 시각에 배포가 두 개 겹치지 않게 순서대로 실행됩니다.
 

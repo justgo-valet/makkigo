@@ -26,7 +26,6 @@ const loadBoothSessions = async (staffId: number) => {
         boothId,
         data: sessions.value,
         loadedAt: Date.now(),
-        notificationsEnabled: membership.notificationsEnabled,
         hasWorkTime: membership.workStartTime !== null && membership.workEndTime !== null,
       }
     : null;
@@ -52,7 +51,6 @@ export default async function Home() {
           boothId={booth.boothId}
           initialData={booth.data}
           initialDataUpdatedAt={booth.loadedAt}
-          initialNotificationsEnabled={booth.notificationsEnabled}
           hasWorkTime={booth.hasWorkTime}
           menu={menu}
         />

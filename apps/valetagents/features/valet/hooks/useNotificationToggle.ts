@@ -1,34 +1,41 @@
 "use client";
 
 import { getErrorMessage } from "@makkigo/api-client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { setNotifications } from "../apis/setNotifications";
+import { boothValetSessionsQueryKey } from "./useBoothValetSessions";
+
+import type { BoothValetSessionListResponse } from "../schemas/sessions";
 
 const TOGGLE_ERROR_MESSAGE = "알림 설정을 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.";
 
 interface UseNotificationToggleOptions {
+  staffId: number;
   boothId: number;
-  initialEnabled: boolean;
+  enabled: boolean;
 }
 
-const useNotificationToggle = ({ boothId, initialEnabled }: UseNotificationToggleOptions) => {
-  const [enabled, setEnabled] = useState(initialEnabled);
+const useNotificationToggle = ({ staffId, boothId, enabled }: UseNotificationToggleOptions) => {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [sheetEnabled, setSheetEnabled] = useState(initialEnabled);
+  const [sheetEnabled, setSheetEnabled] = useState(enabled);
   const mutation = useMutation({
     mutationFn: (next: boolean) => setNotifications(boothId, next),
     retry: false,
     networkMode: "always",
-    onSuccess: (_result, next) => {
-      setEnabled(next);
+    onSuccess: async (_result, next) => {
+      await queryClient.cancelQueries({ queryKey: boothValetSessionsQueryKey(staffId, boothId) });
+      queryClient.setQueryData<BoothValetSessionListResponse>(
+        boothValetSessionsQueryKey(staffId, boothId),
+        (data) => data && { ...data, notificationsEnabled: next },
+      );
       setOpen(false);
     },
   });
 
   return {
-    enabled,
     sheetEnabled,
     open,
     openSheet: () => {
