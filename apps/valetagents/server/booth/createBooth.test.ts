@@ -34,4 +34,19 @@ describe("createBooth", () => {
     await expect(createBooth(7, body)).resolves.toEqual({ ok: true, value: { id: 3 } });
     expect(database.transaction).toHaveBeenCalledTimes(2);
   });
+
+  it("persists photo paths in their selected order", async () => {
+    const transaction = createTransaction();
+    database.transaction.mockImplementation((callback) => callback(transaction));
+
+    await expect(createBooth(7, body, ["photo-a.jpg", "photo-b.png"])).resolves.toMatchObject({ ok: true });
+
+    expect(transaction.booth.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          photos: { create: [{ path: "photo-a.jpg", sortOrder: 0 }, { path: "photo-b.png", sortOrder: 1 }] },
+        }),
+      }),
+    );
+  });
 });
