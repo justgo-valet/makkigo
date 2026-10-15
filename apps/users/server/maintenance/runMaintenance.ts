@@ -14,12 +14,20 @@ import {
 
 type JobResult<T> = { ok: true; result: T } | { ok: false };
 
+const getErrorCode = (error: unknown) => {
+  if (typeof error !== "object" || error === null || !("code" in error)) return undefined;
+  const code = error.code;
+  return typeof code === "string" && /^[A-Za-z0-9_.-]{1,64}$/.test(code) ? code : undefined;
+};
+
 const runJob = async <T>(name: string, job: () => Promise<T>): Promise<JobResult<T>> => {
   try {
     return { ok: true, result: await job() };
   } catch (error) {
+    const errorCode = getErrorCode(error);
     console.error(`Maintenance job ${name} failed`, {
       errorName: error instanceof Error ? error.name : "UnknownError",
+      ...(errorCode && { errorCode }),
     });
     return { ok: false };
   }

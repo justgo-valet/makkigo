@@ -34,7 +34,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "인증이 필요합니다." }, { status: 401 });
   }
 
-  const body = maintenanceBodySchema.safeParse(await request.json().catch(() => ({})));
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ message: "요청 본문이 올바르지 않습니다." }, { status: 400 });
+  }
+
+  const body = maintenanceBodySchema.safeParse(rawBody);
   if (!body.success) {
     return NextResponse.json({ message: "요청 본문이 올바르지 않습니다." }, { status: 400 });
   }

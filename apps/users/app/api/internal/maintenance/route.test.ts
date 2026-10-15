@@ -22,6 +22,18 @@ const callPost = (body: unknown, token: string | null = JOB_TOKEN) =>
     }),
   );
 
+const callPostWithRawBody = (body: string, token: string | null = JOB_TOKEN) =>
+  POST(
+    new NextRequest("http://users:3001/api/internal/maintenance", {
+      method: "POST",
+      headers: {
+        ...(token !== null && { Authorization: `Bearer ${token}` }),
+        "Content-Type": "application/json",
+      },
+      body,
+    }),
+  );
+
 const successResult = (dryRun: boolean) => ({
   ok: true,
   dryRun,
@@ -54,8 +66,16 @@ describe("POST /api/internal/maintenance", () => {
     expect(maintenance.runMaintenance).not.toHaveBeenCalled();
   });
 
+  it("rejects malformed JSON without running maintenance", async () => {
+    const response = await callPostWithRawBody('{"dryRun":');
+
+    expect(response.status).toBe(400);
+    expect(maintenance.runMaintenance).not.toHaveBeenCalled();
+  });
+
   it("rejects unknown body fields", async () => {
     expect((await callPost({ dryRun: false, extra: true })).status).toBe(400);
+    expect(maintenance.runMaintenance).not.toHaveBeenCalled();
   });
 
   it("runs maintenance and returns each job result", async () => {

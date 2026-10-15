@@ -18,9 +18,9 @@ import { runMaintenance } from "./runMaintenance";
 describe("runMaintenance", () => {
   afterEach(() => vi.clearAllMocks());
 
-  it("keeps running the other jobs when one fails", async () => {
-    vi.spyOn(console, "error").mockImplementation(() => undefined);
-    jobs.purgeWithdrawnUsers.mockRejectedValue(new Error("db down"));
+  it("keeps running the other jobs and logs sanitized error codes when one fails", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    jobs.purgeWithdrawnUsers.mockRejectedValue(Object.assign(new Error("db down"), { code: "P1001" }));
     jobs.deleteExpiredAuthRecords.mockResolvedValue({ refreshTokens: 3, loginCodes: 1 });
     jobs.deleteOldLocationUseLogs.mockResolvedValue(4);
 
@@ -30,6 +30,10 @@ describe("runMaintenance", () => {
       withdrawnUsers: null,
       expiredAuthRecords: { refreshTokens: 3, loginCodes: 1 },
       oldLocationUseLogs: 4,
+    });
+    expect(log).toHaveBeenCalledWith("Maintenance job withdrawnUsers failed", {
+      errorName: "Error",
+      errorCode: "P1001",
     });
   });
 
