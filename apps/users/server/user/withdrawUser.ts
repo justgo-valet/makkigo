@@ -1,27 +1,39 @@
 import "server-only";
 import { prisma } from "database";
 
+import { hasActiveValetSession } from "@/server/user/hasActiveValetSession";
+
+import type { WithdrawErrorCode } from "@/libs/user/contracts/withdraw";
+
 const PERSONAL_DATA_RETENTION_DAYS = 30;
 
-const withdrawUser = async (userId: number) => {
+type WithdrawUserResult = { ok: true } | { ok: false; reason: WithdrawErrorCode };
+
+const withdrawUser = async (userId: number): Promise<WithdrawUserResult> => {
   const now = new Date();
   const personalDataPurgeAt = new Date(
     now.getTime() + PERSONAL_DATA_RETENTION_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  await prisma.$transaction([
-    prisma.userSocialAccount.deleteMany({ where: { userId } }),
-    prisma.pushDevice.deleteMany({ where: { userId } }),
-    prisma.locationUseLog.deleteMany({ where: { userId } }),
-    prisma.userRefreshToken.updateMany({
+  return prisma.$transaction(async (tx) => {
+    if (await hasActiveValetSession(tx, userId)) {
+      return { ok: false, reason: "ACTIVE_VALET_SESSION" } as const;
+    }
+
+    await tx.userSocialAccount.deleteMany({ where: { userId } });
+    await tx.pushDevice.deleteMany({ where: { userId } });
+    await tx.locationUseLog.deleteMany({ where: { userId } });
+    await tx.userRefreshToken.updateMany({
       where: { userId, revokedAt: null },
       data: { revokedAt: now },
-    }),
-    prisma.user.update({
+    });
+    await tx.user.update({
       where: { id: userId },
       data: { deletedAt: now, personalDataPurgeAt },
-    }),
-  ]);
+    });
+
+    return { ok: true } as const;
+  });
 };
 
 export { PERSONAL_DATA_RETENTION_DAYS, withdrawUser };
