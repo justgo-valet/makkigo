@@ -45,6 +45,7 @@ jobs:
       - name: Cleanup runner · Compose 구성 검사
         run: |
           node --check apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs
+          node --check apps/valetagents/scripts/agent-notification-sync-runner.mjs
           compose_env_dir="$(mktemp -d)"
           trap 'rm -rf "$compose_env_dir"' EXIT
           touch "$compose_env_dir/users.env" "$compose_env_dir/valetagents.env" "$compose_env_dir/postgres.env"

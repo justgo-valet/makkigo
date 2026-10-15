@@ -10,10 +10,12 @@ import { formatPlateNumber, formatSessionLabel } from "../formatters";
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useCompletePickup } from "../hooks/useCompletePickup";
+import { useNotificationToggle } from "../hooks/useNotificationToggle";
 import { useParkValetSession } from "../hooks/useParkValetSession";
 import { useRespondPickup } from "../hooks/useRespondPickup";
 
 import AddVehicleSheet from "./AddVehicleSheet";
+import NotificationToggleSheet from "./NotificationToggleSheet";
 import PickupResponseSheet from "./PickupResponseSheet";
 import PlateConfirmSheet from "./PlateConfirmSheet";
 
@@ -50,6 +52,7 @@ interface VehicleManagementProps {
   boothId: number;
   initialData: BoothValetSessionListResponse;
   initialDataUpdatedAt: number;
+  hasWorkTime: boolean;
   menu: MenuAccess;
 }
 
@@ -58,9 +61,10 @@ export default function VehicleManagement({
   boothId,
   initialData,
   initialDataUpdatedAt,
+  hasWorkTime,
   menu,
 }: Readonly<VehicleManagementProps>) {
-  const { sessions, completed, updatedAt, errorMessage } = useBoothValetSessions({
+  const { sessions, completed, notificationsEnabled, updatedAt, errorMessage } = useBoothValetSessions({
     staffId,
     boothId,
     initialData,
@@ -78,6 +82,7 @@ export default function VehicleManagement({
     onResponded: () => setResponseTarget(null),
   });
 
+  const notifications = useNotificationToggle({ staffId, boothId, enabled: notificationsEnabled });
   const [completeTarget, setCompleteTarget] = useState<BoothValetSession | null>(null);
   const completing = useCompletePickup({
     staffId,
@@ -102,7 +107,12 @@ export default function VehicleManagement({
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(14px+env(safe-area-inset-bottom))]">
       <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
 
-      <AppHeader menu={menu} home />
+      <AppHeader
+        menu={menu}
+        home
+        notificationsEnabled={notificationsEnabled}
+        onBellClick={notifications.openSheet}
+      />
 
       <div role="status">
         {pickupRequest && (
@@ -202,6 +212,15 @@ export default function VehicleManagement({
         errorMessage={responding.errorMessage}
         onRespond={(body) => responseTarget && responding.respond(responseTarget.id, body)}
         onClose={() => !responding.isResponding && setResponseTarget(null)}
+      />
+      <NotificationToggleSheet
+        open={notifications.open}
+        enabled={notifications.sheetEnabled}
+        hasWorkTime={hasWorkTime}
+        isPending={notifications.isPending}
+        errorMessage={notifications.errorMessage}
+        onConfirm={notifications.confirm}
+        onClose={notifications.close}
       />
       <AddVehicleSheet
         open={addOpen}

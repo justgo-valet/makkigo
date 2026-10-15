@@ -40,6 +40,7 @@ const completedValetSessionSchema = z.object({
 const boothValetSessionListResponseSchema = z.object({
   items: z.array(boothValetSessionSchema),
   completed: z.array(completedValetSessionSchema),
+  notificationsEnabled: z.boolean(),
 });
 
 export {
