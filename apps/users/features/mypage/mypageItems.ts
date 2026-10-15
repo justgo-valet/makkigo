@@ -1,5 +1,6 @@
 import { consentItems } from "@/features/consent/consentItems";
 import { consentDocuments } from "@/features/consent/documents";
+import privacyPolicy from "@/features/consent/documents/privacyPolicy";
 
 import type { ConsentType } from "@/libs/consent/contracts/consents";
 import type { ProfileResponse, SocialProvider } from "@/libs/user/contracts/profile";
@@ -23,11 +24,22 @@ const LOCATION_CONSENT_ITEM: OptionalConsentItem = {
   label: "위치기반서비스 이용 동의",
 };
 
-const TERMS_ITEMS = consentItems.flatMap(({ type, label, required }) => {
-  const content = consentDocuments[type];
+type TermsItemType = ConsentType | "PRIVACY_POLICY";
 
-  return required && content ? [{ type, label, content }] : [];
-});
+interface TermsItem {
+  type: TermsItemType;
+  label: string;
+  content: string;
+}
+
+const TERMS_ITEMS: TermsItem[] = [
+  ...consentItems.flatMap(({ type, label, required }) => {
+    const content = consentDocuments[type];
+
+    return required && content ? [{ type, label, content }] : [];
+  }),
+  { type: "PRIVACY_POLICY", label: "개인정보 처리방침", content: privacyPolicy },
+];
 
 const SOCIAL_PROVIDER_LABELS: Record<SocialProvider, { name: string; iconSrc: string }> = {
   KAKAO: { name: "카카오", iconSrc: "/images/social/kakao.svg" },
@@ -37,4 +49,4 @@ const SOCIAL_PROVIDER_LABELS: Record<SocialProvider, { name: string; iconSrc: st
 };
 
 export { LOCATION_CONSENT_ITEM, NOTIFICATION_CONSENT_ITEMS, SOCIAL_PROVIDER_LABELS, TERMS_ITEMS };
-export type { OptionalConsentItem };
+export type { OptionalConsentItem, TermsItemType };
