@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@makkigo/ui";
+import { Button, FieldError } from "@makkigo/ui";
 import {
   Sheet,
   SheetContent,
@@ -16,6 +16,9 @@ interface ValetNoticeSheetProps {
   description: string;
   confirmLabel: string;
   closeLabel?: string;
+  pendingLabel?: string;
+  isPending?: boolean;
+  errorMessage?: string | null;
   onConfirm: () => void;
   onClose: () => void;
 }
@@ -26,6 +29,9 @@ export default function ValetNoticeSheet({
   description,
   confirmLabel,
   closeLabel,
+  pendingLabel,
+  isPending = false,
+  errorMessage,
   onConfirm,
   onClose,
 }: Readonly<ValetNoticeSheetProps>) {
@@ -51,8 +57,15 @@ export default function ValetNoticeSheet({
           </SheetDescription>
         </SheetHeader>
         <SheetFooter className="px-5 pt-4 pb-6">
-          <Button type="button" size="lg" className="h-12 w-full shadow-none" onClick={onConfirm}>
-            {confirmLabel}
+          {errorMessage && <FieldError>{errorMessage}</FieldError>}
+          <Button
+            type="button"
+            size="lg"
+            className="h-12 w-full shadow-none"
+            disabled={isPending}
+            onClick={onConfirm}
+          >
+            {isPending && pendingLabel ? pendingLabel : confirmLabel}
           </Button>
           {closeLabel && (
             <Button
@@ -60,6 +73,7 @@ export default function ValetNoticeSheet({
               variant="ghost"
               size="lg"
               className="h-12 w-full text-(--tertiary-color)"
+              disabled={isPending}
               onClick={onClose}
             >
               {closeLabel}
