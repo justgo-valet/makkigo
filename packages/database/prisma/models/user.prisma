@@ -39,13 +39,14 @@ model User {
 }
 
 model UserSocialAccount {
-    id             Int            @id @default(autoincrement())
-    userId         Int            @map("user_id")
-    provider       SocialProvider
-    providerUserId String         @map("provider_user_id")
-    email          String?
-    createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-    updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+    id                   Int            @id @default(autoincrement())
+    userId               Int            @map("user_id")
+    provider             SocialProvider
+    providerUserId       String         @map("provider_user_id")
+    email                String?
+    providerRefreshToken String?        @map("provider_refresh_token")
+    createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
