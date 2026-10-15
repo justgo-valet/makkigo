@@ -112,7 +112,7 @@
 ```
 
 - 이용 시간은 **분 단위로 내림**합니다 (1시간 0분 59초 → 1시간). 초과분만 단위 올림.
-- 요금 기준표는 기준 시각(주차 중이면 지금, 출차 요청 후면 출차 요청 시각)에 적용 중이던 것(`effective_from` 이 그 시각 이전인 최신)을 씁니다. 계산 코드: `apps/users/server/valet/calculateValetFee.ts`
+- 요금 기준표는 기준 시각(주차 중이면 지금, 출차 요청 후면 출차 요청 시각)에 적용 중이던 것(`effective_from` 이 그 시각 이전인 최신)을 씁니다. 계산 코드: `packages/database/src/valetFee.ts`
 
 ## 고객 메인 화면
 
