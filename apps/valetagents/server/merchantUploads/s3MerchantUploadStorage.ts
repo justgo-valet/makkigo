@@ -122,7 +122,12 @@ const createS3MerchantUploadStorage = (
       }
 
       const object = (await client.send(
-        new GetObjectCommand({ Bucket: bucket, Key: key, Range: "bytes=0-11" }),
+        new GetObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Range: "bytes=0-11",
+          IfMatch: head.ETag,
+        }),
         { abortSignal },
       )) as GetObjectCommandOutput;
       const bytes = await object.Body?.transformToByteArray();
