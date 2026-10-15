@@ -183,7 +183,7 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 2. OIDC 로 AWS 배포용 역할을 맡음 (AWS 접속 키 없음, **main 브랜치에서만** 맡을 수 있음)
 3. SSM 명령으로 EC2 에 `deploy/` 파일을 보내고 `deploy.sh` 실행 → 결과 로그를 Actions 에 출력
 
-업체 이미지 cleanup runner는 요원 앱과 **같은 이미지**를 사용합니다. 외부 포트는 없고 내부
+업체 이미지 cleanup runner는 요원 앱과 **같은 이미지**를 사용합니다. 같은 sweep에서 만료된 RESERVED 티켓 업로드의 staging 객체와 행을 만료 후 24시간 유예해 정리하고, COMPLETE 행은 presigned POST 재사용 기간 종료 후 staging 객체를 정리합니다. COMPLETE 행과 `tickets/final/*` 자산은 티켓 버전이 참조할 수 있어 보존합니다. 외부 포트는 없고 내부
 `/api/internal/merchant-uploads/cleanup`만 bearer token으로 호출합니다. Caddy는 이 경로를
 공개 요청에서 403으로 차단합니다. 배포는 Caddy validate/reload와 runner heartbeat 확인이
 성공하지 않으면 완료되지 않습니다. one-off dry-run도 배포 때 돌리지만 cleanup이 켜져 있을 때만

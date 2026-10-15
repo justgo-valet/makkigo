@@ -36,6 +36,7 @@ model TicketImageUpload {
     expiresAt        DateTime               @map("expires_at") @db.Timestamptz(3)
     sourceETag       String?                @map("source_etag")
     finalETag        String?                @map("final_etag")
+    stagingDeletedAt DateTime?              @map("staging_deleted_at") @db.Timestamptz(3)
     createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
 
     merchant Merchant @relation(fields: [merchantId], references: [id])
@@ -43,5 +44,6 @@ model TicketImageUpload {
 
     @@index([merchantId, staffId, state])
     @@index([state, expiresAt])
+    @@index([state, stagingDeletedAt])
     @@map("ticket_image_uploads")
 }

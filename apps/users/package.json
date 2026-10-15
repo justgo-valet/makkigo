@@ -20,6 +20,7 @@
     "@makkigo/api-client": "workspace:*",
     "@makkigo/auth": "workspace:*",
     "@makkigo/push": "workspace:*",
+    "@makkigo/ticket-design": "workspace:*",
     "@makkigo/ui": "workspace:*",
     "@tanstack/react-query": "^5.104.1",
     "database": "workspace:*",

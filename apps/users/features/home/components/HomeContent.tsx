@@ -2,6 +2,7 @@
 
 import { Button, FieldError } from "@makkigo/ui";
 import Image from "next/image";
+import Link from "next/link";
 
 import ExitSummaryCard from "@/features/home/components/ExitSummaryCard";
 import HomeActionItem from "@/features/home/components/HomeActionItem";
@@ -76,10 +77,14 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
       )}
 
       <div className="flex flex-col gap-3">
-        <Button variant="link" className="h-auto self-start px-0 font-semibold">
-          <Image src="/icons/ticket.svg" alt="" aria-hidden="true" width={20} height={20} />
-          발렛 티켓 보러가기
-        </Button>
+        {home.hasTicket && (
+          <Button asChild variant="link" className="h-auto self-start px-0 font-semibold">
+            <Link href="/ticket">
+              <Image src="/icons/ticket.svg" alt="" aria-hidden="true" width={20} height={20} />
+              발렛 티켓 보러가기
+            </Link>
+          </Button>
+        )}
         {home.actions.map((action) => (
           <HomeActionItem key={action.key} action={action} onClick={actionHandlers[action.key]} />
         ))}
