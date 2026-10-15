@@ -11,6 +11,7 @@ import type { NextRequest } from "next/server";
 const ERROR_MESSAGES = {
   UNAUTHORIZED: "로그인이 필요합니다.",
   GET_ME_FAILED: "회원 정보를 불러오지 못했습니다.",
+  ACTIVE_VALET_SESSION: "진행 중인 발렛이 있어 탈퇴할 수 없습니다.",
   INTERNAL_SERVER_ERROR: "회원 탈퇴를 처리하지 못했습니다.",
 } as const;
 
@@ -38,7 +39,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ message: ERROR_MESSAGES.UNAUTHORIZED }, { status: 401 });
     }
 
-    await withdrawUser(userId);
+    const result = await withdrawUser(userId);
+
+    if (!result.ok) {
+      return NextResponse.json(
+        { code: result.reason, message: ERROR_MESSAGES[result.reason] },
+        { status: 409 },
+      );
+    }
 
     const response = new NextResponse(null, { status: 204 });
     clearAuthCookies(response);
