@@ -60,6 +60,8 @@
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
 | `/makkigo/prod/users/GOOGLE_CLIENT_SECRET` | |
 | `/makkigo/prod/users/APPLE_SERVICES_ID` | |
+| `/makkigo/prod/users/APPLE_TEAM_ID` · `APPLE_KEY_ID` | 애플 탈퇴 토큰 철회용 → [auth.md](auth.md#환경변수). 없으면 철회를 건너뜀 |
+| `/makkigo/prod/users/APPLE_PRIVATE_KEY` | .p8 내용을 한 줄로(`awk 'NF {printf "%s\\n", $0}' AuthKey_XXXX.p8`), SecureString |
 | `/makkigo/prod/users/NAVER_CLIENT_ID` | |
 | `/makkigo/prod/users/NAVER_CLIENT_SECRET` | |
 | `/makkigo/prod/valetagents/DATABASE_URL` · `AUTH_JWT_SECRET` · `PUBLIC_URL` | 요원 앱. `PUBLIC_URL` = `https://valet.makkigo.com` |
@@ -169,6 +171,7 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
 | 정기 작업 — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ 이 PR → [runbook.md](../operations/runbook.md#정기-정리-작업) |
+| 애플 로그인 회원 탈퇴 때 애플 토큰 철회 (리프레시 토큰 저장 마이그레이션 `20261016090000_add_user_social_refresh_token`) | ✅ 이 PR |
 
 ## 배포하기
 

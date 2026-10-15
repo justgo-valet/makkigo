@@ -1,6 +1,7 @@
 export { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./config";
 export { AuthConfigError, InvalidRefreshTokenError, SocialAuthError } from "./errors";
 export { parseSocialProvider } from "./oauth";
+export { revokeAppleRefreshToken } from "./oauth/apple-token";
 export {
   consumeUserLoginCode,
   createAppLoginVerifier,

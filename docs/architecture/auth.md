@@ -45,11 +45,12 @@
 |---|---|---|---|
 | 카카오 | 인가 코드 → 액세스 토큰 → `/v2/user/me` | 우리 REST 키(+ 시크릿)로 교환 | 인증된 카카오계정 이메일 (동의 항목 설정 시) |
 | 구글 | 인가 코드 → ID 토큰 | 공개키 서명, `aud` = `GOOGLE_CLIENT_ID`, `nonce` | 인증된 이메일 |
-| 애플 | ID 토큰 (`form_post` 로 콜백에 POST) | 공개키 서명, `aud` = `APPLE_SERVICES_ID`, `nonce` | 이메일 (가리기 선택 시 중계 주소) |
+| 애플 | ID 토큰 (`form_post` 로 콜백에 POST) + 고객은 인가 코드 → 리프레시 토큰 | 공개키 서명, `aud` = `APPLE_SERVICES_ID`, `nonce` | 이메일 (가리기 선택 시 중계 주소) |
 | 네이버 | 인가 코드 → 액세스 토큰 → `/v1/nid/me` | 우리 Client ID · Secret 으로 교환 | 프로필 이메일 |
 
 - 토큰을 우리 서버가 직접 교환하므로, 예전 "네이버 토큰이 우리 앱에서 발급됐는지 확인할 수단 없음" 문제는 사라졌습니다.
 - `state` = 우리 키로 서명한 JWT (10분, 제공자 · nonce · CSRF 값 · 웹/앱 · `app_challenge`). CSRF 값은 `makkigo_oauth_csrf` 쿠키(path `/api/v1/auth/oauth`)와 맞춰 봅니다. 애플은 다른 사이트에서 POST 로 돌아오므로 운영에서 이 쿠키는 `SameSite=None; Secure` 입니다.
+- 애플 탈퇴 토큰 철회 (App Store 심사 5.1.1(v)): 고객이 애플로 로그인하면 인가 코드를 애플 리프레시 토큰으로 바꿔 `user_social_accounts.provider_refresh_token` 에 저장하고, 탈퇴 때 `https://appleid.apple.com/auth/revoke` 로 철회합니다. 애플 키(`APPLE_TEAM_ID` · `APPLE_KEY_ID` · `APPLE_PRIVATE_KEY`)가 없으면 교환 · 철회 모두 건너뜁니다. 교환이 실패해도 로그인은 되고, 철회가 실패해도 탈퇴는 됩니다. 이 토큰은 우리 애플 키 없이는 쓸 수 없고 API 응답에 내보내지 않습니다. 요원 로그인은 교환하지 않습니다.
 - 1회용 로그인 코드: `user_login_codes` 에 해시만 저장, 2분, 한 번 쓰면 끝 (틀린 `verifier` 로 시도해도 버려짐).
 
 ## 로그인 화면
@@ -152,5 +153,8 @@
 | `GOOGLE_CLIENT_ID` | 구글 웹 애플리케이션 클라이언트 ID |
 | `GOOGLE_CLIENT_SECRET` | 위 클라이언트의 보안 비밀번호 |
 | `APPLE_SERVICES_ID` | 애플 Services ID (예: `com.makkigo.user.web`) |
+| `APPLE_TEAM_ID` | 애플 팀 ID (`8Z9ZNRXURC`). 고객 앱만 |
+| `APPLE_KEY_ID` | Sign in with Apple 을 켠 키(.p8)의 Key ID. 고객 앱만 |
+| `APPLE_PRIVATE_KEY` | 위 .p8 파일 내용을 **한 줄로** (줄바꿈을 `\n` 으로), SecureString. 고객 앱만 |
 | `NAVER_CLIENT_ID` | 네이버 Client ID |
 | `NAVER_CLIENT_SECRET` | 네이버 Client Secret |

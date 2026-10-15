@@ -14,7 +14,11 @@ const db = vi.hoisted(() => {
 
   return {
     tx,
-    prisma: { $transaction: vi.fn((run: (client: typeof tx) => unknown) => run(tx)) },
+    prisma: {
+      userSocialAccount: { findMany: vi.fn() },
+      $transaction: vi.fn((run: (client: typeof tx) => unknown) => run(tx)),
+    },
+    revokeAppleRefreshToken: vi.fn(),
   };
 });
 
@@ -23,6 +27,7 @@ vi.mock("database", () => ({
   lockPlateNumber: (client: typeof db.tx, plateNumber: string) => client.$executeRaw(plateNumber),
   prisma: db.prisma,
 }));
+vi.mock("@makkigo/auth", () => ({ revokeAppleRefreshToken: db.revokeAppleRefreshToken }));
 
 import { withdrawUser } from "./withdrawUser";
 
@@ -31,10 +36,15 @@ describe("withdrawUser", () => {
     vi.clearAllMocks();
     db.tx.vehicle.findUnique.mockResolvedValue({ plateNumber: "12가3456" });
     db.tx.valetSession.findFirst.mockResolvedValue(null);
+    db.prisma.userSocialAccount.findMany.mockResolvedValue([]);
+    db.revokeAppleRefreshToken.mockResolvedValue(true);
   });
 
   it("rejects withdrawal while a valet session is in progress", async () => {
     db.tx.valetSession.findFirst.mockResolvedValue({ id: 7 });
+    db.prisma.userSocialAccount.findMany.mockResolvedValue([
+      { providerRefreshToken: "apple-refresh" },
+    ]);
 
     await expect(withdrawUser(1)).resolves.toEqual({
       ok: false,
@@ -49,6 +59,7 @@ describe("withdrawUser", () => {
     });
     expect(db.tx.user.update).not.toHaveBeenCalled();
     expect(db.tx.userSocialAccount.deleteMany).not.toHaveBeenCalled();
+    expect(db.revokeAppleRefreshToken).not.toHaveBeenCalled();
   });
 
   it("locks the vehicle plate before checking sessions", async () => {
@@ -70,5 +81,35 @@ describe("withdrawUser", () => {
       where: { id: 1 },
       data: { deletedAt: expect.any(Date), personalDataPurgeAt: expect.any(Date) },
     });
+    expect(db.revokeAppleRefreshToken).not.toHaveBeenCalled();
+  });
+
+  it("revokes stored Apple tokens after the withdrawal transaction", async () => {
+    db.prisma.userSocialAccount.findMany.mockResolvedValue([
+      { providerRefreshToken: "apple-refresh" },
+    ]);
+
+    await expect(withdrawUser(7)).resolves.toEqual({ ok: true });
+
+    expect(db.prisma.userSocialAccount.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ userId: 7, provider: "APPLE" }) }),
+    );
+    expect(db.revokeAppleRefreshToken).toHaveBeenCalledWith("apple-refresh");
+    expect(db.tx.user.update.mock.invocationCallOrder[0]).toBeLessThan(
+      db.revokeAppleRefreshToken.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("finishes the withdrawal without logging the token when revoking fails", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    db.prisma.userSocialAccount.findMany.mockResolvedValue([
+      { providerRefreshToken: "apple-refresh" },
+    ]);
+    db.revokeAppleRefreshToken.mockRejectedValue(new Error("apple down"));
+
+    await expect(withdrawUser(7)).resolves.toEqual({ ok: true });
+
+    expect(JSON.stringify(log.mock.calls)).not.toContain("apple-refresh");
+    log.mockRestore();
   });
 });

@@ -4,6 +4,7 @@ import type { SocialIdentity } from "./oauth";
 
 export const findOrCreateUserBySocialIdentity = async (
   identity: SocialIdentity,
+  providerRefreshToken: string | null = null,
 ): Promise<{ userId: number; isNewUser: boolean }> => {
   const where = {
     provider_providerUserId: {
@@ -15,8 +16,16 @@ export const findOrCreateUserBySocialIdentity = async (
   const existing = await prisma.userSocialAccount.findUnique({ where });
 
   if (existing) {
-    if (identity.email && identity.email !== existing.email) {
-      await prisma.userSocialAccount.update({ where, data: { email: identity.email } });
+    const emailChanged = identity.email !== null && identity.email !== existing.email;
+
+    if (emailChanged || providerRefreshToken) {
+      await prisma.userSocialAccount.update({
+        where,
+        data: {
+          ...(emailChanged && { email: identity.email }),
+          ...(providerRefreshToken && { providerRefreshToken }),
+        },
+      });
     }
     return { userId: existing.userId, isNewUser: false };
   }
@@ -29,6 +38,7 @@ export const findOrCreateUserBySocialIdentity = async (
             provider: identity.provider,
             providerUserId: identity.providerUserId,
             email: identity.email,
+            providerRefreshToken,
           },
         },
       },
