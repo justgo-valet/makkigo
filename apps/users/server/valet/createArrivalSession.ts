@@ -7,7 +7,7 @@ import { estimateArrivalAt } from "@/server/location/estimateArrivalAt";
 import type { ArrivalErrorCode, SendArrivalRequest } from "@/libs/valet/contracts/arrival";
 
 type CreateArrivalSessionResult =
-  | { ok: true; valetSessionId: number }
+  | { ok: true; valetSessionId: number; notificationIds: number[] }
   | { ok: false; reason: ArrivalErrorCode };
 
 const findArrivalRecipientIds = async (merchantId: number) => {
@@ -93,7 +93,7 @@ const createArrivalSession = async (
 
     if (!session) return { ok: false, reason: "ACTIVE_SESSION_EXISTS" } as const;
 
-    await tx.notification.createMany({
+    const notifications = await tx.notification.createManyAndReturn({
       data: recipientIds.map((staffId) => ({
         type: "ARRIVAL" as const,
         staffId,
@@ -101,9 +101,14 @@ const createArrivalSession = async (
         title: "도착 알림",
         body: `${merchant.name} · ${vehicle.plateNumber} 차량이 곧 도착해요`,
       })),
+      select: { id: true },
     });
 
-    return { ok: true, valetSessionId: session.id } as const;
+    return {
+      ok: true,
+      valetSessionId: session.id,
+      notificationIds: notifications.map(({ id }) => id),
+    } as const;
   });
 };
 
