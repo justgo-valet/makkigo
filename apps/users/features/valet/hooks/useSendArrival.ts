@@ -6,6 +6,7 @@ import { recordConsents } from "@/features/consent/apis/recordConsents";
 import { CONSENT_DOCUMENT_VERSION } from "@/features/consent/consentItems";
 import { ME_QUERY_KEY } from "@/features/user/hooks/useMe";
 import { sendArrival } from "@/features/valet/apis/sendArrival";
+import { CURRENT_SESSION_QUERY_KEY } from "@/features/valet/hooks/useCurrentSession";
 
 const FALLBACK_ERROR_MESSAGE = "도착 알림을 보내지 못했습니다. 다시 시도해주세요.";
 
@@ -31,7 +32,10 @@ const useSendArrival = (onSent: () => void) => {
 
       return sendArrival({ merchantId, ...(location && { location }) });
     },
-    onSuccess: onSent,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: CURRENT_SESSION_QUERY_KEY });
+      onSent();
+    },
   });
 
   return {
