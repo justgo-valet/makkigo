@@ -121,4 +121,24 @@ describe("listBoothValetSessions database integration", () => {
 
     expect(result.ok && result.value.items.map(({ id }) => id)).toEqual([arriving, parked]);
   });
+
+  it("lists cars completed at the booth since midnight in Seoul", async () => {
+    const now = new Date("2026-10-14T03:00:00.000Z");
+    const merchantId = await createMerchant(boothId, "APPROVED");
+    const today = await createSession("COMPLETED", { merchantId, boothId });
+    const yesterday = await createSession("COMPLETED", { merchantId, boothId });
+    const elsewhere = await createSession("COMPLETED", { merchantId, boothId: otherBoothId });
+    await prisma.valetSession.updateMany({
+      where: { id: { in: [today, elsewhere] } },
+      data: { completedAt: new Date("2026-10-13T15:00:00.000Z") },
+    });
+    await prisma.valetSession.update({
+      where: { id: yesterday },
+      data: { completedAt: new Date("2026-10-13T14:59:59.000Z") },
+    });
+
+    const result = await listBoothValetSessions(managerId, boothId, IMAGE_BASE_URL, now);
+
+    expect(result.ok && result.value.completed.map(({ id }) => id)).toEqual([today]);
+  });
 });

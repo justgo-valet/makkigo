@@ -10,6 +10,12 @@ const repository = vi.hoisted(() => ({
   fail: vi.fn(),
 }));
 const storage = vi.hoisted(() => ({ deleteObject: vi.fn() }));
+const ticketUploads = vi.hoisted(() => ({
+  count: vi.fn(),
+  findMany: vi.fn(),
+  deleteMany: vi.fn(),
+  updateMany: vi.fn(),
+}));
 
 vi.mock("@/server/merchantUploads/prismaMerchantUploadCleanupRepository", () => ({
   prismaMerchantUploadCleanupRepository: repository,
@@ -17,6 +23,7 @@ vi.mock("@/server/merchantUploads/prismaMerchantUploadCleanupRepository", () => 
 vi.mock("@/server/merchantUploads/s3MerchantUploadStorage", () => ({
   createS3MerchantUploadStorage: () => storage,
 }));
+vi.mock("database", () => ({ prisma: { ticketImageUpload: ticketUploads } }));
 
 import { NextRequest } from "next/server";
 
@@ -43,6 +50,8 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
     process.env.MERCHANT_UPLOAD_CLEANUP_ENABLED = "false";
     repository.inspect.mockResolvedValue({ eligibleCount: 2, oldestEligibleAt: null });
     repository.claim.mockResolvedValue([]);
+    ticketUploads.count.mockResolvedValue(0);
+    ticketUploads.findMany.mockResolvedValue([]);
   });
 
   afterEach(() => {

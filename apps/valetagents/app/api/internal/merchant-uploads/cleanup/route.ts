@@ -1,11 +1,14 @@
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { z } from "zod";
+import { prisma } from "database";
 
 import { apiError, privateJson } from "@/server/common/apiResponse";
+import { hasInternalToken } from "@/server/common/internalToken";
 import { createMerchantUploadCleanupService } from "@/server/merchantUploads/cleanupMerchantUploads";
 import { prismaMerchantUploadCleanupRepository } from "@/server/merchantUploads/prismaMerchantUploadCleanupRepository";
 import { createS3MerchantUploadStorage } from "@/server/merchantUploads/s3MerchantUploadStorage";
+import { cleanupExpiredTicketUploads } from "@/server/ticket/cleanupExpiredTicketUploads";
 
 import type { NextRequest } from "next/server";
 
@@ -19,21 +22,9 @@ const cleanupBodySchema = z
   })
   .strict();
 
-const hasCleanupToken = (request: NextRequest) => {
-  const configured = process.env.MERCHANT_UPLOAD_CLEANUP_TOKEN;
-  const authorization = request.headers.get("authorization");
-  if (!configured || !authorization?.startsWith("Bearer ")) return false;
-  const supplied = authorization.slice("Bearer ".length);
-  const expectedBytes = Buffer.from(configured);
-  const suppliedBytes = Buffer.from(supplied);
-  return (
-    expectedBytes.length >= 32 &&
-    expectedBytes.length === suppliedBytes.length && timingSafeEqual(expectedBytes, suppliedBytes)
-  );
-};
 
 export async function POST(request: NextRequest) {
-  if (!hasCleanupToken(request)) {
+  if (!hasInternalToken(request, process.env.MERCHANT_UPLOAD_CLEANUP_TOKEN)) {
     return apiError("AUTH_REQUIRED", "인증이 필요합니다.", 401);
   }
 
@@ -53,13 +44,29 @@ export async function POST(request: NextRequest) {
       storage,
       createClaimId: randomUUID,
     });
-    return privateJson(
-      await cleanup({
+    const [merchantUploads, ticketUploads] = await Promise.all([
+      cleanup({
         dryRun: body.data.dryRun,
         batchSize: body.data.batchSize,
         signal: request.signal,
       }),
-    );
+      cleanupExpiredTicketUploads(
+        { dryRun: body.data.dryRun, batchSize: body.data.batchSize },
+        {
+          database: prisma,
+          storage,
+          now: () => new Date(),
+        },
+      ),
+    ]);
+    return privateJson({
+      ...merchantUploads,
+      claimed: merchantUploads.claimed + ticketUploads.claimed,
+      cleaned: merchantUploads.cleaned + ticketUploads.cleaned,
+      failed: merchantUploads.failed + ticketUploads.failed,
+      partial: merchantUploads.partial || ticketUploads.partial,
+      ticketUploads,
+    });
   } catch (error) {
     console.error("Merchant upload cleanup failed", {
       errorName: error instanceof Error ? error.name : "UnknownError",
