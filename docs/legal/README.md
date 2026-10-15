@@ -12,7 +12,7 @@
 | [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
 | [appPush.ts](../../apps/users/features/consent/documents/appPush.ts) · [alimtalk.ts](../../apps/users/features/consent/documents/alimtalk.ts) 알림 수신 | 고객 | `APP_PUSH`, `ALIMTALK` | 선택 |
 | [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
-| [privacy-policy.md](privacy-policy.md) 개인정보 처리방침 | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
+| [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 마이페이지 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
 | [staff-terms.md](staff-terms.md) 파트너 이용약관 | 요원 · 업체 관리자 | 요원 앱 (미정) | 필수 |
 | [staff-privacy-collection.md](staff-privacy-collection.md) 파트너 개인정보 수집 · 이용 | 요원 · 업체 관리자 | 요원 앱 (미정) | 필수 |
 
@@ -60,7 +60,7 @@
 | 목적 달성 후 개인위치정보 파기 | 코드 | 좌표는 계산에만 쓰고 저장하지 않음 |
 | 동의 철회 시 확인자료 파기 (제24조 제4항) | 코드 | 위치기반서비스 미동의를 기록하거나 탈퇴하면 그 회원의 위치 이용 기록을 바로 지움 |
 | 확인자료 6개월 지나면 정리 | 코드 | 미정 — 서버 cron 작업과 함께 ([open-questions.md](../planning/open-questions.md)) |
-| 처리방침에 위치정보 · 길찾기 API 제공사(카카오모빌리티) 반영 | 문서 | [privacy-policy.md](privacy-policy.md) |
+| 처리방침에 위치정보 · 길찾기 API 제공사(카카오모빌리티) 반영 | 문서 | [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) |
 
 **변호사 검토 때 물을 것**
 - 위치정보사업 허가 · 등록이 따로 필요한지. 기기 OS 가 준 좌표를 받아 우리 서비스에만 쓰는 경우라 위치기반서비스사업 신고만으로 되는지
@@ -75,7 +75,7 @@
 - **고객 좌표는 DB · 로그 · 오류 추적에 남기지 않습니다.** 위치기반서비스 동의가 없으면 앱에 위치를 요청하지도, 서버가 좌표를 쓰지도 않습니다.
 - 탈퇴 회원 삭제 배치가 없으면 처리방침의 "30일" 을 지키지 못합니다. **출시 전 필수.**
 - 운영 DB 직접 접속 기록을 1년 이상 남기고 점검합니다. DB 백업에도 같은 보관 기간을 적용합니다.
-- 처리방침 공개 주소(`app.makkigo.com/privacy`)가 스토어 등록에 필요합니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
+- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
 - 비회원 QR 화면에 "입력한 차량 번호는 요청 처리에만 쓰입니다 · 개인정보 처리방침" 링크를 둡니다.
 
 ## 버전
