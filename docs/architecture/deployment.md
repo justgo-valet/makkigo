@@ -54,6 +54,7 @@
 | `/makkigo/prod/users/IMAGE_BASE_URL` | `https://d2lnojrmgxqgrc.cloudfront.net` (이미지 CDN, 비밀값 아님) |
 | `/makkigo/prod/users/FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase 서비스 계정 키 JSON 을 **한 줄로** (`jq -c . <키 파일>.json`), SecureString. 앱 푸시 발송용 |
 | `/makkigo/prod/users/KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 키 (업체 상세 지도). 요원 앱과 같은 키를 써도 됨. 카카오 콘솔에 `https://app.makkigo.com` 등록 필요. 없으면 지도 대신 안내 문구가 뜸 |
+| `/makkigo/prod/users/USERS_INTERNAL_JOB_TOKEN` | 정기 작업 컨테이너(`users-jobs`)가 고객 앱 내부 API 를 부를 때 쓰는 임의 값 (`openssl rand -hex 32`, 32바이트 이상), SecureString. 없으면 정기 작업이 아무것도 하지 않음 |
 | `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수). 같은 키로 카카오모빌리티 길찾기 · 카카오 로컬(주소 검색)도 호출 |
 | `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
@@ -70,6 +71,7 @@
 | `/makkigo/prod/valetagents/AWS_REGION` | `ap-northeast-2` |
 | `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |
 | `/makkigo/prod/valetagents/IMAGE_BASE_URL` | CloudFront 공개 기준 URL. 브라우저 빌드 변수가 아니라 서버 런타임 값 |
+| `/makkigo/prod/valetagents/FIREBASE_SERVICE_ACCOUNT_JSON` | 고객 앱과 같은 값(한 줄 JSON, SecureString). 요원이 주차 처리 · 차량 추가를 하면 요원 앱 서버가 고객에게 주차 완료 푸시를 보냄. 없으면 알림 내역만 남고 푸시는 나가지 않음(요청은 성공) |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` | 승인된 운영 채널 webhook. 준비 전에는 cleanup enable 금지 |
@@ -166,7 +168,7 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | 첫 운영 배포 | ✅ 2026-10-09 (#58), 이후 #69 → [runbook.md](../operations/runbook.md) |
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
-| 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리 | 미정 |
+| 정기 작업 — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ 이 PR → [runbook.md](../operations/runbook.md#정기-정리-작업) |
 
 ## 배포하기
 

@@ -12,7 +12,7 @@ import { SOCIAL_PROVIDER_LABELS, TERMS_ITEMS } from "@/features/mypage/mypageIte
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
 import { formatPhoneNumber } from "@/libs/common/format/phoneNumber";
 
-import type { ConsentType } from "@/libs/consent/contracts/consents";
+import type { TermsItemType } from "@/features/mypage/mypageItems";
 
 const FALLBACK_ERROR_MESSAGE = "내 정보를 불러오지 못했습니다.";
 
@@ -25,7 +25,7 @@ const useMypage = () => {
   const logout = useLogout();
   const withdraw = useWithdraw();
   const pushPermissionBanner = usePushPermissionBanner();
-  const [openedTermsType, setOpenedTermsType] = useState<ConsentType | null>(null);
+  const [openedTermsType, setOpenedTermsType] = useState<TermsItemType | null>(null);
 
   const openedTerms = TERMS_ITEMS.find(({ type }) => type === openedTermsType) ?? null;
 
