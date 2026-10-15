@@ -171,8 +171,8 @@ docker exec -i makkigo-postgres-1 sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POS
 
 ## 부스 사진 업로드 오류 복구
 
-부스 등록 로그에 `Booth creation outcome may be ambiguous` 또는 `Failed to clean up booth photos` 가
-남으면 `keys` 에 기록된 정확한 S3 키만 확인합니다. 승격/트랜잭션 결과가 불명확한 final 키는 로그
+부스 등록 로그에 `Booth creation outcome is ambiguous`, `Booth photo promotion may have completed after timeout`,
+`Failed to clean up booth photos` 중 하나가 남으면 `keys` 에 기록된 정확한 S3 키만 확인합니다. 승격/트랜잭션 결과가 불명확한 final 키는 로그
 시각에서 최소 1시간 기다린 뒤 DB에서 참조 여부를 확인합니다. `booth_photos.path` 에 하나라도 남아 있으면
 삭제하지 않습니다. DB 연결이나 조회에 실패하면 S3 객체를 그대로 둡니다.
 

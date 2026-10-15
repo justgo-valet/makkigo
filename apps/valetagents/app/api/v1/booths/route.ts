@@ -90,6 +90,9 @@ export async function POST(request: NextRequest) {
       if (cleanup.some((entry) => entry.status === "rejected")) {
         console.error("Failed to clean up booth photos after promotion failure", { staffId, keys: cleanupKeys });
       }
+      if (candidateFinalKeys.length) {
+        console.error("Booth photo promotion may have completed after timeout; verify final photo keys", { staffId, keys: candidateFinalKeys });
+      }
       throw error;
     }
 
