@@ -7,6 +7,7 @@ describe("getMenuItems", () => {
     expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: 3 })).toEqual([
       { label: "요원 관리", href: "/booths/3/agents" },
       { label: "업체 관리", href: "/booths/3/merchants" },
+      { label: "요금 · 계좌", href: "/booths/3/payment-settings" },
       { label: "설정", href: "/settings" },
     ]);
   });

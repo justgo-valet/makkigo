@@ -34,7 +34,7 @@ const listBoothValetSessions = async (
   const toCarImageUrl = (session: { vehicle: { model: { imageUrl: string } | null } | null }) =>
     toImageUrl(imageBaseUrl, session.vehicle?.model?.imageUrl ?? DEFAULT_CAR_IMAGE_PATH);
 
-  const [sessions, completed] = await Promise.all([
+  const [sessions, completed, membership] = await Promise.all([
     prisma.valetSession.findMany({
       where: {
         OR: [
@@ -63,6 +63,10 @@ const listBoothValetSessions = async (
       where: { boothId, status: "COMPLETED", completedAt: { gte: startOfSeoulDay(now) } },
       orderBy: [{ completedAt: "desc" }, { id: "desc" }],
       select: { id: true, plateNumber: true, ...carImageSelect },
+    }),
+    prisma.boothAgent.findUnique({
+      where: { boothId_staffId: { boothId, staffId } },
+      select: { notificationsEnabled: true },
     }),
   ]);
 
@@ -96,6 +100,7 @@ const listBoothValetSessions = async (
         plateNumber: session.plateNumber,
         carImageUrl: toCarImageUrl(session),
       })),
+      notificationsEnabled: membership?.notificationsEnabled ?? false,
     }),
   };
 };

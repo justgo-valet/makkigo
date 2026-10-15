@@ -10,6 +10,7 @@ type HomeStatus =
 
 interface HomeSnapshot {
   status: HomeStatus;
+  hasTicket: boolean;
   merchantName: string | null;
   plateNumber: string | null;
   arrivalNotifiedAt: number | null;
@@ -33,6 +34,7 @@ const toTime = (value: string | null) => (value ? Date.parse(value) : null);
 
 const getBeforeSessionSnapshot = (merchantName: string | null): HomeSnapshot => ({
   status: merchantName ? "MERCHANT_SELECTED" : "NONE",
+  hasTicket: false,
   merchantName,
   plateNumber: null,
   arrivalNotifiedAt: null,
@@ -47,6 +49,7 @@ const getBeforeSessionSnapshot = (merchantName: string | null): HomeSnapshot => 
 
 const toHomeSnapshot = (session: CurrentSession): HomeSnapshot => ({
   status: HOME_STATUS_BY_SESSION_STATUS[session.status],
+  hasTicket: session.hasTicket,
   merchantName: session.merchantName ?? session.boothName,
   plateNumber: session.plateNumber,
   arrivalNotifiedAt: toTime(session.arrivalNotifiedAt),

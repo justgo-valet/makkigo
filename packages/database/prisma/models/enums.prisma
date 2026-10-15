@@ -40,6 +40,11 @@ enum MerchantImageUploadState {
     TOMBSTONED
 }
 
+enum TicketImageUploadState {
+    RESERVED
+    COMPLETE
+}
+
 enum ValetSessionStatus {
     ARRIVING
     PARKED
