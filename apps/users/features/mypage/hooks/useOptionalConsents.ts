@@ -4,7 +4,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { recordConsents } from "@/features/consent/apis/recordConsents";
 import { CONSENT_DOCUMENT_VERSION } from "@/features/consent/consentItems";
 import { PROFILE_QUERY_KEY } from "@/features/mypage/hooks/useProfile";
-import { saveRegisteredPushToken } from "@/features/push/registeredPushToken";
 import { ME_QUERY_KEY } from "@/features/user/hooks/useMe";
 
 import type { OptionalConsentItem } from "@/features/mypage/mypageItems";
@@ -17,14 +16,11 @@ interface ConsentChange {
   agreed: boolean;
 }
 
-const saveConsent = async ({ item, agreed }: ConsentChange) => {
-  await recordConsents({
+const saveConsent = ({ item, agreed }: ConsentChange) =>
+  recordConsents({
     documentVersion: CONSENT_DOCUMENT_VERSION,
     consents: [{ type: item.type, agreed }],
   });
-
-  if (item.type === "APP_PUSH" && !agreed) saveRegisteredPushToken(null);
-};
 
 const useOptionalConsents = (consents: ProfileResponse["consents"] | undefined) => {
   const queryClient = useQueryClient();

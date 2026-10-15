@@ -13,11 +13,6 @@ interface OptionalConsentItem {
   label: string;
 }
 
-const NOTIFICATION_CONSENT_ITEMS: readonly OptionalConsentItem[] = [
-  { type: "APP_PUSH", key: "appPush", label: "앱 푸시 동의" },
-  { type: "ALIMTALK", key: "alimtalk", label: "알림톡 동의" },
-];
-
 const LOCATION_CONSENT_ITEM: OptionalConsentItem = {
   type: "LOCATION_BASED_SERVICE",
   key: "locationBasedService",
@@ -48,5 +43,5 @@ const SOCIAL_PROVIDER_LABELS: Record<SocialProvider, { name: string; iconSrc: st
   NAVER: { name: "네이버", iconSrc: "/images/social/naver.png" },
 };
 
-export { LOCATION_CONSENT_ITEM, NOTIFICATION_CONSENT_ITEMS, SOCIAL_PROVIDER_LABELS, TERMS_ITEMS };
+export { LOCATION_CONSENT_ITEM, SOCIAL_PROVIDER_LABELS, TERMS_ITEMS };
 export type { OptionalConsentItem, TermsItemType };
