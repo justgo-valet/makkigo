@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { createBooth } from "../apis/createBooth";
 import { useBoothMap } from "./useBoothMap";
+import { useBoothPhotos } from "./useBoothPhotos";
 
 const ADDRESS_DEBOUNCE_MS = 300;
 const SAVE_ERROR_MESSAGE = "부스를 등록하지 못했어요. 잠시 후 다시 시도해 주세요.";
@@ -55,6 +56,7 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
   const [address, setAddress] = useState("");
   const [addressDetail, setAddressDetail] = useState("");
   const [geocodedAddress, setGeocodedAddress] = useState("");
+  const photos = useBoothPhotos();
 
   useEffect(() => {
     const nextAddress = address.trim();
@@ -76,12 +78,13 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
   });
 
   const isLeaving = mutation.isSuccess || isAlreadyOnboardedError(mutation.error);
+  const isSaving = mutation.isPending || isLeaving;
   const canSubmit = getBoothRegistrationAvailability({
     name,
     address,
     geocodedAddress,
     mapState: map.state,
-    isSaving: mutation.isPending || isLeaving,
+    isSaving,
   });
 
   return {
@@ -91,6 +94,8 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
     mapContainerRef: map.containerRef,
     mapView: getBoothRegistrationMapView({ address, geocodedAddress, mapState: map.state }),
     mapErrorMessage: map.errorMessage,
+    photos,
+    isSaving,
     canSubmit,
     errorMessage:
       mutation.error && !isLeaving ? getErrorMessage(mutation.error, SAVE_ERROR_MESSAGE) : null,
@@ -100,7 +105,7 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
     retryMap: map.retry,
     submit: () => {
       if (!canSubmit) return;
-      mutation.mutate({ name, address, addressDetail });
+      mutation.mutate({ name, address, addressDetail, photos: photos.files });
     },
   };
 };

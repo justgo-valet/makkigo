@@ -16,6 +16,7 @@ export interface PushMessage {
 
 export interface PushSendResult {
   sentCount: number;
+  sentTokens: string[];
   invalidTokens: string[];
 }
 
@@ -38,7 +39,7 @@ export const sendPushToTokens = async (
   tokens: string[],
   { title, body, link }: PushMessage,
 ): Promise<PushSendResult> => {
-  if (tokens.length === 0) return { sentCount: 0, invalidTokens: [] };
+  if (tokens.length === 0) return { sentCount: 0, sentTokens: [], invalidTokens: [] };
 
   const response = await getMessaging(getFirebaseApp()).sendEachForMulticast({
     tokens,
@@ -48,9 +49,12 @@ export const sendPushToTokens = async (
     apns: { payload: { aps: { sound: "default" } } },
   });
 
+  const sentTokens = response.responses.flatMap((result, index) =>
+    result.success ? [tokens[index]!] : [],
+  );
   const invalidTokens = response.responses.flatMap((result, index) =>
     !result.success && isInvalidTokenError(result.error?.code) ? [tokens[index]!] : [],
   );
 
-  return { sentCount: response.successCount, invalidTokens };
+  return { sentCount: response.successCount, sentTokens, invalidTokens };
 };

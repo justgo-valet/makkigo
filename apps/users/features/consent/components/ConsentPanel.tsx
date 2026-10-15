@@ -1,9 +1,7 @@
 import { Button, cn } from "@makkigo/ui";
 import Image from "next/image";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
-const MARKDOWN_REMARK_PLUGINS = [remarkGfm];
+import PolicyMarkdown from "@/features/consent/components/PolicyMarkdown";
 
 interface ConsentPanelProps {
   id: string;
@@ -33,14 +31,13 @@ export default function ConsentPanel({
         </button>
         <h1 className="text-lg font-bold">{title}</h1>
       </header>
-      <section
+      <PolicyMarkdown
+        content={content}
         className={cn(
           onAgree ? "h-[calc(100vh-4rem-5rem)]" : "h-[calc(100vh-4rem)]",
-          "overflow-y-auto px-6 pb-4 rounded-md text-s leading-relaxed text-muted-foreground [&_h2]:mt-4 [&_h2]:mb-1 [&_h2]:font-bold [&_h2]:text-foreground [&_h2:first-child]:mt-0 [&_ol]:list-decimal [&_ol]:pl-4 [&_p]:my-1.5 [&_table]:my-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:p-1 [&_td]:align-top [&_th]:border [&_th]:bg-background [&_th]:text-sm [&_td]:text-sm [&_th]:p-1 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:text-sm",
+          "overflow-y-auto rounded-md px-6 pb-4",
         )}
-      >
-        <Markdown remarkPlugins={MARKDOWN_REMARK_PLUGINS}>{content}</Markdown>
-      </section>
+      />
       {onAgree && (
         <footer className="p-4 flex w-full h-20">
           <Button
