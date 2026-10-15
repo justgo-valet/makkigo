@@ -15,9 +15,17 @@ interface AppHeaderProps {
   menu: MenuAccess;
   backHref?: string;
   home?: boolean;
+  notificationsEnabled?: boolean;
+  onBellClick?: () => void;
 }
 
-export default function AppHeader({ menu, backHref, home }: Readonly<AppHeaderProps>) {
+export default function AppHeader({
+  menu,
+  backHref,
+  home,
+  notificationsEnabled,
+  onBellClick,
+}: Readonly<AppHeaderProps>) {
   return (
     <header className="relative mt-2 flex h-6 items-center">
       {backHref && (
@@ -37,8 +45,18 @@ export default function AppHeader({ menu, backHref, home }: Readonly<AppHeaderPr
         )}
       />
       {home && (
-        <button type="button" aria-label="알림" className="mr-[21px] ml-auto">
-          <Image src="/icons/bell_off.svg" alt="" width={24} height={24} />
+        <button
+          type="button"
+          aria-label={notificationsEnabled ? "알림 켜짐" : "알림 꺼짐"}
+          className="mr-[21px] ml-auto"
+          onClick={onBellClick}
+        >
+          <Image
+            src={notificationsEnabled ? "/icons/bell.svg" : "/icons/bell_off.svg"}
+            alt=""
+            width={24}
+            height={24}
+          />
         </button>
       )}
       <Sheet>

@@ -2,19 +2,30 @@ import { getActiveStaffIdFromAccessToken } from "@makkigo/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import ComingSoon from "@/components/layouts/ComingSoon";
+import TicketManagement from "@/features/tickets/components/TicketManagement";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
-import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
+import { getStaffMenuAccess } from "@/server/auth/getStaffMenuAccess";
 import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
+import { listOwnTickets } from "@/server/ticket/listOwnTickets";
 
 export default async function TicketsPage() {
   const token = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   const staffId = token ? await getActiveStaffIdFromAccessToken(token) : null;
   if (!staffId) redirect("/login");
-  await requireProtectedStaff(staffId);
+  const onboarding = await requireProtectedStaff(staffId);
+  if (onboarding.role !== "MERCHANT_ADMIN") redirect(onboarding.nextPath);
 
-  const next = await getPathAfterLogin(staffId);
-  if (next !== "/") redirect(next);
+  const menu = await getStaffMenuAccess(staffId);
+  if (!menu) redirect("/login");
 
-  return <ComingSoon title="티켓 관리 기능을 준비하고 있어요" />;
+  const imageBaseUrl = process.env.IMAGE_BASE_URL;
+  if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required");
+
+  return (
+    <TicketManagement
+      imageBaseUrl={imageBaseUrl}
+      menu={menu}
+      tickets={await listOwnTickets(staffId)}
+    />
+  );
 }
