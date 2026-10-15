@@ -2,6 +2,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { isInApp } from "@/features/auth/appBridge";
+import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
 import { useSelectedMerchant } from "@/features/merchant/selectedMerchant.store";
 import { useMe } from "@/features/user/hooks/useMe";
 import { useSendArrival } from "@/features/valet/hooks/useSendArrival";
@@ -9,7 +10,7 @@ import { merchantIdSchema } from "@/libs/merchant/contracts/merchantDetail";
 
 import type { Merchant } from "@/libs/merchant/contracts/merchants";
 
-type MerchantSearchStep = "search" | "arrival" | "locationConsent";
+type MerchantSearchStep = "search" | "merchantRequired" | "arrival" | "locationConsent";
 
 const MERCHANT_PARAM = "merchant";
 
@@ -21,6 +22,7 @@ const useMerchantSearchFlow = () => {
   const [step, setStep] = useState<MerchantSearchStep | null>(null);
   const [pickedMerchant, setPickedMerchant] = useState<Merchant | null>(null);
   const selectMerchant = useSelectedMerchant((state) => state.selectMerchant);
+  const selectedMerchant = useSelectedMerchantValue();
   const { data: me } = useMe();
   const arrival = useSendArrival(() => setStep(null));
 
@@ -68,6 +70,18 @@ const useMerchantSearchFlow = () => {
     setStep("arrival");
   };
 
+  const startArrival = () => {
+    arrival.resetError();
+
+    if (!selectedMerchant) {
+      setStep("merchantRequired");
+      return;
+    }
+
+    setPickedMerchant(selectedMerchant);
+    setStep("arrival");
+  };
+
   const sendArrival = () => {
     if (!pickedMerchant || arrival.isSending) return;
 
@@ -92,6 +106,7 @@ const useMerchantSearchFlow = () => {
 
   return {
     isSearchOpen: step === "search",
+    isMerchantRequiredOpen: step === "merchantRequired",
     isArrivalOpen: step === "arrival",
     isLocationConsentOpen: step === "locationConsent",
     detailMerchantId,
@@ -103,6 +118,7 @@ const useMerchantSearchFlow = () => {
     viewMerchant,
     backToList: leaveDetail,
     chooseMerchant,
+    startArrival,
     sendArrival,
     agreeLocationAndSend: () => sendWithLocationConsent(true),
     sendWithoutLocation: () => sendWithLocationConsent(false),
