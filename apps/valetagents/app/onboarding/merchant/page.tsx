@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import QueryProvider from "@/components/providers/QueryProvider";
+import MerchantApprovalPending from "@/features/merchants/components/MerchantApprovalPending";
 import MerchantRegistrationForm from "@/features/merchants/components/MerchantRegistrationForm";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
@@ -29,10 +30,5 @@ export default async function MerchantOnboardingPage() {
     );
   }
 
-  return (
-    <section>
-      <h1>업체 등록</h1>
-      <p>업체 승인을 기다리고 있습니다.</p>
-    </section>
-  );
+  return <MerchantApprovalPending />;
 }
