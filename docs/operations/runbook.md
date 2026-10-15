@@ -52,6 +52,26 @@ docker restart makkigo-users-1                 # 한 컨테이너 재시작
 
 새 변수를 추가할 때는 코드 · `.env.production.example` · [infrastructure.md](infrastructure.md) 목록도 함께 고칩니다.
 
+## 정기 정리 작업
+
+`users-jobs` 컨테이너가 **한 시간마다** 고객 앱 내부 API(`POST /api/internal/maintenance`)를 불러 아래 세 가지를 차례로 처리합니다. 하나가 실패해도 나머지는 돕니다.
+
+| 작업 | 지우는 것 | 남기는 것 |
+|---|---|---|
+| 탈퇴 회원 개인정보 | 탈퇴 30일이 지난 회원의 휴대폰 번호, 차량 정보, 고객 알림 내역(차량 번호가 들어 있음), 로그인 코드 · 리프레시 토큰 | 회원 행(탈퇴 표시), 동의 기록(5년), 발렛 이용 기록(5년, 차량 번호 포함) |
+| 로그인 기록 | 만료된 고객 리프레시 토큰, 폐기된 지 하루 지난 리프레시 토큰, 만료된 1회용 로그인 코드 | 쓸 수 있는 토큰 |
+| 위치 이용 기록 | 만든 지 6개월 지난 위치 이용 사실 확인자료 | 6개월 안의 기록 |
+
+탈퇴 즉시 지우는 것(소셜 연결 · 푸시 기기 · 위치 이용 기록)은 탈퇴 API 가 처리합니다. 요원 앱 토큰은 이 작업에 포함되지 않습니다.
+
+- 켜기: SSM `/makkigo/prod/users/USERS_INTERNAL_JOB_TOKEN` 에 `openssl rand -hex 32` 값을 넣고 다시 배포. 값이 없으면 컨테이너는 건너뛰었다는 로그만 남깁니다.
+- 결과 보기: `docker logs --since 24h makkigo-users-jobs-1` → `{"ok":true,"withdrawnUsers":{"purged":N,"remaining":0},"expiredAuthRecords":{...},"oldLocationUseLogs":N}`. 실패하면 `"ok":false` 와 `maintenance failed`, 실패한 작업은 `null`
+- 지울 대상 수만 보기(지우지 않음):
+  ```bash
+  docker exec makkigo-users-jobs-1 sh -c 'curl -sS -X POST -H "Authorization: Bearer $USERS_INTERNAL_JOB_TOKEN" -d "{\"dryRun\":true}" http://users:3001/api/internal/maintenance'
+  ```
+- 내부 API 는 외부에서 막혀 있습니다 (Caddy 가 `app.makkigo.com/api/internal/*` 를 403).
+
 ## 업체 이미지 cleanup
 
 cleanup은 DB에 기록된 ATTACHED · REVOKED staging key와 TOMBSTONED staging/final key만 처리합니다.
