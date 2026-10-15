@@ -46,6 +46,50 @@ services:
         condition: service_healthy
     logging: *logging
 
+  merchant-upload-cleanup:
+    image: ghcr.io/justgo-valet/makkigo-valetagents:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
+    init: true
+    restart: unless-stopped
+    command: ["node", "apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs", "--loop"]
+    stop_grace_period: 120s
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/valetagents.env
+    depends_on:
+      valetagents:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs", "--healthcheck"]
+      interval: 5m
+      timeout: 10s
+      retries: 1
+      start_period: 2m
+    logging: *logging
+
+  users-jobs:
+    image: curlimages/curl:8.11.1
+    init: true
+    restart: unless-stopped
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/users.env
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          if [ -n "$${USERS_INTERNAL_JOB_TOKEN:-}" ]; then
+            curl -sS --fail-with-body -m 300 -X POST \
+              -H "Authorization: Bearer $${USERS_INTERNAL_JOB_TOKEN}" \
+              -H "Content-Type: application/json" -d '{}' \
+              http://users:3001/api/internal/maintenance \
+              || echo "maintenance failed"
+            echo
+          else
+            echo "USERS_INTERNAL_JOB_TOKEN is not set; skipping maintenance"
+          fi
+          sleep 3600
+        done
+    depends_on:
+      users:
+        condition: service_healthy
+    logging: *logging
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped

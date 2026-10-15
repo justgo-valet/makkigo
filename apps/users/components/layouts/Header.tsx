@@ -1,8 +1,11 @@
 "use client";
 
+import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import NotificationBellButton from "@/features/notification/components/NotificationBellButton";
 import { useLayout } from "@/stores/layout";
 
 export default function Header() {
@@ -42,24 +45,16 @@ export default function Header() {
                 : ""
           }
         >
-          <Image
-            src="/images/brand/makkigo_logo.svg"
-            alt="마끼고"
-            width={95}
-            height={39}
-            priority
-          />
+          <Image src={makkigoLogo} alt="마끼고" width={95} height={39} priority />
         </div>
       )}
 
       {showRightMenu && (
         <nav className="flex items-center gap-3">
-          <button type="button" aria-label="알림" className="cursor-pointer">
-            <Image src="/icons/alarm.svg" alt="" aria-hidden="true" width={24} height={24} />
-          </button>
-          <button type="button" aria-label="프로필" className="cursor-pointer">
+          <NotificationBellButton />
+          <Link href="/mypage" aria-label="마이페이지" className="cursor-pointer">
             <Image src="/icons/profile.svg" alt="" aria-hidden="true" width={24} height={24} />
-          </button>
+          </Link>
         </nav>
       )}
     </header>

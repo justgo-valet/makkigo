@@ -1,0 +1,55 @@
+model MerchantRegistrationSession {
+  id               String                           @id @default(uuid()) @db.Uuid
+  staffId          Int                              @map("staff_id")
+  state            MerchantRegistrationSessionState @default(OPEN)
+  expiresAt        DateTime                         @map("expires_at") @db.Timestamptz(3)
+  idempotencyKey   String?                          @map("idempotency_key")
+  canonicalPayload Json?                            @map("canonical_payload")
+  payloadHash      String?                          @map("payload_hash") @db.Char(64)
+  generation       Int                              @default(0)
+  leaseUntil       DateTime?                        @map("lease_until") @db.Timestamptz(3)
+  merchantId       Int?                             @unique @map("merchant_id")
+  replayResponse   Json?                            @map("replay_response")
+  createdAt        DateTime                         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime                         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  staff    Staff                 @relation(fields: [staffId], references: [id])
+  merchant Merchant?             @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  uploads  MerchantImageUpload[]
+
+  @@unique([staffId, idempotencyKey])
+  @@index([staffId, state])
+  @@index([state, expiresAt])
+  @@index([state, leaseUntil])
+  @@map("merchant_registration_sessions")
+}
+
+model MerchantImageUpload {
+  id                String                   @id @default(uuid()) @db.Uuid
+  sessionId         String                   @map("session_id") @db.Uuid
+  slot              Int
+  stagingKey        String                   @unique @map("staging_key")
+  finalKey          String                   @unique @map("final_key")
+  declaredMimeType  String                   @map("declared_mime_type")
+  declaredSize      Int                      @map("declared_size")
+  sourceETag        String?                  @map("source_etag")
+  finalETag         String?                  @map("final_etag")
+  expiresAt         DateTime                 @map("expires_at") @db.Timestamptz(3)
+  state             MerchantImageUploadState @default(RESERVED)
+  cleanupClaimId    String?                  @map("cleanup_claim_id") @db.Uuid
+  cleanupLeaseUntil DateTime?                @map("cleanup_lease_until") @db.Timestamptz(3)
+  cleanupAttempts   Int                      @default(0) @map("cleanup_attempts")
+  lastSweepAt       DateTime?                @map("last_sweep_at") @db.Timestamptz(3)
+  nextSweepAt       DateTime?                @map("next_sweep_at") @db.Timestamptz(3)
+  lastOutcome       String?                  @map("last_outcome")
+  createdAt         DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  session MerchantRegistrationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, slot])
+  @@index([state, expiresAt])
+  @@index([state, nextSweepAt, id])
+  @@index([cleanupLeaseUntil])
+  @@map("merchant_image_uploads")
+}

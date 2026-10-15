@@ -42,6 +42,13 @@ jobs:
         run: pnpm --filter @makkigo/users format:check
       - name: 테스트
         run: pnpm -r test
+      - name: Cleanup runner · Compose 구성 검사
+        run: |
+          node --check apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs
+          compose_env_dir="$(mktemp -d)"
+          trap 'rm -rf "$compose_env_dir"' EXIT
+          touch "$compose_env_dir/users.env" "$compose_env_dir/valetagents.env" "$compose_env_dir/postgres.env"
+          IMAGE_TAG=ci ENV_DIR="$compose_env_dir" docker compose -f deploy/docker-compose.prod.yml config >/dev/null
       - name: 빌드
         run: pnpm build
 

@@ -1,5 +1,8 @@
 {$USERS_DOMAIN} {
 	encode zstd gzip
+	handle /api/internal/* {
+		respond 403
+	}
 	handle /api/v1/staff/auth/oauth/* {
 		reverse_proxy valetagents:3000
 	}
@@ -10,5 +13,10 @@
 
 {$VALET_DOMAIN} {
 	encode zstd gzip
-	reverse_proxy valetagents:3000
+	handle /api/internal/merchant-uploads/* {
+		respond 403
+	}
+	handle {
+		reverse_proxy valetagents:3000
+	}
 }

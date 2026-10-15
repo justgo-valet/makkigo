@@ -31,6 +31,7 @@
 | 업체 · 티켓 | `merchants`, `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9 |
 | 발렛 | `valet_sessions` | #9 |
 | 알림 | `push_devices`, `notifications` | #9 |
+| 위치 | `location_use_logs` (위치정보 이용 사실 확인자료) | 이 PR |
 
 
 ## 관계
@@ -71,11 +72,15 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 - **기준 요금** = `base_fee` (`base_minutes` 까지) + ceil((이용 시간 − `base_minutes`) ÷ `extra_unit_minutes`) × `extra_unit_fee`. 이용 시간 = 주차 완료 ~ 출차 요청 → [valet-session.md](../planning/valet-session.md#요금)
 - **티켓 버전**(`ticket_versions`)은 수정할 때마다 새 행. 업체의 최신 티켓 = 그 업체 티켓 버전 중 `created_at` 이 가장 늦은 것
 - **요원 근무 시간**(`booth_agents.work_start_time` · `work_end_time`)에 맞춰 알림을 켜고 끕니다 (`notifications_enabled`)
+- **업체 관리의 등록일자**는 `APPROVED` 인 `booth_merchants.updated_at` 입니다 (따로 컬럼을 두지 않음). 이 표에서 바뀌는 컬럼이 `status` 뿐이라 `APPROVED` 행의 `updated_at` 이 마지막으로 수락한 시각입니다. `APPROVED` 행을 다시 쓰는 코드를 넣게 되면 그 전에 `approved_at` 컬럼을 만들어 `updated_at` 값을 옮깁니다
 - **부스 · 업체 사진**은 사진 1장 = 행 1개 (`booth_photos`, `merchant_photos`). 한 장씩 추가 · 삭제 · 순서 변경(`sort_order`)하고, 행을 지울 때 S3 파일(`path`)도 함께 지웁니다. 업체 사진은 최대 5장 (서버에서 검사)
 - **푸시 기기 · 알림**은 고객(`user_id`) 또는 staff(`staff_id`) 중 하나에만 속합니다 (서버에서 보장)
+- **업체 좌표**(`merchants.latitude` · `longitude`): 예상 도착 시각 계산의 목적지. 비어 있으면 예상 시각은 미정
+- **예상 도착 시각**(`valet_sessions.expected_arrival_at`): 도착 알림을 보낼 때 한 번 계산. 못 했으면 비움(도착 시간 미정) → [policies.md](../planning/policies.md#위치정보)
+- **위치 이용 기록**(`location_use_logs`): 고객 위치를 쓸 때마다 누가 · 언제 · 무엇에(`purpose`) 썼는지만 남깁니다. **좌표는 어느 테이블에도 저장하지 않습니다.** 6개월이 지난 행과 동의 철회 · 탈퇴 회원의 행은 지웁니다 → [legal/README.md](../legal/README.md#위치정보)
 - **알림 채널**(`notifications.channel`): 실제로 보낸 경로 `PUSH` / `ALIMTALK`. 보내지 않고 앱 알림 목록에만 남긴 경우는 비움 → [policies.md](../planning/policies.md#알림)
 
 ## 코드로 표현 못 하는 제약
 
-- **같은 차량 번호로 진행 중인 세션은 하나만**: 부분 유니크 인덱스가 필요하지만 Prisma 스키마로 표현할 수 없어 서버 코드에서 검사합니다.
+- **같은 차량 번호로 진행 중인 세션은 하나만**: 부분 유니크 인덱스가 필요하지만 Prisma 스키마로 표현할 수 없어 서버 코드에서 검사합니다. 동시 요청을 막기 위해 세션을 만드는 트랜잭션은 **먼저 `lockPlateNumber(tx, 차량 번호)`** (`database` 패키지, PostgreSQL advisory lock) 를 걸고 진행 중 세션(`ACTIVE_VALET_SESSION_STATUSES`)을 확인합니다. 요원 앱의 차량 추가도 같은 함수를 써야 서로 막힙니다.
 - 고객 소셜 계정과 staff 소셜 계정은 테이블을 나눴습니다. 요원도 다른 곳에선 고객이라 같은 소셜 계정으로 양쪽에 가입할 수 있어야 합니다.

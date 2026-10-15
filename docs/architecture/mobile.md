@@ -37,9 +37,30 @@
 |---|---|---|
 | 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 
+| 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
+| 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |
+| 웹 → 앱 | `{"type":"openNotificationSettings"}` | 이 앱의 OS 알림 설정 화면을 엶 (`app_settings`). 켜고 돌아오면 토큰 이벤트가 다시 옴 |
+
 **앱은 주소를 만들지 않습니다.** 제공자 · API 경로 · 로그인 규칙은 모두 웹이 정해 메시지로 넘깁니다. 그래서 로그인 · 회원가입 변경은 서버 배포만으로 끝나고, 앱 업데이트는 이 표의 메시지 형식이나 복귀 스킴을 바꿀 때만 필요합니다.
 
 메시지를 추가 · 변경할 때는 makkigo 와 makkigo-mobile PR 을 서로 링크합니다.
+
+## 푸시
+
+Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 각각 앱으로 등록합니다 (애널리틱스 끔). iOS 는 Firebase 콘솔에 APNs 인증 키(.p8, 팀 단위라 두 앱 공용)를 올려 둡니다.
+
+| 단계 | 하는 곳 |
+|---|---|
+| 앱 푸시 동의한 회원이 로그인하면 웹이 `requestPushToken` 을 보냄 → 그때 OS 알림 권한 팝업 | 웹 `useAppPushRegistration` (`MemberGate`) |
+| 앱이 다시 화면에 나오면(홈 · 설정 앱에서 복귀) 현재 권한을 확인해 토큰 이벤트를 다시 보냄. `token: null`(설정에서 알림 끔)이면 웹이 이 기기 등록을 지움 → 다음 알림부터 알림톡 대상 | 앱 `didChangeAppLifecycleState`, 웹 `useAppPushRegistration` |
+| 앱 푸시 동의 회원인데 `permission: "denied"` 면 메인 상단에 **"알림이 꺼져 있어요 [설정 열기]"** 배너. 켜고 돌아오면 사라짐. iOS APNs 실패(`token: null` · `granted`)엔 안 띄움 | 웹 `PushPermissionBanner` (`usePushPermission` 상태) |
+| 받은 토큰을 `POST /api/v1/push-devices` 로 등록, 로그아웃 때 `DELETE` | 웹 (등록한 토큰은 기기 `localStorage` 에 기억) |
+| 발송: 앱 푸시 동의 확인 → 기기 토큰으로 FCM 발송 → 없는 토큰 삭제 → 알림 내역(`notifications`) 기록 | 서버 `@makkigo/push` 의 `sendUserNotification` |
+| 알림 데이터 `link`(웹 경로)를 누르면 그 화면을 웹뷰로 엶 | 앱 |
+
+- 푸시를 못 보내면(미동의 · 기기 없음 · 발송 실패) 알림 내역의 채널을 비워 둡니다. 알림톡 대체는 알림톡 연동 때 이 자리에서 보냅니다.
+- Android 알림 채널: `makkigo_default` (중요도 높음).
+- 로컬 테스트 발송: `node --env-file=apps/users/.env.development.local packages/push/scripts/send-test.mjs <토큰> [경로]`
 
 ## 빌드 · 서명
 

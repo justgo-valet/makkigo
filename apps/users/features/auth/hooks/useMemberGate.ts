@@ -2,6 +2,7 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { useAppPushRegistration } from "@/features/push/hooks/useAppPushRegistration";
 import { useMe } from "@/features/user/hooks/useMe";
 
 import type { MeResponse } from "@/libs/user/contracts/me";
@@ -34,6 +35,8 @@ const useMemberGate = (area: MemberArea) => {
   // 캐시에 남은 이전 응답이 아니라 이번 진입 때 받은 응답으로만 판단한다.
   const freshMe = isFetchedAfterMount && !isError ? me : undefined;
   const redirectPath = freshMe ? getRedirectPath(area, freshMe) : null;
+
+  useAppPushRegistration(area === "member" && Boolean(freshMe?.appPushAgreed) && !redirectPath);
 
   useEffect(() => {
     if (redirectPath) router.replace(redirectPath);

@@ -19,6 +19,7 @@ const consentItems: readonly ConsentItem[] = (
     { type: "PRIVACY_THIRD_PARTY", label: "개인정보 제3자 제공" },
     { type: "APP_PUSH", label: "앱 푸시 알림 수신" },
     { type: "ALIMTALK", label: "알림톡 수신" },
+    { type: "LOCATION_BASED_SERVICE", label: "위치기반서비스 이용약관" },
   ] as const
 ).map((item) => Object.assign(item, { required: isRequiredConsent(item.type) }));
 

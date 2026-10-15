@@ -3,6 +3,8 @@ import { z } from "zod";
 const meResponseSchema = z.object({
   requiredConsentsAgreed: z.boolean(),
   onboardingCompleted: z.boolean(),
+  appPushAgreed: z.boolean(),
+  locationAgreed: z.boolean(),
 });
 
 type MeResponse = z.infer<typeof meResponseSchema>;

@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@makkigo/api-client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -9,8 +10,13 @@ import {
   formatWon,
 } from "@/features/home/homeFormat";
 import { getHomePreview, PREVIEW_PARAM } from "@/features/home/homePreview";
+import { getBeforeSessionSnapshot, toHomeSnapshot } from "@/features/home/homeSnapshot";
+import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
+import { useCurrentSession } from "@/features/valet/hooks/useCurrentSession";
+import { useVehicles } from "@/features/vehicle/hooks/useVehicles";
+import { formatArrivalDelay } from "@/libs/valet/arrivalDelay";
 
-import type { HomePreview, HomeStatus } from "@/features/home/homePreview";
+import type { HomeSnapshot, HomeStatus } from "@/features/home/homeSnapshot";
 
 type StatusTone = "info" | "success" | "danger" | "warning";
 
@@ -30,7 +36,10 @@ interface ExitSummary {
 }
 
 const MINUTE_MS = 60 * 1000;
+const NOW_TICK_MS = 30 * 1000;
 const COPIED_RESET_MS = 2000;
+const FALLBACK_ERROR_MESSAGE = "차량 정보를 불러오지 못했습니다.";
+const SESSION_FALLBACK_ERROR_MESSAGE = "발렛 정보를 불러오지 못했습니다.";
 
 const STATUS_BADGES: Partial<Record<HomeStatus, StatusBadge>> = {
   ARRIVAL_SCHEDULED: { label: "도착 예정", tone: "info" },
@@ -39,40 +48,46 @@ const STATUS_BADGES: Partial<Record<HomeStatus, StatusBadge>> = {
   EXIT_PREPARING: { label: "출차 준비 중", tone: "warning" },
 };
 
-const minutesAgo = (now: number, minutes: number) => now - minutes * MINUTE_MS;
+const elapsedMinutes = (now: number, from: number) =>
+  Math.max(0, Math.floor((now - from) / MINUTE_MS));
 
-const getMetaItems = (preview: HomePreview, now: number) => {
-  const vehicleNumber = formatVehicleNumber(preview.vehicleNumber);
+const getMetaItems = (snapshot: HomeSnapshot, vehicleNumber: string, now: number) => {
+  const formattedVehicleNumber = formatVehicleNumber(vehicleNumber);
 
-  if (preview.parkedMinutesAgo !== null) {
+  if (snapshot.parkedAt !== null) {
     return [
-      vehicleNumber,
-      `${formatClockTime(minutesAgo(now, preview.parkedMinutesAgo))} 입차`,
-      `${formatElapsed(preview.parkedMinutesAgo)} 경과`,
+      formattedVehicleNumber,
+      `${formatClockTime(snapshot.parkedAt)} 입차`,
+      `${formatElapsed(elapsedMinutes(now, snapshot.parkedAt))} 경과`,
     ];
   }
 
-  if (preview.arrivalNotifiedMinutesAgo !== null) {
+  if (snapshot.arrivalNotifiedAt !== null) {
+    const delayMinutes = snapshot.arrivalDelayMinutes ?? 0;
+
     return [
-      vehicleNumber,
-      `${formatClockTime(minutesAgo(now, preview.arrivalNotifiedMinutesAgo))} 도착 알림`,
+      formattedVehicleNumber,
+      `${formatClockTime(snapshot.arrivalNotifiedAt)} 도착 알림`,
+      ...(delayMinutes > 0 ? [`${formatArrivalDelay(delayMinutes)} 지연`] : []),
     ];
   }
 
-  if (preview.status === "MERCHANT_SELECTED") return [vehicleNumber, "도착 알림 전"];
+  if (snapshot.status === "MERCHANT_SELECTED") {
+    return [formattedVehicleNumber, "도착 알림 전"];
+  }
 
-  return [vehicleNumber];
+  return [formattedVehicleNumber];
 };
 
-const getExitSummary = (preview: HomePreview, now: number): ExitSummary | null => {
-  switch (preview.status) {
+const getExitSummary = (snapshot: HomeSnapshot): ExitSummary | null => {
+  switch (snapshot.status) {
     case "PARKED":
       return {
         headline: "현재 출차 요청",
-        emphasis: `${preview.waitingExitCount ?? 0}대`,
+        emphasis: `${snapshot.waitingExitCount ?? 0}대`,
         note: "요원님 확인 후 시각 안내",
         feeLabel: "지금 출차 시 요금",
-        fee: formatWon(preview.currentFee ?? 0),
+        fee: formatWon(snapshot.currentFee ?? 0),
         canSeeFeeDetail: true,
         accountNumber: null,
       };
@@ -82,30 +97,50 @@ const getExitSummary = (preview: HomePreview, now: number): ExitSummary | null =
         emphasis: null,
         note: "요원님 확인 후 시각 안내",
         feeLabel: "기준 요금",
-        fee: formatWon(preview.currentFee ?? 0),
+        fee: formatWon(snapshot.currentFee ?? 0),
         canSeeFeeDetail: true,
         accountNumber: null,
       };
     case "EXIT_PREPARING":
       return {
         headline: "출차 예정",
-        emphasis: formatClockTime(now + (preview.expectedExitInMinutes ?? 0) * MINUTE_MS),
+        emphasis:
+          snapshot.expectedExitAt === null ? null : formatClockTime(snapshot.expectedExitAt),
         note: "요원님이 차량을 준비하고 있어요",
         feeLabel: "발렛 요금",
-        fee: formatWon(preview.actualFee ?? 0),
+        fee: formatWon(snapshot.actualFee ?? snapshot.currentFee ?? 0),
         canSeeFeeDetail: false,
-        accountNumber: preview.accountNumber,
+        accountNumber: snapshot.accountNumber,
       };
     default:
       return null;
   }
 };
 
+const useNow = () => {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), NOW_TICK_MS);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return now;
+};
+
 const useHome = () => {
   const searchParams = useSearchParams();
-  const preview = getHomePreview(searchParams.get(PREVIEW_PARAM));
-  const [now] = useState(() => Date.now());
+  const now = useNow();
+  const selectedMerchant = useSelectedMerchantValue();
+  const vehiclesQuery = useVehicles();
+  const sessionQuery = useCurrentSession();
   const [isAccountCopied, setIsAccountCopied] = useState(false);
+  const vehicle = vehiclesQuery.data?.[0];
+  const session = sessionQuery.data?.session ?? null;
+  const snapshot =
+    getHomePreview(searchParams.get(PREVIEW_PARAM), now) ??
+    (session ? toHomeSnapshot(session) : getBeforeSessionSnapshot(selectedMerchant?.name ?? null));
 
   useEffect(() => {
     if (!isAccountCopied) return;
@@ -116,19 +151,46 @@ const useHome = () => {
   }, [isAccountCopied]);
 
   const copyAccountNumber = () => {
-    if (!preview.accountNumber) return;
+    if (!snapshot.accountNumber) return;
 
-    void navigator.clipboard.writeText(preview.accountNumber).then(() => setIsAccountCopied(true));
+    void navigator.clipboard.writeText(snapshot.accountNumber).then(() => setIsAccountCopied(true));
   };
 
+  if (vehiclesQuery.isPending || sessionQuery.isPending) return { status: "loading" } as const;
+
+  if (vehiclesQuery.isError) {
+    return {
+      status: "error",
+      errorMessage: getErrorMessage(vehiclesQuery.error, FALLBACK_ERROR_MESSAGE),
+      retry: () => void vehiclesQuery.refetch(),
+    } as const;
+  }
+
+  if (sessionQuery.isError) {
+    return {
+      status: "error",
+      errorMessage: getErrorMessage(sessionQuery.error, SESSION_FALLBACK_ERROR_MESSAGE),
+      retry: () => void sessionQuery.refetch(),
+    } as const;
+  }
+
+  if (!vehicle) {
+    return {
+      status: "error",
+      errorMessage: "등록된 차량이 없습니다.",
+      retry: () => void vehiclesQuery.refetch(),
+    } as const;
+  }
+
   return {
-    title: preview.merchantName ?? "장소 미정",
-    badge: STATUS_BADGES[preview.status] ?? null,
-    metaItems: getMetaItems(preview, now),
-    carImageUrl: preview.carImageUrl,
-    carImageAlt: `${formatVehicleNumber(preview.vehicleNumber)} 차량`,
-    exitSummary: getExitSummary(preview, now),
-    actions: getHomeActions(preview.status),
+    status: "ready" as const,
+    title: snapshot.merchantName ?? "장소 미정",
+    badge: STATUS_BADGES[snapshot.status] ?? null,
+    metaItems: getMetaItems(snapshot, snapshot.plateNumber ?? vehicle.plateNumber, now),
+    carImageUrl: vehicle.carImageUrl,
+    carImageAlt: `${formatVehicleNumber(vehicle.plateNumber)} 차량`,
+    exitSummary: getExitSummary(snapshot),
+    actions: getHomeActions(snapshot.status),
     isAccountCopied,
     copyAccountNumber,
   };
