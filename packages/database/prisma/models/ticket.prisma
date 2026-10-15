@@ -23,3 +23,25 @@ model TicketVersion {
     @@index([ticketId, createdAt])
     @@map("ticket_versions")
 }
+
+model TicketImageUpload {
+    id               String                 @id @default(uuid()) @db.Uuid
+    merchantId       Int                    @map("merchant_id")
+    staffId          Int                    @map("staff_id")
+    state            TicketImageUploadState  @default(RESERVED)
+    stagingKey       String                 @unique @map("staging_key")
+    finalKey         String                 @unique @map("final_key")
+    contentType      String                 @map("content_type")
+    size             Int
+    expiresAt        DateTime               @map("expires_at") @db.Timestamptz(3)
+    sourceETag       String?                @map("source_etag")
+    finalETag        String?                @map("final_etag")
+    createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    merchant Merchant @relation(fields: [merchantId], references: [id])
+    staff    Staff    @relation(fields: [staffId], references: [id])
+
+    @@index([merchantId, staffId, state])
+    @@index([state, expiresAt])
+    @@map("ticket_image_uploads")
+}
