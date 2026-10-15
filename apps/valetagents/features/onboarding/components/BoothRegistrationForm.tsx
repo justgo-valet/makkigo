@@ -5,6 +5,8 @@ import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
 import Link from "next/link";
 
+import { BOOTH_PHOTO_MIME_TYPES } from "@/libs/booth/contracts/photos";
+
 import {
   BOOTH_ADDRESS_DETAIL_MAX_LENGTH,
   BOOTH_ADDRESS_MAX_LENGTH,
@@ -66,6 +68,7 @@ export default function BoothRegistrationForm({
         autoComplete="off"
         maxLength={BOOTH_NAME_MAX_LENGTH}
         value={form.name}
+        disabled={form.isSaving}
         className={INPUT_CLASS}
         onChange={(event) => form.changeName(event.target.value)}
       />
@@ -81,6 +84,7 @@ export default function BoothRegistrationForm({
         autoComplete="off"
         maxLength={BOOTH_ADDRESS_MAX_LENGTH}
         value={form.address}
+        disabled={form.isSaving}
         className={INPUT_CLASS}
         onChange={(event) => form.changeAddress(event.target.value)}
       />
@@ -91,6 +95,7 @@ export default function BoothRegistrationForm({
         maxLength={BOOTH_ADDRESS_DETAIL_MAX_LENGTH}
         placeholder="상세 주소를 입력해 주세요"
         value={form.addressDetail}
+        disabled={form.isSaving}
         className={INPUT_CLASS}
         onChange={(event) => form.changeAddressDetail(event.target.value)}
       />
@@ -107,7 +112,7 @@ export default function BoothRegistrationForm({
             ) : (
               <>
                 <p className="text-xs" role="alert">{form.mapErrorMessage}</p>
-                <button type="button" className="mt-1 text-sm underline" onClick={form.retryMap}>
+                <button type="button" disabled={form.isSaving} className="mt-1 text-sm underline disabled:opacity-50" onClick={form.retryMap}>
                   지도 다시 시도
                 </button>
               </>
@@ -116,10 +121,59 @@ export default function BoothRegistrationForm({
         )}
       </div>
 
-      <p className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
-      <div aria-hidden className={cn(BOX_CLASS, "mt-[3px] flex h-[105px] flex-col items-center justify-center bg-[#e8e8e8]")}>
-        <Image src="/icons/upload.svg" alt="" width={24} height={26} className="ml-px" />
-        <p className="mt-[15px] text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</p>
+      <p id="booth-photos-label" className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
+      <p className="text-[13px] leading-5 text-[#717171]">선택 사항 · 최대 5장, 장당 5MB</p>
+      {form.photos.canAdd && (
+        <label
+          className={cn(
+            BOX_CLASS,
+            "mt-[3px] flex h-[105px] flex-col items-center justify-center bg-[#e8e8e8] focus-within:border-(--primary-color)",
+            form.isSaving ? "cursor-default opacity-60" : "cursor-pointer",
+          )}
+        >
+          <Image src="/icons/upload.svg" alt="" width={24} height={26} className="ml-px" />
+          <span className="mt-[15px] text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</span>
+          <input
+            type="file"
+            multiple
+            accept={BOOTH_PHOTO_MIME_TYPES.join(",")}
+            aria-label="부스 사진 선택"
+            className="sr-only"
+            disabled={form.isSaving}
+            onChange={(event) => {
+              form.photos.add([...(event.target.files ?? [])]);
+              event.target.value = "";
+            }}
+          />
+        </label>
+      )}
+      {form.photos.photos.length > 0 && (
+        <ul aria-labelledby="booth-photos-label" className="mt-3 flex flex-wrap gap-2">
+          {form.photos.photos.map((photo, index) => (
+            <li key={photo.key} className="relative size-[72px]">
+              <Image
+                src={photo.previewUrl}
+                alt={`선택한 부스 사진 ${index + 1}`}
+                width={72}
+                height={72}
+                unoptimized
+                className="size-full rounded-lg border border-[#999] object-cover"
+              />
+              <button
+                type="button"
+                aria-label={`사진 ${index + 1} 삭제`}
+                disabled={form.isSaving}
+                className="absolute -top-1.5 -right-1.5 flex size-5 items-center justify-center rounded-full bg-black/70 text-xs leading-none text-white disabled:opacity-50"
+                onClick={() => form.photos.remove(photo.key)}
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div aria-live="polite">
+        {form.photos.message && <FieldError className="mt-1.5">{form.photos.message}</FieldError>}
       </div>
 
       <div className="mt-auto pt-0.5">
@@ -131,7 +185,7 @@ export default function BoothRegistrationForm({
           className="h-14 w-full rounded-[6px] text-lg font-medium"
           disabled={!form.canSubmit}
         >
-          부스 등록하기
+          {form.isSaving ? "등록 중…" : "부스 등록하기"}
         </Button>
       </div>
     </form>
