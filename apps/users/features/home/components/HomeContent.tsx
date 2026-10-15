@@ -18,6 +18,7 @@ import LocationConsentSheet from "@/features/valet/components/LocationConsentShe
 import PickupRequestSheets from "@/features/valet/components/PickupRequestSheets";
 import ValetNoticeSheet from "@/features/valet/components/ValetNoticeSheet";
 import { useArrivalDelayFlow } from "@/features/valet/hooks/useArrivalDelayFlow";
+import { useCancelArrivalFlow } from "@/features/valet/hooks/useCancelArrivalFlow";
 import { usePickupRequestFlow } from "@/features/valet/hooks/usePickupRequestFlow";
 
 import type { HomeActionKey } from "@/features/home/homeActions";
@@ -28,9 +29,11 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
   const merchantSearch = useMerchantSearchFlow();
   const pushPermissionBanner = usePushPermissionBanner();
   const pickupRequest = usePickupRequestFlow();
+  const cancelArrival = useCancelArrivalFlow();
   const arrivalDelay = useArrivalDelayFlow({ onStartArrival: merchantSearch.open });
   const actionHandlers: Partial<Record<HomeActionKey, () => void>> = {
     EXIT_REQUEST: pickupRequest.open,
+    CANCEL_ARRIVAL: cancelArrival.open,
     MERCHANT_SEARCH: merchantSearch.open,
     DELAY: arrivalDelay.open,
   };
@@ -111,6 +114,18 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         onClose={merchantSearch.close}
       />
       <PickupRequestSheets flow={pickupRequest} />
+      <ValetNoticeSheet
+        open={cancelArrival.isOpen}
+        title="도착 알림을 취소할까요?"
+        description="도착 알림을 받은 발렛 요원님께 취소했다고 알려요"
+        confirmLabel="도착 알림 취소하기"
+        pendingLabel="취소하는 중…"
+        closeLabel="닫기"
+        isPending={cancelArrival.isCancelling}
+        errorMessage={cancelArrival.errorMessage}
+        onConfirm={cancelArrival.confirm}
+        onClose={cancelArrival.close}
+      />
       <ValetNoticeSheet
         open={arrivalDelay.isArrivalRequiredOpen}
         title="도착 알림을 먼저 해주세요"
