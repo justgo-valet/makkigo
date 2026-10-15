@@ -176,7 +176,7 @@ export default function BoothRegistrationForm({
         {form.photos.message && <FieldError className="mt-1.5">{form.photos.message}</FieldError>}
       </div>
 
-      <div className="mt-auto pt-0.5">
+      <div className="mt-auto pt-6">
         {form.errorMessage && (
           <FieldError className="mb-3 text-center">{form.errorMessage}</FieldError>
         )}
