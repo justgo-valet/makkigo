@@ -54,6 +54,7 @@
 | `/makkigo/prod/users/IMAGE_BASE_URL` | `https://d2lnojrmgxqgrc.cloudfront.net` (이미지 CDN, 비밀값 아님) |
 | `/makkigo/prod/users/FIREBASE_SERVICE_ACCOUNT_JSON` | Firebase 서비스 계정 키 JSON 을 **한 줄로** (`jq -c . <키 파일>.json`), SecureString. 앱 푸시 발송용 |
 | `/makkigo/prod/users/KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 키 (업체 상세 지도). 요원 앱과 같은 키를 써도 됨. 카카오 콘솔에 `https://app.makkigo.com` 등록 필요. 없으면 지도 대신 안내 문구가 뜸 |
+| `/makkigo/prod/users/USERS_INTERNAL_JOB_TOKEN` | 정기 작업 컨테이너(`users-jobs`)가 고객 앱 내부 API 를 부를 때 쓰는 임의 값 (`openssl rand -hex 32`, 32바이트 이상), SecureString. 없으면 정기 작업이 아무것도 하지 않음 |
 | `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수). 같은 키로 카카오모빌리티 길찾기 · 카카오 로컬(주소 검색)도 호출 |
 | `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
@@ -168,7 +169,7 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | 첫 운영 배포 | ✅ 2026-10-09 (#58), 이후 #69 → [runbook.md](../operations/runbook.md) |
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
-| 정기 작업 (서버 cron) — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 정리 | 미정 |
+| 정기 작업 — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ 이 PR → [runbook.md](../operations/runbook.md#정기-정리-작업) |
 
 ## 배포하기
 

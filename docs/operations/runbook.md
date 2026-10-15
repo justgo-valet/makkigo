@@ -54,6 +54,26 @@ docker restart makkigo-users-1                 # 한 컨테이너 재시작
 
 새 변수를 추가할 때는 코드 · `.env.production.example` · [infrastructure.md](infrastructure.md) 목록도 함께 고칩니다.
 
+## 정기 정리 작업
+
+`users-jobs` 컨테이너가 **한 시간마다** 고객 앱 내부 API(`POST /api/internal/maintenance`)를 불러 아래 세 가지를 차례로 처리합니다. 하나가 실패해도 나머지는 돕니다.
+
+| 작업 | 지우는 것 | 남기는 것 |
+|---|---|---|
+| 탈퇴 회원 개인정보 | 탈퇴 30일이 지난 회원의 휴대폰 번호, 차량 정보, 고객 알림 내역(차량 번호가 들어 있음), 로그인 코드 · 리프레시 토큰 | 회원 행(탈퇴 표시), 동의 기록(5년), 발렛 이용 기록(5년, 차량 번호 포함) |
+| 로그인 기록 | 만료된 고객 리프레시 토큰, 폐기된 지 하루 지난 리프레시 토큰, 만료된 1회용 로그인 코드 | 쓸 수 있는 토큰 |
+| 위치 이용 기록 | 만든 지 6개월 지난 위치 이용 사실 확인자료 | 6개월 안의 기록 |
+
+탈퇴 즉시 지우는 것(소셜 연결 · 푸시 기기 · 위치 이용 기록)은 탈퇴 API 가 처리합니다. 요원 앱 토큰은 이 작업에 포함되지 않습니다.
+
+- 켜기: SSM `/makkigo/prod/users/USERS_INTERNAL_JOB_TOKEN` 에 `openssl rand -hex 32` 값을 넣고 다시 배포. 값이 없으면 컨테이너는 건너뛰었다는 로그만 남깁니다.
+- 결과 보기: `docker logs --since 24h makkigo-users-jobs-1` → `{"ok":true,"withdrawnUsers":{"purged":N,"remaining":0},"expiredAuthRecords":{...},"oldLocationUseLogs":N}`. 실패하면 `"ok":false` 와 `maintenance failed`, 실패한 작업은 `null`
+- 지울 대상 수만 보기(지우지 않음):
+  ```bash
+  docker exec makkigo-users-jobs-1 sh -c 'curl -sS -X POST -H "Authorization: Bearer $USERS_INTERNAL_JOB_TOKEN" -d "{\"dryRun\":true}" http://users:3001/api/internal/maintenance'
+  ```
+- 내부 API 는 외부에서 막혀 있습니다 (Caddy 가 `app.makkigo.com/api/internal/*` 를 403).
+
 ## 업체 이미지 cleanup
 
 cleanup은 DB에 기록된 ATTACHED · REVOKED staging key와 TOMBSTONED staging/final key만 처리합니다.
@@ -155,6 +175,17 @@ docker exec -i makkigo-postgres-1 sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POS
 2. 같은 키로 덮어썼으면 CloudFront `E37YXLP0UK5UIL` 에서 **무효화**(`/brands/*` 등) — 안 하면 최대 1일 옛 이미지가 보임
 
 새 브랜드 · 모델은 DB(`car_brands`, `car_models`)에 경로를 추가해야 화면에 나옵니다 (`packages/database/prisma/init/init.sql`).
+
+## 부스 사진 업로드 오류 복구
+
+부스 등록 로그에 `Booth creation outcome is ambiguous`, `Booth photo promotion may have completed after timeout`,
+`Failed to clean up booth photos` 중 하나가 남으면 `keys` 에 기록된 정확한 S3 키만 확인합니다. 승격/트랜잭션 결과가 불명확한 final 키는 로그
+시각에서 최소 1시간 기다린 뒤 DB에서 참조 여부를 확인합니다. `booth_photos.path` 에 하나라도 남아 있으면
+삭제하지 않습니다. DB 연결이나 조회에 실패하면 S3 객체를 그대로 둡니다.
+
+참조가 없는 키만 `aws s3 rm s3://makkigo-prod-image-apne2/<로그의 정확한 키>` 로 하나씩 지웁니다.
+`booths/final/*` 전체에 lifecycle 만료나 일괄 삭제를 설정하지 않습니다. 등록되지 않은 staging 객체는
+S3 lifecycle 규칙이 하루 뒤 지웁니다.
 
 ## 문제가 생겼을 때
 

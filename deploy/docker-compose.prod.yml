@@ -80,6 +80,30 @@ services:
       timeout: 10s
       retries: 3
       start_period: 2m
+  users-jobs:
+    image: curlimages/curl:8.11.1
+    init: true
+    restart: unless-stopped
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/users.env
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          if [ -n "$${USERS_INTERNAL_JOB_TOKEN:-}" ]; then
+            curl -sS --fail-with-body -m 300 -X POST \
+              -H "Authorization: Bearer $${USERS_INTERNAL_JOB_TOKEN}" \
+              -H "Content-Type: application/json" -d '{}' \
+              http://users:3001/api/internal/maintenance \
+              || echo "maintenance failed"
+            echo
+          else
+            echo "USERS_INTERNAL_JOB_TOKEN is not set; skipping maintenance"
+          fi
+          sleep 3600
+        done
+    depends_on:
+      users:
+        condition: service_healthy
     logging: *logging
 
   postgres:
