@@ -63,6 +63,13 @@ const createArrivalSession = async (
   return prisma.$transaction(async (tx) => {
     await lockPlateNumber(tx, vehicle.plateNumber);
 
+    const user = await tx.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { id: true },
+    });
+
+    if (!user) throw new Error("Withdrawn user cannot send an arrival notification");
+
     const activeSession = await tx.valetSession.findFirst({
       where: {
         plateNumber: vehicle.plateNumber,

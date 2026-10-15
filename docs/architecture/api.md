@@ -40,7 +40,7 @@
 | `GET /api/v1/users/me/profile` | 마이페이지 내 정보: 휴대폰 번호(`phoneNumber`), 차량 번호(`plateNumber`), 연동 계정(`socialAccounts`: 제공자 · 이메일), 선택 동의 상태(`consents`: `appPush` · `alimtalk` · `locationBasedService`) | ✅ | 이 PR |
 | `PATCH /api/v1/users/me/phone-number` | 휴대폰 번호 수정: `{ phoneNumber }` (하이픈 · 공백 허용, 숫자만 저장) → 204. 다른 회원(탈퇴 후 보관 중 포함) 번호면 409 `DUPLICATE_PHONE`, 형식 오류 400 | ✅ | 이 PR |
 | `PATCH /api/v1/users/me/vehicle` | 차량 번호 수정: `{ vehicleNumber }` → 204. 브랜드 · 모델은 그대로. 다른 회원 차량이면 409 `DUPLICATE_VEHICLE`, 진행 중인 발렛 세션(완료 · 취소 아님)이 있으면 409 `ACTIVE_SESSION_EXISTS`, 차량 없음 404 `VEHICLE_REQUIRED`, 형식 오류 400 | ✅ | 이 PR |
-| `DELETE /api/v1/users/me` | 회원 탈퇴 (푸시 기기도 삭제) | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
+| `DELETE /api/v1/users/me` | 회원 탈퇴 (푸시 기기도 삭제) → 204. 진행 중인 발렛 세션(도착 예정 · 주차 완료 · 출차 요청 · 출차 준비 중)이 있으면 409 `ACTIVE_VALET_SESSION` | ✅ | [#15](https://github.com/justgo-valet/makkigo/pull/15) |
 | `POST /api/v1/push-devices` | 앱 푸시 기기 등록: `{ token, platform: "IOS" \| "ANDROID" }`. 같은 토큰이 있으면 지금 회원으로 옮김 (204) | ✅ | 이 PR |
 | `DELETE /api/v1/push-devices` | 앱 푸시 기기 삭제: `{ token }` (내 기기만, 204). 로그아웃 때 부름 | ✅ | 이 PR |
 | `POST /api/v1/onboarding` | 휴대폰 번호 · 차량 저장 | ✅ | [#16](https://github.com/justgo-valet/makkigo/pull/16) |
