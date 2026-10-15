@@ -52,7 +52,6 @@ interface VehicleManagementProps {
   boothId: number;
   initialData: BoothValetSessionListResponse;
   initialDataUpdatedAt: number;
-  initialNotificationsEnabled: boolean;
   hasWorkTime: boolean;
   menu: MenuAccess;
 }
@@ -62,11 +61,10 @@ export default function VehicleManagement({
   boothId,
   initialData,
   initialDataUpdatedAt,
-  initialNotificationsEnabled,
   hasWorkTime,
   menu,
 }: Readonly<VehicleManagementProps>) {
-  const { sessions, completed, updatedAt, errorMessage } = useBoothValetSessions({
+  const { sessions, completed, notificationsEnabled, updatedAt, errorMessage } = useBoothValetSessions({
     staffId,
     boothId,
     initialData,
@@ -84,10 +82,7 @@ export default function VehicleManagement({
     onResponded: () => setResponseTarget(null),
   });
 
-  const notifications = useNotificationToggle({
-    boothId,
-    initialEnabled: initialNotificationsEnabled,
-  });
+  const notifications = useNotificationToggle({ staffId, boothId, enabled: notificationsEnabled });
   const [completeTarget, setCompleteTarget] = useState<BoothValetSession | null>(null);
   const completing = useCompletePickup({
     staffId,
@@ -115,7 +110,7 @@ export default function VehicleManagement({
       <AppHeader
         menu={menu}
         home
-        notificationsEnabled={notifications.enabled}
+        notificationsEnabled={notificationsEnabled}
         onBellClick={notifications.openSheet}
       />
 

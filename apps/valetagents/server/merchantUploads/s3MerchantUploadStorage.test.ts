@@ -89,6 +89,7 @@ describe("S3 merchant upload storage", () => {
     expect(send.mock.calls[0]?.[0]).toBeInstanceOf(HeadObjectCommand);
     expect(send.mock.calls[1]?.[0]).toBeInstanceOf(GetObjectCommand);
     expect((send.mock.calls[1]?.[0] as GetObjectCommand).input.Range).toBe("bytes=0-11");
+    expect((send.mock.calls[1]?.[0] as GetObjectCommand).input.IfMatch).toBe('"source"');
   });
 
   it("rejects mismatched metadata and signatures", async () => {
