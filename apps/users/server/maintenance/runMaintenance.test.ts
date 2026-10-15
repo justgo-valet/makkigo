@@ -20,7 +20,9 @@ describe("runMaintenance", () => {
 
   it("keeps running the other jobs and logs sanitized error codes when one fails", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    jobs.purgeWithdrawnUsers.mockRejectedValue(Object.assign(new Error("db down"), { code: "P1001" }));
+    jobs.purgeWithdrawnUsers.mockRejectedValue(
+      Object.assign(new Error("db down"), { code: "P1001" }),
+    );
     jobs.deleteExpiredAuthRecords.mockResolvedValue({ refreshTokens: 3, loginCodes: 1 });
     jobs.deleteOldLocationUseLogs.mockResolvedValue(4);
 
