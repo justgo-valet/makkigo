@@ -169,6 +169,17 @@ docker exec -i makkigo-postgres-1 sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POS
 
 새 브랜드 · 모델은 DB(`car_brands`, `car_models`)에 경로를 추가해야 화면에 나옵니다 (`packages/database/prisma/init/init.sql`).
 
+## 부스 사진 업로드 오류 복구
+
+부스 등록 로그에 `Booth creation outcome may be ambiguous` 또는 `Failed to clean up booth photos` 가
+남으면 `keys` 에 기록된 정확한 S3 키만 확인합니다. 승격/트랜잭션 결과가 불명확한 final 키는 로그
+시각에서 최소 1시간 기다린 뒤 DB에서 참조 여부를 확인합니다. `booth_photos.path` 에 하나라도 남아 있으면
+삭제하지 않습니다. DB 연결이나 조회에 실패하면 S3 객체를 그대로 둡니다.
+
+참조가 없는 키만 `aws s3 rm s3://makkigo-prod-image-apne2/<로그의 정확한 키>` 로 하나씩 지웁니다.
+`booths/final/*` 전체에 lifecycle 만료나 일괄 삭제를 설정하지 않습니다. 등록되지 않은 staging 객체는
+S3 lifecycle 규칙이 하루 뒤 지웁니다.
+
 ## 문제가 생겼을 때
 
 | 증상 | 확인 순서 |

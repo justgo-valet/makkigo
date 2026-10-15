@@ -5,6 +5,8 @@ import { Prisma, prisma } from "database";
 import { deriveOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
 
 import type { CreateBoothBody, CreateBoothResponse } from "@/libs/booth/contracts/create-booth";
+import type { StaffRole } from "@/libs/onboarding/contracts/status";
+import type { BoothAgentStatus } from "database";
 
 type CreateBoothFailure =
   | "AUTH_REQUIRED"
@@ -30,10 +32,33 @@ const isSerializationFailure = (error: unknown) => {
   );
 };
 
+const getCreationFailure = (staff: {
+  role: StaffRole | null;
+  boothMemberships: { status: BoothAgentStatus }[];
+} | null): CreateBoothFailure | null => {
+  if (!staff) return "AUTH_REQUIRED";
+  if (staff.role !== "VALET_AGENT") return "VALET_AGENT_REQUIRED";
+  return deriveOnboardingState(staff.role, staff.boothMemberships.map(({ status }) => status)) === "COMPLETE"
+    ? "ALREADY_ONBOARDED"
+    : null;
+};
+
+const getCreateBoothPreflightFailure = async (staffId: number): Promise<CreateBoothFailure | null> => {
+  const staff = await prisma.staff.findFirst({
+    where: { id: staffId, deletedAt: null },
+    select: {
+      role: true,
+      boothMemberships: { where: { booth: { deletedAt: null } }, select: { status: true } },
+    },
+  });
+  return getCreationFailure(staff);
+};
+
 const createInTransaction = async (
   transaction: Prisma.TransactionClient,
   staffId: number,
   body: CreateBoothBody,
+  photoPaths: string[],
 ): Promise<CreateBoothResult> => {
   const staff = await transaction.staff.findFirst({
     where: { id: staffId, deletedAt: null },
@@ -42,14 +67,8 @@ const createInTransaction = async (
       boothMemberships: { where: { booth: { deletedAt: null } }, select: { status: true } },
     },
   });
-  if (!staff) return { ok: false, reason: "AUTH_REQUIRED" };
-  if (staff.role !== "VALET_AGENT") return { ok: false, reason: "VALET_AGENT_REQUIRED" };
-
-  const state = deriveOnboardingState(
-    staff.role,
-    staff.boothMemberships.map(({ status }) => status),
-  );
-  if (state === "COMPLETE") return { ok: false, reason: "ALREADY_ONBOARDED" };
+  const failure = getCreationFailure(staff);
+  if (failure) return { ok: false, reason: failure };
 
   const booth = await transaction.booth.create({
     data: {
@@ -58,6 +77,7 @@ const createInTransaction = async (
       addressDetail: body.addressDetail,
       creatorId: staffId,
       agents: { create: { staffId, status: "APPROVED" } },
+      ...(photoPaths.length > 0 ? { photos: { create: photoPaths.map((path, sortOrder) => ({ path, sortOrder })) } } : {}),
     },
     select: { id: true },
   });
@@ -65,11 +85,11 @@ const createInTransaction = async (
   return { ok: true, value: booth };
 };
 
-const createBooth = async (staffId: number, body: CreateBoothBody): Promise<CreateBoothResult> => {
+const createBooth = async (staffId: number, body: CreateBoothBody, photoPaths: string[] = []): Promise<CreateBoothResult> => {
   for (let attempt = 0; attempt < MAX_TRANSACTION_ATTEMPTS; attempt += 1) {
     try {
       return await prisma.$transaction(
-        (transaction) => createInTransaction(transaction, staffId, body),
+        (transaction) => createInTransaction(transaction, staffId, body, photoPaths),
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
     } catch (error) {
@@ -80,5 +100,5 @@ const createBooth = async (staffId: number, body: CreateBoothBody): Promise<Crea
   return { ok: false, reason: "REQUEST_CONFLICT" };
 };
 
-export { createBooth };
+export { createBooth, getCreateBoothPreflightFailure };
 export type { CreateBoothFailure, CreateBoothResult };

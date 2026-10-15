@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { boothPhotoUploadMetadataSchema, MAX_BOOTH_PHOTOS } from "./photos";
+
 const BOOTH_NAME_MAX_LENGTH = 50;
 const BOOTH_ADDRESS_MAX_LENGTH = 200;
 const BOOTH_ADDRESS_DETAIL_MAX_LENGTH = 100;
@@ -17,6 +19,10 @@ const createBoothBodySchema = z
   })
   .strict();
 
+const createBoothRequestSchema = createBoothBodySchema.extend({
+  photoUploads: z.array(boothPhotoUploadMetadataSchema).max(MAX_BOOTH_PHOTOS).optional().default([]),
+}).strict();
+
 const createBoothResponseSchema = z.object({ id: z.number().int().positive() });
 
 export {
@@ -24,6 +30,7 @@ export {
   BOOTH_ADDRESS_MAX_LENGTH,
   BOOTH_NAME_MAX_LENGTH,
   createBoothBodySchema,
+  createBoothRequestSchema,
   createBoothResponseSchema,
 };
 export type CreateBoothBody = z.infer<typeof createBoothBodySchema>;
