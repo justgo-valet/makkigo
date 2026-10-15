@@ -5,7 +5,9 @@ import { formatArrivalDelay } from "@/libs/valet/arrivalDelay";
 
 import type { DelayArrivalErrorCode, DelayArrivalRequest } from "@/libs/valet/contracts/arrival";
 
-type DelayArrivalSessionResult = { ok: true } | { ok: false; reason: DelayArrivalErrorCode };
+type DelayArrivalSessionResult =
+  | { ok: true; notificationIds: number[] }
+  | { ok: false; reason: DelayArrivalErrorCode };
 
 const delayArrivalSession = async (
   userId: number,
@@ -34,7 +36,7 @@ const delayArrivalSession = async (
     });
     const place = session.merchant ? `${session.merchant.name} · ` : "";
 
-    await tx.notification.createMany({
+    const notifications = await tx.notification.createManyAndReturn({
       data: recipients.map(({ staffId }) => ({
         type: "ARRIVAL_DELAYED" as const,
         staffId,
@@ -42,9 +44,10 @@ const delayArrivalSession = async (
         title: "도착 지연",
         body: `${place}${session.plateNumber} 차량이 ${formatArrivalDelay(minutes)} 늦게 도착해요`,
       })),
+      select: { id: true },
     });
 
-    return { ok: true } as const;
+    return { ok: true, notificationIds: notifications.map(({ id }) => id) } as const;
   });
 
 export { delayArrivalSession };

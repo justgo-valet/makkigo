@@ -1,8 +1,5 @@
 import "server-only";
-import { ACTIVE_VALET_SESSION_STATUSES, prisma } from "database";
-
-import { calculateValetFee } from "@/server/valet/calculateValetFee";
-import { findFeePolicy } from "@/server/valet/findFeePolicy";
+import { ACTIVE_VALET_SESSION_STATUSES, calculateValetFee, findFeePolicy, prisma } from "database";
 
 import type { CurrentSession } from "@/libs/valet/contracts/currentSession";
 import type { Prisma } from "database";
@@ -43,6 +40,7 @@ const findSessionView = async (
     select: {
       id: true,
       status: true,
+      ticketVersionId: true,
       plateNumber: true,
       boothId: true,
       expectedArrivalAt: true,
@@ -66,7 +64,7 @@ const findSessionView = async (
   const needsFee = boothId !== null && parkedAt !== null && feeBaseTime !== null;
 
   const [feePolicy, waitingPickupCount, bankAccount] = await Promise.all([
-    needsFee ? findFeePolicy(boothId, feeBaseTime) : null,
+    needsFee ? findFeePolicy(prisma, boothId, feeBaseTime) : null,
     boothId === null
       ? null
       : prisma.valetSession.count({ where: { boothId, status: "PICKUP_REQUESTED" } }),
@@ -85,6 +83,7 @@ const findSessionView = async (
   return {
     id: session.id,
     status,
+    hasTicket: session.ticketVersionId !== null,
     plateNumber: session.plateNumber,
     merchantName: session.merchant?.name ?? null,
     boothName: session.booth?.name ?? null,

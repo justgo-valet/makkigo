@@ -19,6 +19,7 @@ docker ps                     # 컨테이너 상태
 | `makkigo-users-1` | 고객 앱 |
 | `makkigo-valetagents-1` | 요원 앱 |
 | `makkigo-merchant-upload-cleanup-1` | 업체 이미지 cleanup hourly runner (요원 앱과 같은 이미지) |
+| `makkigo-agent-notification-sync-1` | 요원 알림 자동 전환 runner, 1분마다 (요원 앱과 같은 이미지) |
 | `makkigo-postgres-1` | DB |
 
 ## 배포 · 되돌리기
@@ -32,6 +33,7 @@ docker ps                     # 컨테이너 상태
 - `dev → main` 을 **스쿼시로 머지하면 안 됩니다.** 이력이 갈라져 다음 반영 때 충돌합니다.
 - 되돌려도 **DB 마이그레이션은 되돌아가지 않습니다.** 옛 코드가 새 DB 구조에서 동작하는지 확인하고 되돌립니다.
 - 업체 이미지 cleanup 이 들어가기 전 이미지로 되돌리면 배포가 `makkigo-merchant-upload-cleanup-1` 을 내리고 띄우지 않습니다. runner 가 든 버전을 다시 배포하면 돌아옵니다. 되돌린 상태에서 손으로 `docker compose up -d` 를 하면 이 컨테이너가 다시 떠서 재시작을 반복합니다.
+- 요원 알림 자동 전환이 들어가기 전 이미지로 되돌리면 배포가 `makkigo-agent-notification-sync-1` 도 띄우지 않습니다(위 cleanup 과 같음).
 - 배포 결과 로그는 Actions 의 "EC2 배포" 단계에 출력됩니다.
 
 ## 로그 보기 · 재시작
@@ -79,6 +81,11 @@ cleanup은 DB에 기록된 ATTACHED · REVOKED staging key와 TOMBSTONED staging
 지난 등록 세션을 먼저 닫아(`EXPIRED`, 한 번에 100개까지) 그 사진을 TOMBSTONED로 넘깁니다.
 REVOKED · TOMBSTONED 행은 외부 요청의 늦은 완료를 찾도록 한 시간 뒤 한 번 더 지우고, 그 뒤로는
 다시 검사하지 않습니다(행은 보존). 삭제에는 ETag 조건을 붙이지 않습니다.
+
+티켓 이미지 cleanup은 만료된 RESERVED 행을 24시간 유예 후 staging에서 지우고 행을 제거합니다.
+COMPLETE 행은 presigned POST 재사용 기간이 지난 뒤 staging 삭제 성공까지 재시도합니다. `tickets/final/*`은 이 cleanup
+경로에서 삭제하지 않으므로 과거 발급 티켓의 immutable 자산은 유지됩니다. dry-run 응답의
+`ticketUploads.eligibleCount`로 대상 수를 확인합니다.
 
 ### 배포 전 필수 gate
 
@@ -168,6 +175,17 @@ docker exec -i makkigo-postgres-1 sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POS
 2. 같은 키로 덮어썼으면 CloudFront `E37YXLP0UK5UIL` 에서 **무효화**(`/brands/*` 등) — 안 하면 최대 1일 옛 이미지가 보임
 
 새 브랜드 · 모델은 DB(`car_brands`, `car_models`)에 경로를 추가해야 화면에 나옵니다 (`packages/database/prisma/init/init.sql`).
+
+## 부스 사진 업로드 오류 복구
+
+부스 등록 로그에 `Booth creation outcome is ambiguous`, `Booth photo promotion may have completed after timeout`,
+`Failed to clean up booth photos` 중 하나가 남으면 `keys` 에 기록된 정확한 S3 키만 확인합니다. 승격/트랜잭션 결과가 불명확한 final 키는 로그
+시각에서 최소 1시간 기다린 뒤 DB에서 참조 여부를 확인합니다. `booth_photos.path` 에 하나라도 남아 있으면
+삭제하지 않습니다. DB 연결이나 조회에 실패하면 S3 객체를 그대로 둡니다.
+
+참조가 없는 키만 `aws s3 rm s3://makkigo-prod-image-apne2/<로그의 정확한 키>` 로 하나씩 지웁니다.
+`booths/final/*` 전체에 lifecycle 만료나 일괄 삭제를 설정하지 않습니다. 등록되지 않은 staging 객체는
+S3 lifecycle 규칙이 하루 뒤 지웁니다.
 
 ## 문제가 생겼을 때
 

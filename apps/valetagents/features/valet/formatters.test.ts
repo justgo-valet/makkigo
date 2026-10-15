@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatPlateNumber, formatSessionLabel } from "./formatters";
+import { formatFeeBreakdown, formatPlateNumber, formatSessionLabel } from "./formatters";
 
 import type { BoothValetSession } from "./schemas/sessions";
 
@@ -14,6 +14,8 @@ const session = (fields: Partial<BoothValetSession>): BoothValetSession => ({
   expectedArrivalAt: null,
   arrivalDelayMinutes: null,
   parkedAt: null,
+  pickupRequestedAt: null,
+  fee: null,
   expectedPickupAt: null,
   ...fields,
 });
@@ -35,6 +37,18 @@ describe("valet session formatters", () => {
       formatSessionLabel(session({ status: "PARKED", parkedAt: "2026-10-14T01:05:00.000Z" }), NOW),
     ).toBe("1시간 55분");
     expect(formatSessionLabel(session({ status: "PICKUP_REQUESTED" }), NOW)).toBe("출차 요청");
+    expect(
+      formatFeeBreakdown({
+        baseMinutes: 60,
+        baseFee: 12000,
+        extraUnitMinutes: 30,
+        extraUnitFee: 5000,
+        usedMinutes: 70,
+        extraUnits: 1,
+        extraFee: 5000,
+        total: 17000,
+      }),
+    ).toBe("기본 요금 12,000원(1시간) + 추가 요금 5,000원");
     expect(
       formatSessionLabel(
         session({ status: "PICKUP_PREPARING", expectedPickupAt: "2026-10-14T03:05:00.000Z" }),

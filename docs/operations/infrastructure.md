@@ -14,6 +14,7 @@
                                                 ├ users        :3001       고객 앱  app.makkigo.com
                                                 ├ valetagents  :3000       요원 앱  valet.makkigo.com
                                                 ├ merchant-upload-cleanup  내부 hourly runner (포트 없음)
+                                                ├ agent-notification-sync  내부 1분 runner (포트 없음)
                                                 └ postgres     :5432       DB (허용 IP 만)
 GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
               └─OIDC + SSM 명령──▶ EC2 (deploy.sh)
@@ -31,7 +32,7 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 | 디스크 | EBS 20GB gp3, 스왑 2GB (`/swapfile`) |
 | 탄력적 IP | `13.209.92.174` |
 | 서버 파일 | `/opt/makkigo/deploy` (배포 때 Actions 가 덮어씀), `/opt/makkigo/env` (SSM 에서 꺼낸 env 파일, 권한 600) |
-| IAM 역할 | `makkigo-prod-ec2` — SSM 연결(`AmazonSSMManagedInstanceCore`) + `/makkigo/prod/*` 파라미터 읽기 + 업체 사진 S3(`merchants/staging/*` · `merchants/final/*`) |
+| IAM 역할 | `makkigo-prod-ec2` — SSM 연결(`AmazonSSMManagedInstanceCore`) + `/makkigo/prod/*` 파라미터 읽기 + 업체 · 부스 · 티켓 사진 S3(`merchants/*` · `booths/staging/*` · `booths/final/*` · `tickets/staging/*` · `tickets/final/*`) |
 
 **이미지는 ARM(`linux/arm64`) 전용**입니다. x86 서버로 옮기면 빌드 설정(`deploy.yml` 의 러너 · 플랫폼)도 바꿔야 합니다.
 
@@ -64,8 +65,8 @@ GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
 | 경로 | 개수 | 이름 |
 |---|---|---|
 | `postgres/` | 3 | `POSTGRES_USER` `POSTGRES_PASSWORD` `POSTGRES_DB` |
-| `users/` | 14 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `IMAGE_BASE_URL` `FIREBASE_SERVICE_ACCOUNT_JSON` `KAKAO_MAP_APP_KEY` `USERS_INTERNAL_JOB_TOKEN` `KAKAO_REST_API_KEY` `KAKAO_CLIENT_SECRET` `GOOGLE_CLIENT_ID` `GOOGLE_CLIENT_SECRET` `APPLE_SERVICES_ID` `NAVER_CLIENT_ID` `NAVER_CLIENT_SECRET` |
-| `valetagents/` | 20 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `OAUTH_CALLBACK_ORIGIN` `APP_CALLBACK_URL` `AUTH_COOKIE_DOMAIN` + 소셜 7개 + `KAKAO_MAP_APP_KEY` + 업체 이미지/cleanup 6개(`AWS_REGION` `S3_IMAGE_BUCKET` `IMAGE_BASE_URL` `MERCHANT_UPLOAD_CLEANUP_TOKEN` `MERCHANT_UPLOAD_CLEANUP_ENABLED` `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL`) |
+| `users/` | 17 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `IMAGE_BASE_URL` `FIREBASE_SERVICE_ACCOUNT_JSON` `KAKAO_MAP_APP_KEY` `USERS_INTERNAL_JOB_TOKEN` `KAKAO_REST_API_KEY` `KAKAO_CLIENT_SECRET` `GOOGLE_CLIENT_ID` `GOOGLE_CLIENT_SECRET` `APPLE_SERVICES_ID` `APPLE_TEAM_ID` `APPLE_KEY_ID` `APPLE_PRIVATE_KEY` `NAVER_CLIENT_ID` `NAVER_CLIENT_SECRET` |
+| `valetagents/` | 22 | `DATABASE_URL` `AUTH_JWT_SECRET` `PUBLIC_URL` `OAUTH_CALLBACK_ORIGIN` `APP_CALLBACK_URL` `AUTH_COOKIE_DOMAIN` + 소셜 7개 + `KAKAO_MAP_APP_KEY` + 업체 · 부스 · 티켓 이미지/cleanup 6개(`AWS_REGION` `S3_IMAGE_BUCKET` `IMAGE_BASE_URL` `MERCHANT_UPLOAD_CLEANUP_TOKEN` `MERCHANT_UPLOAD_CLEANUP_ENABLED` `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL`) + 알림 2개(`FIREBASE_SERVICE_ACCOUNT_JSON` `AGENT_NOTIFICATION_SYNC_TOKEN`) |
 | `deploy/` | 2 | `GHCR_USERNAME` `GHCR_TOKEN` (`read:packages` 만 있는 GitHub 토큰) |
 
 ### 이미지 CDN
@@ -80,11 +81,12 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 
 ### 업체 이미지 업로드 IAM · CORS · 버킷 정책
 
-| 항목 | 상태 (2026-10-13) |
+| 항목 | 상태 |
 |---|---|
 | 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `https://valet.makkigo.com` 의 POST 가 허용되는 것을 확인 |
-| EC2 역할의 S3 권한 | **적용 확인 안 됨** — `deploy/aws/setup-iam.sh` 가 아래 권한을 인라인 정책 `makkigo-prod-merchant-images` 로 붙임. 이 정책이 생기기 전에 만든 역할에는 없으므로, 운영에 올리기 전에 스크립트를 다시 실행해야 업로드가 됨 |
-| staging 을 CloudFront 로 읽지 못하게 막기 | 적용됨 — staging 키는 CloudFront 에서 403, final 키와 기존 이미지는 200, 앱의 직접 읽기는 그대로인 것을 확인 (아래 "staging 비공개") |
+| EC2 역할의 S3 권한 | 적용됨 — 운영 역할 정책이 `booths/staging/*` · `booths/final/*` 쓰기를 허용하는 것을 확인. `deploy/aws/setup-iam.sh` 는 업체 · 부스 · 티켓 경로를 포함 |
+| CloudFront staging 차단 | 업체 · 부스 staging 은 403 확인됨. **티켓 staging 은 미검증** — 공개 전 `tickets/staging/*` Deny 적용 및 URL 403 확인 필요 (아래 "staging 비공개") |
+| 부스 staging lifecycle | 활성화됨 — `booths/staging/` 객체는 업로드 후 1일 만료 |
 
 EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain을 사용하며, 아래 prefix 밖은
 거부합니다. 버킷 이름은 `setup-iam.sh` 의 `IMAGE_BUCKET`(기본 `makkigo-prod-image-apne2`)으로 바꿉니다.
@@ -97,13 +99,18 @@ EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain
     "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
     "Resource": [
       "arn:aws:s3:::makkigo-prod-image-apne2/merchants/staging/*",
-      "arn:aws:s3:::makkigo-prod-image-apne2/merchants/final/*"
+      "arn:aws:s3:::makkigo-prod-image-apne2/merchants/final/*",
+      "arn:aws:s3:::makkigo-prod-image-apne2/tickets/staging/*",
+      "arn:aws:s3:::makkigo-prod-image-apne2/booths/staging/*",
+      "arn:aws:s3:::makkigo-prod-image-apne2/booths/final/*",
+      "arn:aws:s3:::makkigo-prod-image-apne2/tickets/final/*"
     ]
   }]
 }
 ```
 
-- 브라우저 presigned POST는 `merchants/staging/{staffId}/{sessionId}/...`에만 발급합니다.
+- 브라우저 presigned POST는 `merchants/staging/{staffId}/{sessionId}/...` 또는
+  `booths/staging/{staffId}/{uploadId}...` 또는 `tickets/staging/{staffId}/{merchantId}/...` 에만 발급합니다. 검증된 티켓 이미지는 `tickets/final/...`로 복사합니다.
 - final write는 서버 conditional CopyObject만 허용합니다. 브라우저/IAM에 final PutObject를
   허용하지 않는 별도 bucket policy 검증이 release gate입니다.
 - 앱은 Head/Get range 검증과 조건부 copy, 삭제에 같은 `s3:GetObject`/`DeleteObject` 권한을
@@ -121,18 +128,22 @@ CORS 는 인증 · 쓰기 권한을 주지 않습니다. 2026-10-13 에 로컬 �
 #### staging 비공개
 
 버킷은 private 이지만 CloudFront 가 버킷 전체를 읽을 수 있어, 검증 전 업로드
-(`merchants/staging/*`)도 키를 알면 `IMAGE_BASE_URL` 로 열렸습니다(2026-10-13 확인: staging 키가
-CloudFront 에서 200). 업체 관리자로 가입한 사람이 이미지로 표시만 한 임의의 파일을 올려 공개 주소를
-얻을 수 있어, 같은 날 버킷 정책에 아래 Deny 를 더했습니다. 버킷 정책을 다시 만들 때는 `Principal` 과
+(`merchants/staging/*`, `booths/staging/*`, `tickets/staging/*`)도 키를 알면 `IMAGE_BASE_URL` 로 열릴 수 있습니다.
+업체 · 부스 staging 은 403 확인됨. 티켓 이미지 공개 전에는 `tickets/staging/*` 도 Deny 정책에 추가하고 URL 403 을 확인해야 합니다. 버킷 정책을 다시 만들 때는 `Principal` 과
 `Condition` 을 CloudFront Allow 문의 것과 같게 둡니다(아래는 OAC 일 때, OAI 면 그 OAI 의 ARN).
+티켓 이미지 공개 전에는 `tickets/staging/*` 항목을 운영 버킷 정책에 반영하고 해당 URL 이 403 인지 확인해야 합니다.
 
 ```json
 {
-  "Sid": "DenyCloudFrontReadOfMerchantStaging",
+  "Sid": "DenyCloudFrontReadOfUnvalidatedImages",
   "Effect": "Deny",
   "Principal": { "Service": "cloudfront.amazonaws.com" },
   "Action": "s3:GetObject",
-  "Resource": "arn:aws:s3:::makkigo-prod-image-apne2/merchants/staging/*",
+  "Resource": [
+    "arn:aws:s3:::makkigo-prod-image-apne2/merchants/staging/*",
+    "arn:aws:s3:::makkigo-prod-image-apne2/booths/staging/*",
+    "arn:aws:s3:::makkigo-prod-image-apne2/tickets/staging/*"
+  ],
   "Condition": {
     "StringEquals": { "AWS:SourceArn": "arn:aws:cloudfront::<계정 ID>:distribution/E37YXLP0UK5UIL" }
   }
@@ -142,8 +153,10 @@ CloudFront 에서 200). 업체 관리자로 가입한 사람이 이미지로 표
 앱은 IAM 자격 증명으로 직접 읽으므로 이 Deny 의 영향을 받지 않습니다. 확인 방법:
 
 ```bash
-# 사진을 올리기만 한 뒤(등록 전) 그 staging 키 — 403 이어야 함
+# 업체 사진 staging key — 403 이어야 함
 curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/merchants/staging/<키>
+# 부스 staging Deny 적용 후 — 403 이어야 함
+curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/booths/staging/<키>
 # 등록이 끝난 사진의 final 키 — 200 이어야 함
 curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/merchants/final/<키>
 ```

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateValetFee } from "./calculateValetFee";
+import { calculateValetFee } from "./valetFee";
 
 const POLICY = { baseMinutes: 60, baseFee: 12000, extraUnitMinutes: 30, extraUnitFee: 5000 };
 const PARKED_AT = new Date("2026-10-12T10:00:00+09:00");

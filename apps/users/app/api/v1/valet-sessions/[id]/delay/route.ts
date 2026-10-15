@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { pushStaffNotifications } from "@makkigo/push";
+import { after, NextResponse } from "next/server";
 
 import { delayArrivalRequestSchema, valetSessionIdSchema } from "@/libs/valet/contracts/arrival";
 import { getCurrentUserId } from "@/server/auth/getCurrentUserId";
@@ -51,6 +52,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         { status: ERROR_STATUSES[result.reason] },
       );
     }
+
+    after(() => pushStaffNotifications(result.notificationIds));
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {

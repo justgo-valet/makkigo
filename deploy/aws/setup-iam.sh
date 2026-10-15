@@ -74,7 +74,7 @@ else
 fi
 aws iam put-role-policy --role-name "$DEPLOY_ROLE" --policy-name ssm-deploy --policy-document file:///tmp/deploy-policy.json
 
-echo "== 3. EC2 역할 (SSM 연결 + /makkigo/prod/* 읽기 + 업체 사진 S3)"
+echo "== 3. EC2 역할 (SSM 연결 + /makkigo/prod/* 읽기 + 업체 · 티켓 · 부스 이미지 S3)"
 cat >/tmp/ec2-params-policy.json <<JSON
 {
   "Version": "2012-10-17",
@@ -93,7 +93,16 @@ cat >/tmp/ec2-merchant-images-policy.json <<JSON
     "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
     "Resource": [
       "arn:aws:s3:::${IMAGE_BUCKET}/merchants/staging/*",
-      "arn:aws:s3:::${IMAGE_BUCKET}/merchants/final/*"
+      "arn:aws:s3:::${IMAGE_BUCKET}/merchants/final/*",
+      "arn:aws:s3:::${IMAGE_BUCKET}/tickets/staging/*",
+      "arn:aws:s3:::${IMAGE_BUCKET}/tickets/final/*"
+    ]
+  }, {
+    "Effect": "Allow",
+    "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+    "Resource": [
+      "arn:aws:s3:::${IMAGE_BUCKET}/booths/staging/*",
+      "arn:aws:s3:::${IMAGE_BUCKET}/booths/final/*"
     ]
   }]
 }

@@ -17,6 +17,7 @@ model Staff {
   createdBooths    Booth[]      @relation("BoothCreator")
   merchants        Merchant[]
   merchantRegistrationSessions MerchantRegistrationSession[]
+  ticketImageUploads            TicketImageUpload[]
 
   parkedSessions    ValetSession[] @relation("SessionParkedBy")
   respondedSessions ValetSession[] @relation("SessionRespondedBy")

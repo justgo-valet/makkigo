@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 
 import { SocialAuthError } from "./errors";
 import { oauthProviders } from "./oauth";
+import { exchangeAppleCodeForRefreshToken } from "./oauth/apple-token";
 import { readOAuthState, signOAuthState } from "./oauth/state";
 import { createRandomToken } from "./tokens";
 import { findOrCreateUserBySocialIdentity } from "./user-social-account";
@@ -72,5 +73,17 @@ export const completeUserOAuth = async (input: {
     throw new SocialAuthError();
   }
 
-  return findOrCreateUserBySocialIdentity(identity);
+  const providerRefreshToken =
+    identity.provider === "APPLE" && input.params.code
+      ? await exchangeAppleCodeForRefreshToken(input.params.code, input.redirectUri).catch(
+          (error: unknown) => {
+            console.warn("Failed to exchange Apple authorization code", {
+              errorName: error instanceof Error ? error.name : "UnknownError",
+            });
+            return null;
+          },
+        )
+      : null;
+
+  return findOrCreateUserBySocialIdentity(identity, providerRefreshToken);
 };

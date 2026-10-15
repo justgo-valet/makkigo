@@ -1,12 +1,11 @@
 import "server-only";
-import { prisma } from "database";
-
-import { calculateValetFee } from "@/server/valet/calculateValetFee";
-import { findFeePolicy } from "@/server/valet/findFeePolicy";
+import { calculateValetFee, findFeePolicy, prisma } from "database";
 
 import type { PickupRequestErrorCode } from "@/libs/valet/contracts/pickupRequest";
 
-type RequestPickupResult = { ok: true } | { ok: false; reason: PickupRequestErrorCode };
+type RequestPickupResult =
+  | { ok: true; notificationIds: number[] }
+  | { ok: false; reason: PickupRequestErrorCode };
 
 const getNotParkedReason = (status: string): PickupRequestErrorCode => {
   switch (status) {
@@ -46,7 +45,7 @@ const requestPickup = async (
 
     if (boothId === null) return { ok: false, reason: "NO_BOOTH" } as const;
 
-    const feePolicy = await findFeePolicy(boothId, now, tx);
+    const feePolicy = await findFeePolicy(tx, boothId, now);
     const baseFee =
       feePolicy && parkedAt ? calculateValetFee(feePolicy, parkedAt, now).total : null;
 
@@ -68,7 +67,7 @@ const requestPickup = async (
     });
     const place = session.merchant ? `${session.merchant.name} · ` : "";
 
-    await tx.notification.createMany({
+    const notifications = await tx.notification.createManyAndReturn({
       data: agents.map(({ staffId }) => ({
         type: "PICKUP_REQUESTED" as const,
         staffId,
@@ -76,9 +75,10 @@ const requestPickup = async (
         title: "출차 요청",
         body: `${place}${session.plateNumber} 차량의 출차 요청이 왔어요`,
       })),
+      select: { id: true },
     });
 
-    return { ok: true } as const;
+    return { ok: true, notificationIds: notifications.map(({ id }) => id) } as const;
   });
 
 export { requestPickup };
