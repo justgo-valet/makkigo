@@ -30,10 +30,11 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
   const pushPermissionBanner = usePushPermissionBanner();
   const pickupRequest = usePickupRequestFlow();
   const cancelArrival = useCancelArrivalFlow();
-  const arrivalDelay = useArrivalDelayFlow({ onStartArrival: merchantSearch.open });
+  const arrivalDelay = useArrivalDelayFlow({ onStartArrival: merchantSearch.startArrival });
   const actionHandlers: Partial<Record<HomeActionKey, () => void>> = {
     EXIT_REQUEST: pickupRequest.open,
     CANCEL_ARRIVAL: cancelArrival.open,
+    ARRIVAL: merchantSearch.startArrival,
     MERCHANT_SEARCH: merchantSearch.open,
     DELAY: arrivalDelay.open,
   };
@@ -96,6 +97,15 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         onViewMerchant={merchantSearch.viewMerchant}
         onBackToList={merchantSearch.backToList}
         onChooseMerchant={merchantSearch.chooseMerchant}
+      />
+      <ValetNoticeSheet
+        open={merchantSearch.isMerchantRequiredOpen}
+        title="업체가 선택되지 않았어요"
+        description="업체 검색을 하시겠어요?"
+        confirmLabel="업체 검색하기"
+        closeLabel="나중에 할게요"
+        onConfirm={merchantSearch.open}
+        onClose={merchantSearch.close}
       />
       <ArrivalConfirmSheet
         open={merchantSearch.isArrivalOpen}
