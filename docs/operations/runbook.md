@@ -20,6 +20,7 @@ docker ps                     # 컨테이너 상태
 | `makkigo-valetagents-1` | 요원 앱 |
 | `makkigo-merchant-upload-cleanup-1` | 업체 이미지 cleanup hourly runner (요원 앱과 같은 이미지) |
 | `makkigo-agent-notification-sync-1` | 요원 알림 자동 전환 runner, 1분마다 (요원 앱과 같은 이미지) |
+| `makkigo-users-jobs-1` | 고객 앱 정기 정리 작업 (curl 이미지, 매시간 내부 API 호출) → [정기 정리 작업](#정기-정리-작업) |
 | `makkigo-postgres-1` | DB |
 
 ## 배포 · 되돌리기
