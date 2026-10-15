@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import type { PrismaClient } from "database";
 import type { getCurrentTicket as GetCurrentTicket } from "./getCurrentTicket";
+import type { PrismaClient } from "database";
 
 const TEST_DATABASE_NAME_PATTERN = /(?:^|[_-])test(?:$|[_-])/i;
 
@@ -67,7 +67,12 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integra
       select: { versions: { select: { id: true }, orderBy: { id: "asc" } } },
     });
     const pinnedSession = await prisma.valetSession.create({
-      data: { userId: user.id, ticketVersionId: ticket.versions[0].id, plateNumber: `12가${suffix.slice(-4)}`, status: "PARKED" },
+      data: {
+        userId: user.id,
+        ticketVersionId: ticket.versions[0].id,
+        plateNumber: `12가${suffix.slice(-4)}`,
+        status: "PARKED",
+      },
       select: { id: true },
     });
     const newerTicketlessSession = await prisma.valetSession.create({
@@ -79,10 +84,20 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integra
       select: { id: true },
     });
     const pinnedUserSession = await prisma.valetSession.create({
-      data: { userId: pinnedUser.id, ticketVersionId: ticket.versions[0].id, plateNumber: `78라${suffix.slice(-4)}`, status: "PARKED" },
+      data: {
+        userId: pinnedUser.id,
+        ticketVersionId: ticket.versions[0].id,
+        plateNumber: `78라${suffix.slice(-4)}`,
+        status: "PARKED",
+      },
       select: { id: true },
     });
-    fixtureIds.sessions.push(pinnedSession.id, newerTicketlessSession.id, unrelatedSession.id, pinnedUserSession.id);
+    fixtureIds.sessions.push(
+      pinnedSession.id,
+      newerTicketlessSession.id,
+      unrelatedSession.id,
+      pinnedUserSession.id,
+    );
 
     await expect(getCurrentTicket(user.id)).resolves.toBeNull();
     await expect(getCurrentTicket(unrelatedUser.id)).resolves.toBeNull();

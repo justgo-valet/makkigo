@@ -1,8 +1,8 @@
 "use client";
 
 import { TicketRenderer } from "@makkigo/ticket-design";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import { useLayout } from "@/stores/layout";
 
@@ -17,17 +17,25 @@ const useTicketHeader = () => {
       if (window.history.length > 1) router.back();
       else router.replace("/");
     };
-    setHeaderConfiguration({ showBackButton: true, backButtonHandler: goBack, logoPosition: "hidden" });
+    setHeaderConfiguration({
+      showBackButton: true,
+      backButtonHandler: goBack,
+      logoPosition: "hidden",
+    });
     return () => setHeaderConfiguration({});
   }, [router, setHeaderConfiguration]);
 };
 
-export default function TicketContent({ design, imageBaseUrl }: Readonly<{
+export default function TicketContent({
+  design,
+  imageBaseUrl,
+}: Readonly<{
   design: TicketDesign;
   imageBaseUrl: string;
 }>) {
   useTicketHeader();
-  const resolveAssetUrl = (path: string) => new URL(path, imageBaseUrl.endsWith("/") ? imageBaseUrl : `${imageBaseUrl}/`).toString();
+  const resolveAssetUrl = (path: string) =>
+    new URL(path, imageBaseUrl.endsWith("/") ? imageBaseUrl : `${imageBaseUrl}/`).toString();
 
   return (
     <div className="flex h-full items-center justify-center overflow-y-auto px-1 pb-6">
