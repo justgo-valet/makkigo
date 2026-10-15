@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
 
 import { z } from "zod";
+import { prisma } from "database";
 
 import { apiError, privateJson } from "@/server/common/apiResponse";
 import { hasInternalToken } from "@/server/common/internalToken";
 import { createMerchantUploadCleanupService } from "@/server/merchantUploads/cleanupMerchantUploads";
 import { prismaMerchantUploadCleanupRepository } from "@/server/merchantUploads/prismaMerchantUploadCleanupRepository";
 import { createS3MerchantUploadStorage } from "@/server/merchantUploads/s3MerchantUploadStorage";
+import { cleanupExpiredTicketUploads } from "@/server/ticket/cleanupExpiredTicketUploads";
 
 import type { NextRequest } from "next/server";
 
@@ -42,13 +44,29 @@ export async function POST(request: NextRequest) {
       storage,
       createClaimId: randomUUID,
     });
-    return privateJson(
-      await cleanup({
+    const [merchantUploads, ticketUploads] = await Promise.all([
+      cleanup({
         dryRun: body.data.dryRun,
         batchSize: body.data.batchSize,
         signal: request.signal,
       }),
-    );
+      cleanupExpiredTicketUploads(
+        { dryRun: body.data.dryRun, batchSize: body.data.batchSize },
+        {
+          database: prisma,
+          storage,
+          now: () => new Date(),
+        },
+      ),
+    ]);
+    return privateJson({
+      ...merchantUploads,
+      claimed: merchantUploads.claimed + ticketUploads.claimed,
+      cleaned: merchantUploads.cleaned + ticketUploads.cleaned,
+      failed: merchantUploads.failed + ticketUploads.failed,
+      partial: merchantUploads.partial || ticketUploads.partial,
+      ticketUploads,
+    });
   } catch (error) {
     console.error("Merchant upload cleanup failed", {
       errorName: error instanceof Error ? error.name : "UnknownError",

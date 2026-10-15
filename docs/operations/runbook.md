@@ -82,6 +82,11 @@ cleanup은 DB에 기록된 ATTACHED · REVOKED staging key와 TOMBSTONED staging
 REVOKED · TOMBSTONED 행은 외부 요청의 늦은 완료를 찾도록 한 시간 뒤 한 번 더 지우고, 그 뒤로는
 다시 검사하지 않습니다(행은 보존). 삭제에는 ETag 조건을 붙이지 않습니다.
 
+티켓 이미지 cleanup은 만료된 RESERVED 행을 24시간 유예 후 staging에서 지우고 행을 제거합니다.
+COMPLETE 행은 presigned POST 재사용 기간이 지난 뒤 staging 삭제 성공까지 재시도합니다. `tickets/final/*`은 이 cleanup
+경로에서 삭제하지 않으므로 과거 발급 티켓의 immutable 자산은 유지됩니다. dry-run 응답의
+`ticketUploads.eligibleCount`로 대상 수를 확인합니다.
+
 ### 배포 전 필수 gate
 
 1. 실제 운영 on-call 담당자와 `MERCHANT_UPLOAD_CLEANUP_ALERT_WEBHOOK_URL` 수신 채널 기록

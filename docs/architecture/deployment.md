@@ -184,7 +184,7 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 2. OIDC 로 AWS 배포용 역할을 맡음 (AWS 접속 키 없음, **main 브랜치에서만** 맡을 수 있음)
 3. SSM 명령으로 EC2 에 `deploy/` 파일을 보내고 `deploy.sh` 실행 → 결과 로그를 Actions 에 출력
 
-업체 이미지 cleanup runner는 요원 앱과 **같은 이미지**를 사용합니다. 외부 포트는 없고 내부
+업체 이미지 cleanup runner는 요원 앱과 **같은 이미지**를 사용합니다. 같은 sweep에서 만료된 RESERVED 티켓 업로드의 staging 객체와 행을 만료 후 24시간 유예해 정리하고, COMPLETE 행은 presigned POST 재사용 기간 종료 후 staging 객체를 정리합니다. COMPLETE 행과 `tickets/final/*` 자산은 티켓 버전이 참조할 수 있어 보존합니다. 외부 포트는 없고 내부
 `/api/internal/merchant-uploads/cleanup`만 bearer token으로 호출합니다. Caddy는 이 경로를
 공개 요청에서 403으로 차단합니다. 배포는 Caddy validate/reload와 runner heartbeat 확인이
 성공하지 않으면 완료되지 않습니다. one-off dry-run도 배포 때 돌리지만 cleanup이 켜져 있을 때만
@@ -206,7 +206,7 @@ dry-run 확인도 건너뜁니다.
    ```bash
    EC2_INSTANCE_ID=i-0b8a5131b7af49a02 bash setup-iam.sh
    ```
-   GitHub OIDC 공급자, 배포용 역할 `makkigo-github-deploy`(이 인스턴스에 SSM 명령만), EC2 역할(SSM 연결 + `/makkigo/prod/*` 읽기 + 업체 사진 S3 `merchants/staging/*` · `merchants/final/*`)을 만들고 인스턴스에 연결합니다. 다시 실행해도 안전합니다. 마지막에 GitHub Secrets 값이 출력됩니다.
+   GitHub OIDC 공급자, 배포용 역할 `makkigo-github-deploy`(이 인스턴스에 SSM 명령만), EC2 역할(SSM 연결 + `/makkigo/prod/*` 읽기 + 업체 · 티켓 사진 S3 `merchants/*` · `tickets/staging/*` · `tickets/final/*`)을 만들고 인스턴스에 연결합니다. 다시 실행해도 안전합니다. 마지막에 GitHub Secrets 값이 출력됩니다.
 2. **서버 준비** — 같은 CloudShell 에서 `deploy/aws/bootstrap-server.sh` 실행 (Docker · compose · AWS CLI 설치, `/opt/makkigo` 생성)
 3. **GHCR 토큰** — GitHub → Settings → Developer settings → Personal access tokens (classic), 권한 `read:packages` 만. CloudShell 에서 SSM 에 저장
    ```bash
