@@ -31,8 +31,16 @@ const boothValetSessionSchema = z.object({
   expectedPickupAt: z.string().datetime().nullable(),
 });
 
+const completedValetSessionSchema = z.object({
+  id: z.number().int().positive(),
+  plateNumber: z.string(),
+  carImageUrl: z.string().url(),
+});
+
 const boothValetSessionListResponseSchema = z.object({
   items: z.array(boothValetSessionSchema),
+  completed: z.array(completedValetSessionSchema),
+  notificationsEnabled: z.boolean(),
 });
 
 export {
@@ -42,4 +50,5 @@ export {
 };
 export type BoothValetSession = z.infer<typeof boothValetSessionSchema>;
 export type ValetFee = z.infer<typeof valetFeeSchema>;
+export type CompletedValetSession = z.infer<typeof completedValetSessionSchema>;
 export type BoothValetSessionListResponse = z.infer<typeof boothValetSessionListResponseSchema>;

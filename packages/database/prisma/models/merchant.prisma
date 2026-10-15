@@ -17,6 +17,7 @@ model Merchant {
     tickets       Ticket[]
     valetSessions ValetSession[]
     registrationSession MerchantRegistrationSession?
+    ticketImageUploads  TicketImageUpload[]
 
     @@index([name])
     @@index([adminId, deletedAt])

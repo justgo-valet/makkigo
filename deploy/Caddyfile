@@ -13,7 +13,7 @@
 
 {$VALET_DOMAIN} {
 	encode zstd gzip
-	handle /api/internal/merchant-uploads/* {
+	handle /api/internal/* {
 		respond 403
 	}
 	handle {

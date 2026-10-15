@@ -27,6 +27,7 @@ const bankAccountSchema = z.object({
 const currentSessionSchema = z.object({
   id: z.number().int(),
   status: z.enum(CURRENT_SESSION_STATUSES),
+  hasTicket: z.boolean(),
   plateNumber: z.string(),
   merchantName: z.string().nullable(),
   boothName: z.string().nullable(),
