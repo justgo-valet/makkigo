@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import type {
   TicketDesign,
@@ -6,6 +6,7 @@ import type {
   TicketLayer,
   TicketShapePreset,
 } from "./ticketDesign";
+import { ticketEditorShapePresets } from "./ticketDesign";
 
 type ResolveTicketAssetUrl = (assetPath: string) => string;
 type TicketImageAltResolver = (layer: TicketImageLayer) => string;
@@ -16,6 +17,7 @@ type TicketRendererProps = {
   className?: string;
   ariaLabel?: string;
   resolveImageAlt?: TicketImageAltResolver;
+  renderLayer?: (layer: TicketLayer, style: CSSProperties) => ReactNode;
 };
 
 const waveClipPath =
@@ -29,6 +31,19 @@ const shapeStyles: Record<TicketShapePreset, CSSProperties> = {
       "polygon(0 0, 100% 0, 100% 40%, 96% 50%, 100% 60%, 100% 100%, 0 100%, 0 60%, 4% 50%, 0 40%)",
   },
   WAVE: { clipPath: waveClipPath },
+  ROUND_RECT: { borderRadius: "max(4px, 3%)" },
+  SIDE_NOTCH: {
+    borderRadius: "max(4px, 3%)",
+    maskImage: "radial-gradient(ellipse 13.33% 11.43% at 100% 50%, transparent 98%, #000 100%)",
+  },
+  BOTTOM_NOTCHES: {
+    maskImage: "radial-gradient(ellipse 9% 6.43% at 0% 74%, transparent 98%, #000 100%), radial-gradient(ellipse 9% 6.43% at 100% 74%, transparent 98%, #000 100%)",
+    maskComposite: "intersect",
+  },
+  STUB_NOTCHES: {
+    maskImage: "radial-gradient(ellipse 6.43% 9% at 74% 0%, transparent 98%, #000 100%), radial-gradient(ellipse 6.43% 9% at 74% 100%, transparent 98%, #000 100%)",
+    maskComposite: "intersect",
+  },
 };
 
 const rootBaseStyle: CSSProperties = {
@@ -61,6 +76,7 @@ function TicketRenderer({
   className,
   ariaLabel,
   resolveImageAlt,
+  renderLayer,
 }: TicketRendererProps) {
   const layers = [...design.layers].sort((left, right) => left.order - right.order);
 
@@ -69,15 +85,17 @@ function TicketRenderer({
       aria-label={ariaLabel}
       className={className}
       data-ticket-shape={design.shape}
-      role={ariaLabel ? "img" : undefined}
+      role={ariaLabel ? (renderLayer ? "group" : "img") : undefined}
       style={{
         ...rootBaseStyle,
         ...shapeStyles[design.shape],
+        aspectRatio: design.shape === "STUB_NOTCHES" ? "7 / 5" : ticketEditorShapePresets.some((shape) => shape === design.shape) ? "5 / 7" : undefined,
         backgroundColor: design.backgroundColor,
       }}
     >
       {layers.map((layer) => {
         const layerStyle = getLayerStyle(layer);
+        if (renderLayer) return renderLayer(layer, layerStyle);
 
         if (layer.type === "TEXT") {
           return (
