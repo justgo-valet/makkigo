@@ -8,6 +8,7 @@ export {
   ticketLayerSchema,
   ticketShapePresetSchema,
   ticketShapePresets,
+  ticketEditorShapePresets,
 } from "./ticketDesign";
 export type {
   TicketDesign,
