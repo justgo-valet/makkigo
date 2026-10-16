@@ -12,8 +12,6 @@ const profileResponseSchema = z.object({
     }),
   ),
   consents: z.object({
-    appPush: z.boolean(),
-    alimtalk: z.boolean(),
     locationBasedService: z.boolean(),
   }),
 });

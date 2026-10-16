@@ -6,7 +6,7 @@
 - 서버 CPU 는 **ARM(aarch64, Graviton)**, OS 는 Ubuntu 26.04. 그래서 이미지는 GitHub 의 **ARM 빌드 서버(`ubuntu-24.04-arm`)** 에서 `linux/arm64` 로 빌드합니다
 - 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), PostgreSQL. 직접 운영합니다.
 - DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
-- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com` (가비아 DNS A 레코드 → EC2 탄력적 IP). 루트 `makkigo.com` 은 비워 둠
+- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com` (Route 53 A 레코드 → EC2 탄력적 IP. 도메인 등록은 가비아, DNS 는 Route 53). 루트 `makkigo.com` 은 비워 둠
 - HTTPS: **Caddy** 가 Let's Encrypt 인증서를 자동 발급 · 갱신
 - PostgreSQL 5432 는 호스트에도 열어 둠 (로컬에서 운영 DB 확인용). EC2 보안 그룹이 허용한 IP 만 접속 가능
 - 서버에서 쓰는 파일은 `deploy/` 폴더: `docker-compose.prod.yml`, `Caddyfile`, `load-env.sh`, `deploy.sh`
@@ -171,8 +171,8 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | 첫 운영 배포 | ✅ 2026-10-09 (#58), 이후 #69 → [runbook.md](../operations/runbook.md) |
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
-| 정기 작업 — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ 이 PR → [runbook.md](../operations/runbook.md#정기-정리-작업) |
-| 애플 로그인 회원 탈퇴 때 애플 토큰 철회 (리프레시 토큰 저장 마이그레이션 `20261016090000_add_user_social_refresh_token`) | ✅ 이 PR |
+| 정기 작업 — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ [#166](https://github.com/justgo-valet/makkigo/pull/166) → [runbook.md](../operations/runbook.md#정기-정리-작업) |
+| 애플 로그인 회원 탈퇴 때 애플 토큰 철회 (리프레시 토큰 저장 마이그레이션 `20261016090000_add_user_social_refresh_token`) | ✅ [#170](https://github.com/justgo-valet/makkigo/pull/170) |
 
 ## 배포하기
 

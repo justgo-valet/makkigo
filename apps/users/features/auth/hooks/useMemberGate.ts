@@ -36,7 +36,7 @@ const useMemberGate = (area: MemberArea) => {
   const freshMe = isFetchedAfterMount && !isError ? me : undefined;
   const redirectPath = freshMe ? getRedirectPath(area, freshMe) : null;
 
-  useAppPushRegistration(area === "member" && Boolean(freshMe?.appPushAgreed) && !redirectPath);
+  useAppPushRegistration(area === "member" && Boolean(freshMe) && !redirectPath);
 
   useEffect(() => {
     if (redirectPath) router.replace(redirectPath);

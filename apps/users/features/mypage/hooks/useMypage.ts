@@ -1,6 +1,7 @@
 import { getErrorMessage } from "@makkigo/api-client";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
+import { isInApp, openAppNotificationSettings } from "@/features/auth/appBridge";
 import { formatVehicleNumber } from "@/features/home/homeFormat";
 import { useLogout } from "@/features/mypage/hooks/useLogout";
 import { useMypageHeader } from "@/features/mypage/hooks/useMypageHeader";
@@ -16,6 +17,8 @@ import type { TermsItemType } from "@/features/mypage/mypageItems";
 
 const FALLBACK_ERROR_MESSAGE = "내 정보를 불러오지 못했습니다.";
 
+const subscribeNothing = () => () => {};
+
 const useMypage = () => {
   useMypageHeader();
   const { data: profile, error, isPending, isError, refetch } = useProfile();
@@ -26,6 +29,7 @@ const useMypage = () => {
   const withdraw = useWithdraw();
   const pushPermissionBanner = usePushPermissionBanner();
   const [openedTermsType, setOpenedTermsType] = useState<TermsItemType | null>(null);
+  const canOpenNotificationSettings = useSyncExternalStore(subscribeNothing, isInApp, () => false);
 
   const openedTerms = TERMS_ITEMS.find(({ type }) => type === openedTermsType) ?? null;
 
@@ -52,6 +56,10 @@ const useMypage = () => {
     logout,
     withdraw,
     pushPermissionBanner,
+    notificationSettings: {
+      isAvailable: canOpenNotificationSettings,
+      open: openAppNotificationSettings,
+    },
   } as const;
 };
 

@@ -11,19 +11,7 @@ export interface UserNotification extends PushMessage {
   valetSessionId?: number;
 }
 
-const hasAgreedToAppPush = async (userId: number) => {
-  const latest = await prisma.userConsent.findFirst({
-    where: { userId, type: "APP_PUSH" },
-    orderBy: { createdAt: "desc" },
-    select: { agreed: true },
-  });
-
-  return latest?.agreed === true;
-};
-
 const pushToUser = async (userId: number, message: PushMessage) => {
-  if (!(await hasAgreedToAppPush(userId))) return false;
-
   const devices = await prisma.pushDevice.findMany({ where: { userId }, select: { token: true } });
 
   try {
