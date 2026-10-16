@@ -9,7 +9,7 @@
 | 앱 | 폴더 | 앱 ID (iOS 번들 ID = Android 패키지명) | 이름 | 담당 |
 |---|---|---|---|---|
 | 고객 앱 | `apps/users` | `com.makkigo.user` | 마끼고 | 태균 |
-| 요원 · 업체 관리자 앱 | `apps/valetagents` (예정) | 미정 | 미정 | 지상님 |
+| 요원 · 업체 관리자 앱 | `apps/valetagents` (예정) | `com.makkigo.valetagent` (서버의 복귀 주소 `APP_CALLBACK_URL` 기준, 앱은 아직 없음) | 미정 | 지상님 |
 
 두 앱이 같은 로그인 창 열기 · 웹뷰 브리지 · 푸시 토큰 코드를 쓰므로 `packages/` 에 공통으로 둡니다.
 
@@ -65,6 +65,6 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 ## 빌드 · 서명
 
 - Android 운영 서명: `apps/users/android/key.properties` 가 있으면 그 키로, 없으면 디버그 키로 서명합니다. 키 파일(`*.jks`)과 `key.properties` 는 커밋하지 않습니다.
-- Play Console 은 **개인 계정**이라 앱마다 **테스터 12명 이상 · 14일 비공개 테스트** 후에 프로덕션 액세스를 신청할 수 있습니다. 10/31 출시를 맞추려면 10/7 까지 비공개 테스트를 시작해야 합니다.
+- Play Console 은 **개인 계정**이라 앱마다 **테스터 12명 이상 · 14일 비공개 테스트** 후에 프로덕션 액세스를 신청할 수 있습니다. 10/31 출시를 맞추려면 10/7 까지 비공개 테스트를 시작해야 했습니다. 시작 여부와 출시일 영향은 [open-questions.md](../planning/open-questions.md#개발) 에서 추적합니다.
 
 실행 · 빌드 명령은 makkigo-mobile 의 [apps/users/README.md](https://github.com/justgo-valet/makkigo-mobile/blob/dev/apps/users/README.md).

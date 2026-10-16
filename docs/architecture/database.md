@@ -9,7 +9,7 @@
 
 | 항목 | 규칙 |
 |---|---|
-| ID | 자동 증가 `Int` (차량 브랜드·모델과 통일) |
+| ID | 자동 증가 `Int` (차량 브랜드·모델과 통일). 예외: 업체 등록 세션 · 사진 업로드(`merchant_registration_sessions`, `merchant_image_uploads`)는 브라우저가 재시도에 쓰는 UUID |
 | 이름 | 필드 camelCase, 컬럼 `@map` snake_case, 테이블 복수형 snake_case |
 | 들여쓰기 | 4칸 (`prisma format` 은 2칸으로 바꾸므로 주의) |
 | 시각 | `timestamptz(3)` |
@@ -23,31 +23,34 @@
 | 영역 | 테이블 | 어디에 |
 |---|---|---|
 | 차량 마스터 | `car_brands`(35), `car_models`(182) — 데이터는 `prisma/init/init.sql`, 컨테이너 시작마다 실행(같은 이름이면 이미지 경로만 갱신) | dev (#8) |
-| 고객 인증 | `users`, `user_social_accounts`, `user_refresh_tokens`, `user_login_codes`(앱 로그인 1회용 코드) | #11, [#38](https://github.com/justgo-valet/makkigo/pull/38) |
+| 고객 인증 | `users`, `user_social_accounts`(`provider_refresh_token` 은 애플 탈퇴 철회용), `user_refresh_tokens`, `user_login_codes`(앱 로그인 1회용 코드) | #11, [#38](https://github.com/justgo-valet/makkigo/pull/38), [#170](https://github.com/justgo-valet/makkigo/pull/170) |
 | 약관 | `user_consents` (enum `PRIVACY_OVERSEAS_TRANSFER` · `APP_PUSH` · `ALIMTALK` 는 기존 기록용, 새로 받지 않음) | #14 |
 | 차량 | `vehicles` | #16 |
-| 요원 · 업체 관리자 | `staff`, `staff_social_accounts` | #9 (요원 인증 작업 때 리프레시 토큰 등 추가) |
+| 요원 · 업체 관리자 | `staff`, `staff_social_accounts`, `staff_refresh_tokens`, `staff_login_codes` | #9, [#56](https://github.com/justgo-valet/makkigo/pull/56) |
 | 부스 | `booths`, `booth_photos`, `booth_agents`, `booth_fee_policies`, `booth_bank_accounts` | #9 |
-| 업체 · 티켓 | `merchants`, `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9 |
+| 업체 · 티켓 | `merchants`(우편번호 · 좌표 포함), `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9, [#96](https://github.com/justgo-valet/makkigo/pull/96), [#132](https://github.com/justgo-valet/makkigo/pull/132) |
+| 업체 등록 | `merchant_registration_sessions`, `merchant_image_uploads` (사진 업로드 예약 · 정리 상태) | [#132](https://github.com/justgo-valet/makkigo/pull/132) |
 | 발렛 | `valet_sessions` | #9 |
 | 알림 | `push_devices`, `notifications` | #9 |
-| 위치 | `location_use_logs` (위치정보 이용 사실 확인자료) | 이 PR |
+| 위치 | `location_use_logs` (위치정보 이용 사실 확인자료) | [#96](https://github.com/justgo-valet/makkigo/pull/96) |
 
 
 ## 관계
 
 ```
 users ─┬─ user_social_accounts
-       ├─ user_refresh_tokens
+       ├─ user_refresh_tokens · user_login_codes
        ├─ user_consents
+       ├─ push_devices · notifications · location_use_logs
        └─ vehicles ── car_brands / car_models
 
-staff ── booth_agents ── booths ─┬─ booth_fee_policies
-  │                              ├─ booth_bank_accounts
-  │ (부스 생성자 = 관리자)        └─ booth_merchants ── merchants ── tickets ── ticket_versions
-  └─ merchants (업체 관리자)
+staff ─┬─ staff_social_accounts · staff_refresh_tokens · staff_login_codes · push_devices · notifications
+       ├─ booth_agents ── booths ─┬─ booth_photos · booth_fee_policies · booth_bank_accounts
+       │ (부스 생성자 = 관리자)     └─ booth_merchants ── merchants ── tickets ── ticket_versions
+       ├─ merchants (업체 관리자) ── merchant_photos
+       └─ merchant_registration_sessions ── merchant_image_uploads
 
-valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?, 처리 요원 staff ×3)
+valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?, 처리 요원 staff ×3, location_use_logs, notifications)
 ```
 
 ## ERD 초안(version1.0)에서 바뀐 점과 이유

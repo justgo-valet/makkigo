@@ -3,7 +3,7 @@
 운영에 쓰는 자원이 **어디에 무엇으로** 있는지 모아 둔 문서입니다. 비밀값은 적지 않고 위치만 적습니다.
 구성과 그렇게 정한 이유는 [deployment.md](../architecture/deployment.md), 운영 방법은 [runbook.md](runbook.md) 를 봅니다.
 
-(2026-10-10 기준)
+(2026-10-16 기준)
 
 ## 한눈에
 
@@ -15,6 +15,7 @@
                                                 ├ valetagents  :3000       요원 앱  valet.makkigo.com
                                                 ├ merchant-upload-cleanup  내부 hourly runner (포트 없음)
                                                 ├ agent-notification-sync  내부 1분 runner (포트 없음)
+                                                ├ users-jobs   매시간 고객 앱 내부 API 호출 (정리 작업, 포트 없음)
                                                 └ postgres     :5432       DB (허용 IP 만)
 GitHub Actions ──빌드──▶ GHCR ──pull──▶ EC2
               └─OIDC + SSM 명령──▶ EC2 (deploy.sh)
