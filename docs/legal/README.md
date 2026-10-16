@@ -10,7 +10,6 @@
 | [termsOfService.ts](../../apps/users/features/consent/documents/termsOfService.ts) 서비스 이용약관 | 고객 | `TERMS_OF_SERVICE` | 필수 |
 | [privacyCollection.ts](../../apps/users/features/consent/documents/privacyCollection.ts) 개인정보 수집 · 이용 | 고객 | `PRIVACY_COLLECTION` | 필수 |
 | [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
-| [appPush.ts](../../apps/users/features/consent/documents/appPush.ts) · [alimtalk.ts](../../apps/users/features/consent/documents/alimtalk.ts) 알림 수신 | 고객 | `APP_PUSH`, `ALIMTALK` | 선택 |
 | [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
 | [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 마이페이지 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
 | [staff-terms.md](staff-terms.md) 파트너 이용약관 | 요원 · 업체 관리자 | 요원 앱 (미정) | 필수 |
@@ -45,6 +44,7 @@
 | 요금 분쟁 | 발렛 사업자 책임, 회사는 중개자(거래 당사자 아님) | 전자상거래법 제20조 중개자 고지. 단 회사 고의 · 중과실 면책은 무효(약관규제법 제7조)라 그 부분은 남김 |
 | 보관 기간 | 이용 기록 5년, 접속 기록 3개월, 탈퇴 후 개인정보 30일 | 전자상거래법 · 통신비밀보호법, 아이파킹도 5년 |
 | 알림톡 수탁자 | 카카오 + 대행사 | 카카오가 휴대폰 번호를 처리 |
+| 앱 푸시 · 알림톡 수신 동의 | **받지 않음** (2026-10-16) | 서비스 이용에 필요한 정보성 알림이라 수신 동의 대상이 아님(광고성 정보는 보내지 않음). 번호는 개인정보 수집 · 이용(필수)의 "서비스 알림" 목적, 카카오 · 대행사는 처리위탁 고지. 앱 푸시는 휴대폰 알림 권한으로 끄고 켬. 광고성 알림은 2차에서 보낼 때 별도 수신 동의(2년마다 재확인, 야간 별도 동의). 변호사 확인 필요 |
 | 카카오톡 미사용자 | 문자로 대체하지 않음 | 푸시 → 알림톡 정책 유지, 문자 대행사 추가 불필요 |
 
 ## 위치정보

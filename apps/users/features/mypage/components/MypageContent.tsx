@@ -10,7 +10,7 @@ import MypageRow from "@/features/mypage/components/MypageRow";
 import MypageSection from "@/features/mypage/components/MypageSection";
 import WithdrawSheet from "@/features/mypage/components/WithdrawSheet";
 import { useMypage } from "@/features/mypage/hooks/useMypage";
-import { LOCATION_CONSENT_ITEM, NOTIFICATION_CONSENT_ITEMS } from "@/features/mypage/mypageItems";
+import { LOCATION_CONSENT_ITEM } from "@/features/mypage/mypageItems";
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 
 import type { OptionalConsentItem } from "@/features/mypage/mypageItems";
@@ -102,9 +102,22 @@ export default function MypageContent() {
         ))}
       </MypageSection>
 
-      <MypageSection title="알림 설정">
-        {NOTIFICATION_CONSENT_ITEMS.map(renderConsentRow)}
-      </MypageSection>
+      {mypage.notificationSettings.isAvailable && (
+        <MypageSection title="알림 설정">
+          <MypageRow>
+            <span className="min-w-0 flex-1">앱 알림</span>
+            <Button
+              type="button"
+              variant="ghost"
+              className={EDIT_BUTTON_CLASS_NAME}
+              aria-label="휴대폰 알림 설정 열기"
+              onClick={mypage.notificationSettings.open}
+            >
+              설정 열기
+            </Button>
+          </MypageRow>
+        </MypageSection>
+      )}
 
       <MypageSection title="위치 정보">{renderConsentRow(LOCATION_CONSENT_ITEM)}</MypageSection>
 
