@@ -24,7 +24,7 @@
 |---|---|---|
 | 차량 마스터 | `car_brands`(35), `car_models`(182) — 데이터는 `prisma/init/init.sql`, 컨테이너 시작마다 실행(같은 이름이면 이미지 경로만 갱신) | dev (#8) |
 | 고객 인증 | `users`, `user_social_accounts`(`provider_refresh_token` 은 애플 탈퇴 철회용), `user_refresh_tokens`, `user_login_codes`(앱 로그인 1회용 코드) | #11, [#38](https://github.com/justgo-valet/makkigo/pull/38), [#170](https://github.com/justgo-valet/makkigo/pull/170) |
-| 약관 | `user_consents` (enum `PRIVACY_OVERSEAS_TRANSFER` 는 기존 기록용, 새로 받지 않음) | #14 |
+| 약관 | `user_consents` (enum `PRIVACY_OVERSEAS_TRANSFER` · `APP_PUSH` · `ALIMTALK` 는 기존 기록용, 새로 받지 않음) | #14 |
 | 차량 | `vehicles` | #16 |
 | 요원 · 업체 관리자 | `staff`, `staff_social_accounts`, `staff_refresh_tokens`, `staff_login_codes` | #9, [#56](https://github.com/justgo-valet/makkigo/pull/56) |
 | 부스 | `booths`, `booth_photos`, `booth_agents`, `booth_fee_policies`, `booth_bank_accounts` | #9 |

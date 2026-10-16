@@ -10,7 +10,6 @@
 | [termsOfService.ts](../../apps/users/features/consent/documents/termsOfService.ts) 서비스 이용약관 | 고객 | `TERMS_OF_SERVICE` | 필수 |
 | [privacyCollection.ts](../../apps/users/features/consent/documents/privacyCollection.ts) 개인정보 수집 · 이용 | 고객 | `PRIVACY_COLLECTION` | 필수 |
 | [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
-| [appPush.ts](../../apps/users/features/consent/documents/appPush.ts) · [alimtalk.ts](../../apps/users/features/consent/documents/alimtalk.ts) 알림 수신 | 고객 | `APP_PUSH`, `ALIMTALK` | 선택 |
 | [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
 | [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 마이페이지 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
 | [staff-terms.md](staff-terms.md) 파트너 이용약관 | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
@@ -52,6 +51,7 @@
 | 제3자 제공 받는 자 (2026-10-16) | "이용자가 선택한 업체와 계약한 발렛 사업자", 구체적 이름은 업체 정보 · 발렛 진행 화면에 표시. 예상 도착 시각 포함 · 위치 제외 명시 | 도착 알림은 그 업체와 계약한 모든 부스의 요원에게 차량 번호가 감 |
 | 서비스 알림 동의 | 앱 푸시 · 알림톡 선택 동의 유지 | 정보통신망법 제50조는 광고성 정보에만 수신 동의를 요구하므로 법적으로는 동의 없이도 보낼 수 있음. 둘 다 미동의한 회원 문제([open-questions.md](../planning/open-questions.md))를 풀 때 쓸 수 있음 |
 | 알림톡 수탁자 | 카카오 + 대행사 | 카카오가 휴대폰 번호를 처리 |
+| 앱 푸시 · 알림톡 수신 동의 | **받지 않음** (2026-10-16) | 서비스 이용에 필요한 정보성 알림이라 수신 동의 대상이 아님(광고성 정보는 보내지 않음). 번호는 개인정보 수집 · 이용(필수)의 "서비스 알림" 목적, 카카오 · 대행사는 처리위탁 고지. 앱 푸시는 휴대폰 알림 권한으로 끄고 켬. 광고성 알림은 2차에서 보낼 때 별도 수신 동의(2년마다 재확인, 야간 별도 동의). 변호사 확인 필요 |
 | 카카오톡 미사용자 | 문자로 대체하지 않음 | 푸시 → 알림톡 정책 유지, 문자 대행사 추가 불필요 |
 | 분쟁 조정 기관명 (2026-10-16) | 위치기반서비스 이용약관 제9조를 **방송미디어통신위원회**로 | 2025-10 기관 개편, 위치정보법 현행 조문 기준 |
 
@@ -94,7 +94,7 @@
 | 앱 첫 실행 접근 권한 안내 (위치 · 알림 = 선택) | Flutter | **미구현.** 정보통신망법 제22조의2 |
 | 애플 리프레시 토큰 암호화 저장 | 고객 | 평문 저장 중 (`user_social_accounts.provider_refresh_token`) |
 | 개인정보처리시스템(운영 DB) 접속 기록 1년 보관 · 점검 | 운영 | **미설정.** 안전성 확보조치 기준 제8조. 5432 가 관리자 IP 에 열려 있어 직접 접속이 가능 |
-| 알림톡 발송 연동 | 고객 | **미구현.** 알림톡 동의서 · 정책은 푸시를 못 받을 때 알림톡으로 보낸다고 약속함. 연동 전에는 휴대폰 번호 인증이 없어 남의 번호로 차량 번호 · 요금이 갈 위험을 먼저 봐야 함 |
+| 알림톡 발송 연동 | 고객 | **미구현.** 정책은 푸시를 못 받으면 알림톡으로 보낸다고 함. 연동 전에는 휴대폰 번호 인증이 없어 남의 번호로 차량 번호 · 요금이 갈 위험을 먼저 봐야 함 |
 | 요원 앱 완료 세션 표시 기간 제한 | 요원 | 제3자 제공 보유 기간 "이용이 끝날 때까지". 출차 완료 목록을 만들 때 표시 기간을 짧게 |
 | 이용 기록 · 동의 기록 5년 뒤 삭제 작업 | 고객 | 없음. 2031년 전에 정기 작업에 추가 |
 | 액세스 토큰 만료 뒤 재진입 확인 | 고객 | [auth.md](../architecture/auth.md#프론트-주의점) 참고 |

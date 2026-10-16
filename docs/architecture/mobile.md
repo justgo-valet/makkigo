@@ -51,11 +51,11 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 
 | 단계 | 하는 곳 |
 |---|---|
-| 앱 푸시 동의한 회원이 로그인하면 웹이 `requestPushToken` 을 보냄 → 그때 OS 알림 권한 팝업 | 웹 `useAppPushRegistration` (`MemberGate`) |
+| 회원이 로그인해 메인 영역에 들어오면 웹이 `requestPushToken` 을 보냄 → 그때 OS 알림 권한 팝업 | 웹 `useAppPushRegistration` (`MemberGate`) |
 | 앱이 다시 화면에 나오면(홈 · 설정 앱에서 복귀) 현재 권한을 확인해 토큰 이벤트를 다시 보냄. `token: null`(설정에서 알림 끔)이면 웹이 이 기기 등록을 지움 → 다음 알림부터 알림톡 대상 | 앱 `didChangeAppLifecycleState`, 웹 `useAppPushRegistration` |
-| 앱 푸시 동의 회원인데 `permission: "denied"` 면 메인 상단에 **"알림이 꺼져 있어요 [설정 열기]"** 배너. 켜고 돌아오면 사라짐. iOS APNs 실패(`token: null` · `granted`)엔 안 띄움 | 웹 `PushPermissionBanner` (`usePushPermission` 상태) |
+| `permission: "denied"` 면 메인 · 마이페이지 상단에 **"알림이 꺼져 있어요 [설정 열기]"** 배너. 켜고 돌아오면 사라짐. iOS APNs 실패(`token: null` · `granted`)엔 안 띄움 | 웹 `PushPermissionBanner` (`usePushPermission` 상태) |
 | 받은 토큰을 `POST /api/v1/push-devices` 로 등록, 로그아웃 때 `DELETE` | 웹 (등록한 토큰은 기기 `localStorage` 에 기억) |
-| 발송: 앱 푸시 동의 확인 → 기기 토큰으로 FCM 발송 → 없는 토큰 삭제 → 알림 내역(`notifications`) 기록 | 서버 `@makkigo/push` 의 `sendUserNotification` |
+| 발송: 기기 토큰으로 FCM 발송 → 없는 토큰 삭제 → 알림 내역(`notifications`) 기록 | 서버 `@makkigo/push` 의 `sendUserNotification` |
 | 알림 데이터 `link`(웹 경로)를 누르면 그 화면을 웹뷰로 엶 | 앱 |
 
 - 푸시를 못 보내면(미동의 · 기기 없음 · 발송 실패) 알림 내역의 채널을 비워 둡니다. 알림톡 대체는 알림톡 연동 때 이 자리에서 보냅니다.
