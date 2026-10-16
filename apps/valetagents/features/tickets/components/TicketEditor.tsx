@@ -233,8 +233,8 @@ export default function TicketEditor({
           </select>
         </label>
       )}
-      <div className="flex flex-1 flex-col items-center justify-center py-8">
-        <div ref={setCanvasElement} className="w-full max-w-[300px] drop-shadow-[0_3px_2px_rgba(3,9,15,0.25)]" onPointerDown={() => setSelectedLayerId(null)}>
+      <div className="flex flex-1 flex-col items-center justify-center pt-8 pb-14">
+        <div ref={setCanvasElement} inert={busy} className="w-full max-w-[300px] drop-shadow-[0_3px_2px_rgba(3,9,15,0.25)]" onPointerDown={() => setSelectedLayerId(null)}>
           <TicketRenderer
             ariaLabel="티켓 편집 영역"
             className="aspect-[3/4] w-full"
@@ -303,19 +303,21 @@ export default function TicketEditor({
         </div>
       </div>
       {selectedLayer && (
-        <div className="mb-4 flex min-h-10 flex-wrap items-center justify-center gap-2 text-sm" aria-label="선택 항목 설정">
-          {selectedLayer.type === "TEXT" && (
-            <label className="flex items-center gap-2 rounded-lg bg-white px-3 py-2">
-              글자 크기
-              <input aria-label="글자 크기" type="range" className="w-20 accent-[#2170D6]" min="2" max="20" step="0.5" value={selectedLayer.fontSize * 100} onChange={(event) => updateLayer(selectedLayer.id, (layer) => layer.type === "TEXT" ? { ...layer, fontSize: Number(event.target.value) / 100 } : layer)} />
-            </label>
-          )}
-          <button type="button" className="min-h-10 rounded-lg bg-white px-3 disabled:opacity-40" disabled={selectedLayer.order === 0} onClick={() => changeOrder(-1)}>뒤로</button>
-          <button type="button" className="min-h-10 rounded-lg bg-white px-3 disabled:opacity-40" disabled={selectedLayer.order === design.layers.length - 1} onClick={() => changeOrder(1)}>앞으로</button>
-          <button type="button" aria-label="선택 항목 삭제" className="min-h-10 rounded-lg bg-white px-3 text-red-600" onClick={removeSelected}>삭제</button>
+        <div className="relative h-0 w-full">
+          <div inert={busy} className="absolute inset-x-0 bottom-3 z-20 flex min-h-10 items-center justify-center gap-1 text-xs" aria-label="선택 항목 설정">
+            {selectedLayer.type === "TEXT" && (
+              <label className="flex min-h-10 items-center gap-1 rounded-lg bg-white px-2 py-2">
+                크기
+                <input aria-label="글자 크기" type="range" className="w-16 accent-[#2170D6]" min="2" max="20" step="0.5" value={selectedLayer.fontSize * 100} onChange={(event) => updateLayer(selectedLayer.id, (layer) => layer.type === "TEXT" ? { ...layer, fontSize: Number(event.target.value) / 100 } : layer)} />
+              </label>
+            )}
+            <button type="button" className="min-h-10 rounded-lg bg-white px-2 disabled:opacity-40" disabled={selectedLayer.order === 0} onClick={() => changeOrder(-1)}>뒤로</button>
+            <button type="button" className="min-h-10 rounded-lg bg-white px-2 disabled:opacity-40" disabled={selectedLayer.order === design.layers.length - 1} onClick={() => changeOrder(1)}>앞으로</button>
+            <button type="button" aria-label="선택 항목 삭제" className="min-h-10 rounded-lg bg-white px-2 text-red-600" onClick={removeSelected}>삭제</button>
+          </div>
         </div>
       )}
-      <div className="relative mb-6 min-h-[80px]" aria-label="티켓 편집 도구">
+      <div inert={busy} className="relative mb-6 min-h-[80px]" aria-label="티켓 편집 도구">
         {shapePicker ? (
           <div className="relative flex h-20 items-center justify-around rounded-[32px] border border-(--primary-color) px-4" role="radiogroup" aria-label="티켓 모양">
             <button type="button" aria-label="모양 선택 닫기" className="absolute -top-1.5 -right-1.5 z-10 flex size-6 items-center justify-center rounded-full bg-[#a3a3a3] text-xl leading-none text-white" onClick={() => setShapePicker(false)}>×</button>
