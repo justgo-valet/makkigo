@@ -7,10 +7,10 @@
 | 문서 | 대상 | 동의 항목 (`ConsentType`) | 구분 |
 |---|---|---|---|
 | (본문 없음) 만 14세 이상입니다 | 고객 | `AGE_14_OR_OVER` | 필수 |
-| [termsOfService.ts](../../apps/users/features/consent/documents/termsOfService.ts) 서비스 이용약관 | 고객 | `TERMS_OF_SERVICE` | 필수 |
-| [privacyCollection.ts](../../apps/users/features/consent/documents/privacyCollection.ts) 개인정보 수집 · 이용 | 고객 | `PRIVACY_COLLECTION` | 필수 |
-| [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
-| [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
+| [termsOfService.ts](../../apps/users/features/consent/documents/termsOfService.ts) 서비스 이용약관 (공개 주소 `https://app.makkigo.com/terms`) | 고객 | `TERMS_OF_SERVICE` | 필수 |
+| [privacyCollection.ts](../../apps/users/features/consent/documents/privacyCollection.ts) 개인정보 수집 · 이용 (공개 주소 `https://app.makkigo.com/privacy-collection`) | 고객 | `PRIVACY_COLLECTION` | 필수 |
+| [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 (공개 주소 `https://app.makkigo.com/privacy-third-party`) | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
+| [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함, 공개 주소 `https://app.makkigo.com/location-terms`) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
 | [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 마이페이지 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
 | [staff-terms.md](staff-terms.md) 파트너 이용약관 | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
 | [staff-privacy-collection.md](staff-privacy-collection.md) 파트너 개인정보 수집 · 이용 | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
@@ -107,7 +107,7 @@
 - 탈퇴 회원의 휴대폰 번호 · 차량 정보 · 고객 알림 내역은 탈퇴 30일 뒤 정기 작업이 지웁니다 → [runbook.md](../operations/runbook.md#정기-정리-작업). 운영 SSM 에 `USERS_INTERNAL_JOB_TOKEN` 이 있어야 돕니다.
 - 접속 기록(IP)은 수집하지 않습니다. Caddy 접속 로그를 켜게 되면 처리방침 1 · 2 절에 항목과 보관 기간을 다시 넣습니다.
 - 운영 DB 직접 접속 기록을 1년 이상 남기고 점검합니다 (위 할 일 표, 미설정). DB 백업에도 같은 보관 기간을 적용합니다.
-- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
+- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다. 이용약관 주소는 `https://app.makkigo.com/terms` 입니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
 - 비회원 QR 화면에 차량 번호 제공 동의와 "개인정보 처리방침" 링크를 둡니다 (위 할 일 표).
 
 ## 버전
