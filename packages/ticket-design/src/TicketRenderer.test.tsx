@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import type { TicketDesign } from "./ticketDesign";
+import { ticketDesignSchema, ticketEditorShapePresets, type TicketDesign } from "./ticketDesign";
 import { TicketRenderer } from "./TicketRenderer";
 
 const imageAssetPath =
@@ -86,5 +86,29 @@ describe("TicketRenderer", () => {
 
     expect(markup).toContain('alt="주차 안내 이미지"');
     expect(markup).not.toContain('role="img"');
+  });
+
+  it.each(ticketEditorShapePresets)("validates and renders the reference shape %s", (shape) => {
+    const nextDesign = ticketDesignSchema.parse({ ...design, shape });
+    const markup = renderToStaticMarkup(<TicketRenderer design={nextDesign} resolveAssetUrl={() => "image.webp"} />);
+    expect(markup).toContain(`data-ticket-shape="${shape}"`);
+    expect(markup).toContain(shape === "STUB_NOTCHES" ? "aspect-ratio:7 / 5" : "aspect-ratio:5 / 7");
+    expect(markup).not.toContain("polygon");
+    if (shape !== "ROUND_RECT") expect(markup).toContain("radial-gradient");
+  });
+
+  it("renders editable layers in the same stacking and geometry as the customer preview", () => {
+    const markup = renderToStaticMarkup(
+      <TicketRenderer
+        ariaLabel="티켓 편집 영역"
+        design={design}
+        resolveAssetUrl={() => "unused"}
+        renderLayer={(layer, style) => <div key={layer.id} style={style} data-editable={layer.id}>{layer.type === "TEXT" ? layer.text : "image"}</div>}
+      />,
+    );
+    expect(markup).toContain('role="group"');
+    expect(markup).not.toContain('role="img"');
+    expect(markup).toContain('height:20%;left:10%;top:10%;width:80%;z-index:0');
+    expect(markup.indexOf("첫 줄")).toBeLessThan(markup.indexOf(">image<"));
   });
 });
