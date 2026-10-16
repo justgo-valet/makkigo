@@ -1,7 +1,7 @@
 # Design
 
 ## Source of truth
-Active, 2026-10-16. Scope: merchant ticket editor. References: original screens `21. 업체 관리자 - 티켓 추가.png` and `22. 업체 관리자 - 티켓 추가.png`, Figma nodes `188:584` and `288:464`, `docs/design/screens.md`, existing `TicketEditor` and shared `TicketRenderer`.
+Active, 2026-10-16. Scope: merchant ticket editor and valet vehicle lists. References: original screens `21. 업체 관리자 - 티켓 추가.png` and `22. 업체 관리자 - 티켓 추가.png`, Figma nodes `188:584` and `288:464`, `docs/design/screens.md`, existing `TicketEditor` and shared `TicketRenderer`.
 
 ## Brand
 Quiet, practical mobile utility. Retain Makkigo branding and existing header. Avoid additional panels or decorative labels.
@@ -38,6 +38,13 @@ Short Korean action labels: 글자 추가, 이미지 추가, 티켓 모양 선�
 
 ## Implementation constraints
 React/Next.js, existing Tailwind tokens and shared schema. No new dependencies. Preserve legacy presets and normalized layer coordinates. Verify live text/caret, Korean composition, paste, drag/resize, save payload, and responsive geometry in a local browser, plus existing automated checks.
+
+## Vehicle lists
+Maintain the existing three-column image/plate lists for both active and completed vehicles. Follow `VehicleManagement`, `PickupResponseSheet` and application tokens: existing font, #F7F9FC surface, #2170D6 primary, #81A9DA secondary, #717171 muted text and 6px corner radii. Keep the header, notification banner, session order and confirmation flows unchanged.
+
+Use equal-width cells, 8px column gaps and 12px row gaps. Fit car images within each cell without negative margins or overlap; align plates and status labels consistently. Requests use a light #FF7777 background and red border; preparation uses a light primary background and secondary border. Retain explicit time/status text and grayscale arrival/completed images. Keep completed vehicles quieter and separate the section with the existing blue rule. Preserve visible keyboard focus and plate-based button names. Do not add cards, action footers, counters or a different list layout.
+
+Verify with existing tests, lint and typecheck. Browser checks should cover 320px and wider phone widths and all session states.
 
 ## Open questions
 None for this scope.

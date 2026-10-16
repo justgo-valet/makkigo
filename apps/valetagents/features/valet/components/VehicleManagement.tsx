@@ -32,17 +32,17 @@ interface CarFigureProps {
 function CarFigure({ imageUrl, plateNumber, label, gray }: Readonly<CarFigureProps>) {
   return (
     <>
-      <span className="relative -mt-4 block aspect-[8/5] w-[120px]">
+      <span className="relative block h-16 w-full max-w-[120px]">
         <Image
           src={imageUrl}
           alt=""
           fill
           unoptimized
-          className={cn("object-contain", gray && "grayscale")}
+          className={cn("object-contain", gray && "grayscale opacity-70")}
         />
       </span>
-      <span className="-mt-0.5 text-sm leading-5">{formatPlateNumber(plateNumber)}</span>
-      <span className="text-[11px] leading-3">{label}</span>
+      <span className="mt-1 whitespace-nowrap text-sm leading-5 font-medium tabular-nums">{formatPlateNumber(plateNumber)}</span>
+      <span className="mt-1 text-[11px] leading-4">{label}</span>
     </>
   );
 }
@@ -116,7 +116,7 @@ export default function VehicleManagement({
 
       <div role="status">
         {pickupRequest && (
-          <p className="-mx-6 mt-[31px] flex h-14 items-center justify-center bg-[#ff7777] pt-1 text-xl text-(--base-color)">
+          <p className="mt-6 flex min-h-12 items-center justify-center rounded-[6px] bg-[#ff7777]/20 px-3 py-3 text-center text-sm leading-5 text-(--base-color)">
             <span>
               {formatPlateNumber(pickupRequest.plateNumber)} 차량이{" "}
               <strong className="font-bold">출차 요청</strong>을 보냈어요.
@@ -127,26 +127,32 @@ export default function VehicleManagement({
 
       {errorMessage && <FieldError className="mt-3 text-center">{errorMessage}</FieldError>}
 
-      <ul className="-mx-5 mt-[26px] grid grid-cols-3 gap-y-[22px] text-(--base-color)">
+      <ul className="mt-6 grid grid-cols-3 gap-x-2 gap-y-3 text-(--base-color)">
         {sessions.map((session) => {
           const cellClass = cn(
-            "flex h-24 w-full flex-col items-center rounded-[6px]",
-            (session.status === "PICKUP_REQUESTED" || session.status === "PICKUP_PREPARING") &&
-              "bg-[#ff7777]",
+            "flex min-h-[120px] w-full min-w-0 flex-col items-center rounded-[6px] border border-transparent px-1 py-2",
+            session.status === "ARRIVING" && "text-[#717171]",
+            session.status === "PICKUP_REQUESTED" && "border-[#ff7777] bg-[#ff7777]/15 [&>span:last-child]:font-semibold [&>span:last-child]:text-[#b42318]",
+            session.status === "PICKUP_PREPARING" && "border-(--secondary-color) bg-(--primary-color)/5 [&>span:last-child]:font-semibold [&>span:last-child]:text-(--primary-color)",
           );
           const car = (
             <CarFigure
               imageUrl={session.carImageUrl}
               plateNumber={session.plateNumber}
-              label={formatSessionLabel(session, updatedAt)}
+              label={session.status === "PARKED" && session.parkedAt ? `주차 ${formatSessionLabel(session, updatedAt)}` : formatSessionLabel(session, updatedAt)}
               gray={session.status === "ARRIVING"}
             />
           );
 
           return (
-            <li key={session.id}>
+            <li key={session.id} className="min-w-0">
               {session.status !== "PARKED" ? (
-                <button type="button" className={cellClass} onClick={() => selectSession(session)}>
+                <button
+                  type="button"
+                  className={cn(cellClass, "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary-color)")}
+                  aria-label={`${formatPlateNumber(session.plateNumber)}, ${formatSessionLabel(session, updatedAt)}`}
+                  onClick={() => selectSession(session)}
+                >
                   {car}
                 </button>
               ) : (
@@ -157,13 +163,13 @@ export default function VehicleManagement({
         })}
       </ul>
 
-      <h2 className="-mr-[7px] -ml-0.5 mt-[58px] -indent-0.5 border-b-2 border-(--primary-color) pb-0.5 text-xl leading-6 font-medium text-(--base-color)">
+      <h2 className="mt-8 border-b-2 border-(--primary-color) pb-2 text-lg leading-6 font-medium text-(--base-color)">
         출차 완료 차량
       </h2>
 
-      <ul className="-mx-5 -mt-1 grid grid-cols-3 gap-y-[22px] text-(--base-color)">
+      <ul className="mt-3 grid grid-cols-3 gap-x-2 gap-y-3 text-[#717171]">
         {completed.map((session) => (
-          <li key={session.id} className="flex h-24 flex-col items-center">
+          <li key={session.id} className="flex min-h-[120px] min-w-0 flex-col items-center px-1 py-2">
             <CarFigure
               imageUrl={session.carImageUrl}
               plateNumber={session.plateNumber}
