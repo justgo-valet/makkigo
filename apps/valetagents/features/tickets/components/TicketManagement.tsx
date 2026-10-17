@@ -40,7 +40,7 @@ export default function TicketManagement({
             key={ticket.id}
             href={`/tickets/${ticket.id}`}
             aria-label={`티켓 ${ticket.id} 편집`}
-            className="block overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(3,9,15,0.12)]"
+            className="block self-start drop-shadow-[0_2px_4px_rgba(3,9,15,0.12)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--primary-color)"
           >
             <TicketRenderer
               ariaLabel={`티켓 ${ticket.id}`}

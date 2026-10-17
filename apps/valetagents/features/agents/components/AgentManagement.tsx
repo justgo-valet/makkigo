@@ -24,7 +24,7 @@ interface AgentManagementProps {
 }
 
 const CHECKBOX_CLASS =
-  "block size-3 rounded-[4px] border-black bg-[#f7f4f4] shadow-none data-[state=checked]:border-black data-[state=checked]:bg-[#6676de] [&_svg]:hidden";
+  "size-3 rounded-[4px] border-black bg-[#f7f4f4] shadow-none data-[state=checked]:border-black data-[state=checked]:bg-[#6676de] data-[state=checked]:text-white [&_svg]:size-2.5";
 const HEADER_CELL_CLASS = "border-b border-black pt-0.5 align-top font-medium";
 const BODY_CELL_CLASS = "border-b border-[#c2c2c2]";
 

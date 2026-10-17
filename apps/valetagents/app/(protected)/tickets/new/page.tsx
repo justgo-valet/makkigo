@@ -23,7 +23,7 @@ export default async function NewTicketPage() {
   if (!menu) redirect("/login");
   return (
     <TicketEditor
-      initialDesign={{ version: 1, shape: "RECTANGLE", backgroundColor: "#FFFFFF", layers: [] }}
+      initialDesign={{ version: 1, shape: "ROUND_RECT", backgroundColor: "#FFFFFF", layers: [] }}
       initialMerchantId={merchants.items.length === 1 ? merchants.items[0].id : undefined}
       merchants={merchants.items.map(({ id, name }) => ({ id, name }))}
       imageBaseUrl={imageBaseUrl}

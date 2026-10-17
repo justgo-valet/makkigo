@@ -5,7 +5,9 @@ const MAX_TICKET_LAYERS = 20;
 const MAX_TICKET_TEXT_LENGTH = 200;
 const MIN_TICKET_LAYER_SIZE = 0.02;
 
-const ticketShapePresets = ["RECTANGLE", "ROUNDED", "NOTCHED", "WAVE"] as const;
+// Keep legacy presets readable for already-issued, immutable ticket versions.
+const ticketShapePresets = ["RECTANGLE", "ROUNDED", "NOTCHED", "WAVE", "ROUND_RECT", "SIDE_NOTCH", "BOTTOM_NOTCHES", "STUB_NOTCHES"] as const;
+const ticketEditorShapePresets = ["ROUND_RECT", "SIDE_NOTCH", "BOTTOM_NOTCHES", "STUB_NOTCHES"] as const;
 
 const ticketShapePresetSchema = z.enum(ticketShapePresets);
 const colorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
@@ -104,6 +106,7 @@ export {
   ticketLayerSchema,
   ticketShapePresetSchema,
   ticketShapePresets,
+  ticketEditorShapePresets,
   ticketTextLayerSchema,
 };
 export type TicketDesign = z.infer<typeof ticketDesignSchema>;
