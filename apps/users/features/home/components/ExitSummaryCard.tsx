@@ -1,19 +1,20 @@
-import { Button, Separator } from "@makkigo/ui";
+import { Separator } from "@makkigo/ui";
 import Image from "next/image";
 
+import BankTransferButton from "@/features/valet/components/BankTransferButton";
+
 import type { ExitSummary } from "@/features/home/hooks/useHome";
+import type { BankTransfer } from "@/features/valet/hooks/useBankTransfer";
 
 interface ExitSummaryCardProps {
   summary: ExitSummary;
-  isAccountCopied: boolean;
-  onCopyAccountNumber: () => void;
+  transfer: BankTransfer;
   onFeeDetailClick: () => void;
 }
 
 export default function ExitSummaryCard({
   summary,
-  isAccountCopied,
-  onCopyAccountNumber,
+  transfer,
   onFeeDetailClick,
 }: Readonly<ExitSummaryCardProps>) {
   return (
@@ -48,14 +49,12 @@ export default function ExitSummaryCard({
           )}
         </span>
       </button>
-      {summary.accountNumber && (
+      {summary.accountLabel && (
         <>
           <Separator />
-          <div className="flex items-center justify-between py-3">
-            <p className="text-sm text-(--base-color)">{summary.accountNumber}</p>
-            <Button variant="link" size="sm" className="px-0" onClick={onCopyAccountNumber}>
-              {isAccountCopied ? "복사됨" : "복사"}
-            </Button>
+          <div className="flex items-center justify-between gap-3 py-3">
+            <p className="min-w-0 text-sm break-all text-(--base-color)">{summary.accountLabel}</p>
+            <BankTransferButton transfer={transfer} />
           </div>
         </>
       )}
