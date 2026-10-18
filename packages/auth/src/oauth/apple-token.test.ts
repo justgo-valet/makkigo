@@ -32,8 +32,13 @@ describe("apple token", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
-    expect(await exchangeAppleCodeForRefreshToken("code", "https://app/callback")).toBeNull();
-    expect(await revokeAppleRefreshToken("refresh")).toBe(false);
+    expect(
+      await exchangeAppleCodeForRefreshToken("code", {
+        clientId: "com.makkigo.web",
+        redirectUri: "https://app/callback",
+      }),
+    ).toBeNull();
+    expect(await revokeAppleRefreshToken("refresh", null)).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -42,9 +47,12 @@ describe("apple token", () => {
     const fetchMock = vi.fn(async () => Response.json({ refresh_token: "apple-refresh" }));
     vi.stubGlobal("fetch", fetchMock);
 
-    expect(await exchangeAppleCodeForRefreshToken("code", "https://app/callback")).toBe(
-      "apple-refresh",
-    );
+    expect(
+      await exchangeAppleCodeForRefreshToken("code", {
+        clientId: "com.makkigo.web",
+        redirectUri: "https://app/callback",
+      }),
+    ).toBe("apple-refresh");
 
     const [url] = fetchMock.mock.calls[0] as unknown[];
     const form = readForm(fetchMock.mock.calls[0] as unknown[]);
@@ -66,11 +74,36 @@ describe("apple token", () => {
       .mockResolvedValueOnce(new Response(null, { status: 400 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    expect(await revokeAppleRefreshToken("apple-refresh")).toBe(true);
+    expect(await revokeAppleRefreshToken("apple-refresh", null)).toBe(true);
     expect(readForm(fetchMock.mock.calls[0] as unknown[])).toMatchObject({
+      client_id: "com.makkigo.web",
       token: "apple-refresh",
       token_type_hint: "refresh_token",
     });
-    await expect(revokeAppleRefreshToken("apple-refresh")).rejects.toThrow("400");
+    await expect(revokeAppleRefreshToken("apple-refresh", null)).rejects.toThrow("400");
+  });
+
+  it("exchanges and revokes an app sign-in token with the bundle ID", async () => {
+    setAppleEnv();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ refresh_token: "apple-refresh" }))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    expect(
+      await exchangeAppleCodeForRefreshToken("code", {
+        clientId: "com.makkigo.user",
+        redirectUri: null,
+      }),
+    ).toBe("apple-refresh");
+    const exchangeForm = readForm(fetchMock.mock.calls[0] as unknown[]);
+    expect(exchangeForm).toMatchObject({ client_id: "com.makkigo.user", code: "code" });
+    expect(exchangeForm).not.toHaveProperty("redirect_uri");
+
+    expect(await revokeAppleRefreshToken("apple-refresh", "com.makkigo.user")).toBe(true);
+    expect(readForm(fetchMock.mock.calls[1] as unknown[])).toMatchObject({
+      client_id: "com.makkigo.user",
+    });
   });
 });

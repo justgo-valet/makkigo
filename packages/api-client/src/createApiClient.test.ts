@@ -119,7 +119,7 @@ describe("createApiClient", () => {
     expect(countCalls(calls, "GET /api/v1/users/me")).toBe(2);
   });
 
-  it.each(["auth/social/kakao", "auth/refresh", "auth/logout"])(
+  it.each(["auth/social/kakao", "auth/oauth/kakao/native", "auth/refresh", "auth/logout"])(
     "%s 의 401 은 재발급하지 않는다",
     async (path) => {
       const calls = mockServer(() => json(401, { message: "소셜 토큰 오류" }));

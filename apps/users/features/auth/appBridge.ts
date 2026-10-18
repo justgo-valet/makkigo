@@ -1,3 +1,5 @@
+import type { SocialLoginProvider } from "@/features/auth/socialLoginProviders";
+
 interface MakkigoAppChannel {
   postMessage: (message: string) => void;
 }
@@ -135,26 +137,79 @@ const queryAppInstalledSchemes = (schemes: string[]) =>
     getAppChannel()?.postMessage(JSON.stringify({ type: "queryInstalledApps", schemes }));
   });
 
-const toAbsoluteUrl = (path: string) => new URL(path, window.location.origin).toString();
+const NATIVE_LOGIN_EVENT = "makkigo:native-login";
 
-const openAppAuthSession = ({ url, returnUrl }: { url: string; returnUrl: string }) => {
-  getAppChannel()?.postMessage(
-    JSON.stringify({
-      type: "openAuthSession",
-      url: toAbsoluteUrl(url),
-      returnUrl: toAbsoluteUrl(returnUrl),
-    }),
-  );
+/** 앱이 제공자 SDK 로 받은 값. 카카오는 `accessToken`, 구글은 `idToken`, 애플은 `idToken` + `authorizationCode`. */
+interface AppNativeLoginCredential {
+  accessToken?: string;
+  idToken?: string;
+  authorizationCode?: string;
+}
+
+type AppNativeLoginResult =
+  | { status: "success"; credential: AppNativeLoginCredential }
+  | { status: "cancelled" | "failed" };
+
+type NativeLoginEventDetail = AppNativeLoginCredential & {
+  provider?: unknown;
+  status?: unknown;
 };
+
+const pickString = (value: unknown) => (typeof value === "string" && value ? value : undefined);
+
+const toNativeLoginResult = (detail: NativeLoginEventDetail): AppNativeLoginResult => {
+  if (detail.status === "cancelled") return { status: "cancelled" };
+  if (detail.status !== "success") return { status: "failed" };
+
+  return {
+    status: "success",
+    credential: {
+      accessToken: pickString(detail.accessToken),
+      idToken: pickString(detail.idToken),
+      authorizationCode: pickString(detail.authorizationCode),
+    },
+  };
+};
+
+/**
+ * 앱이 카카오 · 구글 · 애플 SDK 로 로그인하게 하고 결과를 기다린다.
+ * 사용자가 카카오톡 등 다른 앱에 다녀오는 동안 기다려야 하므로 시간 제한을 두지 않는다. 같은 제공자의 응답만 받는다.
+ */
+const requestAppNativeLogin = (provider: SocialLoginProvider) =>
+  new Promise<AppNativeLoginResult>((resolve) => {
+    if (!isInApp()) {
+      resolve({ status: "failed" });
+      return;
+    }
+
+    const handleEvent = (event: Event) => {
+      const detail = (event as CustomEvent<NativeLoginEventDetail>).detail ?? {};
+
+      if (detail.provider !== provider) return;
+
+      window.removeEventListener(NATIVE_LOGIN_EVENT, handleEvent);
+      resolve(toNativeLoginResult(detail));
+    };
+
+    window.addEventListener(NATIVE_LOGIN_EVENT, handleEvent);
+    getAppChannel()?.postMessage(JSON.stringify({ type: "nativeLogin", provider }));
+  });
 
 export {
   askAppForPushToken,
   isInApp,
   onAppPushToken,
-  openAppAuthSession,
   openAppNotificationSettings,
   queryAppInstalledSchemes,
   requestAppLocation,
+  requestAppNativeLogin,
   setAppStatusBarStyle,
 };
-export type { AppLocation, AppPushState, AppPushToken, AppStatusBarStyle };
+export type {
+  AppLocation,
+  AppNativeLoginCredential,
+  AppNativeLoginResult,
+  AppPushState,
+  AppPushToken,
+  AppStatusBarStyle,
+};

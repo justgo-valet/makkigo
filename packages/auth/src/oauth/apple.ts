@@ -7,7 +7,7 @@ import { verifyIdToken } from "./id-token";
 
 import type { OAuthProvider } from "./types";
 
-const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
+export const APPLE_JWKS = createRemoteJWKSet(new URL("https://appleid.apple.com/auth/keys"));
 
 export const apple: OAuthProvider = {
   buildAuthorizationUrl: ({ redirectUri, state, nonce }) =>

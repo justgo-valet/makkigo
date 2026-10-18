@@ -4,7 +4,7 @@
 
 ## 흐름
 
-소셜 로그인은 **Next.js 서버가 OAuth(인가 코드 방식)로 처리**합니다. 앱은 로그인 페이지를 **시스템 브라우저 창**으로 열어 주기만 합니다.
+소셜 로그인은 브라우저에서는 **Next.js 서버가 OAuth(인가 코드 방식)로 처리**하고, 앱(웹뷰)에서는 **앱이 각 사 SDK 로 로그인**해 받은 토큰을 서버가 확인합니다.
 
 ```
 [일반 브라우저]
@@ -15,29 +15,38 @@
                     우리 토큰 쿠키 + /onboarding 또는 / 로 이동
 
 [앱 (Flutter 웹뷰)]
-웹뷰 /login ─▶ POST /api/v1/auth/oauth/{provider}/app-session
-                 └ verifier 를 웹뷰 쿠키에 심고 { authUrl, returnUrl } 응답
-웹뷰 ─▶ 앱에 "이 주소로 창 열어줘" (authUrl, returnUrl)
-앱이 시스템 브라우저 창으로 authUrl 열기   (iOS ASWebAuthenticationSession, Android Custom Tabs)
-   = GET /api/v1/auth/oauth/{provider}?app_challenge=…
-             └▶ 제공자 로그인 ─▶ callback ─▶ 1회용 로그인 코드 발급
-                                              └▶ com.makkigo.user://auth?code=… 로 앱 복귀
-앱이 웹뷰에서 returnUrl + 받은 쿼리를 그대로 열기
-   = GET /api/v1/auth/oauth/exchange?code=…   (verifier 는 웹뷰 쿠키에 있음)
-   └▶ 우리 토큰 쿠키가 **웹뷰에** 심김 + /onboarding 또는 / 로 이동
+웹뷰 /login ─▶ 앱에 {"type":"nativeLogin","provider":"kakao"}
+앱이 SDK 로 로그인   카카오: 카카오톡 앱(없으면 카카오계정) · 구글: 계정 선택 · 애플: iOS 기본 시트
+   └▶ window 에 makkigo:native-login 이벤트 { status, accessToken | idToken (+ authorizationCode) }
+웹뷰 ─▶ POST /api/v1/auth/oauth/{provider}/native   (JSON)
+          │ 토큰 확인 → 회원 확인 · 처음이면 가입
+          ▼
+   우리 토큰 쿠키가 **웹뷰에** 심김 + { redirectTo } → /onboarding 또는 / 로 이동
 ```
 
-**왜 웹뷰 안에서 바로 로그인하지 않나**: 구글은 앱 안 웹뷰의 로그인 페이지를 막습니다(`disallowed_useragent`). 시스템 브라우저 창은 허용됩니다.
+**왜 앱 SDK 로 하나** (decisions 2026-10-19): 웹 OAuth 를 시스템 브라우저 창으로 열면 iOS 가 매번 "'마끼고'이(가) 'app.makkigo.com'을(를) 사용하여 로그인하려고 합니다" 동의 모달을 띄우고, 카카오는 카카오톡이 있어도 아이디 · 비밀번호 화면부터 나옵니다. SDK 는 카카오톡 앱 · 애플 시트 · Android 계정 선택으로 바로 갑니다. 구글 iOS 는 SDK 도 내부에서 로그인 창을 써서 모달이 남습니다.
 
-**왜 1회용 코드를 거치나**: 시스템 브라우저 창과 웹뷰는 쿠키 저장소가 다릅니다. 창에서 받은 로그인을 웹뷰로 옮기려고, 2분짜리 1회용 코드를 앱 복귀 주소에 실어 보내고 웹뷰가 그 코드를 쿠키로 바꿉니다.
+**SDK 토큰 확인**: 토큰이 **우리 앱에 발급된 것인지**만 봅니다.
+
+| 제공자 | 앱이 넘기는 값 | 서버 확인 |
+|---|---|---|
+| 카카오 | 액세스 토큰 | `/v1/user/access_token_info` 의 `app_id` = `KAKAO_APP_ID` → `/v2/user/me` |
+| 구글 | ID 토큰 | 공개키 서명, `aud` = `GOOGLE_CLIENT_ID` (앱이 `serverClientId` 로 웹 클라이언트 ID 를 넘김) |
+| 애플 | ID 토큰 + 인가 코드 | 공개키 서명, `aud` = `APPLE_BUNDLE_ID`. 인가 코드는 번들 ID 로 리프레시 토큰과 교환(탈퇴 철회용) |
+
+- `nonce` 는 보지 않습니다. 구글 SDK 는 nonce 를 앱 시작 때 한 번만 정할 수 있어 로그인마다 맞춰 볼 수 없습니다. 대신 토큰의 대상(`aud` · `app_id`)으로 다른 앱 토큰을 막고, ID 토큰 수명(구글 1시간 · 애플 10분)에 기댑니다.
+- 로그인 CSRF: `native` API 는 `Content-Type: application/json` 요청만 받습니다. 다른 사이트의 폼 · `text/plain` 요청은 415 로 거절되고, JSON 은 CORS 확인을 통과하지 못합니다.
+- 실패: 토큰이 틀리면 401, 그 밖은 500. 공통 API 클라이언트는 `/auth/oauth/*` 의 401 에 토큰 재발급을 하지 않습니다.
+
+**예전 방식(시스템 브라우저 창)**: `app-session` → 창에서 웹 OAuth → `com.makkigo.user://auth?code=…` → `exchange` 흐름은 서버 · 앱에 남아 있습니다. 고객 웹은 지금 쓰지 않고, SDK 로그인에 문제가 생기면 웹 배포만으로 되돌릴 수 있습니다. 창과 웹뷰는 쿠키 저장소가 달라 2분짜리 1회용 코드로 로그인을 옮깁니다(구글은 웹뷰 안 로그인 페이지를 `disallowed_useragent` 로 막아 웹뷰에서 바로 할 수 없음).
 
 **`app_challenge` / `verifier`**: 서버가 앱 로그인 준비(`app-session`) 때 임의 값(`verifier`, 43자)을 만들어 **웹뷰 쿠키**(`makkigo_app_login_verifier`, HttpOnly, path `/api/v1/auth/oauth`, 10분)에 심고, 그 SHA-256(base64url, 43자)을 `app_challenge` 로 `authUrl` 에 넣습니다. 교환할 때 그 쿠키가 있어야 합니다. 다른 앱이 같은 복귀 주소(`com.makkigo.user://`)를 가로채도 `verifier` 가 없어서 로그인할 수 없습니다 (OAuth PKCE 와 같은 원리).
 
 **로그인 뒤 이동**: 필수 약관 동의 + 온보딩까지 끝났으면 `/`, 아니면 `/onboarding` (`GET /api/v1/users/me` 와 같은 기준).
 
-**실패 · 취소**: 웹은 `/login?error=cancelled|failed`, 앱은 `com.makkigo.user://auth?error=cancelled|failed`.
+**실패 · 취소**: 웹은 `/login?error=cancelled|failed`. 앱 SDK 로그인은 이벤트의 `status` 로 받아 로그인 화면에 같은 문구를 띄웁니다.
 
-**앱은 심부름만 합니다** (decisions 2026-10-08): 앱은 웹이 준 `authUrl` 을 창으로 열고, 돌아온 쿼리를 웹이 준 `returnUrl` 에 붙여 웹뷰에서 열 뿐입니다. 제공자 목록 · API 경로 · `verifier` 를 앱이 모르므로, 로그인 · 회원가입을 바꿔도 **서버 배포만** 하면 되고 앱 업데이트(스토어 심사)는 필요 없습니다. 앱 업데이트가 필요한 것은 브리지 메시지 형식이나 복귀 주소(`com.makkigo.user://auth`)를 바꿀 때뿐입니다 → [mobile.md](mobile.md#웹--앱-브리지).
+**앱이 아는 것** (← 변경 decisions 2026-10-19, 이전 2026-10-08 "앱은 심부름만"): 앱은 카카오 · 구글 · 애플 SDK 와 그 설정값(카카오 네이티브 앱 키, 구글 클라이언트 ID)을 압니다. 제공자를 더하거나 SDK 설정을 바꾸면 **앱 업데이트(스토어 심사)가 필요**합니다. 버튼 목록 · 로그인 뒤 이동 · 회원 처리는 여전히 웹 · 서버가 정합니다 → [mobile.md](mobile.md#웹--앱-브리지).
 
 ## OAuth 세부
 
@@ -49,6 +58,7 @@
 
 - `state` = 우리 키로 서명한 JWT (10분, 제공자 · nonce · CSRF 값 · 웹/앱 · `app_challenge`). CSRF 값은 `makkigo_oauth_csrf` 쿠키(path `/api/v1/auth/oauth`)와 맞춰 봅니다. 애플은 다른 사이트에서 POST 로 돌아오므로 운영에서 이 쿠키는 `SameSite=None; Secure` 입니다.
 - 애플 탈퇴 토큰 철회 (App Store 심사 5.1.1(v)): 고객이 애플로 로그인하면 인가 코드를 애플 리프레시 토큰으로 바꿔 `user_social_accounts.provider_refresh_token` 에 저장하고, 탈퇴 때 `https://appleid.apple.com/auth/revoke` 로 철회합니다. 애플 키(`APPLE_TEAM_ID` · `APPLE_KEY_ID` · `APPLE_PRIVATE_KEY`)가 없으면 교환 · 철회 모두 건너뜁니다. 교환이 실패해도 로그인은 되고, 철회가 실패해도 탈퇴는 됩니다. 이 토큰은 우리 애플 키 없이는 쓸 수 없고 API 응답에 내보내지 않습니다. 요원 로그인은 교환하지 않습니다.
+- 애플 리프레시 토큰은 발급받은 클라이언트 ID(웹 = Services ID, 앱 SDK = 번들 ID)로만 철회되므로 `user_social_accounts.provider_client_id` 에 함께 저장합니다. 이 칸이 비어 있는 예전 토큰은 Services ID 로 철회합니다.
 - 1회용 로그인 코드: `user_login_codes` 에 해시만 저장, 2분, 한 번 쓰면 끝 (틀린 `verifier` 로 시도해도 버려짐).
 
 ## 로그인 화면
@@ -103,8 +113,8 @@
 
 | 제공자 | 할 일 |
 |---|---|
-| 카카오 | 카카오 로그인 활성화, Redirect URI 등록, (선택) 보안 → Client Secret 사용, 동의 항목에 카카오계정(이메일) |
-| 구글 | OAuth 클라이언트 ID **웹 애플리케이션** 유형, 승인된 리디렉션 URI 등록, OAuth 동의 화면 게시 |
+| 카카오 | 카카오 로그인 활성화, Redirect URI 등록, (선택) 보안 → Client Secret 사용, 동의 항목에 카카오계정(이메일). 앱 SDK: 플랫폼에 iOS 번들 ID · Android 패키지 + 키 해시 (makkigo-mobile README) |
+| 구글 | OAuth 클라이언트 ID **웹 애플리케이션** 유형, 승인된 리디렉션 URI 등록, OAuth 동의 화면 게시. 앱 SDK: 같은 프로젝트에 **iOS**(번들 ID) · **Android**(패키지 + SHA-1) 클라이언트 |
 | 애플 | App ID(`com.makkigo.user`)에 Sign in with Apple, **Services ID** 생성 → 도메인 `app.makkigo.com` · Return URL 등록 |
 
 ## 토큰
@@ -148,9 +158,11 @@
 | `PUBLIC_URL` | 고객 앱 주소. 운영 `https://app.makkigo.com`, 로컬 `http://localhost:3001`. 콜백 주소 · 이동 주소를 만듭니다 |
 | `KAKAO_REST_API_KEY` | 카카오 앱 키 → REST API 키 |
 | `KAKAO_CLIENT_SECRET` | 카카오 보안 → Client Secret (사용 안 하면 비우거나 SSM 에 만들지 않음) |
+| `KAKAO_APP_ID` | 카카오 앱 ID (숫자, `1596995`). 앱 SDK 로그인 토큰이 우리 앱 것인지 확인. 고객 앱만 |
 | `GOOGLE_CLIENT_ID` | 구글 웹 애플리케이션 클라이언트 ID |
 | `GOOGLE_CLIENT_SECRET` | 위 클라이언트의 보안 비밀번호 |
 | `APPLE_SERVICES_ID` | 애플 Services ID (예: `com.makkigo.user.web`) |
+| `APPLE_BUNDLE_ID` | 고객 앱 번들 ID (`com.makkigo.user`). 앱 SDK 로그인 ID 토큰의 `aud`. 고객 앱만 |
 | `APPLE_TEAM_ID` | 애플 팀 ID (`8Z9ZNRXURC`). 고객 앱만 |
 | `APPLE_KEY_ID` | Sign in with Apple 을 켠 키(.p8)의 Key ID. 고객 앱만 |
 | `APPLE_PRIVATE_KEY` | 위 .p8 파일 내용을 **한 줄로** (줄바꿈을 `\n` 으로), SecureString. 고객 앱만 |
