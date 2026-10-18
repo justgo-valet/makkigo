@@ -43,7 +43,7 @@ const createPreviews = (now: number): Record<HomeStatus, HomeSnapshot> => {
       parkedAt: minutesAgo(75),
       expectedExitAt: now + 12 * MINUTE_MS,
       actualFee: 15000,
-      accountNumber: "국민 123-456-789012",
+      bankAccount: { bankName: "국민", accountNumber: "123-456-789012" },
     },
   };
 };

@@ -15,6 +15,7 @@ import { useMerchantSearchFlow } from "@/features/merchant/hooks/useMerchantSear
 import PushPermissionBanner from "@/features/push/components/PushPermissionBanner";
 import { usePushPermissionBanner } from "@/features/push/hooks/usePushPermissionBanner";
 import ArrivalDelaySheet from "@/features/valet/components/ArrivalDelaySheet";
+import BankTransferSheet from "@/features/valet/components/BankTransferSheet";
 import LocationConsentSheet from "@/features/valet/components/LocationConsentSheet";
 import PickupRequestSheets from "@/features/valet/components/PickupRequestSheets";
 import ValetNoticeSheet from "@/features/valet/components/ValetNoticeSheet";
@@ -74,8 +75,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
       {home.exitSummary && (
         <ExitSummaryCard
           summary={home.exitSummary}
-          isAccountCopied={home.isAccountCopied}
-          onCopyAccountNumber={home.copyAccountNumber}
+          transfer={home.bankTransfer}
           onFeeDetailClick={pickupRequest.openFeeDetail}
         />
       )}
@@ -129,6 +129,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         onClose={merchantSearch.close}
       />
       <PickupRequestSheets flow={pickupRequest} />
+      <BankTransferSheet transfer={home.bankTransfer} />
       <ValetNoticeSheet
         open={cancelArrival.isOpen}
         title="도착 알림을 취소할까요?"

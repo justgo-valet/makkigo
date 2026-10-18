@@ -1,5 +1,6 @@
 "use client";
 
+import BankTransferSheet from "@/features/valet/components/BankTransferSheet";
 import PickupAcceptedContent from "@/features/valet/components/PickupAcceptedContent";
 import ValetFeeBreakdown from "@/features/valet/components/ValetFeeBreakdown";
 import ValetSheet from "@/features/valet/components/ValetSheet";
@@ -56,11 +57,11 @@ export default function PickupRequestSheets({ flow }: Readonly<PickupRequestShee
           fee={flow.fee}
           isFeeExpanded={flow.isFeeExpanded}
           accountLabel={flow.accountLabel}
-          isAccountCopied={flow.isAccountCopied}
+          transfer={flow.bankTransfer}
           onToggleFee={flow.toggleFee}
-          onCopyAccountNumber={flow.copyAccountNumber}
         />
       </ValetSheet>
+      <BankTransferSheet transfer={flow.bankTransfer} />
     </>
   );
 }

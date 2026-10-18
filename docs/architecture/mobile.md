@@ -43,6 +43,7 @@
 | 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 상태바 글자색을 바꿈 (`light` 흰 글자 · `dark` 검은 글자). 페이지를 새로 열면 `dark` 로 되돌리므로 어두운 화면(로그인)이 켜질 때 `light`, 벗어날 때 `dark` 를 보냄 (mobile #9) |
 | 앱 → 웹 | CSS 변수 `--safe-area-inset-top/bottom/left/right` | 페이지가 뜰 때와 화면 크기가 바뀔 때 `document.documentElement` 인라인 스타일에 px 로 넣음. 브라우저에서는 `env(safe-area-inset-*)` 값이 되도록 `@makkigo/ui` 전역 CSS 에 기본값이 있음. Android 웹뷰는 `env()` 가 항상 0 이라 앱이 넣어 준다 |
 | 웹 → 앱 | `{"type":"openNotificationSettings"}` | 이 앱의 OS 알림 설정 화면을 엶 (`app_settings`). 켜고 돌아오면 토큰 이벤트가 다시 옴 |
+| 웹 → 앱 | `{"type":"queryInstalledApps","schemes":["supertoss","kakaobank",…]}` | 스킴마다 열 수 있는지 확인해 `window` 에 `makkigo:installed-apps` 이벤트로 돌려줌 (`detail: { schemes }`, 열 수 있는 스킴만). 출차 화면 **입금하기**가 설치된 은행 앱만 보여줄 때 씀. 은행 목록 · 스킴 · 송금 주소는 웹 `features/valet/bankApps.ts` 가 정하고, 은행 앱은 웹이 스킴 주소(`supertoss://send?…`)로 이동하면 앱이 외부 앱으로 엶. 앱은 물어볼 스킴을 Android `<queries>` · iOS `LSApplicationQueriesSchemes` 에 미리 등록해야 하므로 **스킴을 더하면 앱 PR 도 함께** 낸다 (웹은 5초 안에 이벤트가 없으면 빈 목록으로 봄) |
 
 **앱은 주소를 만들지 않습니다.** 제공자 · API 경로 · 로그인 규칙은 모두 웹이 정해 메시지로 넘깁니다. 그래서 로그인 · 회원가입 변경은 서버 배포만으로 끝나고, 앱 업데이트는 이 표의 메시지 형식이나 복귀 스킴을 바꿀 때만 필요합니다.
 

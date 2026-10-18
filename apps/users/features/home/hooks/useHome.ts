@@ -12,6 +12,7 @@ import {
 import { getHomePreview, PREVIEW_PARAM } from "@/features/home/homePreview";
 import { getBeforeSessionSnapshot, toHomeSnapshot } from "@/features/home/homeSnapshot";
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
+import { useBankTransfer } from "@/features/valet/hooks/useBankTransfer";
 import { useCurrentSession } from "@/features/valet/hooks/useCurrentSession";
 import { useVehicles } from "@/features/vehicle/hooks/useVehicles";
 import { formatArrivalDelay } from "@/libs/valet/arrivalDelay";
@@ -32,12 +33,11 @@ interface ExitSummary {
   feeLabel: string;
   fee: string;
   canSeeFeeDetail: boolean;
-  accountNumber: string | null;
+  accountLabel: string | null;
 }
 
 const MINUTE_MS = 60 * 1000;
 const NOW_TICK_MS = 30 * 1000;
-const COPIED_RESET_MS = 2000;
 const FALLBACK_ERROR_MESSAGE = "차량 정보를 불러오지 못했습니다.";
 const SESSION_FALLBACK_ERROR_MESSAGE = "발렛 정보를 불러오지 못했습니다.";
 
@@ -89,7 +89,7 @@ const getExitSummary = (snapshot: HomeSnapshot): ExitSummary | null => {
         feeLabel: "지금 출차 시 요금",
         fee: formatWon(snapshot.currentFee ?? 0),
         canSeeFeeDetail: true,
-        accountNumber: null,
+        accountLabel: null,
       };
     case "EXIT_REQUESTED":
       return {
@@ -99,7 +99,7 @@ const getExitSummary = (snapshot: HomeSnapshot): ExitSummary | null => {
         feeLabel: "기준 요금",
         fee: formatWon(snapshot.currentFee ?? 0),
         canSeeFeeDetail: true,
-        accountNumber: null,
+        accountLabel: null,
       };
     case "EXIT_PREPARING":
       return {
@@ -110,7 +110,9 @@ const getExitSummary = (snapshot: HomeSnapshot): ExitSummary | null => {
         feeLabel: "발렛 요금",
         fee: formatWon(snapshot.actualFee ?? snapshot.currentFee ?? 0),
         canSeeFeeDetail: false,
-        accountNumber: snapshot.accountNumber,
+        accountLabel:
+          snapshot.bankAccount &&
+          `${snapshot.bankAccount.bankName} ${snapshot.bankAccount.accountNumber}`,
       };
     default:
       return null;
@@ -135,26 +137,15 @@ const useHome = () => {
   const selectedMerchant = useSelectedMerchantValue();
   const vehiclesQuery = useVehicles();
   const sessionQuery = useCurrentSession();
-  const [isAccountCopied, setIsAccountCopied] = useState(false);
   const vehicle = vehiclesQuery.data?.[0];
   const session = sessionQuery.data?.session ?? null;
   const snapshot =
     getHomePreview(searchParams.get(PREVIEW_PARAM), now) ??
     (session ? toHomeSnapshot(session) : getBeforeSessionSnapshot(selectedMerchant?.name ?? null));
-
-  useEffect(() => {
-    if (!isAccountCopied) return;
-
-    const timer = setTimeout(() => setIsAccountCopied(false), COPIED_RESET_MS);
-
-    return () => clearTimeout(timer);
-  }, [isAccountCopied]);
-
-  const copyAccountNumber = () => {
-    if (!snapshot.accountNumber) return;
-
-    void navigator.clipboard.writeText(snapshot.accountNumber).then(() => setIsAccountCopied(true));
-  };
+  const bankTransfer = useBankTransfer(
+    snapshot.bankAccount,
+    snapshot.actualFee ?? snapshot.currentFee,
+  );
 
   if (vehiclesQuery.isPending || sessionQuery.isPending) return { status: "loading" } as const;
 
@@ -192,8 +183,7 @@ const useHome = () => {
     carImageAlt: `${formatVehicleNumber(vehicle.plateNumber)} 차량`,
     exitSummary: getExitSummary(snapshot),
     actions: getHomeActions(snapshot.status),
-    isAccountCopied,
-    copyAccountNumber,
+    bankTransfer,
   };
 };
 

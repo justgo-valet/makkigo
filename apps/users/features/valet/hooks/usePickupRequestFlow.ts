@@ -1,9 +1,10 @@
 import { getErrorMessage } from "@makkigo/api-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { formatClockTime } from "@/features/home/homeFormat";
 import { requestPickup } from "@/features/valet/apis/requestPickup";
+import { useBankTransfer } from "@/features/valet/hooks/useBankTransfer";
 import {
   CURRENT_SESSION_QUERY_KEY,
   useCurrentSession,
@@ -16,7 +17,6 @@ type PickupRequestStep = "no-session" | "not-parked" | "fee" | "accepted";
 type FeeDetailMode = "request" | "view";
 
 const FALLBACK_ERROR_MESSAGE = "출차 요청을 보내지 못했습니다. 다시 시도해주세요.";
-const COPIED_RESET_MS = 2000;
 
 const isPickupStatus = (session: CurrentSession) =>
   session.status === "PICKUP_REQUESTED" || session.status === "PICKUP_PREPARING";
@@ -30,7 +30,6 @@ const usePickupRequestFlow = () => {
   const [step, setStep] = useState<PickupRequestStep | null>(null);
   const [feeMode, setFeeMode] = useState<FeeDetailMode>("view");
   const [isFeeExpanded, setIsFeeExpanded] = useState(false);
-  const [isAccountCopied, setIsAccountCopied] = useState(false);
   const queryClient = useQueryClient();
   const currentSession = useCurrentSession().data?.session ?? null;
   const { mutate, isPending, error, reset, data } = useMutation({
@@ -42,14 +41,11 @@ const usePickupRequestFlow = () => {
     onSettled: () => queryClient.invalidateQueries({ queryKey: CURRENT_SESSION_QUERY_KEY }),
   });
   const acceptedSession = data?.session ?? currentSession;
-
-  useEffect(() => {
-    if (!isAccountCopied) return;
-
-    const timer = setTimeout(() => setIsAccountCopied(false), COPIED_RESET_MS);
-
-    return () => clearTimeout(timer);
-  }, [isAccountCopied]);
+  const bankAccount = acceptedSession?.bankAccount ?? null;
+  const bankTransfer = useBankTransfer(
+    bankAccount && { bankName: bankAccount.bankName, accountNumber: bankAccount.accountNumber },
+    acceptedSession?.actualFee ?? acceptedSession?.fee?.total ?? null,
+  );
 
   const open = () => {
     reset();
@@ -82,17 +78,8 @@ const usePickupRequestFlow = () => {
     mutate(currentSession.id);
   };
 
-  const copyAccountNumber = () => {
-    const accountNumber = acceptedSession?.bankAccount?.accountNumber;
-
-    if (!accountNumber) return;
-
-    void navigator.clipboard.writeText(accountNumber).then(() => setIsAccountCopied(true));
-  };
-
   const feeSession = step === "fee" ? currentSession : acceptedSession;
   const fee = feeSession?.fee ?? null;
-  const bankAccount = acceptedSession?.bankAccount ?? null;
   const expectedPickupAt = acceptedSession?.expectedPickupAt ?? null;
 
   return {
@@ -108,15 +95,14 @@ const usePickupRequestFlow = () => {
       expectedPickupAt === null
         ? "요원님 확인 후 시각 안내"
         : `${formatClockTime(Date.parse(expectedPickupAt))} 출차 예정`,
-    accountLabel: bankAccount && `${bankAccount.bankName} ${bankAccount.accountNumber}`,
+    accountLabel: bankTransfer.accountLabel,
+    bankTransfer,
     isFeeExpanded,
-    isAccountCopied,
     open,
     openFeeDetail,
     close,
     confirmFee,
     toggleFee: () => setIsFeeExpanded((expanded) => !expanded),
-    copyAccountNumber,
   };
 };
 

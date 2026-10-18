@@ -100,6 +100,41 @@ const setAppStatusBarStyle = (style: AppStatusBarStyle) => {
   getAppChannel()?.postMessage(JSON.stringify({ type: "setStatusBarStyle", style }));
 };
 
+const INSTALLED_APPS_EVENT = "makkigo:installed-apps";
+const INSTALLED_APPS_TIMEOUT_MS = 5 * 1000;
+
+type InstalledAppsEventDetail = {
+  schemes?: unknown;
+};
+
+const toInstalledSchemes = (event: Event): string[] => {
+  const { schemes } = (event as CustomEvent<InstalledAppsEventDetail>).detail ?? {};
+
+  return Array.isArray(schemes)
+    ? schemes.filter((scheme): scheme is string => typeof scheme === "string")
+    : [];
+};
+
+/** 앱이 열 수 있는 스킴만 돌려준다. 앱 밖이거나 제때 응답이 없으면 빈 목록. */
+const queryAppInstalledSchemes = (schemes: string[]) =>
+  new Promise<string[]>((resolve) => {
+    if (!isInApp()) {
+      resolve([]);
+      return;
+    }
+
+    const finish = (installed: string[]) => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener(INSTALLED_APPS_EVENT, handleEvent);
+      resolve(installed);
+    };
+    const handleEvent = (event: Event) => finish(toInstalledSchemes(event));
+    const timeoutId = window.setTimeout(() => finish([]), INSTALLED_APPS_TIMEOUT_MS);
+
+    window.addEventListener(INSTALLED_APPS_EVENT, handleEvent);
+    getAppChannel()?.postMessage(JSON.stringify({ type: "queryInstalledApps", schemes }));
+  });
+
 const toAbsoluteUrl = (path: string) => new URL(path, window.location.origin).toString();
 
 const openAppAuthSession = ({ url, returnUrl }: { url: string; returnUrl: string }) => {
@@ -118,6 +153,7 @@ export {
   onAppPushToken,
   openAppAuthSession,
   openAppNotificationSettings,
+  queryAppInstalledSchemes,
   requestAppLocation,
   setAppStatusBarStyle,
 };
