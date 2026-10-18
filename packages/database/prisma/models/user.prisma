@@ -44,6 +44,7 @@ model UserSocialAccount {
     providerUserId       String         @map("provider_user_id")
     email                String?
     providerRefreshToken String?        @map("provider_refresh_token")
+    providerClientId     String?        @map("provider_client_id")
     createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
     updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 

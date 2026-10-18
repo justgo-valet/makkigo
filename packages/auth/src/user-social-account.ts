@@ -2,9 +2,15 @@ import { Prisma, prisma } from "database";
 
 import type { SocialIdentity } from "./oauth";
 
+/** 탈퇴 때 철회하려고 저장하는 제공자 리프레시 토큰과, 그 토큰을 발급받은 클라이언트 ID (지금은 애플만). */
+export interface ProviderToken {
+  refreshToken: string;
+  clientId: string;
+}
+
 export const findOrCreateUserBySocialIdentity = async (
   identity: SocialIdentity,
-  providerRefreshToken: string | null = null,
+  providerToken: ProviderToken | null = null,
 ): Promise<{ userId: number; isNewUser: boolean }> => {
   const where = {
     provider_providerUserId: {
@@ -18,12 +24,15 @@ export const findOrCreateUserBySocialIdentity = async (
   if (existing) {
     const emailChanged = identity.email !== null && identity.email !== existing.email;
 
-    if (emailChanged || providerRefreshToken) {
+    if (emailChanged || providerToken) {
       await prisma.userSocialAccount.update({
         where,
         data: {
           ...(emailChanged && { email: identity.email }),
-          ...(providerRefreshToken && { providerRefreshToken }),
+          ...(providerToken && {
+            providerRefreshToken: providerToken.refreshToken,
+            providerClientId: providerToken.clientId,
+          }),
         },
       });
     }
@@ -38,7 +47,8 @@ export const findOrCreateUserBySocialIdentity = async (
             provider: identity.provider,
             providerUserId: identity.providerUserId,
             email: identity.email,
-            providerRefreshToken,
+            providerRefreshToken: providerToken?.refreshToken ?? null,
+            providerClientId: providerToken?.clientId ?? null,
           },
         },
       },

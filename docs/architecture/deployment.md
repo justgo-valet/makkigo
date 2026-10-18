@@ -57,9 +57,11 @@
 | `/makkigo/prod/users/USERS_INTERNAL_JOB_TOKEN` | 정기 작업 컨테이너(`users-jobs`)가 고객 앱 내부 API 를 부를 때 쓰는 임의 값 (`openssl rand -hex 32`, 32바이트 이상), SecureString. 없으면 정기 작업이 아무것도 하지 않음 |
 | `/makkigo/prod/users/KAKAO_REST_API_KEY` | 소셜 로그인 값은 → [auth.md](auth.md#환경변수). 같은 키로 카카오모빌리티 길찾기 · 카카오 로컬(주소 검색)도 호출 |
 | `/makkigo/prod/users/KAKAO_CLIENT_SECRET` | Client Secret 을 안 쓰면 만들지 않음 |
+| `/makkigo/prod/users/KAKAO_APP_ID` | 카카오 앱 ID (숫자). 앱 SDK 로그인 토큰 확인용. 없으면 앱 카카오 로그인이 실패함 |
 | `/makkigo/prod/users/GOOGLE_CLIENT_ID` | |
 | `/makkigo/prod/users/GOOGLE_CLIENT_SECRET` | |
 | `/makkigo/prod/users/APPLE_SERVICES_ID` | |
+| `/makkigo/prod/users/APPLE_BUNDLE_ID` | `com.makkigo.user`. 앱 SDK 애플 로그인 확인용. 없으면 앱 애플 로그인이 실패함 |
 | `/makkigo/prod/users/APPLE_TEAM_ID` · `APPLE_KEY_ID` | 애플 탈퇴 토큰 철회용 → [auth.md](auth.md#환경변수). 없으면 철회를 건너뜀 |
 | `/makkigo/prod/users/APPLE_PRIVATE_KEY` | .p8 내용을 한 줄로(`awk 'NF {printf "%s\\n", $0}' AuthKey_XXXX.p8`), SecureString |
 | `/makkigo/prod/valetagents/DATABASE_URL` · `AUTH_JWT_SECRET` · `PUBLIC_URL` | 요원 앱. `PUBLIC_URL` = `https://valet.makkigo.com` |

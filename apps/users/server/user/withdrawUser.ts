@@ -10,10 +10,10 @@ const PERSONAL_DATA_RETENTION_DAYS = 30;
 
 type WithdrawUserResult = { ok: true } | { ok: false; reason: WithdrawErrorCode };
 
-const revokeAppleTokens = (refreshTokens: string[]) =>
+const revokeAppleTokens = (tokens: { refreshToken: string; clientId: string | null }[]) =>
   Promise.all(
-    refreshTokens.map((refreshToken) =>
-      revokeAppleRefreshToken(refreshToken).catch((error: unknown) => {
+    tokens.map(({ refreshToken, clientId }) =>
+      revokeAppleRefreshToken(refreshToken, clientId).catch((error: unknown) => {
         console.error("Failed to revoke Apple token on withdrawal", {
           errorName: error instanceof Error ? error.name : "UnknownError",
         });
@@ -28,7 +28,7 @@ const withdrawUser = async (userId: number): Promise<WithdrawUserResult> => {
   );
   const appleAccounts = await prisma.userSocialAccount.findMany({
     where: { userId, provider: "APPLE", providerRefreshToken: { not: null } },
-    select: { providerRefreshToken: true },
+    select: { providerRefreshToken: true, providerClientId: true },
   });
 
   const result = await prisma.$transaction(async (tx) => {
@@ -53,8 +53,10 @@ const withdrawUser = async (userId: number): Promise<WithdrawUserResult> => {
 
   if (result.ok) {
     await revokeAppleTokens(
-      appleAccounts.flatMap(({ providerRefreshToken }) =>
-        providerRefreshToken ? [providerRefreshToken] : [],
+      appleAccounts.flatMap(({ providerRefreshToken, providerClientId }) =>
+        providerRefreshToken
+          ? [{ refreshToken: providerRefreshToken, clientId: providerClientId }]
+          : [],
       ),
     );
   }

@@ -86,7 +86,8 @@ describe("withdrawUser", () => {
 
   it("revokes stored Apple tokens after the withdrawal transaction", async () => {
     db.prisma.userSocialAccount.findMany.mockResolvedValue([
-      { providerRefreshToken: "apple-refresh" },
+      { providerRefreshToken: "apple-refresh", providerClientId: null },
+      { providerRefreshToken: "app-refresh", providerClientId: "com.makkigo.user" },
     ]);
 
     await expect(withdrawUser(7)).resolves.toEqual({ ok: true });
@@ -94,7 +95,8 @@ describe("withdrawUser", () => {
     expect(db.prisma.userSocialAccount.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expect.objectContaining({ userId: 7, provider: "APPLE" }) }),
     );
-    expect(db.revokeAppleRefreshToken).toHaveBeenCalledWith("apple-refresh");
+    expect(db.revokeAppleRefreshToken).toHaveBeenCalledWith("apple-refresh", null);
+    expect(db.revokeAppleRefreshToken).toHaveBeenCalledWith("app-refresh", "com.makkigo.user");
     expect(db.tx.user.update.mock.invocationCallOrder[0]).toBeLessThan(
       db.revokeAppleRefreshToken.mock.invocationCallOrder[0]!,
     );

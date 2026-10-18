@@ -1,7 +1,7 @@
 import { optionalEnv, requireEnv } from "../config";
 import { buildUrl, getWithBearer, postForm, requireAccessToken, requireCode } from "./http";
 
-import type { OAuthProvider } from "./types";
+import type { OAuthProvider, SocialIdentity } from "./types";
 
 interface KakaoUser {
   id: number;
@@ -26,16 +26,18 @@ export const kakao: OAuthProvider = {
       code: requireCode(code),
       ...(clientSecret ? { client_secret: clientSecret } : {}),
     });
-    const user = (await getWithBearer(
-      "https://kapi.kakao.com/v2/user/me",
-      requireAccessToken(token),
-    )) as KakaoUser;
-    const account = user.kakao_account;
 
-    return {
-      provider: "KAKAO",
-      providerUserId: String(user.id),
-      email: account?.is_email_verified && account.email ? account.email : null,
-    };
+    return identifyKakaoUser(requireAccessToken(token));
   },
+};
+
+export const identifyKakaoUser = async (accessToken: string): Promise<SocialIdentity> => {
+  const user = (await getWithBearer("https://kapi.kakao.com/v2/user/me", accessToken)) as KakaoUser;
+  const account = user.kakao_account;
+
+  return {
+    provider: "KAKAO",
+    providerUserId: String(user.id),
+    email: account?.is_email_verified && account.email ? account.email : null,
+  };
 };

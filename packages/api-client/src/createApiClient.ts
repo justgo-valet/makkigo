@@ -2,7 +2,12 @@ import ky from "ky";
 
 import type { KyInstance } from "ky";
 
-const NO_REFRESH_PATHS = [/\/auth\/social\//, /\/auth\/refresh$/, /\/auth\/logout$/];
+const NO_REFRESH_PATHS = [
+  /\/auth\/social\//,
+  /\/auth\/oauth\//,
+  /\/auth\/refresh$/,
+  /\/auth\/logout$/,
+];
 
 export interface CreateApiClientOptions {
   onAuthExpired: () => void;

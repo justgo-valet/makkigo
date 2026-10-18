@@ -37,7 +37,8 @@
 
 | 방향 | 메시지 | 앱이 하는 일 |
 |---|---|---|
-| 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
+| 웹 → 앱 | `{"type":"nativeLogin","provider":"kakao"\|"google"\|"apple"}` | 각 사 SDK 로 로그인하고 `window` 에 `makkigo:native-login` 이벤트로 돌려줌 (`detail: { provider, status: "success"\|"cancelled"\|"failed", accessToken?, idToken?, authorizationCode? }`). 카카오는 카카오톡이 있으면 카카오톡, 없으면 카카오계정 · 구글은 계정 선택 · 애플은 iOS 시트. 웹은 받은 값을 `POST /api/v1/auth/oauth/{provider}/native` 로 보냄. 시간 제한 없음(다른 앱에 다녀옴) → [auth.md](auth.md#흐름) |
+| 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소, **예전 로그인 방식 — 고객 웹은 지금 안 씀**) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
 | 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |
 | 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 상태바 글자색을 바꿈 (`light` 흰 글자 · `dark` 검은 글자). 페이지를 새로 열면 `dark` 로 되돌리므로 어두운 화면(로그인)이 켜질 때 `light`, 벗어날 때 `dark` 를 보냄 (mobile #9) |
@@ -45,7 +46,7 @@
 | 웹 → 앱 | `{"type":"openNotificationSettings"}` | 이 앱의 OS 알림 설정 화면을 엶 (`app_settings`). 켜고 돌아오면 토큰 이벤트가 다시 옴 |
 | 웹 → 앱 | `{"type":"queryInstalledApps","schemes":["supertoss","kakaobank",…]}` | 스킴마다 열 수 있는지 확인해 `window` 에 `makkigo:installed-apps` 이벤트로 돌려줌 (`detail: { schemes }`, 열 수 있는 스킴만). 출차 화면 **입금하기**가 설치된 은행 앱만 보여줄 때 씀. 은행 목록 · 스킴 · 송금 주소는 웹 `features/valet/bankApps.ts` 가 정하고, 은행 앱은 웹이 스킴 주소(`supertoss://send?…`)로 이동하면 앱이 외부 앱으로 엶. 앱은 물어볼 스킴을 Android `<queries>` · iOS `LSApplicationQueriesSchemes` 에 미리 등록해야 하므로 **스킴을 더하면 앱 PR 도 함께** 낸다 (웹은 5초 안에 이벤트가 없으면 빈 목록으로 봄) |
 
-**앱은 주소를 만들지 않습니다.** 제공자 · API 경로 · 로그인 규칙은 모두 웹이 정해 메시지로 넘깁니다. 그래서 로그인 · 회원가입 변경은 서버 배포만으로 끝나고, 앱 업데이트는 이 표의 메시지 형식이나 복귀 스킴을 바꿀 때만 필요합니다.
+**앱은 주소를 만들지 않습니다.** API 경로 · 로그인 뒤 이동 · 회원 규칙은 웹이 정합니다. 앱 업데이트는 이 표의 메시지 형식, 복귀 스킴, **소셜 로그인 SDK · 설정값**(제공자 추가 포함)을 바꿀 때 필요합니다 (decisions 2026-10-19).
 
 메시지를 추가 · 변경할 때는 makkigo 와 makkigo-mobile PR 을 서로 링크합니다.
 
