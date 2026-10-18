@@ -7,4 +7,3 @@ export { default as appleLogo } from "./login/apple_logo_white.png";
 export { default as googleLogo } from "./login/google_logo_square.png";
 export { default as kakaoSymbol } from "./login/kakao_symbol.svg";
 export { default as loginIllustration } from "./login/login_illustration.png";
-export { default as naverLogo } from "./login/naver_logo.png";

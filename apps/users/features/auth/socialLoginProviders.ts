@@ -1,4 +1,4 @@
-const SOCIAL_LOGIN_PROVIDERS = ["kakao", "google", "apple", "naver"] as const;
+const SOCIAL_LOGIN_PROVIDERS = ["kakao", "google", "apple"] as const;
 
 type SocialLoginProvider = (typeof SOCIAL_LOGIN_PROVIDERS)[number];
 
@@ -6,7 +6,7 @@ type DevicePlatform = "ios" | "android" | "other";
 
 const PROVIDERS_BY_PLATFORM: Record<DevicePlatform, readonly SocialLoginProvider[]> = {
   ios: ["kakao", "google", "apple"],
-  android: ["kakao", "google", "naver"],
+  android: ["kakao", "google"],
   other: SOCIAL_LOGIN_PROVIDERS,
 };
 

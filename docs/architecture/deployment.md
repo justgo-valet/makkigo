@@ -62,13 +62,11 @@
 | `/makkigo/prod/users/APPLE_SERVICES_ID` | |
 | `/makkigo/prod/users/APPLE_TEAM_ID` · `APPLE_KEY_ID` | 애플 탈퇴 토큰 철회용 → [auth.md](auth.md#환경변수). 없으면 철회를 건너뜀 |
 | `/makkigo/prod/users/APPLE_PRIVATE_KEY` | .p8 내용을 한 줄로(`awk 'NF {printf "%s\\n", $0}' AuthKey_XXXX.p8`), SecureString |
-| `/makkigo/prod/users/NAVER_CLIENT_ID` | |
-| `/makkigo/prod/users/NAVER_CLIENT_SECRET` | |
 | `/makkigo/prod/valetagents/DATABASE_URL` · `AUTH_JWT_SECRET` · `PUBLIC_URL` | 요원 앱. `PUBLIC_URL` = `https://valet.makkigo.com` |
 | `/makkigo/prod/valetagents/OAUTH_CALLBACK_ORIGIN` | 소셜 제공자 콜백 주소의 기준 URL |
 | `/makkigo/prod/valetagents/APP_CALLBACK_URL` | Flutter 요원 앱 복귀 주소 (`com.makkigo.valetagent://auth`) |
 | `/makkigo/prod/valetagents/AUTH_COOKIE_DOMAIN` | `.makkigo.com` (콜백 CSRF 쿠키를 두 서브도메인에 공유) |
-| `/makkigo/prod/valetagents/` 소셜 7개 | 고객 앱과 같은 이름 (`KAKAO_REST_API_KEY` … `NAVER_CLIENT_SECRET`) |
+| `/makkigo/prod/valetagents/` 소셜 5개 | 고객 앱과 같은 이름 (`KAKAO_REST_API_KEY` … `APPLE_SERVICES_ID`) |
 | `/makkigo/prod/valetagents/KAKAO_MAP_APP_KEY` | 카카오맵 JavaScript 키 (부스 위치 지도). 브라우저에 보이는 값이지만 다른 값과 같이 런타임에 읽음. 카카오 콘솔에 `https://valet.makkigo.com` 등록 · 카카오맵 사용 설정 필요. 없으면 지도 대신 안내 문구가 뜸 |
 | `/makkigo/prod/valetagents/AWS_REGION` | `ap-northeast-2` |
 | `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |

@@ -46,9 +46,7 @@
 | 카카오 | 인가 코드 → 액세스 토큰 → `/v2/user/me` | 우리 REST 키(+ 시크릿)로 교환 | 인증된 카카오계정 이메일 (동의 항목 설정 시) |
 | 구글 | 인가 코드 → ID 토큰 | 공개키 서명, `aud` = `GOOGLE_CLIENT_ID`, `nonce` | 인증된 이메일 |
 | 애플 | ID 토큰 (`form_post` 로 콜백에 POST) + 고객은 인가 코드 → 리프레시 토큰 | 공개키 서명, `aud` = `APPLE_SERVICES_ID`, `nonce` | 이메일 (가리기 선택 시 중계 주소) |
-| 네이버 | 인가 코드 → 액세스 토큰 → `/v1/nid/me` | 우리 Client ID · Secret 으로 교환 | 프로필 이메일 |
 
-- 토큰을 우리 서버가 직접 교환하므로, 예전 "네이버 토큰이 우리 앱에서 발급됐는지 확인할 수단 없음" 문제는 사라졌습니다.
 - `state` = 우리 키로 서명한 JWT (10분, 제공자 · nonce · CSRF 값 · 웹/앱 · `app_challenge`). CSRF 값은 `makkigo_oauth_csrf` 쿠키(path `/api/v1/auth/oauth`)와 맞춰 봅니다. 애플은 다른 사이트에서 POST 로 돌아오므로 운영에서 이 쿠키는 `SameSite=None; Secure` 입니다.
 - 애플 탈퇴 토큰 철회 (App Store 심사 5.1.1(v)): 고객이 애플로 로그인하면 인가 코드를 애플 리프레시 토큰으로 바꿔 `user_social_accounts.provider_refresh_token` 에 저장하고, 탈퇴 때 `https://appleid.apple.com/auth/revoke` 로 철회합니다. 애플 키(`APPLE_TEAM_ID` · `APPLE_KEY_ID` · `APPLE_PRIVATE_KEY`)가 없으면 교환 · 철회 모두 건너뜁니다. 교환이 실패해도 로그인은 되고, 철회가 실패해도 탈퇴는 됩니다. 이 토큰은 우리 애플 키 없이는 쓸 수 없고 API 응답에 내보내지 않습니다. 요원 로그인은 교환하지 않습니다.
 - 1회용 로그인 코드: `user_login_codes` 에 해시만 저장, 2분, 한 번 쓰면 끝 (틀린 `verifier` 로 시도해도 버려짐).
@@ -81,11 +79,10 @@
 | 카카오 | #FBE200 / #333333 | 공식 말풍선 심볼 18px (`kakao_symbol.svg`) | 카카오로 계속하기 |
 | 구글 | 흰색, 테두리 #D0D5DD / #333333 | 공식 G 로고 20px (`google_logo_square.png` 의 가운데) | Google로 계속하기 |
 | 애플 | 검정 / 흰색 | 버튼 생성기 로고를 흰 로고만 남기고 자름, 19×24 (`apple_logo_white.png`) | Apple로 계속하기 |
-| 네이버 | #1BC500 / 흰색 | 공식 이미지에서 뽑은 흰 N 로고 18px (`naver_logo.png`) | 네이버로 계속하기 |
 
 구글 버튼은 같은 틀에 흰 바탕 + 회색 테두리로 만들었습니다.
 
-**각 사 가이드와 다른 점** (알고 쓰는 것): 애플은 글자가 버튼 높이의 43%(≈21px)보다 작음, 카카오는 색(#FEE500)과 문구("카카오 로그인")가 다름, 네이버는 지정 녹색과 다름, 구글은 Roboto 가 아님. 애플은 심사에서 커스텀 버튼을 보므로 반려되면 애플 버튼만 가이드대로 되돌립니다.
+**각 사 가이드와 다른 점** (알고 쓰는 것): 애플은 글자가 버튼 높이의 43%(≈21px)보다 작음, 카카오는 색(#FEE500)과 문구("카카오 로그인")가 다름, 구글은 Roboto 가 아님. 애플은 심사에서 커스텀 버튼을 보므로 반려되면 애플 버튼만 가이드대로 되돌립니다.
 
 ## 소셜 아이콘
 
@@ -94,13 +91,12 @@
 | 파일 | 출처 |
 |---|---|
 | `kakao.svg` | 카카오 `kakao_login_light.svg` (노란 원 + 말풍선) |
-| `naver.png` | 네이버 `NAVER_login_Light_KR_green_icon_H56.png` (녹색 원 + N, 224px) |
 | `google.svg` | 구글 `Theme=Light, Show text=No, Shape=Pill` (흰 원 + G) |
 | `apple.png` | 애플 생성기 로고 전용 버튼 (검정 사각형 + 로고, 64px) |
 
 ## 콘솔 설정
 
-고객 리다이렉트(콜백) 주소: `https://app.makkigo.com/api/v1/auth/oauth/{kakao|google|apple|naver}/callback`. 요원 앱도 같은 도메인의 `https://app.makkigo.com/api/v1/staff/auth/oauth/{provider}/callback`을 사용하며, Caddy가 이 경로만 `valetagents`로 전달합니다. 로컬 요원 콜백은 `http://localhost:3000/api/v1/staff/auth/oauth/{provider}/callback`입니다 (애플은 HTTPS · 실제 도메인만 가능).
+고객 리다이렉트(콜백) 주소: `https://app.makkigo.com/api/v1/auth/oauth/{kakao|google|apple}/callback`. 요원 앱도 같은 도메인의 `https://app.makkigo.com/api/v1/staff/auth/oauth/{provider}/callback`을 사용하며, Caddy가 이 경로만 `valetagents`로 전달합니다. 로컬 요원 콜백은 `http://localhost:3000/api/v1/staff/auth/oauth/{provider}/callback`입니다 (애플은 HTTPS · 실제 도메인만 가능).
 
 요원 로그인 시작은 `valet.makkigo.com`, 콜백은 `app.makkigo.com`이므로 운영의 `AUTH_COOKIE_DOMAIN`은 `.makkigo.com`, `OAUTH_CALLBACK_ORIGIN`은 `https://app.makkigo.com`으로 설정합니다. 도메인 공유 쿠키는 콜백 검증용 CSRF 값뿐입니다. 콜백은 verifier에 묶인 1회용 코드를 `valet.makkigo.com`으로 돌려보내고, Staff 액세스·리프레시 토큰은 그곳에서 host-only 쿠키로 발급합니다.
 
@@ -109,7 +105,6 @@
 | 카카오 | 카카오 로그인 활성화, Redirect URI 등록, (선택) 보안 → Client Secret 사용, 동의 항목에 카카오계정(이메일) |
 | 구글 | OAuth 클라이언트 ID **웹 애플리케이션** 유형, 승인된 리디렉션 URI 등록, OAuth 동의 화면 게시 |
 | 애플 | App ID(`com.makkigo.user`)에 Sign in with Apple, **Services ID** 생성 → 도메인 `app.makkigo.com` · Return URL 등록 |
-| 네이버 | 애플리케이션 등록(네이버 로그인), 서비스 URL `https://app.makkigo.com`, Callback URL 등록, 이메일 권한. 운영 전 **검수 요청** |
 
 ## 토큰
 
@@ -158,5 +153,3 @@
 | `APPLE_TEAM_ID` | 애플 팀 ID (`8Z9ZNRXURC`). 고객 앱만 |
 | `APPLE_KEY_ID` | Sign in with Apple 을 켠 키(.p8)의 Key ID. 고객 앱만 |
 | `APPLE_PRIVATE_KEY` | 위 .p8 파일 내용을 **한 줄로** (줄바꿈을 `\n` 으로), SecureString. 고객 앱만 |
-| `NAVER_CLIENT_ID` | 네이버 Client ID |
-| `NAVER_CLIENT_SECRET` | 네이버 Client Secret |
