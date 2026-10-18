@@ -7,6 +7,13 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* 상태바 · 홈 인디케이터 여백. 브라우저는 env() 값이고, 앱(웹뷰)은 이 변수를 직접 덮어쓴다
+     (Android 웹뷰는 env() 가 항상 0). 여백을 둘 때는 env() 대신 이 변수를 쓴다. */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

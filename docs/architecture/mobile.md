@@ -26,6 +26,7 @@
 | 다른 호스트, `tel:` 등 | 외부 브라우저 · 앱으로 열기 |
 | 뒤로 가기 (Android) | 웹 기록이 있으면 웹 뒤로, 없으면 앱 종료 |
 | 화면 방향 | 세로 고정 |
+| 안전영역 | 웹뷰가 상태바 · 홈 인디케이터 뒤까지 채움(edge-to-edge). 여백은 웹이 CSS 변수 `--safe-area-inset-top/bottom/left/right` 로 둠 → [브리지](#웹--앱-브리지) |
 | 지원 기기 | iOS 는 **iPhone 만** (iPad 스크린샷 · 심사 부담 없음) |
 | HTTP | 운영은 HTTPS 만. 개발용 HTTP 는 Android 디버그 빌드와 iOS 로컬 네트워크만 허용 |
 
@@ -39,6 +40,8 @@
 
 | 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
 | 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |
+| 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 상태바 글자색을 바꿈 (`light` 흰 글자 · `dark` 검은 글자). 페이지를 새로 열면 `dark` 로 되돌리므로 어두운 화면(로그인)이 켜질 때 `light`, 벗어날 때 `dark` 를 보냄 (mobile #9) |
+| 앱 → 웹 | CSS 변수 `--safe-area-inset-top/bottom/left/right` | 페이지가 뜰 때와 화면 크기가 바뀔 때 `document.documentElement` 인라인 스타일에 px 로 넣음. 브라우저에서는 `env(safe-area-inset-*)` 값이 되도록 `@makkigo/ui` 전역 CSS 에 기본값이 있음. Android 웹뷰는 `env()` 가 항상 0 이라 앱이 넣어 준다 |
 | 웹 → 앱 | `{"type":"openNotificationSettings"}` | 이 앱의 OS 알림 설정 화면을 엶 (`app_settings`). 켜고 돌아오면 토큰 이벤트가 다시 옴 |
 
 **앱은 주소를 만들지 않습니다.** 제공자 · API 경로 · 로그인 규칙은 모두 웹이 정해 메시지로 넘깁니다. 그래서 로그인 · 회원가입 변경은 서버 배포만으로 끝나고, 앱 업데이트는 이 표의 메시지 형식이나 복귀 스킴을 바꿀 때만 필요합니다.

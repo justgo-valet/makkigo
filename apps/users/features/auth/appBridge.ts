@@ -90,6 +90,16 @@ const requestAppLocation = () =>
     getAppChannel()?.postMessage(JSON.stringify({ type: "requestLocation" }));
   });
 
+type AppStatusBarStyle = "light" | "dark";
+
+/**
+ * 상태바 글자색. `light` 는 흰 글자(어두운 배경), `dark` 는 검은 글자(밝은 배경).
+ * 앱은 페이지를 새로 열 때마다 `dark` 로 되돌리므로, 어두운 화면이 켜질 때 `light` 를 보내고 벗어날 때 `dark` 로 돌려 둔다.
+ */
+const setAppStatusBarStyle = (style: AppStatusBarStyle) => {
+  getAppChannel()?.postMessage(JSON.stringify({ type: "setStatusBarStyle", style }));
+};
+
 const toAbsoluteUrl = (path: string) => new URL(path, window.location.origin).toString();
 
 const openAppAuthSession = ({ url, returnUrl }: { url: string; returnUrl: string }) => {
@@ -109,5 +119,6 @@ export {
   openAppAuthSession,
   openAppNotificationSettings,
   requestAppLocation,
+  setAppStatusBarStyle,
 };
-export type { AppLocation, AppPushState, AppPushToken };
+export type { AppLocation, AppPushState, AppPushToken, AppStatusBarStyle };

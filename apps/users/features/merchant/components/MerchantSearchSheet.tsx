@@ -52,7 +52,7 @@ export default function MerchantSearchSheet({
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="mx-auto h-[calc(100dvh-180px)] max-w-md gap-0 rounded-t-[20px] border-none px-5 pt-3 pb-[calc(24px+env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.12)]"
+        className="mx-auto h-[calc(100dvh-180px)] max-w-md gap-0 rounded-t-[20px] border-none px-5 pt-3 pb-[calc(24px+var(--safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.12)]"
         onCloseAutoFocus={search.reset}
       >
         <SheetHeader className="sr-only">
