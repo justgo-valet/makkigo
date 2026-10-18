@@ -284,6 +284,7 @@ export function TimePickerSheet({
 
         <div
           className="relative mt-[18px] flex h-[162px] justify-center gap-[52px]"
+          data-sheet-drag="none"
           data-slot="time-picker-columns"
         >
           <div

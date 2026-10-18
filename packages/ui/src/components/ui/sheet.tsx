@@ -5,6 +5,8 @@ import { cn } from "cn"
 import { XIcon } from "lucide-react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
+import { useSheetDrag } from "../../hooks/use-sheet-drag"
+
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
@@ -49,17 +51,26 @@ function SheetContent({
   side = "right",
   showCloseButton = true,
   overlayClassName,
+  ref,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
   overlayClassName?: string
 }) {
+  const dragCloseRef = React.useRef<HTMLButtonElement>(null)
+  const setDragNode = useSheetDrag(side === "bottom", () => dragCloseRef.current?.click())
+
   return (
     <SheetPortal>
       <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        ref={(node) => {
+          setDragNode(node)
+          if (typeof ref === "function") return ref(node)
+          if (ref) ref.current = node
+        }}
         className={cn(
           "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
           side === "right" &&
@@ -75,6 +86,9 @@ function SheetContent({
         {...props}
       >
         {children}
+        {side === "bottom" && (
+          <SheetPrimitive.Close ref={dragCloseRef} className="hidden" tabIndex={-1} aria-hidden />
+        )}
         {showCloseButton && (
           <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
             <XIcon className="size-4" />
