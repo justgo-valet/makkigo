@@ -5,6 +5,7 @@ import { cn } from "cn"
 import { XIcon } from "lucide-react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
+import { useKeyboardInset } from "../../hooks/use-keyboard-inset"
 import { useSheetDrag } from "../../hooks/use-sheet-drag"
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -52,6 +53,7 @@ function SheetContent({
   showCloseButton = true,
   overlayClassName,
   ref,
+  style,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
@@ -60,12 +62,18 @@ function SheetContent({
 }) {
   const dragCloseRef = React.useRef<HTMLButtonElement>(null)
   const setDragNode = useSheetDrag(side === "bottom", () => dragCloseRef.current?.click())
+  const keyboardInset = useKeyboardInset(side === "bottom")
 
   return (
     <SheetPortal>
       <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        style={
+          keyboardInset > 0
+            ? { ...style, bottom: keyboardInset, maxHeight: `calc(100dvh - ${keyboardInset}px)` }
+            : style
+        }
         ref={(node) => {
           setDragNode(node)
           if (typeof ref === "function") return ref(node)
