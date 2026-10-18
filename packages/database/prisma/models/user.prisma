@@ -2,7 +2,6 @@ enum SocialProvider {
     KAKAO
     GOOGLE
     APPLE
-    NAVER
 }
 
 enum ConsentType {

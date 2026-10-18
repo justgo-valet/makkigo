@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const SOCIAL_PROVIDERS = ["KAKAO", "GOOGLE", "APPLE", "NAVER"] as const;
+const SOCIAL_PROVIDERS = ["KAKAO", "GOOGLE", "APPLE"] as const;
 
 const profileResponseSchema = z.object({
   phoneNumber: z.string().nullable(),

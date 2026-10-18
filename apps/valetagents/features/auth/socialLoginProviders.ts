@@ -1,10 +1,10 @@
-const SOCIAL_LOGIN_PROVIDERS = ["kakao", "google", "apple", "naver"] as const;
+const SOCIAL_LOGIN_PROVIDERS = ["kakao", "google", "apple"] as const;
 type SocialLoginProvider = (typeof SOCIAL_LOGIN_PROVIDERS)[number];
 type LoginError = "cancelled" | "failed";
 
 const getProviders = (userAgent: string): readonly SocialLoginProvider[] => {
   if (/iPhone|iPad|iPod/i.test(userAgent)) return ["kakao", "google", "apple"];
-  if (/Android/i.test(userAgent)) return ["kakao", "google", "naver"];
+  if (/Android/i.test(userAgent)) return ["kakao", "google"];
   return SOCIAL_LOGIN_PROVIDERS;
 };
 
