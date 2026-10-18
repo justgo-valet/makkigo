@@ -1,8 +1,9 @@
-import { Button } from "@makkigo/ui";
 import Image from "next/image";
 
+import BankTransferButton from "@/features/valet/components/BankTransferButton";
 import ValetFeeBreakdown from "@/features/valet/components/ValetFeeBreakdown";
 
+import type { BankTransfer } from "@/features/valet/hooks/useBankTransfer";
 import type { ValetFeeView } from "@/features/valet/valetFeeFormat";
 
 interface PickupAcceptedContentProps {
@@ -10,9 +11,8 @@ interface PickupAcceptedContentProps {
   fee: ValetFeeView | null;
   isFeeExpanded: boolean;
   accountLabel: string | null;
-  isAccountCopied: boolean;
+  transfer: BankTransfer;
   onToggleFee: () => void;
-  onCopyAccountNumber: () => void;
 }
 
 export default function PickupAcceptedContent({
@@ -20,9 +20,8 @@ export default function PickupAcceptedContent({
   fee,
   isFeeExpanded,
   accountLabel,
-  isAccountCopied,
+  transfer,
   onToggleFee,
-  onCopyAccountNumber,
 }: Readonly<PickupAcceptedContentProps>) {
   return (
     <div className="flex flex-col gap-3">
@@ -74,15 +73,7 @@ export default function PickupAcceptedContent({
             <span className="mr-1.5">계좌번호</span>
             {accountLabel}
           </p>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className="shrink-0 px-0"
-            onClick={onCopyAccountNumber}
-          >
-            {isAccountCopied ? "복사됨" : "복사"}
-          </Button>
+          <BankTransferButton transfer={transfer} />
         </div>
       )}
     </div>

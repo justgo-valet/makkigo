@@ -1,12 +1,12 @@
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import Image from "next/image";
 
-import { appleLogo, googleLogo, kakaoSymbol, naverLogo } from "../../../assets";
+import { appleLogo, googleLogo, kakaoSymbol } from "../../../assets";
 import { Button } from "../../ui/button";
 
 import type { ReactNode } from "react";
 
-type SocialLoginProvider = "kakao" | "google" | "apple" | "naver";
+type SocialLoginProvider = "kakao" | "google" | "apple";
 
 interface SocialLoginButtonProps {
   provider: SocialLoginProvider;
@@ -20,11 +20,6 @@ const BUTTONS: Record<SocialLoginProvider, { label: string; className: string; i
       label: "카카오로 계속하기",
       className: "bg-[#FBE200] text-[#333333] hover:bg-[#FBE200] hover:text-[#333333]",
       icon: <Image src={kakaoSymbol} alt="" width={18} height={18} />,
-    },
-    naver: {
-      label: "네이버로 계속하기",
-      className: "bg-[#1BC500] text-white hover:bg-[#1BC500] hover:text-white",
-      icon: <Image src={naverLogo} alt="" width={18} height={18} />,
     },
     google: {
       label: "Google로 계속하기",

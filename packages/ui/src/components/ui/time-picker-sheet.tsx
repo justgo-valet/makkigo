@@ -267,7 +267,7 @@ export function TimePickerSheet({
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
       <SheetContent
-        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] px-[27px] pt-[39px] pb-[max(19px,env(safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
+        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] px-[27px] pt-[39px] pb-[max(19px,var(--safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
         onCloseAutoFocus={restoreFocus}
         overlayClassName="bg-transparent"
         showCloseButton={false}
@@ -284,6 +284,7 @@ export function TimePickerSheet({
 
         <div
           className="relative mt-[18px] flex h-[162px] justify-center gap-[52px]"
+          data-sheet-drag="none"
           data-slot="time-picker-columns"
         >
           <div

@@ -90,6 +90,51 @@ const requestAppLocation = () =>
     getAppChannel()?.postMessage(JSON.stringify({ type: "requestLocation" }));
   });
 
+type AppStatusBarStyle = "light" | "dark";
+
+/**
+ * 상태바 글자색. `light` 는 흰 글자(어두운 배경), `dark` 는 검은 글자(밝은 배경).
+ * 앱은 페이지를 새로 열 때마다 `dark` 로 되돌리므로, 어두운 화면이 켜질 때 `light` 를 보내고 벗어날 때 `dark` 로 돌려 둔다.
+ */
+const setAppStatusBarStyle = (style: AppStatusBarStyle) => {
+  getAppChannel()?.postMessage(JSON.stringify({ type: "setStatusBarStyle", style }));
+};
+
+const INSTALLED_APPS_EVENT = "makkigo:installed-apps";
+const INSTALLED_APPS_TIMEOUT_MS = 5 * 1000;
+
+type InstalledAppsEventDetail = {
+  schemes?: unknown;
+};
+
+const toInstalledSchemes = (event: Event): string[] => {
+  const { schemes } = (event as CustomEvent<InstalledAppsEventDetail>).detail ?? {};
+
+  return Array.isArray(schemes)
+    ? schemes.filter((scheme): scheme is string => typeof scheme === "string")
+    : [];
+};
+
+/** 앱이 열 수 있는 스킴만 돌려준다. 앱 밖이거나 제때 응답이 없으면 빈 목록. */
+const queryAppInstalledSchemes = (schemes: string[]) =>
+  new Promise<string[]>((resolve) => {
+    if (!isInApp()) {
+      resolve([]);
+      return;
+    }
+
+    const finish = (installed: string[]) => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener(INSTALLED_APPS_EVENT, handleEvent);
+      resolve(installed);
+    };
+    const handleEvent = (event: Event) => finish(toInstalledSchemes(event));
+    const timeoutId = window.setTimeout(() => finish([]), INSTALLED_APPS_TIMEOUT_MS);
+
+    window.addEventListener(INSTALLED_APPS_EVENT, handleEvent);
+    getAppChannel()?.postMessage(JSON.stringify({ type: "queryInstalledApps", schemes }));
+  });
+
 const toAbsoluteUrl = (path: string) => new URL(path, window.location.origin).toString();
 
 const openAppAuthSession = ({ url, returnUrl }: { url: string; returnUrl: string }) => {
@@ -108,6 +153,8 @@ export {
   onAppPushToken,
   openAppAuthSession,
   openAppNotificationSettings,
+  queryAppInstalledSchemes,
   requestAppLocation,
+  setAppStatusBarStyle,
 };
-export type { AppLocation, AppPushState, AppPushToken };
+export type { AppLocation, AppPushState, AppPushToken, AppStatusBarStyle };

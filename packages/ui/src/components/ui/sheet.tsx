@@ -5,6 +5,9 @@ import { cn } from "cn"
 import { XIcon } from "lucide-react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
+import { useKeyboardInset } from "../../hooks/use-keyboard-inset"
+import { useSheetDrag } from "../../hooks/use-sheet-drag"
+
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
@@ -49,17 +52,33 @@ function SheetContent({
   side = "right",
   showCloseButton = true,
   overlayClassName,
+  ref,
+  style,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
   overlayClassName?: string
 }) {
+  const dragCloseRef = React.useRef<HTMLButtonElement>(null)
+  const setDragNode = useSheetDrag(side === "bottom", () => dragCloseRef.current?.click())
+  const keyboardInset = useKeyboardInset(side === "bottom")
+
   return (
     <SheetPortal>
       <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        style={
+          keyboardInset > 0
+            ? { ...style, bottom: keyboardInset, maxHeight: `calc(100dvh - ${keyboardInset}px)` }
+            : style
+        }
+        ref={(node) => {
+          setDragNode(node)
+          if (typeof ref === "function") return ref(node)
+          if (ref) ref.current = node
+        }}
         className={cn(
           "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
           side === "right" &&
@@ -69,12 +88,15 @@ function SheetContent({
           side === "top" &&
             "inset-x-0 top-0 h-auto border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
           side === "bottom" &&
-            "inset-x-0 bottom-0 h-auto border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+            "inset-x-0 bottom-0 h-auto border-t pb-(--safe-area-inset-bottom) data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
           className
         )}
         {...props}
       >
         {children}
+        {side === "bottom" && (
+          <SheetPrimitive.Close ref={dragCloseRef} className="hidden" tabIndex={-1} aria-hidden />
+        )}
         {showCloseButton && (
           <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
             <XIcon className="size-4" />

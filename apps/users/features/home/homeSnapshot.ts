@@ -1,3 +1,4 @@
+import type { BankTransferAccount } from "@/features/valet/bankApps";
 import type { CurrentSession, CurrentSessionStatus } from "@/libs/valet/contracts/currentSession";
 
 type HomeStatus =
@@ -20,7 +21,7 @@ interface HomeSnapshot {
   currentFee: number | null;
   actualFee: number | null;
   expectedExitAt: number | null;
-  accountNumber: string | null;
+  bankAccount: BankTransferAccount | null;
 }
 
 const HOME_STATUS_BY_SESSION_STATUS: Record<CurrentSessionStatus, HomeStatus> = {
@@ -44,7 +45,7 @@ const getBeforeSessionSnapshot = (merchantName: string | null): HomeSnapshot => 
   currentFee: null,
   actualFee: null,
   expectedExitAt: null,
-  accountNumber: null,
+  bankAccount: null,
 });
 
 const toHomeSnapshot = (session: CurrentSession): HomeSnapshot => ({
@@ -59,9 +60,10 @@ const toHomeSnapshot = (session: CurrentSession): HomeSnapshot => ({
   currentFee: session.fee?.total ?? null,
   actualFee: session.actualFee,
   expectedExitAt: toTime(session.expectedPickupAt),
-  accountNumber: session.bankAccount
-    ? `${session.bankAccount.bankName} ${session.bankAccount.accountNumber}`
-    : null,
+  bankAccount: session.bankAccount && {
+    bankName: session.bankAccount.bankName,
+    accountNumber: session.bankAccount.accountNumber,
+  },
 });
 
 export { getBeforeSessionSnapshot, toHomeSnapshot };

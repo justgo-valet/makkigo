@@ -61,7 +61,7 @@ export default function ValetSheet({
           </SheetHeader>
           {children && <div className="px-5 pt-5">{children}</div>}
         </div>
-        <SheetFooter className="px-5 pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <SheetFooter className="px-5 pt-5 pb-6">
           <FieldError>{errorMessage}</FieldError>
           <Button
             type="button"

@@ -40,7 +40,6 @@ const SOCIAL_PROVIDER_LABELS: Record<SocialProvider, { name: string; iconSrc: st
   KAKAO: { name: "카카오", iconSrc: "/images/social/kakao.svg" },
   GOOGLE: { name: "구글", iconSrc: "/images/social/google.svg" },
   APPLE: { name: "Apple", iconSrc: "/images/social/apple.png" },
-  NAVER: { name: "네이버", iconSrc: "/images/social/naver.png" },
 };
 
 export { LOCATION_CONSENT_ITEM, SOCIAL_PROVIDER_LABELS, TERMS_ITEMS };

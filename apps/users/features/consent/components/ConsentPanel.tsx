@@ -24,7 +24,10 @@ export default function ConsentPanel({
   };
 
   return (
-    <div className="w-full h-screen fixed top-0 left-0 bg-white z-50" id={id}>
+    <div
+      className="fixed top-0 left-0 z-50 h-screen w-full bg-white pt-(--safe-area-inset-top) pb-(--safe-area-inset-bottom)"
+      id={id}
+    >
       <header className="p-4 flex items-center gap-2 justify-start h-16">
         <button type="button" aria-label="약관 패널 닫기" onClick={onClose}>
           <Image src="/icons/arrow_right.svg" alt="" width={20} height={20} aria-hidden />
@@ -34,7 +37,9 @@ export default function ConsentPanel({
       <PolicyMarkdown
         content={content}
         className={cn(
-          onAgree ? "h-[calc(100vh-4rem-5rem)]" : "h-[calc(100vh-4rem)]",
+          onAgree
+            ? "h-[calc(100vh-4rem-5rem-var(--safe-area-inset-top)-var(--safe-area-inset-bottom))]"
+            : "h-[calc(100vh-4rem-var(--safe-area-inset-top)-var(--safe-area-inset-bottom))]",
           "overflow-y-auto rounded-md px-6 pb-4",
         )}
       />
