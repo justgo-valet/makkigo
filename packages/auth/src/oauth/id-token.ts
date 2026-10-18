@@ -7,7 +7,8 @@ import type { createRemoteJWKSet, JWTPayload } from "jose";
 export const verifyIdToken = async (
   idToken: string,
   jwks: ReturnType<typeof createRemoteJWKSet>,
-  options: { issuer: string | string[]; audience: string; nonce: string },
+  /** `nonce: null` 은 앱 SDK 로그인용. 구글 SDK 는 nonce 를 앱 시작 때 한 번만 정할 수 있어 로그인마다 맞춰 볼 수 없다. */
+  options: { issuer: string | string[]; audience: string; nonce: string | null },
 ): Promise<JWTPayload & { sub: string }> => {
   try {
     const { payload } = await jwtVerify(idToken, jwks, {
@@ -15,7 +16,7 @@ export const verifyIdToken = async (
       audience: options.audience,
     });
 
-    if (!payload.sub || payload.nonce !== options.nonce) {
+    if (!payload.sub || (options.nonce !== null && payload.nonce !== options.nonce)) {
       throw new SocialAuthError("ID 토큰의 사용자 또는 nonce 가 맞지 않습니다.");
     }
 

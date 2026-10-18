@@ -9,6 +9,7 @@ export {
 } from "./user-login-code";
 export { revokeUserRefreshToken } from "./user-logout";
 export {
+  completeUserNativeLogin,
   completeUserOAuth,
   isValidAppChallenge,
   readUserOAuthState,
@@ -25,5 +26,6 @@ export { refreshStaffTokens } from "./staff-token-refresh";
 export { issueStaffTokens } from "./staff-tokens";
 
 export type { OAuthCallbackParams, SocialIdentity } from "./oauth";
+export type { NativeLoginCredential } from "./oauth/native";
 export type { OAuthClient, OAuthState } from "./oauth/state";
 export type { IssuedToken } from "./tokens";

@@ -7,7 +7,7 @@ import { verifyIdToken } from "./id-token";
 
 import type { OAuthProvider } from "./types";
 
-const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
+export const GOOGLE_JWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
 
 export const google: OAuthProvider = {
   buildAuthorizationUrl: ({ redirectUri, state, nonce }) =>
