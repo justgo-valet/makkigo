@@ -5,15 +5,23 @@ import { FieldError } from "../../ui/field";
 import { SocialLoginButton } from "./SocialLoginButton";
 
 import type { SocialLoginProvider } from "./SocialLoginButton";
+import type { ReactNode } from "react";
 
 interface LoginScreenProps {
   providers: readonly SocialLoginProvider[];
   disabled: boolean;
   errorMessage: string | null;
   onLogin: (provider: SocialLoginProvider) => void;
+  children?: ReactNode;
 }
 
-function LoginScreen({ providers, disabled, errorMessage, onLogin }: Readonly<LoginScreenProps>) {
+function LoginScreen({
+  providers,
+  disabled,
+  errorMessage,
+  onLogin,
+  children,
+}: Readonly<LoginScreenProps>) {
   return (
     <div className="fixed inset-0 flex justify-center overflow-y-auto bg-(--surface-color)">
       <div className="flex flex-col w-full min-h-dvh max-w-md bg-[#0970E9]">
@@ -45,6 +53,7 @@ function LoginScreen({ providers, disabled, errorMessage, onLogin }: Readonly<Lo
               onClick={() => onLogin(provider)}
             />
           ))}
+          {children}
         </div>
       </div>
     </div>
