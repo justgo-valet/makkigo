@@ -76,7 +76,7 @@ export default function CarModelStep({
                 autoComplete="off"
                 aria-invalid={Boolean(error)}
                 aria-describedby="car-model-error"
-                className="h-auto p-0 text-sm font-medium border-0 shadow-none focus:border-0"
+                className="h-auto p-0 text-base font-medium border-0 shadow-none focus:border-0"
                 onFocus={onCustomModelFocus}
               />
             </CardContent>

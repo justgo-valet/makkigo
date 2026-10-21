@@ -32,6 +32,15 @@ export default function EditNumberSheet({ edit, description }: Readonly<EditNumb
         side="bottom"
         showCloseButton={false}
         className="mx-auto max-w-md gap-0 rounded-t-2xl"
+        onOpenAutoFocus={(event) => {
+          // Radix 는 첫 입력칸에 포커스하면서 글자를 모두 선택한다. 커서만 끝에 둔다.
+          event.preventDefault();
+          const input = document.getElementById(inputId);
+          if (input instanceof HTMLInputElement) {
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+          }
+        }}
       >
         <div aria-hidden className="mx-auto mt-3 h-1 w-9 rounded-full bg-border" />
         <form onSubmit={edit.handleSubmit} noValidate>

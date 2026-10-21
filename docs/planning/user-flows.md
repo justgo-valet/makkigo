@@ -49,7 +49,7 @@
 1. 메인 → 지연 알림 버튼
 2. 도착 알림을 보내지 않았으면: "도착 알림을 먼저 해주세요" → 도착 알림 플로우
 3. 보냈으면: 몇 분/시간 지연되는지 선택 → 지연 알림 보내기
-   - 선택지는 **5분 · 10분 · 15분 이상** ([screens.md](../design/screens.md) A3). 다시 보내면 마지막 값으로 바뀝니다 → [valet-session.md](valet-session.md#도착-알림)
+   - 선택지는 **5분 · 10분 · 15분+**, 15분+ 는 5분씩 늘리고 줄여 최대 60분 ([screens.md](../design/screens.md) A3). 다시 보내면 마지막 값으로 바뀝니다 → [valet-session.md](valet-session.md#도착-알림)
 
 ## 출차 요청
 
