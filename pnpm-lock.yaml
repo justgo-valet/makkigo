@@ -195,6 +195,9 @@ importers:
       ky:
         specifier: ^2.1.0
         version: 2.1.0
+      lucide-react:
+        specifier: ^1.46.0
+        version: 1.46.0(react@19.3.0)
       motion:
         specifier: ^13.4.4
         version: 13.4.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)

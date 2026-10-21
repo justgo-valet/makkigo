@@ -155,10 +155,14 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         open={arrivalDelay.isSelectOpen}
         expectedArrivalTime={arrivalDelay.expectedArrivalTime}
         options={arrivalDelay.options}
-        selectedMinutes={arrivalDelay.selectedMinutes}
+        selectedOptionMinutes={arrivalDelay.selectedOptionMinutes}
+        stepper={arrivalDelay.stepper}
+        maxMinutes={arrivalDelay.maxMinutes}
         isSending={arrivalDelay.isSending}
         errorMessage={arrivalDelay.errorMessage}
         onSelect={arrivalDelay.select}
+        onDecrease={arrivalDelay.decrease}
+        onIncrease={arrivalDelay.increase}
         onSend={arrivalDelay.send}
         onClose={arrivalDelay.close}
       />
