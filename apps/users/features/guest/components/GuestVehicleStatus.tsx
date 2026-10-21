@@ -3,6 +3,8 @@
 import { Button } from "@makkigo/ui";
 
 import { useHiddenHeader } from "@/features/auth/hooks/useHiddenHeader";
+import ConsentPanel from "@/features/consent/components/ConsentPanel";
+import GuestExitConsent from "@/features/guest/components/GuestExitConsent";
 import { useGuestVehicleStatus } from "@/features/guest/hooks/useGuestVehicleStatus";
 
 export default function GuestVehicleStatus() {
@@ -11,9 +13,9 @@ export default function GuestVehicleStatus() {
 
   return (
     <div className="mx-auto h-full w-full max-w-[375px]">
-      <div className="flex h-full min-h-[620px] flex-col overflow-hidden rounded-lg bg-white px-6 py-6">
+      <div className="flex min-h-full flex-col rounded-lg bg-white px-6 py-6">
         {guest.view === "lookup" ? (
-          <form className="flex h-full flex-col" onSubmit={guest.lookupVehicle}>
+          <form className="flex flex-1 flex-col" onSubmit={guest.lookupVehicle}>
             <p
               className="text-2xl font-medium tracking-[-0.06em] text-[#9a9a93]"
               aria-label="막히고"
@@ -53,7 +55,7 @@ export default function GuestVehicleStatus() {
             </Button>
           </form>
         ) : (
-          <div className="flex h-full flex-col">
+          <div className="flex flex-1 flex-col">
             <button
               type="button"
               onClick={guest.resetLookup}
@@ -67,7 +69,7 @@ export default function GuestVehicleStatus() {
 
             <section
               aria-label="발렛 티켓"
-              className="mx-auto mt-10 w-full max-w-[300px] overflow-hidden rounded-lg bg-white shadow-[0_4px_5px_rgba(2,8,23,0.22)]"
+              className="mx-auto mt-10 w-full max-w-[300px] shrink-0 overflow-hidden rounded-lg bg-white shadow-[0_4px_5px_rgba(2,8,23,0.22)]"
             >
               <div className="bg-[#216ed4] px-5 py-5 text-white">
                 <div className="flex items-center justify-between gap-3">
@@ -113,17 +115,35 @@ export default function GuestVehicleStatus() {
               </output>
             )}
 
-            <Button
-              type="button"
-              disabled={guest.requestedExit}
-              onClick={guest.requestExit}
-              className="mt-auto h-14 w-full rounded-md bg-[#216ed4] text-sm font-medium text-slate-50 shadow-[0_1px_1px_rgba(0,0,0,0.05)]"
-            >
-              {guest.requestedExit ? "출차 요청 완료" : "출차 요청"}
-            </Button>
+            <div className="mt-auto">
+              {!guest.requestedExit && (
+                <GuestExitConsent
+                  agreed={guest.agreed}
+                  onAgreedChange={guest.changeAgreed}
+                  onOpenDocument={guest.openDocument}
+                />
+              )}
+
+              <Button
+                type="button"
+                disabled={!guest.canRequestExit}
+                onClick={guest.requestExit}
+                className="mt-4 h-14 w-full rounded-md bg-[#216ed4] text-sm font-medium text-slate-50 shadow-[0_1px_1px_rgba(0,0,0,0.05)]"
+              >
+                {guest.requestedExit ? "출차 요청 완료" : "출차 요청"}
+              </Button>
+            </div>
           </div>
         )}
       </div>
+      {guest.openedDocument && (
+        <ConsentPanel
+          id="guest-legal-panel"
+          title={guest.openedDocument.label}
+          content={guest.openedDocument.content}
+          onClose={guest.closeDocument}
+        />
+      )}
     </div>
   );
 }
