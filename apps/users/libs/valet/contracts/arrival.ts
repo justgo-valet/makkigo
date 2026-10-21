@@ -16,10 +16,16 @@ const sendArrivalResponseSchema = z.object({
 
 const valetSessionIdSchema = z.coerce.number().int().positive();
 
-const ARRIVAL_DELAY_MINUTES = [5, 10, 15] as const;
+const ARRIVAL_DELAY_STEP_MINUTES = 5;
+const MAX_ARRIVAL_DELAY_MINUTES = 60;
 
 const delayArrivalRequestSchema = z.object({
-  minutes: z.literal(ARRIVAL_DELAY_MINUTES),
+  minutes: z
+    .number()
+    .int()
+    .min(ARRIVAL_DELAY_STEP_MINUTES)
+    .max(MAX_ARRIVAL_DELAY_MINUTES)
+    .multipleOf(ARRIVAL_DELAY_STEP_MINUTES),
 });
 
 const ARRIVAL_ERROR_CODES = [
@@ -44,7 +50,8 @@ type DelayArrivalRequest = z.infer<typeof delayArrivalRequestSchema>;
 type DelayArrivalErrorCode = (typeof DELAY_ARRIVAL_ERROR_CODES)[number];
 
 export {
-  ARRIVAL_DELAY_MINUTES,
+  ARRIVAL_DELAY_STEP_MINUTES,
+  MAX_ARRIVAL_DELAY_MINUTES,
   arrivalErrorResponseSchema,
   cancelArrivalErrorResponseSchema,
   delayArrivalErrorResponseSchema,
