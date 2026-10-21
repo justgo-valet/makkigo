@@ -28,10 +28,10 @@ interface TermsItem {
 }
 
 const TERMS_ITEMS: TermsItem[] = [
-  ...consentItems.flatMap(({ type, label, required }) => {
+  ...consentItems.flatMap(({ type, label }) => {
     const content = consentDocuments[type];
 
-    return required && content ? [{ type, label, content }] : [];
+    return content ? [{ type, label, content }] : [];
   }),
   { type: "PRIVACY_POLICY", label: "개인정보 처리방침", content: privacyPolicy },
 ];
