@@ -88,7 +88,7 @@
 | 요원 탈퇴 API · 화면 | 요원 | **미구현.** App Store 5.1.1(v), Google Play 계정 삭제 정책 |
 | 요원 앱 로그인 화면에 파트너 이용약관 · 처리방침 링크 | 요원 | **미구현.** 고객 앱은 [#197](https://github.com/justgo-valet/makkigo/pull/197) 로 추가. 파트너 약관은 공개 페이지 · 앱 안 본문이 아직 없음 |
 | 비회원 동의 기록 저장 | 고객 | 화면은 [#198](https://github.com/justgo-valet/makkigo/pull/198) 로 추가: 출차 요청 버튼 위 필수 체크(서비스 이용약관 · 차량 번호 · 이용 기록 제공) + 이용약관 · 제3자 제공 · 처리방침 보기, 체크해야 버튼이 켜짐. **`/guest` 가 아직 더미라** 동의 기록(문서 버전 · 시각)은 비회원 출차 요청 API 를 만들 때 함께 저장해야 함 |
-| Google Play 계정 삭제 요청 웹 페이지 | 고객 · 요원 | **미구현.** Play 데이터 보안 양식에 앱 밖에서 열리는 삭제 요청 링크를 적어야 함 |
+| 요원 앱 계정 삭제 요청 웹 페이지 | 요원 | **미구현.** 고객 앱은 [#199](https://github.com/justgo-valet/makkigo/pull/199) (`/account-deletion`). 요원 탈퇴가 생기면 같은 형식으로 요원 앱 페이지 필요 |
 | 앱 첫 실행 접근 권한 안내 (위치 · 알림 = 선택) | Flutter | **미구현.** 정보통신망법 제22조의2 |
 | 애플 리프레시 토큰 암호화 저장 | 고객 | 평문 저장 중 (`user_social_accounts.provider_refresh_token`) |
 | 개인정보처리시스템(운영 DB) 접속 기록 1년 보관 · 점검 | 운영 | **미설정.** 안전성 확보조치 기준 제8조. 5432 가 관리자 IP 에 열려 있어 직접 접속이 가능 |
@@ -105,7 +105,7 @@
 - 탈퇴 회원의 휴대폰 번호 · 차량 정보 · 고객 알림 내역은 탈퇴 30일 뒤 정기 작업이 지웁니다 → [runbook.md](../operations/runbook.md#정기-정리-작업). 운영 SSM 에 `USERS_INTERNAL_JOB_TOKEN` 이 있어야 돕니다.
 - 접속 기록(IP)은 수집하지 않습니다. Caddy 접속 로그를 켜게 되면 처리방침 1 · 2 절에 항목과 보관 기간을 다시 넣습니다.
 - 운영 DB 직접 접속 기록을 1년 이상 남기고 점검합니다 (위 할 일 표, 미설정). DB 백업에도 같은 보관 기간을 적용합니다.
-- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다. 이용약관 주소는 `https://app.makkigo.com/terms` 입니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
+- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다. 이용약관 주소는 `https://app.makkigo.com/terms` 입니다. Play 데이터 보안 양식의 계정 삭제 주소는 `https://app.makkigo.com/account-deletion` (고객 앱, 본문 [accountDeletion.ts](../../apps/users/features/consent/documents/accountDeletion.ts)) 입니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
 - 비회원 QR 화면에 차량 번호 제공 동의와 "개인정보 처리방침" 링크를 둡니다 (위 할 일 표).
 
 ## 버전
