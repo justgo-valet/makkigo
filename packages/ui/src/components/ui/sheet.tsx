@@ -69,9 +69,14 @@ function SheetContent({
       <SheetOverlay className={overlayClassName} />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        // 키 큰 시트도 키보드와 상태바 사이에 들어오게 높이를 줄인다.
         style={
           keyboardInset > 0
-            ? { ...style, bottom: keyboardInset, maxHeight: `calc(100dvh - ${keyboardInset}px)` }
+            ? {
+                ...style,
+                bottom: keyboardInset,
+                maxHeight: `calc(100dvh - ${keyboardInset}px - var(--safe-area-inset-top, 0px))`,
+              }
             : style
         }
         ref={(node) => {

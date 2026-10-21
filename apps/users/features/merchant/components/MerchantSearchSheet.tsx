@@ -77,7 +77,7 @@ export default function MerchantSearchSheet({
               enterKeyHint="search"
               aria-label="업체 검색어"
               placeholder="업체명, 지역으로 검색"
-              className="h-[42px] border-slate-200 px-3 text-sm placeholder:text-(--tertiary-color) md:text-sm"
+              className="h-[42px] border-slate-200 px-3 text-base placeholder:text-(--tertiary-color)"
               value={search.keyword}
               onChange={(event) => search.changeKeyword(event.target.value)}
             />

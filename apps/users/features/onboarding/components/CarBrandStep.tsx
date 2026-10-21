@@ -113,7 +113,7 @@ export default function CarBrandStep({
                 autoComplete="off"
                 aria-invalid={Boolean(error)}
                 aria-describedby="car-brand-error"
-                className="h-auto p-0 text-sm font-medium text-center border-0 shadow-none focus:border-0"
+                className="h-auto p-0 text-base font-medium text-center border-0 shadow-none focus:border-0"
                 onChange={onCustomBrandChange}
                 onFocus={onCustomBrandFocus}
               />

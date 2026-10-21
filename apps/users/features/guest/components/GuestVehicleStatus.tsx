@@ -40,7 +40,7 @@ export default function GuestVehicleStatus() {
                 autoComplete="off"
                 inputMode="text"
                 enterKeyHint="search"
-                className="mt-6 h-[42px] w-full rounded-md border border-[#e2e8f0] bg-white px-3 text-sm text-(--base-color) shadow-[0_1px_1px_rgba(0,0,0,0.05)] outline-none placeholder:text-(--base-color) focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15"
+                className="mt-6 h-[42px] w-full rounded-md border border-[#e2e8f0] bg-white px-3 text-base text-(--base-color) shadow-[0_1px_1px_rgba(0,0,0,0.05)] outline-none placeholder:text-(--base-color) focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-primary/15"
               />
             </div>
 
