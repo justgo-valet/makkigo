@@ -8,6 +8,10 @@ import {
   deleteOldLocationUseLogs,
 } from "@/server/maintenance/deleteOldLocationUseLogs";
 import {
+  countIncompleteSignups,
+  purgeIncompleteSignups,
+} from "@/server/maintenance/purgeIncompleteSignups";
+import {
   countDueWithdrawnUsers,
   purgeWithdrawnUsers,
 } from "@/server/maintenance/purgeWithdrawnUsers";
@@ -39,6 +43,11 @@ const runMaintenance = async ({ dryRun }: { dryRun: boolean }) => {
   const withdrawnUsers = await runJob("withdrawnUsers", async () =>
     dryRun ? { purged: 0, remaining: await countDueWithdrawnUsers(now) } : purgeWithdrawnUsers(now),
   );
+  const incompleteSignups = await runJob("incompleteSignups", async () =>
+    dryRun
+      ? { purged: 0, remaining: await countIncompleteSignups(now) }
+      : purgeIncompleteSignups(now),
+  );
   const authRecords = await runJob("authRecords", () =>
     dryRun ? countExpiredAuthRecords(now) : deleteExpiredAuthRecords(now),
   );
@@ -47,9 +56,10 @@ const runMaintenance = async ({ dryRun }: { dryRun: boolean }) => {
   );
 
   return {
-    ok: withdrawnUsers.ok && authRecords.ok && locationUseLogs.ok,
+    ok: withdrawnUsers.ok && incompleteSignups.ok && authRecords.ok && locationUseLogs.ok,
     dryRun,
     withdrawnUsers: withdrawnUsers.ok ? withdrawnUsers.result : null,
+    incompleteSignups: incompleteSignups.ok ? incompleteSignups.result : null,
     expiredAuthRecords: authRecords.ok ? authRecords.result : null,
     oldLocationUseLogs: locationUseLogs.ok ? locationUseLogs.result : null,
   };
