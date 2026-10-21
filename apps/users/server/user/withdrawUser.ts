@@ -1,25 +1,14 @@
 import "server-only";
-import { revokeAppleRefreshToken } from "@makkigo/auth";
 import { prisma } from "database";
 
 import { hasActiveValetSession } from "@/server/user/hasActiveValetSession";
+import { revokeAppleTokens, toAppleTokens } from "@/server/user/revokeAppleTokens";
 
 import type { WithdrawErrorCode } from "@/libs/user/contracts/withdraw";
 
 const PERSONAL_DATA_RETENTION_DAYS = 30;
 
 type WithdrawUserResult = { ok: true } | { ok: false; reason: WithdrawErrorCode };
-
-const revokeAppleTokens = (tokens: { refreshToken: string; clientId: string | null }[]) =>
-  Promise.all(
-    tokens.map(({ refreshToken, clientId }) =>
-      revokeAppleRefreshToken(refreshToken, clientId).catch((error: unknown) => {
-        console.error("Failed to revoke Apple token on withdrawal", {
-          errorName: error instanceof Error ? error.name : "UnknownError",
-        });
-      }),
-    ),
-  );
 
 const withdrawUser = async (userId: number): Promise<WithdrawUserResult> => {
   const now = new Date();
@@ -52,13 +41,7 @@ const withdrawUser = async (userId: number): Promise<WithdrawUserResult> => {
   });
 
   if (result.ok) {
-    await revokeAppleTokens(
-      appleAccounts.flatMap(({ providerRefreshToken, providerClientId }) =>
-        providerRefreshToken
-          ? [{ refreshToken: providerRefreshToken, clientId: providerClientId }]
-          : [],
-      ),
-    );
+    await revokeAppleTokens(toAppleTokens(appleAccounts));
   }
 
   return result;

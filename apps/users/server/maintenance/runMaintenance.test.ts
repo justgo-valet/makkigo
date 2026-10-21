@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const jobs = vi.hoisted(() => ({
   countDueWithdrawnUsers: vi.fn(),
   purgeWithdrawnUsers: vi.fn(),
+  countIncompleteSignups: vi.fn(),
+  purgeIncompleteSignups: vi.fn(),
   countExpiredAuthRecords: vi.fn(),
   deleteExpiredAuthRecords: vi.fn(),
   countOldLocationUseLogs: vi.fn(),
@@ -10,6 +12,7 @@ const jobs = vi.hoisted(() => ({
 }));
 
 vi.mock("@/server/maintenance/purgeWithdrawnUsers", () => jobs);
+vi.mock("@/server/maintenance/purgeIncompleteSignups", () => jobs);
 vi.mock("@/server/maintenance/deleteExpiredAuthRecords", () => jobs);
 vi.mock("@/server/maintenance/deleteOldLocationUseLogs", () => jobs);
 
@@ -23,6 +26,7 @@ describe("runMaintenance", () => {
     jobs.purgeWithdrawnUsers.mockRejectedValue(
       Object.assign(new Error("db down"), { code: "P1001" }),
     );
+    jobs.purgeIncompleteSignups.mockResolvedValue({ purged: 2, remaining: 0 });
     jobs.deleteExpiredAuthRecords.mockResolvedValue({ refreshTokens: 3, loginCodes: 1 });
     jobs.deleteOldLocationUseLogs.mockResolvedValue(4);
 
@@ -30,6 +34,7 @@ describe("runMaintenance", () => {
       ok: false,
       dryRun: false,
       withdrawnUsers: null,
+      incompleteSignups: { purged: 2, remaining: 0 },
       expiredAuthRecords: { refreshTokens: 3, loginCodes: 1 },
       oldLocationUseLogs: 4,
     });
@@ -41,6 +46,7 @@ describe("runMaintenance", () => {
 
   it("only counts on a dry run", async () => {
     jobs.countDueWithdrawnUsers.mockResolvedValue(2);
+    jobs.countIncompleteSignups.mockResolvedValue(6);
     jobs.countExpiredAuthRecords.mockResolvedValue({ refreshTokens: 5, loginCodes: 0 });
     jobs.countOldLocationUseLogs.mockResolvedValue(7);
 
@@ -48,10 +54,12 @@ describe("runMaintenance", () => {
       ok: true,
       dryRun: true,
       withdrawnUsers: { purged: 0, remaining: 2 },
+      incompleteSignups: { purged: 0, remaining: 6 },
       expiredAuthRecords: { refreshTokens: 5, loginCodes: 0 },
       oldLocationUseLogs: 7,
     });
     expect(jobs.purgeWithdrawnUsers).not.toHaveBeenCalled();
+    expect(jobs.purgeIncompleteSignups).not.toHaveBeenCalled();
     expect(jobs.deleteExpiredAuthRecords).not.toHaveBeenCalled();
     expect(jobs.deleteOldLocationUseLogs).not.toHaveBeenCalled();
   });
