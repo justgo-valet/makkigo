@@ -171,7 +171,7 @@ PR 제목이 스쿼시 커밋 제목이 되고, release-please 가 그것으로 
 | 첫 운영 배포 | ✅ 2026-10-09 (#58), 이후 #69 → [runbook.md](../operations/runbook.md) |
 | release-please (`Release-As: 1.0.0`) | 출시 때 |
 | DB 백업 (정기 덤프 → S3) | 미정 |
-| 정기 작업 — 탈퇴 회원 개인정보 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ [#166](https://github.com/justgo-valet/makkigo/pull/166) → [runbook.md](../operations/runbook.md#정기-정리-작업) |
+| 정기 작업 — 탈퇴 회원 개인정보 삭제, 가입 미완료 회원 30일 뒤 삭제, 만료 · 폐기된 리프레시 토큰 · 로그인 코드 정리, 6개월 지난 위치 이용 기록 정리 (`users-jobs` 컨테이너가 매시간 내부 API 호출) | ✅ [#166](https://github.com/justgo-valet/makkigo/pull/166) · [#195](https://github.com/justgo-valet/makkigo/pull/195) → [runbook.md](../operations/runbook.md#정기-정리-작업) |
 | 애플 로그인 회원 탈퇴 때 애플 토큰 철회 (리프레시 토큰 저장 마이그레이션 `20261016090000_add_user_social_refresh_token`) | ✅ [#170](https://github.com/justgo-valet/makkigo/pull/170) |
 
 ## 배포하기
