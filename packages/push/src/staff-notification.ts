@@ -47,7 +47,11 @@ export const pushStaffNotifications = async (notificationIds: number[]) => {
 
     for (const { title, body, notificationIdByToken } of groups) {
       const tokens = [...notificationIdByToken.keys()];
-      const { sentTokens, invalidTokens } = await sendPushToTokens(tokens, { title, body });
+      const { sentTokens, invalidTokens } = await sendPushToTokens(tokens, {
+        title,
+        body,
+        link: "/",
+      });
 
       if (invalidTokens.length > 0) {
         await prisma.pushDevice.deleteMany({ where: { token: { in: invalidTokens } } });

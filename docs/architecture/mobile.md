@@ -9,7 +9,7 @@
 | 앱 | 폴더 | 앱 ID (iOS 번들 ID = Android 패키지명) | 이름 | 담당 |
 |---|---|---|---|---|
 | 고객 앱 | `apps/users` | `com.makkigo.user` | 마끼고 | 태균 |
-| 요원 · 업체 관리자 앱 | `apps/valetagents` (예정) | `com.makkigo.valetagent` (서버의 복귀 주소 `APP_CALLBACK_URL` 기준, 앱은 아직 없음) | 미정 | 지상님 |
+| 요원 · 업체 관리자 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 요원 | 지상님 |
 
 두 앱이 같은 로그인 창 열기 · 웹뷰 브리지 · 푸시 토큰 코드를 쓰므로 `packages/` 에 공통으로 둡니다.
 
@@ -45,6 +45,7 @@
 | 앱 → 웹 | CSS 변수 `--safe-area-inset-top/bottom/left/right` | 페이지가 뜰 때와 화면 크기 · 키보드가 바뀔 때 `document.documentElement` 인라인 스타일에 px 로 넣음. 아래 여백은 키보드 높이만큼 줄인 값(키보드가 떠 있으면 보통 0 — 내비게이션 바 · 홈 인디케이터가 키보드에 가려짐). 브라우저에서는 `env(safe-area-inset-*)` 값이 되도록 `@makkigo/ui` 전역 CSS 에 기본값이 있음. Android 웹뷰는 `env()` 가 항상 0 이라 앱이 넣어 준다 |
 | 웹 → 앱 | `{"type":"openNotificationSettings"}` | 이 앱의 OS 알림 설정 화면을 엶 (`app_settings`). 켜고 돌아오면 토큰 이벤트가 다시 옴 |
 | 웹 → 앱 | `{"type":"queryInstalledApps","schemes":["supertoss","kakaobank",…]}` | 스킴마다 열 수 있는지 확인해 `window` 에 `makkigo:installed-apps` 이벤트로 돌려줌 (`detail: { schemes }`, 열 수 있는 스킴만). 출차 화면 **입금하기**가 설치된 은행 앱만 보여줄 때 씀. 은행 목록 · 스킴 · 송금 주소는 웹 `features/valet/bankApps.ts` 가 정하고, 은행 앱은 웹이 스킴 주소(`supertoss://send?…`)로 이동하면 앱이 외부 앱으로 엶. 앱은 물어볼 스킴을 Android `<queries>` · iOS `LSApplicationQueriesSchemes` 에 미리 등록해야 하므로 **스킴을 더하면 앱 PR 도 함께** 낸다 (웹은 5초 안에 이벤트가 없으면 빈 목록으로 봄) |
+| 웹 → 앱 | `{"type":"setAuthenticated","authenticated":true|false}` | 보호·온보딩 경계는 `true`, 로그인 화면은 `false`를 보냄. 앱은 알림 목적지를 인증 완료 전까지 보관하고 `true` 뒤에만 안전한 웹 경로를 엶 |
 
 **앱은 주소를 만들지 않습니다.** API 경로 · 로그인 뒤 이동 · 회원 규칙은 웹이 정합니다. 앱 업데이트는 이 표의 메시지 형식, 복귀 스킴, **소셜 로그인 SDK · 설정값**(제공자 추가 포함)을 바꿀 때 필요합니다 (decisions 2026-10-19).
 
@@ -62,6 +63,12 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 | 받은 토큰을 `POST /api/v1/push-devices` 로 등록, 로그아웃 때 `DELETE` | 웹 (등록한 토큰은 기기 `localStorage` 에 기억) |
 | 발송: 기기 토큰으로 FCM 발송 → 없는 토큰 삭제 → 알림 내역(`notifications`) 기록 | 서버 `@makkigo/push` 의 `sendUserNotification` |
 | 알림 데이터 `link`(웹 경로)를 누르면 그 화면을 웹뷰로 엶 | 앱 |
+
+요원 앱은 승인 완료된 `VALET_AGENT`에게만 최초 권한을 요청합니다. 업체 관리자와 승인 대기 사용자는 요청하지 않습니다. OS 권한과 부스의 업무 알림 설정은 독립적이며, 서버의 기존 `APPROVED + notificationsEnabled` 발송 정책을 유지합니다.
+
+요원 기기 등록은 앱 설치가 생성한 32바이트 난수의 해시로 한 행에 고정됩니다. 서버는 원문 설치 비밀값을 저장하지 않습니다. 토큰 회전·응답 유실 재시도·계정 전환은 같은 설치 행을 갱신하고, 로그아웃과 세션 만료 정리는 설치 비밀값 또는 서명된 HttpOnly 기기 권한으로만 수행합니다. 원시 FCM 토큰은 정리 권한으로 사용하지 않습니다.
+
+요원 업무 알림은 `link: "/"`를 포함합니다. 링크 없는 이전 알림도 앱에서 `/`로 처리하며 외부 origin과 위험 스킴은 앱 탐색 정책에서 거부합니다.
 
 - 푸시를 못 보내면(미동의 · 기기 없음 · 발송 실패) 알림 내역의 채널을 비워 둡니다. 알림톡 대체는 알림톡 연동 때 이 자리에서 보냅니다.
 - Android 알림 채널: `makkigo_default` (중요도 높음).
