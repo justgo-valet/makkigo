@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+const session = vi.hoisted(() => ({ cleanupPush: vi.fn(), cleanupQuery: vi.fn() }));
+
+vi.mock("@/features/push/cleanupExpiredPushSession", () => ({
+  cleanupExpiredPushSession: session.cleanupPush,
+}));
+vi.mock("@/libs/common/query/querySession", () => ({
+  cleanupActiveQuerySession: session.cleanupQuery,
+}));
+
 import { createValetApiClient } from "./apiClient";
 
 const BASE_URL = "https://makkigo.test";
@@ -112,5 +121,43 @@ describe("valet apiClient retry policy", () => {
     expect(countCalls(calls, "PUT /api/v1/booths/1")).toBe(2);
     expect(countCalls(calls, "POST /api/v1/auth/refresh")).toBe(1);
     expect(onAuthExpired).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("valet apiClient default session expiry", () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  const expireThroughDefaultHandler = async () => {
+    const replace = vi.fn();
+    vi.stubGlobal("window", { location: { replace } });
+    mockFetch(() => response(401));
+    session.cleanupQuery.mockResolvedValue(undefined);
+
+    await expect(createValetApiClient({ baseUrl: BASE_URL }).get("booths/1")).rejects.toThrow();
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledTimes(1));
+    return replace;
+  };
+
+  it("cleans up this device's push session before redirecting to login", async () => {
+    session.cleanupPush.mockResolvedValue(undefined);
+
+    const replace = await expireThroughDefaultHandler();
+
+    expect(session.cleanupPush).toHaveBeenCalledTimes(1);
+    expect(session.cleanupQuery).toHaveBeenCalledTimes(1);
+    expect(replace).toHaveBeenCalledWith("/login");
+  });
+
+  it("reports a failed push cleanup on the login retry boundary", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    session.cleanupPush.mockRejectedValue(new Error("network unavailable"));
+
+    const replace = await expireThroughDefaultHandler();
+
+    expect(session.cleanupQuery).toHaveBeenCalledTimes(1);
+    expect(replace).toHaveBeenCalledWith("/login?error=failed");
   });
 });

@@ -1,11 +1,12 @@
 model PushDevice {
-    id        Int            @id @default(autoincrement())
-    userId    Int?           @map("user_id")
-    staffId   Int?           @map("staff_id")
-    platform  DevicePlatform
-    token     String         @unique
-    createdAt DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-    updatedAt DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+    id               Int            @id @default(autoincrement())
+    userId           Int?           @map("user_id")
+    staffId          Int?           @map("staff_id")
+    platform         DevicePlatform
+    token            String         @unique
+    installationHash String?        @unique @map("installation_hash") @db.Char(64)
+    createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
     user  User?  @relation(fields: [userId], references: [id], onDelete: Cascade)
     staff Staff? @relation(fields: [staffId], references: [id], onDelete: Cascade)

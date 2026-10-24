@@ -19,7 +19,7 @@ const getStaffMenuAccess = async (staffId: number): Promise<MenuAccess | null> =
   });
 
   if (!staff) return null;
-  return { role: staff.role, managedBoothId: staff.createdBooths[0]?.id ?? null };
+  return { staffId, role: staff.role, managedBoothId: staff.createdBooths[0]?.id ?? null };
 };
 
 export { getStaffMenuAccess };

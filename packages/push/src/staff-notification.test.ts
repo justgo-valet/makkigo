@@ -48,6 +48,7 @@ describe("pushStaffNotifications", () => {
     expect(sendPushToTokens).toHaveBeenCalledWith(["a", "b", "c"], {
       title: "도착 알림",
       body: "업체 · 12가3456 차량이 곧 도착해요",
+      link: "/",
     });
     expect(prisma.pushDevice.deleteMany).toHaveBeenCalledWith({
       where: { token: { in: ["c"] } },
