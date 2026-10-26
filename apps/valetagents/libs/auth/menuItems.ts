@@ -1,6 +1,7 @@
 import type { StaffRole } from "@/libs/onboarding/contracts/status";
 
 interface MenuAccess {
+  staffId?: number;
   role: StaffRole | null;
   managedBoothId: number | null;
 }

@@ -2,6 +2,7 @@ import { getActiveStaffIdFromAccessToken } from "@makkigo/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import AppSessionBridge from "@/features/auth/components/AppSessionBridge";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
 
@@ -12,5 +13,5 @@ export default async function OnboardingLayout({ children }: Readonly<{ children
   const staffId = token ? await getActiveStaffIdFromAccessToken(token) : null;
   if (!staffId) redirect("/login");
   if ((await getPathAfterLogin(staffId)) === "/") redirect("/");
-  return <section className="h-full">{children}</section>;
+  return <section className="h-full"><AppSessionBridge authenticated />{children}</section>;
 }
