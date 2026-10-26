@@ -5,6 +5,7 @@ import { SheetClose, SheetContent, SheetTitle } from "@makkigo/ui/components/ui/
 import Image from "next/image";
 import Link from "next/link";
 
+import { useLogout } from "@/features/auth/hooks/useLogout";
 import { getMenuItems } from "@/libs/auth/menuItems";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
@@ -14,6 +15,8 @@ interface AppMenuProps {
 }
 
 export default function AppMenu({ menu }: Readonly<AppMenuProps>) {
+  const logout = useLogout(menu.staffId ?? 0);
+
   return (
     <SheetContent
       showCloseButton={false}
@@ -30,6 +33,19 @@ export default function AppMenu({ menu }: Readonly<AppMenuProps>) {
             </Link>
           </SheetClose>
         ))}
+        {menu.staffId && (
+          <button
+            type="button"
+            className="mt-4 text-left text-lg leading-6 font-medium text-[#717171]"
+            disabled={logout.isLoggingOut}
+            onClick={logout.logout}
+          >
+            {logout.isLoggingOut ? "로그아웃하는 중…" : "로그아웃"}
+          </button>
+        )}
+        {logout.errorMessage && (
+          <p role="alert" className="max-w-40 text-sm text-red-600">{logout.errorMessage}</p>
+        )}
       </nav>
     </SheetContent>
   );

@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { createAppLoginSession } from "@/features/auth/apis/createAppLoginSession";
 import { isInApp, openAppAuthSession } from "@/features/auth/appBridge";
+import { cleanupExpiredPushSession } from "@/features/push/cleanupExpiredPushSession";
 import { getProviders } from "@/features/auth/socialLoginProviders";
 
 import type { LoginError, SocialLoginProvider } from "@/features/auth/socialLoginProviders";
@@ -29,6 +30,13 @@ const useSocialLogin = (error: LoginError | null) => {
   const login = async (provider: SocialLoginProvider) => {
     setPending(true);
     setDisplayedError(null);
+    try {
+      await cleanupExpiredPushSession();
+    } catch {
+      setDisplayedError("failed");
+      setPending(false);
+      return;
+    }
     if (!isInApp()) {
       window.location.assign(new URL(`/api/v1/auth/oauth/${provider}`, window.location.origin));
       return;

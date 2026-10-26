@@ -1,14 +1,19 @@
 import { z } from "zod";
 
+const installationSecretSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
+
 const pushDeviceRequestSchema = z.object({
   token: z.string().trim().min(1).max(4096),
   platform: z.enum(["IOS", "ANDROID"]),
+  installationSecret: installationSecretSchema,
+});
+const pushDeviceCleanupRequestSchema = z.object({
+  hasPushDevice: z.boolean(),
+  installationSecret: installationSecretSchema.optional(),
 });
 
-const removePushDeviceRequestSchema = pushDeviceRequestSchema.pick({ token: true });
-
 type PushDeviceRequest = z.infer<typeof pushDeviceRequestSchema>;
-type RemovePushDeviceRequest = z.infer<typeof removePushDeviceRequestSchema>;
+type PushDeviceCleanupRequest = z.infer<typeof pushDeviceCleanupRequestSchema>;
 
-export { pushDeviceRequestSchema, removePushDeviceRequestSchema };
-export type { PushDeviceRequest, RemovePushDeviceRequest };
+export { pushDeviceCleanupRequestSchema, pushDeviceRequestSchema };
+export type { PushDeviceCleanupRequest, PushDeviceRequest };

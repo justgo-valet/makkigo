@@ -1,6 +1,13 @@
 export { isInvalidTokenError, sendPushToTokens } from "./fcm";
 export { pushStaffNotifications } from "./staff-notification";
-export { registerStaffPushDevice, removeStaffPushDevice } from "./staff-push-devices";
+export {
+  hashPushInstallationSecret,
+  PushDeviceInstallationConflictError,
+  registerStaffPushDevice,
+  removeStaffPushDevice,
+  removeStaffPushDeviceById,
+  removeStaffPushDeviceByInstallationHash,
+} from "./staff-push-devices";
 export { sendUserNotification } from "./user-notification";
 export { registerUserPushDevice, removeUserPushDevice } from "./user-push-devices";
 
