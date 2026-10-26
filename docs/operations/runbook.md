@@ -194,11 +194,11 @@ S3 lifecycle 규칙이 하루 뒤 지웁니다.
 | 증상 | 확인 순서 |
 |---|---|
 | 사이트가 안 열림 | ① `curl https://app.makkigo.com/api/health` ② 서버 `docker ps` 에서 컨테이너가 `healthy` 인지 ③ 해당 컨테이너 로그 ④ 디스크 `df -h`, 메모리 `free -h` |
-| 배포가 실패 | Actions 로그에서 실패 단계 확인. "AWS 역할" 단계면 OIDC 신뢰 조건, "EC2 배포" 단계면 출력된 서버 로그(이미지 받기 · 마이그레이션) |
+| 배포가 실패 | Actions 로그에서 실패 단계 확인. "AWS 역할" 단계면 OIDC 신뢰 조건, "EC2 배포" 단계면 출력된 서버 로그(이미지 받기 · 마이그레이션). 서버 로그 없이 `ipc messaging received timeout` 만 나오면 디스크가 찬 것 (SSM 에이전트가 작업 파일을 못 씀) |
 | 로그인이 안 됨 | ① SSM 의 소셜 키 값 ② 각 개발자 콘솔의 **콜백 주소**가 운영 주소로 등록됐는지 ③ 앱 로그 |
 | 인증서 오류 | ① Route 53 A 레코드가 `13.209.92.174` 인지 ② 보안 그룹 80 · 443 이 열려 있는지 ③ `docker logs makkigo-caddy-1` |
 | DB 접속 안 됨 (로컬) | 내 IP 가 바뀌었는지 → 보안 그룹 5432 규칙 소스 수정 |
-| 디스크가 참 | `docker system df` 확인 후 `docker image prune -a` (실행 중이 아닌 이미지 삭제) |
+| 디스크가 참 | `df -h /` · `docker system df` 확인 후 `docker image prune -a` (실행 중이 아닌 이미지 삭제). 배포가 이번 태그가 아닌 `makkigo-*` 이미지를 지우므로 평소엔 쌓이지 않음 |
 
 ## 처음부터 다시 구성하기
 
