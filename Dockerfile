@@ -34,6 +34,7 @@ COPY --from=build-valetagents --chown=node:node /repo/apps/valetagents/.next/sta
 COPY --from=build-valetagents --chown=node:node /repo/apps/valetagents/.next/static ./apps/valetagents/.next/static
 COPY --from=build-valetagents --chown=node:node /repo/apps/valetagents/public ./apps/valetagents/public
 COPY --from=build-valetagents --chown=node:node /repo/apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs ./apps/valetagents/scripts/merchant-upload-cleanup-runner.mjs
+COPY --from=build-valetagents --chown=node:node /repo/apps/valetagents/scripts/agent-notification-sync-runner.mjs ./apps/valetagents/scripts/agent-notification-sync-runner.mjs
 USER node
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
