@@ -7,7 +7,7 @@ import { useRef } from "react";
 import { merchantImageMimeTypes } from "@/libs/merchant/contracts/image-upload";
 
 import RequiredMark from "./RequiredMark";
-import { LABEL_CLASS } from "../fieldStyles";
+import { LABEL_CLASS } from "@/components/fieldStyles";
 
 import type { useMerchantPhotos } from "../hooks/useMerchantPhotos";
 
@@ -16,7 +16,7 @@ interface MerchantPhotoFieldProps {
   disabled: boolean;
 }
 
-const TILE_CLASS = "size-[72px] overflow-hidden rounded-lg border border-[#999]";
+const TILE_CLASS = "size-18 overflow-hidden rounded-md border border-input";
 
 export default function MerchantPhotoField({ photos, disabled }: Readonly<MerchantPhotoFieldProps>) {
   const draggedKeyRef = useRef<string | null>(null);
@@ -27,7 +27,7 @@ export default function MerchantPhotoField({ photos, disabled }: Readonly<Mercha
         업체 사진 업로드
         <RequiredMark />
       </p>
-      <p className="text-[13px] leading-5 text-[#717171]">최대 5장까지 업로드 가능해요</p>
+      <p className="text-xs leading-5 text-(--tertiary-color)">최대 5장까지 업로드 가능해요</p>
 
       <ul aria-labelledby="merchant-photos-label" className="mt-3 flex flex-wrap gap-2">
         {photos.canAdd && !disabled && (
@@ -35,7 +35,7 @@ export default function MerchantPhotoField({ photos, disabled }: Readonly<Mercha
             <label
               className={cn(
                 TILE_CLASS,
-                "flex cursor-pointer items-center justify-center bg-[#e8e8e8] focus-within:border-(--primary-color)",
+                "flex cursor-pointer items-center justify-center bg-muted focus-within:border-primary",
               )}
             >
               <Image src="/icons/upload.svg" alt="" width={24} height={26} />

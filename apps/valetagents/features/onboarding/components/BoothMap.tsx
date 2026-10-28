@@ -13,11 +13,11 @@ export default function BoothMap({ address, appKey }: Readonly<BoothMapProps>) {
   return (
     <section
       aria-label="선택한 부스 위치"
-      className="relative h-[180px] overflow-hidden rounded-lg border border-[#999] bg-[#e8e8e8]"
+      className="relative h-45 overflow-hidden rounded-xl border bg-muted"
     >
       <div ref={containerRef} className="h-full w-full" aria-hidden={map.state !== "ready"} />
       {map.state !== "ready" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center text-[#575757]">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center text-(--tertiary-color)">
           {map.state === "loading" ? (
             <p className="text-sm" role="status">지도를 불러오고 있어요.</p>
           ) : (

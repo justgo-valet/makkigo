@@ -9,7 +9,7 @@ import MerchantAddressField from "./MerchantAddressField";
 import MerchantBoothField from "./MerchantBoothField";
 import MerchantPhotoField from "./MerchantPhotoField";
 import RequiredMark from "./RequiredMark";
-import { INPUT_CLASS, LABEL_CLASS } from "../fieldStyles";
+import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
 import { NAME_MAX_LENGTH, useMerchantRegistrationForm } from "../hooks/useMerchantRegistrationForm";
 
 interface MerchantRegistrationFormProps {
@@ -33,16 +33,16 @@ export default function MerchantRegistrationForm({
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full max-w-md flex-col pt-2"
+      className="mx-auto flex min-h-full w-full max-w-md flex-col"
       onSubmit={(event) => {
         event.preventDefault();
         form.submit();
       }}
     >
-      <header className="relative flex h-6 items-center">
+      <header className="relative flex h-12 w-full shrink-0 items-center">
         {returnPath && !form.isSubmitting && (
-          <Link href={returnPath} aria-label="뒤로 가기">
-            <Image src="/icons/chevron_left.svg" alt="" width={24} height={24} />
+          <Link href={returnPath} aria-label="뒤로 가기" className="z-10 flex h-full items-center">
+            <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
           </Link>
         )}
         <Image
@@ -51,13 +51,13 @@ export default function MerchantRegistrationForm({
           width={95}
           height={39}
           priority
-          className="absolute -top-1.5 left-1/2 -ml-px -translate-x-1/2"
+          className="absolute left-1/2 -translate-x-1/2"
         />
       </header>
 
-      <h1 className="mt-9 text-2xl leading-6 font-medium text-(--base-color)">업체 등록</h1>
+      <h1 className="mt-4 text-xl font-bold text-(--base-color)">업체 등록</h1>
 
-      <label htmlFor="merchant-name" className={cn(LABEL_CLASS, "mt-3")}>
+      <label htmlFor="merchant-name" className={cn(LABEL_CLASS, "mt-4")}>
         업체명
         <RequiredMark />
       </label>
@@ -91,7 +91,8 @@ export default function MerchantRegistrationForm({
         {form.canRecheck ? (
           <Button
             type="button"
-            className="h-14 w-full rounded-[6px] text-lg font-medium"
+            size="xl"
+            className="w-full"
             onClick={form.recheck}
           >
             다시 확인하기
@@ -99,7 +100,8 @@ export default function MerchantRegistrationForm({
         ) : (
           <Button
             type="submit"
-            className="h-14 w-full rounded-[6px] text-lg font-medium"
+            size="xl"
+            className="w-full"
             disabled={!form.canSubmit}
           >
             {form.isSubmitting ? "등록하고 있어요" : "업체 등록하기"}

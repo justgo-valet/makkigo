@@ -15,7 +15,7 @@ export default function OnboardingLinks({
   return (
     <nav
       className={cn(
-        "flex items-center justify-center gap-6 text-[#575757] underline",
+        "flex items-center justify-center gap-6 text-(--tertiary-color) underline",
         className,
         "leading-[1.15]",
       )}

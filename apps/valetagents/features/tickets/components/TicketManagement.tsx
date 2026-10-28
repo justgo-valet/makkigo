@@ -1,3 +1,4 @@
+import { Button } from "@makkigo/ui";
 import { TicketRenderer } from "@makkigo/ticket-design";
 import Link from "next/link";
 
@@ -26,24 +27,21 @@ export default function TicketManagement({
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
-
       <AppHeader menu={menu} backHref="/" />
 
-      <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">
-        티켓 관리
-      </h1>
+      <h1 className="mt-4 text-xl font-bold text-(--base-color)">티켓 관리</h1>
 
-      <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5 px-1.5">
+      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-5">
         {tickets.items.map((ticket) => (
           <Link
             key={ticket.id}
             href={`/tickets/${ticket.id}`}
             aria-label={`티켓 ${ticket.id} 편집`}
-            className="block self-start drop-shadow-[0_2px_4px_rgba(3,9,15,0.12)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--primary-color)"
+            className="block self-start drop-shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
           >
             <TicketRenderer
               ariaLabel={`티켓 ${ticket.id}`}
-              className="aspect-[3/4] w-full"
+              className="aspect-3/4 w-full"
               design={ticket.design}
               resolveAssetUrl={resolveAssetUrl}
             />
@@ -51,12 +49,9 @@ export default function TicketManagement({
         ))}
       </div>
 
-      <Link
-        href="/tickets/new"
-        className="mt-auto flex h-12 w-full items-center justify-center rounded-lg bg-(--primary-color) text-lg font-medium text-white"
-      >
-        티켓 추가하기
-      </Link>
+      <Button asChild size="xl" className="mt-auto w-full">
+        <Link href="/tickets/new">티켓 추가하기</Link>
+      </Button>
     </div>
   );
 }
