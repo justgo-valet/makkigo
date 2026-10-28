@@ -2,12 +2,11 @@
 
 import { Button, FieldError } from "@makkigo/ui";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@makkigo/ui/components/ui/sheet";
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetFooter,
+  BottomSheetHeader,
+} from "@makkigo/ui/components/ui/bottom-sheet";
 
 interface NotificationToggleSheetProps {
   open: boolean;
@@ -33,44 +32,28 @@ export default function NotificationToggleSheet({
     : "다음 퇴근 시간에 알림이 자동으로 꺼져요";
 
   return (
-    <Sheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        overlayClassName="bg-transparent"
-        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] pt-[30px] pr-[27px] pb-[max(24px,env(safe-area-inset-bottom))] pl-[28px] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
-      >
-        <SheetHeader className="gap-[9px] p-0 text-left">
-          <SheetTitle className="text-2xl leading-6 font-medium text-[#03090f]">
-            {enabled ? "알림 끄기" : "알림 켜기"}
-          </SheetTitle>
-          <SheetDescription
-            className={hasWorkTime ? "text-sm leading-6 text-[#717171]" : "sr-only"}
-          >
-            {hasWorkTime ? description : "확인을 누르면 알림 설정이 바뀌어요."}
-          </SheetDescription>
-        </SheetHeader>
-
-        {errorMessage && <FieldError className="mt-3">{errorMessage}</FieldError>}
-
-        <div className="mt-[45px] -ml-[8px] flex w-[345px] gap-[5px]">
+    <BottomSheet open={open} onClose={onClose}>
+      <BottomSheetContent>
+        <BottomSheetHeader
+          title={enabled ? "알림 끄기" : "알림 켜기"}
+          description={hasWorkTime ? description : "확인을 누르면 알림 설정이 바뀌어요."}
+        />
+        {errorMessage && <FieldError className="px-5 pt-3">{errorMessage}</FieldError>}
+        <BottomSheetFooter className="flex-row pt-6">
           <Button
             type="button"
-            className="h-12 flex-1 rounded-[6px] bg-(--secondary-color) text-lg font-medium hover:bg-(--secondary-color)"
+            variant="outline"
+            size="xl"
+            className="flex-1 text-(--tertiary-color)"
             onClick={onClose}
           >
             취소
           </Button>
-          <Button
-            type="button"
-            className="h-12 flex-1 rounded-[6px] text-lg font-medium"
-            disabled={isPending}
-            onClick={onConfirm}
-          >
+          <Button type="button" size="xl" className="flex-1" disabled={isPending} onClick={onConfirm}>
             확인
           </Button>
-        </div>
-      </SheetContent>
-    </Sheet>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
   );
 }
