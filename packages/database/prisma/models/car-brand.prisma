@@ -1,9 +1,10 @@
 model CarBrand {
-    id        Int        @id @default(autoincrement())
-    name      String     @unique
-    logoUrl   String     @map("logo_url")
-    carModels CarModel[]
-    vehicles  Vehicle[]
+    id           Int        @id @default(autoincrement())
+    name         String     @unique
+    logoUrl      String     @map("logo_url")
+    displayOrder Int        @default(0) @map("display_order")
+    carModels    CarModel[]
+    vehicles     Vehicle[]
 
     @@map("car_brands")
 }
