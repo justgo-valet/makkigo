@@ -24,8 +24,7 @@ export default function OnboardingShell({
   const flow = useOnboardingFlow({ staffId, initialStatus, initialView });
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2 pb-[calc(17px+env(safe-area-inset-bottom))]">
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
+    <div className="mx-auto flex min-h-full w-full max-w-md flex-col pt-2">
       {flow.showsPending ? (
         <ApprovalPending
           requests={flow.requests}

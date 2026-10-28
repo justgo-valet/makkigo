@@ -33,14 +33,12 @@ export default function MerchantRegistrationForm({
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2"
+      className="mx-auto flex min-h-full w-full max-w-md flex-col pt-2"
       onSubmit={(event) => {
         event.preventDefault();
         form.submit();
       }}
     >
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
-
       <header className="relative flex h-6 items-center">
         {returnPath && !form.isSubmitting && (
           <Link href={returnPath} aria-label="뒤로 가기">
@@ -86,7 +84,7 @@ export default function MerchantRegistrationForm({
       />
       <MerchantPhotoField photos={form.photos} disabled={form.isLocked} />
 
-      <div className="sticky bottom-0 mt-auto bg-[#f7f9fc] pt-6 pb-[calc(17px+env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 mt-auto bg-(--surface-color) pt-6 pb-[calc(1rem+var(--safe-area-inset-bottom))]">
         <div aria-live="polite">
           {form.notice && <FieldError className="mb-3 text-center">{form.notice}</FieldError>}
         </div>

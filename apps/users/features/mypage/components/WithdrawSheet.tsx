@@ -2,13 +2,11 @@
 
 import { Button, FieldError } from "@makkigo/ui";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@makkigo/ui/components/ui/sheet";
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetFooter,
+} from "@makkigo/ui/components/ui/bottom-sheet";
+import { SheetDescription, SheetHeader, SheetTitle } from "@makkigo/ui/components/ui/sheet";
 
 interface WithdrawSheetProps {
   open: boolean;
@@ -32,18 +30,8 @@ export default function WithdrawSheet({
   onClose,
 }: Readonly<WithdrawSheetProps>) {
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
-      }}
-    >
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        className="mx-auto max-w-md gap-0 rounded-t-2xl"
-      >
-        <div aria-hidden className="mx-auto mt-3 h-1 w-9 rounded-full bg-border" />
+    <BottomSheet open={open} onClose={onClose}>
+      <BottomSheetContent>
         <SheetHeader className="gap-3 px-5 pt-4">
           <SheetTitle className="text-lg font-bold text-(--base-color)">
             정말 탈퇴할까요?
@@ -57,12 +45,12 @@ export default function WithdrawSheet({
           </SheetDescription>
         </SheetHeader>
         {errorMessage && <FieldError className="px-5 pt-3">{errorMessage}</FieldError>}
-        <SheetFooter className="px-5 pt-4 pb-6">
+        <BottomSheetFooter>
           <Button
             type="button"
             variant="destructive"
-            size="lg"
-            className="h-12 w-full shadow-none"
+            size="xl"
+            className="w-full"
             disabled={isWithdrawing}
             onClick={onConfirm}
           >
@@ -71,14 +59,14 @@ export default function WithdrawSheet({
           <Button
             type="button"
             variant="ghost"
-            size="lg"
-            className="h-12 w-full text-(--tertiary-color)"
+            size="xl"
+            className="w-full text-(--tertiary-color)"
             onClick={onClose}
           >
             취소
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
   );
 }

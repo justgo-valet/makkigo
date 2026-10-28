@@ -188,4 +188,4 @@ const useHome = () => {
 };
 
 export { useHome };
-export type { ExitSummary, StatusBadge, StatusTone };
+export type { ExitSummary, StatusBadge };

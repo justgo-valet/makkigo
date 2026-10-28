@@ -86,7 +86,7 @@ export default function MerchantAddressField({
           onKeyDown={(event) => {
             if (event.key === "Escape") address.close();
           }}
-          className="fixed inset-0 z-50 flex flex-col bg-white pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+          className="fixed inset-0 z-50 flex flex-col bg-white pt-(--safe-area-inset-top) pb-(--safe-area-inset-bottom)"
         >
           <div className="flex h-12 shrink-0 items-center justify-between px-4">
             <p className="text-base font-medium text-(--base-color)">주소 검색</p>
