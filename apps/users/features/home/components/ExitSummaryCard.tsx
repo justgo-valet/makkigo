@@ -18,7 +18,7 @@ export default function ExitSummaryCard({
   onFeeDetailClick,
 }: Readonly<ExitSummaryCardProps>) {
   return (
-    <div className="flex flex-col rounded-xl border bg-(--surface-color) px-4">
+    <div className="flex flex-col rounded-xl border bg-white px-4">
       <div className="flex items-center justify-between gap-3 py-4">
         <p className="shrink-0 font-bold whitespace-nowrap text-(--base-color)">
           {summary.headline}

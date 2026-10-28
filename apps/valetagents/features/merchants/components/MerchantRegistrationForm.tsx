@@ -86,7 +86,7 @@ export default function MerchantRegistrationForm({
       />
       <MerchantPhotoField photos={form.photos} disabled={form.isLocked} />
 
-      <div className="sticky bottom-0 mt-auto bg-[#f7f9fc] pt-6 pb-[calc(17px+env(safe-area-inset-bottom))]">
+      <div className="sticky bottom-0 mt-auto bg-[#f7f9fc] pt-6 pb-[calc(17px+var(--safe-area-inset-bottom))]">
         <div aria-live="polite">
           {form.notice && <FieldError className="mb-3 text-center">{form.notice}</FieldError>}
         </div>
