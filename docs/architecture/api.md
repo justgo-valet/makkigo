@@ -26,7 +26,7 @@
 
 | 메서드 · 경로 | 하는 일 | 로그인 | PR |
 |---|---|---|---|
-| `GET /api/v1/cars/brands` | 차량 브랜드 이름 · 로고 전체 주소 (등록 순) | | [#51](https://github.com/justgo-valet/makkigo/pull/51) |
+| `GET /api/v1/cars/brands` | 차량 브랜드 이름 · 로고 전체 주소 (`display_order` 순) | | [#51](https://github.com/justgo-valet/makkigo/pull/51) |
 | `GET /api/v1/cars/models?brand=` | 브랜드별 차량 모델 이름 (한국어 순). 옛 경로 `/api/car/get-car-models` 는 삭제 | | dev (#5), [#26](https://github.com/justgo-valet/makkigo/pull/26) |
 | `GET /api/v1/auth/oauth/{kakao\|google\|apple}` | 소셜 로그인 시작 → 제공자 로그인 페이지로 이동. 앱은 `?app_challenge=` | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | `GET · POST /api/v1/auth/oauth/{provider}/callback` | 제공자 콜백: 회원 확인 · 가입 → 웹은 쿠키 + 이동, 앱은 1회용 코드로 앱 복귀 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |

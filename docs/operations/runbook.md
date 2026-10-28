@@ -176,7 +176,7 @@ docker exec -i makkigo-postgres-1 sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POS
 1. S3 `makkigo-prod-image-apne2` 의 같은 키로 업로드 (`aws s3 cp ... --profile makkigo`)
 2. 같은 키로 덮어썼으면 CloudFront `E37YXLP0UK5UIL` 에서 **무효화**(`/brands/*` 등) — 안 하면 최대 1일 옛 이미지가 보임
 
-새 브랜드 · 모델은 DB(`car_brands`, `car_models`)에 경로를 추가해야 화면에 나옵니다 (`packages/database/prisma/init/init.sql`).
+새 브랜드 · 모델은 DB(`car_brands`, `car_models`)에 경로를 추가해야 화면에 나옵니다 (`packages/database/prisma/init/init.sql`). 브랜드는 `display_order` 도 넣고, 순서를 바꿀 때는 이 값만 고칩니다.
 
 ## 부스 사진 업로드 오류 복구
 
