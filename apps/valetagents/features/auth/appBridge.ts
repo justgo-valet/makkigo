@@ -47,6 +47,14 @@ export const openAppNotificationSettings = () => {
   channel()?.postMessage(JSON.stringify({ type: "openNotificationSettings" }));
 };
 
+/**
+ * 상태바 글자색. `light` 는 흰 글자(어두운 배경), `dark` 는 검은 글자(밝은 배경).
+ * 앱은 페이지를 새로 열 때마다 `dark` 로 되돌리므로, 어두운 화면이 켜질 때 `light` 를 보내고 벗어날 때 `dark` 로 돌려 둔다.
+ */
+export const setAppStatusBarStyle = (style: "light" | "dark") => {
+  channel()?.postMessage(JSON.stringify({ type: "setStatusBarStyle", style }));
+};
+
 export const setAppAuthenticated = (authenticated: boolean) => {
   channel()?.postMessage(JSON.stringify({ type: "setAuthenticated", authenticated }));
 };

@@ -64,7 +64,7 @@ export default function BankTransferSheet({ transfer }: Readonly<{ transfer: Ban
             )}
           </div>
         </div>
-        <BottomSheetFooter className="pt-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+        <BottomSheetFooter className="pt-5 pb-[calc(1.5rem+var(--safe-area-inset-bottom))]">
           <Button
             type="button"
             variant="ghost"
