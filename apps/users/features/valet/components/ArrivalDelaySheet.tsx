@@ -52,7 +52,7 @@ export default function ArrivalDelaySheet({
           title="도착이 늦어지시나요?"
           description={
             expectedArrivalTime
-              ? `요청하신 ${expectedArrivalTime}보다 얼마나 더 걸릴지 알려주세요`
+              ? `도착 예정 ${expectedArrivalTime}보다 얼마나 더 걸릴지 알려주세요`
               : "도착이 얼마나 더 걸릴지 알려주세요"
           }
         />
