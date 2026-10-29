@@ -2,6 +2,7 @@
 
 import { Button } from "@makkigo/ui";
 import Image from "next/image";
+import { useState } from "react";
 
 import { askAppForPushToken, openAppNotificationSettings } from "@/features/auth/appBridge";
 import { useAppPushRegistration } from "@/features/push/hooks/useAppPushRegistration";
@@ -16,11 +17,12 @@ export default function StaffPushRegistration({
   requestPermission,
 }: Readonly<StaffPushRegistrationProps>) {
   const availability = useAppPushRegistration(staffId, requestPermission);
-  if (availability === "ready") return null;
+  const [dismissed, setDismissed] = useState(false);
+  if (availability === "ready" || dismissed) return null;
   const denied = availability === "denied";
 
   return (
-    <output className="mt-3 flex items-center gap-3 rounded-xl border bg-white px-4 py-3">
+    <output className="fixed inset-x-4 top-[calc(0.75rem+var(--safe-area-inset-top))] z-50 mx-auto flex max-w-[735px] items-center gap-3 rounded-xl border bg-white py-3 pr-2 pl-4 shadow-md">
       <Image src="/icons/bell_off.svg" alt="" aria-hidden="true" width={24} height={24} />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 break-keep">
         <p className="text-sm font-bold text-(--base-color)">
@@ -38,6 +40,17 @@ export default function StaffPushRegistration({
         onClick={denied ? openAppNotificationSettings : askAppForPushToken}
       >
         {denied ? "설정 열기" : "다시 시도"}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-xs"
+        className="shrink-0 text-(--tertiary-color)"
+        aria-label="닫기"
+        onClick={() => setDismissed(true)}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
       </Button>
     </output>
   );
