@@ -62,12 +62,18 @@ const getMetaItems = (snapshot: HomeSnapshot, vehicleNumber: string, now: number
     ];
   }
 
-  if (snapshot.arrivalNotifiedAt !== null) {
+  if (snapshot.status === "ARRIVAL_SCHEDULED") {
     const delayMinutes = snapshot.arrivalDelayMinutes ?? 0;
+    const expectedArrivalAt =
+      snapshot.expectedArrivalAt === null
+        ? null
+        : snapshot.expectedArrivalAt + delayMinutes * MINUTE_MS;
 
     return [
       formattedVehicleNumber,
-      `${formatClockTime(snapshot.arrivalNotifiedAt)} 도착 알림`,
+      expectedArrivalAt === null
+        ? "도착 시간 미정"
+        : `${formatClockTime(expectedArrivalAt)} 도착 예정`,
       ...(delayMinutes > 0 ? [`${formatArrivalDelay(delayMinutes)} 지연`] : []),
     ];
   }
