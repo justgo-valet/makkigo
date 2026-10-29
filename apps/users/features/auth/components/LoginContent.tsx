@@ -15,7 +15,7 @@ interface LoginContentProps {
 
 export default function LoginContent({ error }: Readonly<LoginContentProps>) {
   useHiddenHeader();
-  // 파란 배경이 상태바 뒤까지 깔리는 예전 앱을 위해 글자를 흰색으로. 상단을 흰 띠로 두는 새 앱은 무시한다.
+  // 파란 배경이 상태바 뒤까지 깔리므로 글자를 흰색으로.
   useAppStatusBarStyle("light");
   const { providers, isRedirecting, error: displayedError, login } = useSocialLogin(error);
 
