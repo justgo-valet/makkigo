@@ -22,8 +22,6 @@ export default function StaffPushRegistration({
   const denied = availability === "denied";
 
   return (
-    // 화면 위에 띄워 페이지 높이를 늘리지 않는다 (늘리면 아래 고정 버튼이 내비게이션 바 뒤로 밀린다).
-    // 헤더 버튼을 가리므로 닫을 수 있게 둔다.
     <output className="fixed inset-x-4 top-[calc(0.75rem+var(--safe-area-inset-top))] z-50 mx-auto flex max-w-[735px] items-center gap-3 rounded-xl border bg-white py-3 pr-2 pl-4 shadow-md">
       <Image src="/icons/bell_off.svg" alt="" aria-hidden="true" width={24} height={24} />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 break-keep">
