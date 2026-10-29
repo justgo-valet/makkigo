@@ -30,13 +30,14 @@ const useAnimatedOnboarding = () => {
   const searchParams = useSearchParams();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const transitionDirection = useOnboardingTransition((state) => state.direction);
-  const { handleBack } = useOnboarding();
+  const { handleBack, isCustomInput } = useOnboarding();
   const stepIndex = getOnboardingStepIndex(searchParams.get("step"));
+  const stepKey = ONBOARDING_STEPS[stepIndex];
 
   useOnboardingHeader(handleBack);
 
   return {
-    animationKey: ONBOARDING_STEPS[stepIndex],
+    animationKey: isCustomInput ? `${stepKey}-custom` : stepKey,
     slideDirection: transitionDirection === "forward" ? 1 : -1,
     slideVariants: createSlideVariants(shouldReduceMotion),
     transition: shouldReduceMotion ? { duration: 0 } : ONBOARDING_TRANSITION,

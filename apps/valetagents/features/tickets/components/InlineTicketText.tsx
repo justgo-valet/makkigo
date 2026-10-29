@@ -52,7 +52,7 @@ export default function InlineTicketText({ text, autoFocus, onChange, onFocus }:
       aria-label="티켓 글자"
       aria-multiline="true"
       data-placeholder="글자를 입력하세요"
-      className="h-full w-full cursor-text overflow-hidden whitespace-pre-wrap wrap-anywhere outline-none empty:before:text-[#94a3b8] empty:before:content-[attr(data-placeholder)]"
+      className="h-full w-full cursor-text overflow-hidden whitespace-pre-wrap wrap-anywhere outline-none empty:before:text-(--tertiary-color) empty:before:content-[attr(data-placeholder)]"
       onFocus={onFocus}
       onPointerDown={(event) => event.stopPropagation()}
       onKeyDown={(event) => {

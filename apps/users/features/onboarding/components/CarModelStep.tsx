@@ -1,4 +1,4 @@
-import { Field, FieldDescription, FieldError, FieldLabel, Input } from "@makkigo/ui";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@makkigo/ui";
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
 import Image from "next/image";
 
@@ -18,7 +18,7 @@ interface CarModelStepProps {
   errors: (FormFieldError | undefined)[];
   isCustomModel: boolean;
   onSelect: (carModel: string) => void;
-  onCustomModelFocus: () => void;
+  onOpenCustomInput: () => void;
 }
 
 export default function CarModelStep({
@@ -30,11 +30,13 @@ export default function CarModelStep({
   errors,
   isCustomModel,
   onSelect,
-  onCustomModelFocus,
+  onOpenCustomInput,
 }: Readonly<CarModelStepProps>) {
+  const customModel = isCustomModel ? field.value.trim() : "";
+
   return (
     <Field className="h-full min-h-0" data-invalid={Boolean(error)}>
-      <FieldLabel htmlFor="car-model" className="text-xl font-bold text-(--base-color)">
+      <FieldLabel className="text-xl font-bold text-(--base-color)">
         {carBrand} 모델을 선택해주세요.
       </FieldLabel>
       {carModelsStatus === "error" && (
@@ -60,26 +62,28 @@ export default function CarModelStep({
         ))}
         {carModelsStatus !== "pending" && (
           <Card
-            className={`col-span-2 border-dashed p-4 transition-all duration-200 ${
-              isCustomModel && field.value.trim()
-                ? SELECTED_CARD_CLASS_NAME
-                : `shadow-none ${IDLE_CARD_CLASS_NAME}`
+            className={`col-span-2 border-dashed p-0 transition-all duration-200 ${
+              customModel ? SELECTED_CARD_CLASS_NAME : `shadow-none ${IDLE_CARD_CLASS_NAME}`
             }`}
           >
-            <CardContent className="flex items-center gap-3 p-0">
-              <Image src="/icons/plus.svg" alt="" aria-hidden width={20} height={20} />
-              <Input
-                {...field}
-                id="car-model"
-                value={isCustomModel ? field.value : ""}
-                placeholder="직접 입력 (예: 아반떼)"
-                autoComplete="off"
-                aria-invalid={Boolean(error)}
-                aria-describedby="car-model-error"
-                className="h-auto p-0 text-base font-medium border-0 shadow-none focus:border-0"
-                onFocus={onCustomModelFocus}
-              />
-            </CardContent>
+            <button
+              type="button"
+              className="w-full min-w-0 p-4 cursor-pointer"
+              aria-pressed={Boolean(customModel)}
+              aria-describedby="car-model-error"
+              onClick={onOpenCustomInput}
+            >
+              <CardContent className="flex items-center gap-3 p-0">
+                <Image src="/icons/plus.svg" alt="" aria-hidden width={20} height={20} />
+                <span
+                  className={`min-w-0 truncate text-base font-medium ${
+                    customModel ? "" : "text-muted-foreground"
+                  }`}
+                >
+                  {customModel || "직접 입력 (예: 아반떼)"}
+                </span>
+              </CardContent>
+            </button>
           </Card>
         )}
       </div>

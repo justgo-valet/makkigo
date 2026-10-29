@@ -2,13 +2,11 @@
 
 import { Button, FieldError } from "@makkigo/ui";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@makkigo/ui/components/ui/sheet";
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetFooter,
+  BottomSheetHeader,
+} from "@makkigo/ui/components/ui/bottom-sheet";
 
 interface ValetNoticeSheetProps {
   open: boolean;
@@ -36,32 +34,15 @@ export default function ValetNoticeSheet({
   onClose,
 }: Readonly<ValetNoticeSheetProps>) {
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
-      }}
-    >
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        className="mx-auto max-w-md gap-0 rounded-t-2xl"
-      >
-        <div aria-hidden className="mx-auto mt-3 h-1 w-9 rounded-full bg-border" />
-        <SheetHeader className="gap-2 px-5 pt-4">
-          <SheetTitle className="text-lg font-bold break-keep text-(--base-color)">
-            {title}
-          </SheetTitle>
-          <SheetDescription className="text-sm break-keep text-(--tertiary-color)">
-            {description}
-          </SheetDescription>
-        </SheetHeader>
-        <SheetFooter className="px-5 pt-4 pb-6">
+    <BottomSheet open={open} onClose={onClose}>
+      <BottomSheetContent>
+        <BottomSheetHeader title={title} description={description} />
+        <BottomSheetFooter>
           {errorMessage && <FieldError>{errorMessage}</FieldError>}
           <Button
             type="button"
-            size="lg"
-            className="h-12 w-full shadow-none"
+            size="xl"
+            className="w-full"
             disabled={isPending}
             onClick={onConfirm}
           >
@@ -71,16 +52,16 @@ export default function ValetNoticeSheet({
             <Button
               type="button"
               variant="ghost"
-              size="lg"
-              className="h-12 w-full text-(--tertiary-color)"
+              size="xl"
+              className="w-full text-(--tertiary-color)"
               disabled={isPending}
               onClick={onClose}
             >
               {closeLabel}
             </Button>
           )}
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
   );
 }

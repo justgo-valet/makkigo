@@ -2,13 +2,11 @@
 
 import { Button, cn, FieldError } from "@makkigo/ui";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@makkigo/ui/components/ui/sheet";
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetFooter,
+  BottomSheetHeader,
+} from "@makkigo/ui/components/ui/bottom-sheet";
 import { MinusIcon, PlusIcon } from "lucide-react";
 
 import type {
@@ -48,28 +46,16 @@ export default function ArrivalDelaySheet({
   onClose,
 }: Readonly<ArrivalDelaySheetProps>) {
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
-      }}
-    >
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        className="mx-auto max-w-md gap-0 rounded-t-2xl"
-      >
-        <div aria-hidden className="mx-auto mt-3 h-1 w-9 rounded-full bg-border" />
-        <SheetHeader className="gap-2 px-5 pt-4">
-          <SheetTitle className="text-lg font-bold break-keep text-(--base-color)">
-            도착이 늦어지시나요?
-          </SheetTitle>
-          <SheetDescription className="text-sm break-keep text-(--tertiary-color)">
-            {expectedArrivalTime
-              ? `요청하신 ${expectedArrivalTime}보다 얼마나 더 걸릴지 알려주세요`
-              : "도착이 얼마나 더 걸릴지 알려주세요"}
-          </SheetDescription>
-        </SheetHeader>
+    <BottomSheet open={open} onClose={onClose}>
+      <BottomSheetContent>
+        <BottomSheetHeader
+          title="도착이 늦어지시나요?"
+          description={
+            expectedArrivalTime
+              ? `도착 예정 ${expectedArrivalTime}보다 얼마나 더 걸릴지 알려주세요`
+              : "도착이 얼마나 더 걸릴지 알려주세요"
+          }
+        />
         <fieldset className="grid grid-cols-3 gap-2 px-5 pt-5">
           <legend className="sr-only">지연 시간</legend>
           {options.map((option) => {
@@ -128,11 +114,11 @@ export default function ArrivalDelaySheet({
           </p>
         )}
         {errorMessage && <FieldError className="px-5 pt-3">{errorMessage}</FieldError>}
-        <SheetFooter className="px-5 pt-5 pb-6">
+        <BottomSheetFooter className="pt-5">
           <Button
             type="button"
-            size="lg"
-            className="h-12 w-full shadow-none"
+            size="xl"
+            className="w-full"
             disabled={selectedOptionMinutes === null || isSending}
             onClick={onSend}
           >
@@ -141,14 +127,14 @@ export default function ArrivalDelaySheet({
           <Button
             type="button"
             variant="ghost"
-            size="lg"
-            className="h-12 w-full text-(--tertiary-color)"
+            size="xl"
+            className="w-full text-(--tertiary-color)"
             onClick={onClose}
           >
             취소
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
   );
 }
