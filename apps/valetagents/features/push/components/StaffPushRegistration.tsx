@@ -20,7 +20,7 @@ export default function StaffPushRegistration({
   const denied = availability === "denied";
 
   return (
-    <output className="mt-3 flex items-center gap-3 rounded-xl border bg-(--surface-color) px-4 py-3">
+    <output className="mt-3 flex items-center gap-3 rounded-xl border bg-white px-4 py-3">
       <Image src="/icons/bell_off.svg" alt="" aria-hidden="true" width={24} height={24} />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 break-keep">
         <p className="text-sm font-bold text-(--base-color)">

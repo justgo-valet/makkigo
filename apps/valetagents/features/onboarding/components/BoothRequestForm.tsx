@@ -49,7 +49,7 @@ export default function BoothRequestForm({
 
   return (
     <form
-      className="flex flex-1 flex-col pt-[17px]"
+      className="flex flex-1 flex-col pt-4"
       onSubmit={(event) => {
         event.preventDefault();
         form.submit();
@@ -57,15 +57,15 @@ export default function BoothRequestForm({
     >
       <BoothMap address={booth.address} appKey={kakaoMapAppKey} />
 
-      <h1 className="mt-[26px] text-2xl leading-6 font-medium text-(--base-color)">{booth.name}</h1>
-      <p className="mt-[9px] text-sm leading-6 text-[#717171]">{formatAddress(booth)}</p>
+      <h1 className="mt-6 text-xl font-bold text-(--base-color)">{booth.name}</h1>
+      <p className="mt-1 text-sm text-(--tertiary-color)">{formatAddress(booth)}</p>
 
-      <h2 className="mt-5 text-xl leading-6 font-medium text-[#333]">발렛 비용</h2>
-      <p className="mt-[3px] text-xs leading-6 text-[#717171]">
+      <h2 className="mt-6 text-base font-bold text-(--base-color)">발렛 비용</h2>
+      <p className="mt-1 text-xs text-(--tertiary-color)">
         발렛부스에서 설정된 비용이에요. 요원 등록 후 수정이 가능해요
       </p>
       {feePolicy ? (
-        <p className="mt-1 text-lg leading-[26px] text-(--base-color)">
+        <p className="mt-2 text-base leading-relaxed text-(--base-color)">
           기본요금 <Emphasis>{formatDuration(feePolicy.baseMinutes)}</Emphasis>{" "}
           <Emphasis>{formatFee(feePolicy.baseFee)}</Emphasis> 원
           <br />
@@ -73,21 +73,21 @@ export default function BoothRequestForm({
           <Emphasis>{formatFee(feePolicy.extraUnitFee)}</Emphasis> 원
         </p>
       ) : (
-        <p className="mt-1 text-lg leading-[26px] text-[#717171]">요금 정보가 아직 등록되지 않았어요</p>
+        <p className="mt-2 text-base leading-relaxed text-(--tertiary-color)">요금 정보가 아직 등록되지 않았어요</p>
       )}
 
-      <fieldset className="mt-3.5">
-        <legend className="text-xl leading-6 font-medium text-[#333]">
+      <fieldset className="mt-6">
+        <legend className="text-base font-bold text-(--base-color)">
           근무 시간을 입력해 주세요
-          <span aria-hidden className="ml-1 align-top text-[#ff1515]">*</span>
+          <span aria-hidden className="ml-1 text-destructive">*</span>
         </legend>
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-3 flex items-center justify-between gap-3">
           <TimeField
             label="출근 시간"
             value={form.workStartTime}
             onClick={() => form.openPicker("start")}
           />
-          <span aria-hidden className="text-2xl font-medium text-[#333]">~</span>
+          <span aria-hidden className="text-2xl font-medium text-(--base-color)">~</span>
           <TimeField
             label="퇴근 시간"
             value={form.workEndTime}
@@ -98,13 +98,13 @@ export default function BoothRequestForm({
           <FieldError className="mt-2">출근과 퇴근 시간은 달라야 합니다.</FieldError>
         )}
         {form.isOvernight && (
-          <p className="mt-2 text-xs leading-6 text-[#717171]">퇴근은 다음 날이에요.</p>
+          <p className="mt-2 text-xs text-(--tertiary-color)">퇴근은 다음 날이에요.</p>
         )}
       </fieldset>
 
       <div aria-live="polite">
         {form.rejectedNotice && (
-          <p className="mx-auto mt-5 max-w-[304px] rounded-lg bg-[rgba(129,169,218,0.2)] px-3 py-2 text-center text-xs leading-6 text-(--base-color)">
+          <p className="mt-5 rounded-xl bg-primary/10 px-4 py-2 text-center text-sm text-(--base-color)">
             {form.rejectedNotice}
           </p>
         )}
@@ -116,7 +116,8 @@ export default function BoothRequestForm({
         )}
         <Button
           type="submit"
-          className="h-14 w-full rounded-[6px] text-lg font-medium"
+          size="xl"
+          className="w-full"
           disabled={!form.canSubmit}
         >
           {form.isSaving ? "저장하고 있어요" : getRequestActionLabel(request?.status)}
@@ -124,7 +125,7 @@ export default function BoothRequestForm({
         <OnboardingLinks
           canReturnToPending={canReturnToPending}
           onShowPending={onShowPending}
-          className="mt-[15px] text-sm"
+          className="mt-4 text-sm"
         />
       </div>
 
@@ -143,7 +144,7 @@ export default function BoothRequestForm({
 }
 
 function Emphasis({ children }: Readonly<{ children: string }>) {
-  return <span className="text-(--secondary-color)">{children}</span>;
+  return <span className="font-semibold text-primary">{children}</span>;
 }
 
 function TimeField({
@@ -155,7 +156,7 @@ function TimeField({
     <button
       type="button"
       aria-label={`${label} ${value ?? "선택"}`}
-      className="h-14 w-full max-w-[140px] min-w-0 rounded-lg border border-[#d8d8d8] bg-white text-[28px] leading-none text-black tabular-nums outline-none focus-visible:border-(--primary-color)"
+      className="h-14 w-full max-w-36 min-w-0 rounded-md border border-input bg-white text-2xl leading-none text-(--base-color) tabular-nums shadow-xs outline-none focus-visible:border-primary"
       onClick={onClick}
     >
       {formatTimeField(value)}

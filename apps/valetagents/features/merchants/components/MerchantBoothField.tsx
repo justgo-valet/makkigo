@@ -3,7 +3,7 @@
 import { cn } from "@makkigo/ui";
 
 import RequiredMark from "./RequiredMark";
-import { INPUT_CLASS, LABEL_CLASS } from "../fieldStyles";
+import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
 
 import type { useMerchantBoothField } from "../hooks/useMerchantBoothField";
 
@@ -47,7 +47,7 @@ export default function MerchantBoothField({ field, disabled }: Readonly<Merchan
 
       {field.expanded && (
         <div
-          className="absolute inset-x-0 top-full z-10 mt-1 overflow-hidden rounded-lg border border-[#d8d8d8] bg-white shadow-[2px_-1px_16px_rgba(0,0,0,0.2)]"
+          className="absolute inset-x-0 top-full z-10 mt-1 overflow-hidden rounded-lg border border-input bg-white shadow-lg"
           onMouseDown={(event) => event.preventDefault()}
         >
           {field.view === "results" ? (
@@ -68,19 +68,19 @@ export default function MerchantBoothField({ field, disabled }: Readonly<Merchan
                     type="button"
                     className={cn(
                       "flex w-full flex-col px-3 py-2 text-left",
-                      field.isActiveOption(index) && "bg-[#f7f9fc]",
+                      field.isActiveOption(index) && "bg-(--surface-color)",
                     )}
                     onMouseEnter={() => field.highlightOption(index)}
                     onClick={() => field.select(booth)}
                   >
                     <span className="text-base leading-6 text-(--base-color)">{booth.name}</span>
-                    <span className="truncate text-xs leading-5 text-[#717171]">{booth.address}</span>
+                    <span className="truncate text-xs leading-5 text-(--tertiary-color)">{booth.address}</span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
-            <div id={field.listboxId} className="px-3 py-3 text-sm text-[#575757]">
+            <div id={field.listboxId} className="px-3 py-3 text-sm text-(--tertiary-color)">
               {field.view !== "idle" && (
                 <p role={field.view === "error" ? "alert" : "status"}>{VIEW_MESSAGES[field.view]}</p>
               )}

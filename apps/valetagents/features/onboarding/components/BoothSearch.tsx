@@ -54,11 +54,11 @@ export default function BoothSearch({
       <div className="relative z-10 h-14" onBlur={combobox.handleBlur}>
         <div
           className={cn(
-            "absolute inset-x-0 top-0 overflow-hidden rounded-lg border border-[#d8d8d8] bg-white",
-            combobox.expanded && "shadow-[2px_-1px_16px_rgba(0,0,0,0.2)]",
+            "absolute inset-x-0 top-0 overflow-hidden rounded-lg border border-input bg-white shadow-xs",
+            combobox.expanded && "shadow-lg",
           )}
         >
-          <div className="flex h-[54px] items-center pr-[15px] pl-[21px]">
+          <div className="flex h-13.5 items-center px-4">
             <input
               ref={inputRef}
               type="text"
@@ -73,7 +73,7 @@ export default function BoothSearch({
               enterKeyHint="search"
               placeholder="발렛 부스 검색하기"
               value={combobox.keyword}
-              className="h-full min-w-0 flex-1 bg-transparent text-lg font-medium text-(--base-color) outline-none placeholder:text-base placeholder:font-normal placeholder:text-[#7d7d7d]"
+              className="h-full min-w-0 flex-1 bg-transparent text-lg font-medium text-(--base-color) outline-none placeholder:text-base placeholder:font-normal placeholder:text-(--tertiary-color)"
               onClick={combobox.openList}
               onChange={(event) => combobox.changeKeyword(event.target.value)}
               onKeyDown={combobox.handleKeyDown}
@@ -90,7 +90,7 @@ export default function BoothSearch({
                 </svg>
               </button>
             ) : (
-              <svg {...ICON_PROPS} className="mr-1.5 size-6 shrink-0 text-[#575757]">
+              <svg {...ICON_PROPS} className="mr-1.5 size-6 shrink-0 text-(--tertiary-color)">
                 <circle cx="10.5" cy="10.5" r="6.5" />
                 <path d="m20 20-4.5-4.5" />
               </svg>
@@ -102,7 +102,7 @@ export default function BoothSearch({
               id={combobox.listboxId}
               role="listbox"
               aria-label="부스 검색 결과"
-              className="max-h-[min(60dvh,420px)] overflow-y-auto pb-[17px]"
+              className="max-h-[min(60dvh,420px)] overflow-y-auto pb-4"
             >
               {combobox.booths.map((booth, index) => (
                 <li
@@ -114,14 +114,14 @@ export default function BoothSearch({
                   <button
                     type="button"
                     className={cn(
-                      "flex h-9 w-full items-start justify-between gap-3 pr-[15px] pl-[21px] text-left leading-6",
-                      combobox.isHighlightedOption(index) && "bg-[#f7f9fc]",
+                      "flex h-10 w-full items-center justify-between gap-3 px-4 text-left",
+                      combobox.isHighlightedOption(index) && "bg-(--surface-color)",
                     )}
                     onMouseEnter={() => combobox.highlightOption(index)}
                     onClick={() => combobox.select(booth)}
                   >
-                    <span className="shrink-0 text-lg text-(--base-color)">{booth.name}</span>
-                    <span className="min-w-0 truncate pt-px text-xs leading-6 text-[#717171]">
+                    <span className="shrink-0 text-base text-(--base-color)">{booth.name}</span>
+                    <span className="min-w-0 truncate text-xs text-(--tertiary-color)">
                       {booth.address}
                     </span>
                   </button>
@@ -135,14 +135,14 @@ export default function BoothSearch({
       {children ?? (
         <>
           <div
-            className="mt-[72px] text-center text-lg text-[#575757]"
+            className="mt-18 text-center text-base text-(--tertiary-color)"
             aria-live="polite"
             aria-busy={combobox.view === "loading"}
           >
             {combobox.view === "error" ? (
               <>
                 <p role="alert">{combobox.errorMessage}</p>
-                <button type="button" className="mt-3 text-base underline" onClick={combobox.retry}>
+                <button type="button" className="mt-3 text-sm underline" onClick={combobox.retry}>
                   다시 시도
                 </button>
               </>
@@ -153,7 +153,7 @@ export default function BoothSearch({
           <OnboardingLinks
             canReturnToPending={canReturnToPending}
             onShowPending={onShowPending}
-            className="mt-auto flex-col gap-3 pt-8 pb-[25px] text-base"
+            className="mt-auto flex-col gap-3 pt-8 pb-6 text-base"
           />
         </>
       )}

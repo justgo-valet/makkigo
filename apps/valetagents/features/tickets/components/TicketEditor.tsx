@@ -1,6 +1,7 @@
 "use client";
 
 import { TicketRenderer, ticketEditorShapePresets, ticketDesignSchema } from "@makkigo/ticket-design";
+import { Button, FieldError } from "@makkigo/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
@@ -217,26 +218,26 @@ export default function TicketEditor({
   const shapeLabels: Partial<Record<TicketShapePreset, string>> = {
     ROUND_RECT: "둥근 사각형", SIDE_NOTCH: "오른쪽 홈", BOTTOM_NOTCHES: "하단 양쪽 홈", STUB_NOTCHES: "상하 홈",
   };
-  const toolClass = "flex size-[clamp(48px,17vw,66px)] shrink-0 items-center justify-center rounded-full border border-(--primary-color) text-(--base-color) transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--primary-color) disabled:opacity-40";
+  const toolClass = "flex size-[clamp(48px,17vw,66px)] shrink-0 items-center justify-center rounded-full border border-primary bg-white text-(--base-color) transition-colors hover:bg-primary/5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:opacity-40";
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
       <AppHeader menu={menu} backHref="/tickets" />
-      <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">티켓 관리</h1>
+      <h1 className="mt-4 text-xl font-bold text-(--base-color)">티켓 관리</h1>
       {!ticketId && merchants.length > 1 && (
-        <label className="mt-5 flex items-center gap-3 px-1.5 text-sm text-[#717171]">
+        <label className="mt-4 flex items-center gap-3 text-sm text-(--tertiary-color)">
           업체
-          <select className="h-10 min-w-0 flex-1 rounded-lg border border-[#d8d8d8] bg-white px-3 text-base text-(--base-color)" disabled={busy || design.layers.some((layer) => layer.type === "IMAGE")} value={merchantId || ""} onChange={(event) => setMerchantId(Number(event.target.value))}>
+          <select className="h-10 min-w-0 flex-1 rounded-md border border-input bg-white px-3 text-base text-(--base-color) shadow-xs" disabled={busy || design.layers.some((layer) => layer.type === "IMAGE")} value={merchantId || ""} onChange={(event) => setMerchantId(Number(event.target.value))}>
             <option value="" disabled>업체 선택</option>
             {merchants.map((merchant) => <option key={merchant.id} value={merchant.id}>{merchant.name}</option>)}
           </select>
         </label>
       )}
       <div className="flex flex-1 flex-col items-center justify-center pt-8 pb-14">
-        <div ref={setCanvasElement} inert={busy} className="w-full max-w-[300px] drop-shadow-[0_3px_2px_rgba(3,9,15,0.25)]" onPointerDown={() => setSelectedLayerId(null)}>
+        <div ref={setCanvasElement} inert={busy} className="w-full max-w-75 drop-shadow-md" onPointerDown={() => setSelectedLayerId(null)}>
           <TicketRenderer
             ariaLabel="티켓 편집 영역"
-            className="aspect-[3/4] w-full"
+            className="aspect-3/4 w-full"
             design={design}
             resolveAssetUrl={resolveAssetUrl}
             renderLayer={(layer, style) => (
@@ -245,7 +246,7 @@ export default function TicketEditor({
                 role={layer.type === "IMAGE" ? "group" : undefined}
                 tabIndex={layer.type === "IMAGE" ? 0 : undefined}
                 aria-label={layer.type === "IMAGE" ? "이미지 이동" : undefined}
-                className={selectedLayerId === layer.id ? "outline-2 outline-[#2170D6]" : ""}
+                className={selectedLayerId === layer.id ? "outline-2 outline-primary" : ""}
                 style={{ ...style, overflow: "visible", pointerEvents: "auto", touchAction: layer.type === "IMAGE" ? "none" : "auto", ...(layer.type === "TEXT" ? { color: layer.color, fontSize: `${layer.fontSize * 100}cqw`, lineHeight: 1.2 } : {}) }}
                 onPointerDown={(event) => beginInteraction(layer, event, null)}
                 onPointerMove={moveInteraction}
@@ -279,7 +280,7 @@ export default function TicketEditor({
                       type="button"
                       aria-label="선택 항목 이동"
                       title="드래그하거나 방향키로 이동"
-                      className="absolute left-1/2 z-20 flex h-7 w-11 -translate-x-1/2 touch-none items-center justify-center rounded-t-md bg-(--primary-color) text-white"
+                      className="absolute left-1/2 z-20 flex h-7 w-11 -translate-x-1/2 touch-none items-center justify-center rounded-t-md bg-primary text-white"
                       style={{ top: layer.y < 0.08 ? 0 : -28 }}
                       onPointerDown={(event) => beginInteraction(layer, event, null)}
                     >
@@ -292,7 +293,7 @@ export default function TicketEditor({
                         aria-label={`${handle} 크기 조절`}
                         className={`absolute z-10 h-11 w-11 touch-none bg-transparent ${handle.includes("n") ? "-top-5" : "-bottom-5"} ${handle.includes("w") ? "-left-5" : "-right-5"}`}
                         onPointerDown={(event) => beginInteraction(layer, event, handle)}
-                      ><span className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-[#2170D6]" /></button>
+                      ><span className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary" /></button>
                     ))}
                   </>
                 )}
@@ -305,24 +306,24 @@ export default function TicketEditor({
         <div className="relative h-0 w-full">
           <div inert={busy} className="absolute inset-x-0 bottom-3 z-20 flex min-h-10 items-center justify-center gap-1 text-xs" aria-label="선택 항목 설정">
             {selectedLayer.type === "TEXT" && (
-              <label className="flex min-h-10 items-center gap-1 rounded-lg bg-white px-2 py-2">
+              <label className="flex min-h-10 items-center gap-1 rounded-lg border bg-white px-2 py-2 shadow-xs">
                 크기
-                <input aria-label="글자 크기" type="range" className="w-16 accent-[#2170D6]" min="2" max="20" step="0.5" value={selectedLayer.fontSize * 100} onChange={(event) => updateLayer(selectedLayer.id, (layer) => layer.type === "TEXT" ? { ...layer, fontSize: Number(event.target.value) / 100 } : layer)} />
+                <input aria-label="글자 크기" type="range" className="w-16 accent-primary" min="2" max="20" step="0.5" value={selectedLayer.fontSize * 100} onChange={(event) => updateLayer(selectedLayer.id, (layer) => layer.type === "TEXT" ? { ...layer, fontSize: Number(event.target.value) / 100 } : layer)} />
               </label>
             )}
-            <button type="button" className="min-h-10 rounded-lg bg-white px-2 disabled:opacity-40" disabled={selectedLayer.order === 0} onClick={() => changeOrder(-1)}>뒤로</button>
-            <button type="button" className="min-h-10 rounded-lg bg-white px-2 disabled:opacity-40" disabled={selectedLayer.order === design.layers.length - 1} onClick={() => changeOrder(1)}>앞으로</button>
-            <button type="button" aria-label="선택 항목 삭제" className="min-h-10 rounded-lg bg-white px-2 text-red-600" onClick={removeSelected}>삭제</button>
+            <button type="button" className="min-h-10 rounded-lg border bg-white px-2 shadow-xs disabled:opacity-40" disabled={selectedLayer.order === 0} onClick={() => changeOrder(-1)}>뒤로</button>
+            <button type="button" className="min-h-10 rounded-lg border bg-white px-2 shadow-xs disabled:opacity-40" disabled={selectedLayer.order === design.layers.length - 1} onClick={() => changeOrder(1)}>앞으로</button>
+            <button type="button" aria-label="선택 항목 삭제" className="min-h-10 rounded-lg border bg-white px-2 text-destructive shadow-xs" onClick={removeSelected}>삭제</button>
           </div>
         </div>
       )}
-      <div inert={busy} className="relative mb-6 min-h-[80px]" aria-label="티켓 편집 도구">
+      <div inert={busy} className="relative mb-6 min-h-20" aria-label="티켓 편집 도구">
         {shapePicker ? (
-          <div className="relative flex h-20 items-center justify-around rounded-[32px] border border-(--primary-color) px-4" role="radiogroup" aria-label="티켓 모양">
-            <button type="button" aria-label="모양 선택 닫기" className="absolute -top-1.5 -right-1.5 z-10 flex size-6 items-center justify-center rounded-full bg-[#a3a3a3] text-xl leading-none text-white" onClick={() => setShapePicker(false)}>×</button>
+          <div className="relative flex h-20 items-center justify-around rounded-full border border-primary bg-white px-4" role="radiogroup" aria-label="티켓 모양">
+            <button type="button" aria-label="모양 선택 닫기" className="absolute -top-1.5 -right-1.5 z-10 flex size-6 items-center justify-center rounded-full bg-(--tertiary-color) text-xl leading-none text-white" onClick={() => setShapePicker(false)}>×</button>
             {ticketEditorShapePresets.map((shape) => (
-              <button key={shape} type="button" role="radio" aria-label={shapeLabels[shape]} aria-checked={design.shape === shape} className="flex size-16 items-center justify-center rounded-xl focus-visible:outline-2 focus-visible:outline-(--primary-color)" data-shape={shape} onClick={() => { setDesign((current) => ({ ...current, shape })); setSelectedLayerId(null); }}>
-                <span className={`block ${shape === "STUB_NOTCHES" ? "w-14" : "w-11"} drop-shadow-[0_3px_2px_rgba(3,9,15,0.3)] ${design.shape === shape ? "drop-shadow-[0_2px_3px_rgba(33,112,214,0.5)]" : ""}`}><TicketRenderer className="w-full" design={{ ...createEmptyDesign(), shape }} resolveAssetUrl={resolveAssetUrl} /></span>
+              <button key={shape} type="button" role="radio" aria-label={shapeLabels[shape]} aria-checked={design.shape === shape} className="flex size-16 items-center justify-center rounded-xl focus-visible:outline-2 focus-visible:outline-primary" data-shape={shape} onClick={() => { setDesign((current) => ({ ...current, shape })); setSelectedLayerId(null); }}>
+                <span className={`block ${shape === "STUB_NOTCHES" ? "w-14" : "w-11"} ${design.shape === shape ? "drop-shadow-md drop-shadow-primary/50" : "drop-shadow-sm"}`}><TicketRenderer className="w-full" design={{ ...createEmptyDesign(), shape }} resolveAssetUrl={resolveAssetUrl} /></span>
               </button>
             ))}
           </div>
@@ -338,14 +339,14 @@ export default function TicketEditor({
               <span className="size-8 rounded-full border border-black/5" style={{ backgroundColor: selectedLayer?.type === "TEXT" ? selectedLayer.color : design.backgroundColor }} />
               <input aria-label={selectedLayer?.type === "TEXT" ? "글자 색 선택" : "배경색 선택"} className="absolute inset-0 size-full cursor-pointer opacity-0" type="color" value={selectedLayer?.type === "TEXT" ? selectedLayer.color : design.backgroundColor} onChange={(event) => selectedLayer?.type === "TEXT" ? updateLayer(selectedLayer.id, (layer) => layer.type === "TEXT" ? { ...layer, color: event.target.value.toUpperCase() } : layer) : setDesign((current) => ({ ...current, backgroundColor: event.target.value.toUpperCase() }))} />
             </label>
-            <button type="button" aria-label="티켓 모양 선택" title="티켓 모양 선택" className={toolClass} onClick={() => { setShapePicker(true); setSelectedLayerId(null); }}><span className="size-6 rotate-45 bg-[#d8d8d8]" /></button>
+            <button type="button" aria-label="티켓 모양 선택" title="티켓 모양 선택" className={toolClass} onClick={() => { setShapePicker(true); setSelectedLayerId(null); }}><span className="size-6 rotate-45 bg-input" /></button>
           </div>
         )}
       </div>
       <input ref={fileInputRef} className="hidden" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void onChooseImage(event.target.files?.[0])} />
       <p className="sr-only" role="status">{busy ? "처리 중입니다." : selectedLayer?.type === "TEXT" ? "티켓 안에서 글자를 수정하세요. 이동 손잡이로 위치를 바꿀 수 있습니다." : "글자나 이미지를 추가해 티켓을 꾸며보세요."}</p>
-      {error && <p role="alert" className="mb-3 text-sm text-red-600">{error}</p>}
-      <button type="button" disabled={busy || (!ticketId && !merchantId)} className="flex h-14 w-full shrink-0 items-center justify-center rounded-md bg-(--primary-color) text-lg font-medium text-white disabled:opacity-50" onClick={() => void save()}>{busy ? "처리 중" : "티켓 저장"}</button>
+      {error && <FieldError className="mb-3">{error}</FieldError>}
+      <Button type="button" size="xl" disabled={busy || (!ticketId && !merchantId)} className="w-full shrink-0" onClick={() => void save()}>{busy ? "처리 중" : "티켓 저장"}</Button>
     </div>
   );
 }

@@ -13,6 +13,8 @@ import {
   BOOTH_NAME_MAX_LENGTH,
 } from "@/libs/booth/contracts/create-booth";
 
+import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
+
 import { useBoothRegistrationForm } from "../hooks/useBoothRegistrationForm";
 
 interface BoothRegistrationFormProps {
@@ -20,10 +22,7 @@ interface BoothRegistrationFormProps {
   kakaoMapAppKey: string;
 }
 
-const LABEL_CLASS = "text-base leading-6 font-medium text-(--base-color)";
-const INPUT_CLASS =
-  "mt-1.5 h-12 w-full rounded-lg border border-[#d8d8d8] bg-white px-3 text-base text-(--base-color) outline-none placeholder:text-sm placeholder:text-[#717171] focus-visible:border-(--primary-color)";
-const BOX_CLASS = "rounded-lg border border-[#999]";
+const BOX_CLASS = "rounded-md border border-input";
 
 export default function BoothRegistrationForm({
   returnPath,
@@ -33,15 +32,15 @@ export default function BoothRegistrationForm({
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full max-w-md flex-col pt-2"
+      className="mx-auto flex min-h-full w-full max-w-md flex-col"
       onSubmit={(event) => {
         event.preventDefault();
         form.submit();
       }}
     >
-      <header className="relative flex h-6 items-center">
-        <Link href={returnPath} aria-label="뒤로 가기">
-          <Image src="/icons/chevron_left.svg" alt="" width={24} height={24} />
+      <header className="relative flex h-12 w-full shrink-0 items-center">
+        <Link href={returnPath} aria-label="뒤로 가기" className="z-10 flex h-full items-center">
+          <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
         </Link>
         <Image
           src={makkigoLogo}
@@ -49,11 +48,11 @@ export default function BoothRegistrationForm({
           width={95}
           height={39}
           priority
-          className="absolute -top-1.5 left-1/2 -ml-px -translate-x-1/2"
+          className="absolute left-1/2 -translate-x-1/2"
         />
       </header>
 
-      <h1 className="mt-9 text-2xl leading-6 font-medium text-(--base-color)">부스 등록</h1>
+      <h1 className="mt-4 text-xl font-bold text-(--base-color)">부스 등록</h1>
 
       <label htmlFor="booth-name" className={cn(LABEL_CLASS, "mt-3")}>
         부스 이름
@@ -98,13 +97,13 @@ export default function BoothRegistrationForm({
         onChange={(event) => form.changeAddressDetail(event.target.value)}
       />
 
-      <div className={cn(BOX_CLASS, "relative mt-1.5 h-[180px] overflow-hidden bg-white")}>
+      <div className={cn(BOX_CLASS, "relative mt-2 h-45 overflow-hidden bg-white")}>
         <div
           ref={mapContainerRef}
           className={cn("h-full w-full", form.mapView !== "ready" && "invisible")}
         />
         {(form.mapView === "loading" || form.mapView === "error") && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center text-[#575757]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center text-(--tertiary-color)">
             {form.mapView === "loading" ? (
               <p className="text-sm" role="status">지도를 불러오고 있어요.</p>
             ) : (
@@ -120,17 +119,17 @@ export default function BoothRegistrationForm({
       </div>
 
       <p id="booth-photos-label" className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
-      <p className="text-[13px] leading-5 text-[#717171]">선택 사항 · 최대 5장, 장당 5MB</p>
+      <p className="text-xs leading-5 text-(--tertiary-color)">선택 사항 · 최대 5장, 장당 5MB</p>
       {form.photos.canAdd && (
         <label
           className={cn(
             BOX_CLASS,
-            "mt-[3px] flex h-[105px] flex-col items-center justify-center bg-[#e8e8e8] focus-within:border-(--primary-color)",
+            "mt-2 flex h-26 flex-col items-center justify-center bg-white focus-within:border-primary",
             form.isSaving ? "cursor-default opacity-60" : "cursor-pointer",
           )}
         >
-          <Image src="/icons/upload.svg" alt="" width={24} height={26} className="ml-px" />
-          <span className="mt-[15px] text-sm leading-5 font-medium text-(--base-color)">부스 사진 업로드</span>
+          <Image src="/icons/upload.svg" alt="" width={24} height={26} />
+          <span className="mt-3 text-sm font-medium text-(--base-color)">부스 사진 업로드</span>
           <input
             type="file"
             multiple
@@ -148,14 +147,14 @@ export default function BoothRegistrationForm({
       {form.photos.photos.length > 0 && (
         <ul aria-labelledby="booth-photos-label" className="mt-3 flex flex-wrap gap-2">
           {form.photos.photos.map((photo, index) => (
-            <li key={photo.key} className="relative size-[72px]">
+            <li key={photo.key} className="relative size-18">
               <Image
                 src={photo.previewUrl}
                 alt={`선택한 부스 사진 ${index + 1}`}
                 width={72}
                 height={72}
                 unoptimized
-                className="size-full rounded-lg border border-[#999] object-cover"
+                className="size-full rounded-md border border-input object-cover"
               />
               <button
                 type="button"
@@ -180,7 +179,8 @@ export default function BoothRegistrationForm({
         )}
         <Button
           type="submit"
-          className="h-14 w-full rounded-[6px] text-lg font-medium"
+          size="xl"
+          className="w-full"
           disabled={!form.canSubmit}
         >
           {form.isSaving ? "등록 중…" : "부스 등록하기"}
@@ -191,5 +191,5 @@ export default function BoothRegistrationForm({
 }
 
 function RequiredMark() {
-  return <span aria-hidden className="relative -top-0.5 ml-1 align-top text-[#ff1515]">*</span>;
+  return <span aria-hidden className="ml-1 text-destructive">*</span>;
 }
