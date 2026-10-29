@@ -220,7 +220,7 @@ export default function TicketEditor({
   const toolClass = "flex size-[clamp(48px,17vw,66px)] shrink-0 items-center justify-center rounded-full border border-(--primary-color) text-(--base-color) transition-colors hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-(--primary-color) disabled:opacity-40";
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(17px+env(safe-area-inset-bottom))]">
+    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(17px+var(--safe-area-inset-bottom))]">
       <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
       <AppHeader menu={menu} backHref="/tickets" />
       <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">티켓 관리</h1>

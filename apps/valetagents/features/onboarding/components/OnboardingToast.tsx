@@ -8,7 +8,7 @@ export default function OnboardingToast({ toast }: Readonly<OnboardingToastProps
   return (
     <div
       aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(139px+env(safe-area-inset-bottom))] z-20 flex justify-center px-6"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(139px+var(--safe-area-inset-bottom))] z-20 flex justify-center px-6"
     >
       {toast && (
         <p

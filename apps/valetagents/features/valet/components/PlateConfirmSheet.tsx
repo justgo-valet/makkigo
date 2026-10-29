@@ -40,7 +40,7 @@ export default function PlateConfirmSheet({
         side="bottom"
         showCloseButton={false}
         overlayClassName="bg-transparent"
-        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] px-[27px] pt-[42px] pb-[max(25px,env(safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
+        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] px-[27px] pt-[42px] pb-[max(25px,var(--safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
       >
         <SheetHeader className="p-0 text-left">
           <SheetTitle className="text-2xl leading-6 font-medium text-[#03090f]">{title}</SheetTitle>
