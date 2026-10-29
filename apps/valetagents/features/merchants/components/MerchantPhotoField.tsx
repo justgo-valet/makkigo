@@ -95,7 +95,7 @@ export default function MerchantPhotoField({ photos, disabled }: Readonly<Mercha
             {(photo.removing || photo.status === "uploading") && (
               <p
                 role="status"
-                className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 text-xs text-white"
+                className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-md bg-black/40 text-xs text-white"
               >
                 {photo.removing ? "지우는 중" : "올리는 중"}
               </p>
@@ -103,7 +103,7 @@ export default function MerchantPhotoField({ photos, disabled }: Readonly<Mercha
             {photo.status === "failed" && !photo.removing && !disabled && (
               <button
                 type="button"
-                className="absolute inset-0 rounded-lg bg-black/60 text-xs text-white underline"
+                className="absolute inset-0 rounded-md bg-black/60 text-xs text-white underline"
                 onClick={() => photos.retry(photo.key)}
               >
                 다시 시도
