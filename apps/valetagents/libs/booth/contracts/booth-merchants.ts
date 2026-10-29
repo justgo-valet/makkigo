@@ -9,6 +9,7 @@ const boothMerchantSchema = z.object({
   name: z.string(),
   address: z.string(),
   addressDetail: z.string().nullable(),
+  photoUrls: z.array(z.string().url()),
   status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
   updatedAt: z.string().datetime(),
 });

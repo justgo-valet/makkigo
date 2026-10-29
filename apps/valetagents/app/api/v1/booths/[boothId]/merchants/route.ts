@@ -47,7 +47,10 @@ export async function GET(
     const page = boothMerchantPageSchema.safeParse(request.nextUrl.searchParams.get("page") ?? 1);
     if (!page.success) return apiError("INVALID_PAGE", "올바른 페이지 번호가 필요합니다.", 400);
 
-    const result = await listBoothMerchants(staffId, boothId, page.data);
+    const imageBaseUrl = process.env.IMAGE_BASE_URL;
+    if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required");
+
+    const result = await listBoothMerchants(staffId, boothId, page.data, imageBaseUrl);
     if (!result.ok) {
       const error = ERROR_RESPONSES[result.reason];
       return apiError(result.reason, error.message, error.status);

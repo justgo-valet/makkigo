@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
@@ -54,6 +54,7 @@ const merchantPage = {
       name: "샘플 식당",
       address: "서울특별시 중구 세종대로 110",
       addressDetail: "2층",
+      photoUrls: [],
       status: "APPROVED",
       updatedAt: "2026-10-10T01:00:00.000Z",
     },
@@ -65,9 +66,14 @@ const merchantPage = {
 describe("GET /api/v1/booths/:boothId/merchants", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("IMAGE_BASE_URL", "https://images.example.com");
     auth.getCurrentStaffId.mockResolvedValue(7);
     protectedAccess.getProtectedStaffAccess.mockResolvedValue({ ok: true });
     merchantService.listBoothMerchants.mockResolvedValue({ ok: true, value: merchantPage });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("rejects incomplete merchants before ownership lookup", async () => {

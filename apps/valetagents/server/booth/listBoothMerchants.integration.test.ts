@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { listBoothMerchants as ListBoothMerchants } from "./listBoothMerchants";
 import type { BoothMerchantStatus, PrismaClient } from "database";
 
+const IMAGE_BASE_URL = "https://images.example.com";
 const TEST_DATABASE_NAME_PATTERN = /(?:^|[_-])test(?:$|[_-])/i;
 
 let prisma: PrismaClient;
@@ -108,7 +109,7 @@ describe("listBoothMerchants database integration", () => {
       data: { status: "APPROVED" },
     });
 
-    const result = await listBoothMerchants(managerId, boothId, 1);
+    const result = await listBoothMerchants(managerId, boothId, 1, IMAGE_BASE_URL);
     const stored = await prisma.boothMerchant.findMany({
       where: { boothId },
       select: { merchantId: true, status: true, updatedAt: true },
@@ -141,8 +142,8 @@ describe("listBoothMerchants database integration", () => {
     }
     const requested = [...merchants].reverse();
 
-    const first = await listBoothMerchants(managerId, boothId, 1);
-    const second = await listBoothMerchants(managerId, boothId, 2);
+    const first = await listBoothMerchants(managerId, boothId, 1, IMAGE_BASE_URL);
+    const second = await listBoothMerchants(managerId, boothId, 2, IMAGE_BASE_URL);
 
     expect(first.ok && first.value.items.map(({ id }) => id)).toEqual(requested.slice(0, 5));
     expect(second.ok && second.value.items.map(({ id }) => id)).toEqual(requested.slice(5));
@@ -152,7 +153,7 @@ describe("listBoothMerchants database integration", () => {
   it("only lets the booth creator list", async () => {
     await createContract(await createMerchant("contracted"), "APPROVED");
 
-    await expect(listBoothMerchants(otherManagerId, boothId, 1)).resolves.toEqual({
+    await expect(listBoothMerchants(otherManagerId, boothId, 1, IMAGE_BASE_URL)).resolves.toEqual({
       ok: false,
       reason: "BOOTH_MANAGER_REQUIRED",
     });
