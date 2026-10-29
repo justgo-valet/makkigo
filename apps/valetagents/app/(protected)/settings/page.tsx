@@ -2,9 +2,11 @@ import { getActiveStaffIdFromAccessToken } from "@makkigo/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import ComingSoon from "@/components/layouts/ComingSoon";
+import SettingsContent from "@/features/settings/components/SettingsContent";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
+import { getStaffMenuAccess } from "@/server/auth/getStaffMenuAccess";
+import { listStaffSocialAccounts } from "@/server/auth/listStaffSocialAccounts";
 import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
 
 export default async function SettingsPage() {
@@ -16,5 +18,11 @@ export default async function SettingsPage() {
   const next = await getPathAfterLogin(staffId);
   if (next !== "/") redirect(next);
 
-  return <ComingSoon title="설정 기능을 준비하고 있어요" />;
+  const [menu, socialAccounts] = await Promise.all([
+    getStaffMenuAccess(staffId),
+    listStaffSocialAccounts(staffId),
+  ]);
+  if (!menu) redirect("/login");
+
+  return <SettingsContent staffId={staffId} menu={menu} socialAccounts={socialAccounts} />;
 }

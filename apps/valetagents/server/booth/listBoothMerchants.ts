@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "database";
 
 import { BOOTH_MERCHANT_PAGE_SIZE } from "@/libs/booth/contracts/booth-merchants";
+import { toImageUrl } from "@/server/merchant/listOwnMerchants";
 
 import { getBoothManagerFailure } from "./boothManager";
 
@@ -17,6 +18,7 @@ const listBoothMerchants = async (
   staffId: number,
   boothId: number,
   page: number,
+  imageBaseUrl: string,
 ): Promise<ListBoothMerchantsResult> => {
   const failure = await getBoothManagerFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
@@ -33,7 +35,14 @@ const listBoothMerchants = async (
         merchantId: true,
         status: true,
         updatedAt: true,
-        merchant: { select: { name: true, address: true, addressDetail: true } },
+        merchant: {
+          select: {
+            name: true,
+            address: true,
+            addressDetail: true,
+            photos: { select: { path: true }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
+          },
+        },
       },
     }),
   ]);
@@ -46,6 +55,7 @@ const listBoothMerchants = async (
         name: contract.merchant.name,
         address: contract.merchant.address,
         addressDetail: contract.merchant.addressDetail,
+        photoUrls: contract.merchant.photos.map(({ path }) => toImageUrl(imageBaseUrl, path)),
         status: contract.status,
         updatedAt: contract.updatedAt.toISOString(),
       })),
