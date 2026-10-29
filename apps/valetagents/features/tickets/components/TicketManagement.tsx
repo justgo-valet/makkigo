@@ -25,8 +25,7 @@ export default function TicketManagement({
   const resolveAssetUrl = createAssetUrlResolver(imageBaseUrl);
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(17px+var(--safe-area-inset-bottom))]">
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
+    <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
 
       <AppHeader menu={menu} backHref="/" />
 

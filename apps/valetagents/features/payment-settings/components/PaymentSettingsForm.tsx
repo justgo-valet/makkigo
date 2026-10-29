@@ -36,14 +36,12 @@ export default function PaymentSettingsForm({
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pb-[calc(17px+var(--safe-area-inset-bottom))]"
+      className="mx-auto flex min-h-full w-full max-w-md flex-col"
       onSubmit={(event) => {
         event.preventDefault();
         form.save();
       }}
     >
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
-
       <AppHeader menu={menu} backHref="/" />
 
       <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">

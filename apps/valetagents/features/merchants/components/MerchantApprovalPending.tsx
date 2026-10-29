@@ -9,9 +9,7 @@ export default function MerchantApprovalPending() {
   const router = useRouter();
 
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2 pb-[calc(17px+var(--safe-area-inset-bottom))]">
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
-
+    <main className="mx-auto flex min-h-full w-full max-w-md flex-col pt-2">
       <header className="relative flex h-6 items-center justify-center">
         <Image src={makkigoLogo} alt="마끼고" width={95} height={39} priority />
       </header>

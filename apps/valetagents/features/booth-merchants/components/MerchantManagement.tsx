@@ -33,9 +33,7 @@ export default function MerchantManagement({
   const { detail } = management;
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col px-2 pb-[35px]">
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
-
+    <div className="mx-auto flex h-full w-full max-w-md flex-col">
       <AppHeader menu={menu} />
 
       <h1 className="mt-[34px] pl-1.5 text-2xl leading-6 font-medium text-(--base-color)">업체 관리</h1>

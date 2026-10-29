@@ -33,14 +33,12 @@ export default function BoothRegistrationForm({
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2 pb-[calc(17px+var(--safe-area-inset-bottom))]"
+      className="mx-auto flex min-h-full w-full max-w-md flex-col pt-2"
       onSubmit={(event) => {
         event.preventDefault();
         form.submit();
       }}
     >
-      <div className="fixed inset-0 -z-10 bg-[#f7f9fc]" />
-
       <header className="relative flex h-6 items-center">
         <Link href={returnPath} aria-label="뒤로 가기">
           <Image src="/icons/chevron_left.svg" alt="" width={24} height={24} />

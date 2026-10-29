@@ -1,6 +1,6 @@
 import { Ubuntu } from "next/font/google";
 
-import './globals.css';
+import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
@@ -12,24 +12,25 @@ const ubuntu = Ubuntu({
 });
 
 export const metadata: Metadata = {
-  title: 'Valet Agents',
-  description: 'Makkigo 발렛 에이전트 애플리케이션',
-}
+  title: "Valet Agents",
+  description: "Makkigo 발렛 에이전트 애플리케이션",
+};
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
-  viewportFit: 'cover',
-}
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+};
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
-  return <html lang="ko" className={ubuntu.variable}>
-    <body className="flex flex-col items-center w-full h-screen">
-      <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4 pt-[calc(1rem+var(--safe-area-inset-top))]">
-        <section className="min-h-0 w-full flex-1">
-          {children}
-        </section>
-      </main>
-    </body>
-  </html>
+  return (
+    <html lang="ko" className={ubuntu.variable}>
+      <body className="flex h-screen w-full flex-col items-center bg-(--surface-color)">
+        <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4 pt-[calc(1rem+var(--safe-area-inset-top))] pb-[calc(1rem+var(--safe-area-inset-bottom))]">
+          <section className="min-h-0 w-full flex-1">{children}</section>
+        </main>
+      </body>
+    </html>
+  );
 }
