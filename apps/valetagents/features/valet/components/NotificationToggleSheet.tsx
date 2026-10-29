@@ -38,7 +38,7 @@ export default function NotificationToggleSheet({
         side="bottom"
         showCloseButton={false}
         overlayClassName="bg-transparent"
-        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] pt-[30px] pr-[27px] pb-[max(24px,env(safe-area-inset-bottom))] pl-[28px] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
+        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] pt-[30px] pr-[27px] pb-[max(24px,var(--safe-area-inset-bottom))] pl-[28px] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
       >
         <SheetHeader className="gap-[9px] p-0 text-left">
           <SheetTitle className="text-2xl leading-6 font-medium text-[#03090f]">

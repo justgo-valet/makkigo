@@ -33,7 +33,7 @@ export default function BoothRegistrationForm({
 
   return (
     <form
-      className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2 pb-[calc(17px+env(safe-area-inset-bottom))]"
+      className="mx-auto flex min-h-full w-full max-w-md flex-col px-2 pt-2 pb-[calc(17px+var(--safe-area-inset-bottom))]"
       onSubmit={(event) => {
         event.preventDefault();
         form.submit();

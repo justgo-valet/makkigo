@@ -89,7 +89,7 @@ export default function AddVehicleSheet({ open, ...form }: Readonly<AddVehicleSh
         side="bottom"
         showCloseButton={false}
         overlayClassName="bg-transparent"
-        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] pr-[21px] pl-[25px] pt-[45px] pb-[max(17px,env(safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
+        className="mx-auto max-w-[767px] gap-0 rounded-t-[32px] border border-[#d8d8d8] bg-[#f7f9fc] pr-[21px] pl-[25px] pt-[45px] pb-[max(17px,var(--safe-area-inset-bottom))] shadow-[0_-3px_4px_rgba(0,0,0,0.25)] data-[state=closed]:duration-150 data-[state=open]:duration-200"
       >
         <AddVehicleForm {...form} />
       </SheetContent>

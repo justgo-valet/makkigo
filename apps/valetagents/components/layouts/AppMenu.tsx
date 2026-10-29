@@ -20,7 +20,7 @@ export default function AppMenu({ menu }: Readonly<AppMenuProps>) {
   return (
     <SheetContent
       showCloseButton={false}
-      className="w-[249px] gap-0 border-l-0 pt-[13.5px] shadow-none"
+      className="w-[249px] gap-0 border-l-0 pt-[calc(13.5px+var(--safe-area-inset-top))] shadow-none"
       overlayClassName="bg-black/70 backdrop-blur-[2px]"
     >
       <SheetTitle className="sr-only">메뉴</SheetTitle>

@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return <html lang="ko" className={ubuntu.variable}>
     <body className="flex flex-col items-center w-full h-screen">
-      <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4">
+      <main className="flex h-screen w-full max-w-[767px] flex-col items-center p-4 pt-[calc(1rem+var(--safe-area-inset-top))]">
         <section className="min-h-0 w-full flex-1">
           {children}
         </section>
