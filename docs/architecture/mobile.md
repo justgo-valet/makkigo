@@ -26,7 +26,7 @@
 | 다른 호스트, `tel:` 등 | 외부 브라우저 · 앱으로 열기 |
 | 뒤로 가기 (Android) | 웹 기록이 있으면 웹 뒤로, 없으면 앱 종료 |
 | 화면 방향 | 세로 고정 |
-| 안전영역 | 고객 · 요원 앱 같음. 위는 앱이 상태바만큼 흰 띠(검은 글자)를 두고 웹뷰는 그 아래에서 시작, 아래는 웹뷰가 홈 인디케이터 · 내비게이션 바 뒤까지 채움. 아래 여백은 웹이 CSS 변수 `--safe-area-inset-bottom` 으로 둠 — `env(safe-area-inset-*)` 를 직접 쓰지 않음(Android 웹뷰는 0) → [브리지](#웹--앱-브리지) |
+| 안전영역 | 고객 · 요원 앱 같음. 웹뷰가 상태바 · 홈 인디케이터 뒤까지 채움(edge-to-edge). 상태바 · 내비게이션 바는 투명하고 반투명 막(scrim · 글라스)도 없어 웹 화면 색이 그대로 비침. 위아래 여백은 웹이 CSS 변수 `--safe-area-inset-top/bottom/left/right` 로 둠 — `env(safe-area-inset-*)` 를 직접 쓰지 않음(Android 웹뷰는 기기마다 0 이거나 앱 여백과 겹침) → [브리지](#웹--앱-브리지) |
 | 키보드 | 입력창이 있는 바텀 시트는 키보드 위로 올라옴. iOS 는 웹이 `visualViewport` 로 가려진 높이를 재서 공통 `Sheet` 를 띄우고(`useKeyboardInset`), Android 는 고객 앱 viewport 의 `interactiveWidget: resizes-content` 로 레이아웃이 키보드만큼 줄어듦 (Chrome · WebView 108+). 앱은 Android 에서만 웹뷰를 키보드만큼 줄임(iOS 까지 줄이면 웹이 키보드 높이를 두 번 빼 시트가 두 배로 올라감). 키보드로 올라간 시트는 상태바 아래까지만 커짐. **입력창 글자는 16px 이상**(`text-base`) — 더 작으면 iOS 가 포커스 때 화면을 확대함 |
 | 지원 기기 | iOS 는 **iPhone 만** (iPad 스크린샷 · 심사 부담 없음) |
 | HTTP | 운영은 HTTPS 만. 개발용 HTTP 는 Android 디버그 빌드와 iOS 로컬 네트워크만 허용 |
@@ -41,8 +41,8 @@
 | 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소, **예전 로그인 방식 — 고객 웹은 지금 안 씀**) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
 | 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |
-| 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 예전 고객 앱(상태바 뒤까지 웹뷰)만 상태바 글자색을 바꿈. 상단을 흰 띠로 두는 새 앱은 받기만 하고 무시함. 예전 앱이 다 바뀌면 웹에서 지움 (mobile #9) |
-| 앱 → 웹 | CSS 변수 `--safe-area-inset-top/bottom/left/right` | 새 앱은 웹뷰가 상태바 아래에서 시작하므로 `top` 은 항상 `0px`. 페이지가 뜰 때와 화면 크기 · 키보드가 바뀔 때 `document.documentElement` 인라인 스타일에 px 로 넣음. 아래 여백은 키보드 높이만큼 줄인 값(키보드가 떠 있으면 보통 0 — 내비게이션 바 · 홈 인디케이터가 키보드에 가려짐). 브라우저에서는 `env(safe-area-inset-*)` 값이 되도록 `@makkigo/ui` 전역 CSS 에 기본값이 있음. Android 웹뷰는 `env()` 가 항상 0 이라 앱이 넣어 준다 |
+| 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 상태바 글자색을 바꿈 (`light` 흰 글자 · `dark` 검은 글자). 페이지를 새로 열면 `dark` 로 되돌리므로 어두운 화면(고객 · 요원 로그인)이 켜질 때 `light`, 벗어날 때 `dark` 를 보냄 (mobile #9) |
+| 앱 → 웹 | CSS 변수 `--safe-area-inset-top/bottom/left/right` | 페이지가 뜰 때와 화면 크기 · 키보드가 바뀔 때 `document.documentElement` 인라인 스타일에 px 로 넣음. 아래 여백은 키보드 높이만큼 줄인 값(키보드가 떠 있으면 보통 0 — 내비게이션 바 · 홈 인디케이터가 키보드에 가려짐). 브라우저에서는 `env(safe-area-inset-*)` 값이 되도록 `@makkigo/ui` 전역 CSS 에 기본값이 있음. Android 웹뷰의 `env()` 는 믿을 수 없어 앱이 넣어 준다 |
 | 웹 → 앱 | `{"type":"openNotificationSettings"}` | 이 앱의 OS 알림 설정 화면을 엶 (`app_settings`). 켜고 돌아오면 토큰 이벤트가 다시 옴 |
 | 웹 → 앱 | `{"type":"queryInstalledApps","schemes":["supertoss","kakaobank",…]}` | 스킴마다 열 수 있는지 확인해 `window` 에 `makkigo:installed-apps` 이벤트로 돌려줌 (`detail: { schemes }`, 열 수 있는 스킴만). 출차 화면 **입금하기**가 설치된 은행 앱만 보여줄 때 씀. 은행 목록 · 스킴 · 송금 주소는 웹 `features/valet/bankApps.ts` 가 정하고, 은행 앱은 웹이 스킴 주소(`supertoss://send?…`)로 이동하면 앱이 외부 앱으로 엶. 앱은 물어볼 스킴을 Android `<queries>` · iOS `LSApplicationQueriesSchemes` 에 미리 등록해야 하므로 **스킴을 더하면 앱 PR 도 함께** 낸다 (웹은 5초 안에 이벤트가 없으면 빈 목록으로 봄) |
 | 웹 → 앱 | `{"type":"setAuthenticated","authenticated":true|false}` | 보호·온보딩 경계는 `true`, 로그인 화면은 `false`를 보냄. 앱은 알림 목적지를 인증 완료 전까지 보관하고 `true` 뒤에만 안전한 웹 경로를 엶 |
