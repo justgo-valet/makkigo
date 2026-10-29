@@ -3,7 +3,7 @@
 import { FieldError, cn } from "@makkigo/ui";
 
 import RequiredMark from "./RequiredMark";
-import { INPUT_CLASS, LABEL_CLASS } from "../fieldStyles";
+import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
 import { ADDRESS_DETAIL_MAX_LENGTH } from "../hooks/useMerchantRegistrationForm";
 
 import type { useMerchantAddress } from "../hooks/useMerchantAddress";
@@ -60,7 +60,7 @@ export default function MerchantAddressField({
       <div aria-live="polite">
         {address.message && <FieldError className="mt-1.5">{address.message}</FieldError>}
         {address.coordinateState === "loading" && (
-          <p role="status" className="mt-1.5 text-[13px] text-[#717171]">
+          <p role="status" className="mt-1.5 text-xs text-(--tertiary-color)">
             주소 위치를 확인하고 있어요.
           </p>
         )}
@@ -69,7 +69,7 @@ export default function MerchantAddressField({
             <FieldError>주소 위치를 확인하지 못했어요.</FieldError>
             <button
               type="button"
-              className="text-sm text-[#575757] underline"
+              className="text-sm text-(--tertiary-color) underline"
               onClick={address.retryCoordinates}
             >
               다시 시도
@@ -86,14 +86,14 @@ export default function MerchantAddressField({
           onKeyDown={(event) => {
             if (event.key === "Escape") address.close();
           }}
-          className="fixed inset-0 z-50 flex flex-col bg-white pt-[var(--safe-area-inset-top)] pb-[var(--safe-area-inset-bottom)]"
+          className="fixed inset-0 z-50 flex flex-col bg-white pt-(--safe-area-inset-top) pb-(--safe-area-inset-bottom)"
         >
           <div className="flex h-12 shrink-0 items-center justify-between px-4">
             <p className="text-base font-medium text-(--base-color)">주소 검색</p>
             <button
               type="button"
               autoFocus
-              className="h-11 px-2 text-sm text-[#575757] underline"
+              className="h-11 px-2 text-sm text-(--tertiary-color) underline"
               onClick={address.close}
             >
               닫기
@@ -102,7 +102,7 @@ export default function MerchantAddressField({
           <div className="relative min-h-0 flex-1">
             <div ref={containerRef} className="size-full" />
             {address.layer !== "ready" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center text-sm text-[#575757]">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-6 text-center text-sm text-(--tertiary-color)">
                 {address.layer === "loading" ? (
                   <p role="status">주소 검색을 불러오고 있어요.</p>
                 ) : (

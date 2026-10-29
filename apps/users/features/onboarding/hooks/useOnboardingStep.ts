@@ -10,7 +10,7 @@ import type { OnboardingStep } from "@/features/onboarding/onboardingSteps";
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 import type { ChangeEvent } from "react";
 
-const useOnboardingStep = (onboardingStep: OnboardingStep) => {
+const useOnboardingStep = (onboardingStep: OnboardingStep, onOpenCustomInput: () => void) => {
   const form = useFormContext<OnboardingFormValues>();
   const phoneNumber = useController({ name: "phoneNumber", control: form.control });
   const carBrand = useController({ name: "carBrand", control: form.control });
@@ -30,6 +30,7 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
   const changeCarBrand = useCallback(
     (brand: string) => {
       if (brand !== carBrand.field.value) form.setValue("carModel", "");
+      form.clearErrors("carBrand");
       carBrand.field.onChange(brand);
     },
     [carBrand.field, form],
@@ -41,16 +42,33 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
     },
     [form, phoneNumber.field],
   );
+  const changeCarModel = useCallback(
+    (model: string) => {
+      form.clearErrors("carModel");
+      carModel.field.onChange(model);
+    },
+    [carModel.field, form],
+  );
   const handleCustomBrandChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => changeCarBrand(event.target.value),
     [changeCarBrand],
   );
-  const handleCustomBrandFocus = useCallback(() => {
+  const handleCustomModelChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => changeCarModel(event.target.value),
+    [changeCarModel],
+  );
+  const handleOpenCustomBrand = useCallback(() => {
     if (!isCustomBrand) changeCarBrand("");
-  }, [changeCarBrand, isCustomBrand]);
-  const handleCustomModelFocus = useCallback(() => {
-    if (!isCustomModel) carModel.field.onChange("");
-  }, [carModel.field, isCustomModel]);
+    onOpenCustomInput();
+  }, [changeCarBrand, isCustomBrand, onOpenCustomInput]);
+  const handleOpenCustomModel = useCallback(() => {
+    if (!isCustomModel) changeCarModel("");
+    onOpenCustomInput();
+  }, [changeCarModel, isCustomModel, onOpenCustomInput]);
+  const carBrandErrors = useMemo(
+    () => [form.formState.errors.carBrand],
+    [form.formState.errors.carBrand],
+  );
   const carModelErrors = useMemo(
     () => [form.formState.errors.carModel],
     [form.formState.errors.carModel],
@@ -76,8 +94,12 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
       error: form.formState.errors.carBrand,
       isCustomBrand,
       onSelect: changeCarBrand,
-      onCustomBrandChange: handleCustomBrandChange,
-      onCustomBrandFocus: handleCustomBrandFocus,
+      onOpenCustomInput: handleOpenCustomBrand,
+    },
+    carBrandInput: {
+      field: carBrand.field,
+      errors: carBrandErrors,
+      onChange: handleCustomBrandChange,
     },
     carModel: {
       carBrand: selectedCarBrand,
@@ -87,8 +109,14 @@ const useOnboardingStep = (onboardingStep: OnboardingStep) => {
       error: form.formState.errors.carModel,
       errors: carModelErrors,
       isCustomModel,
-      onSelect: carModel.field.onChange,
-      onCustomModelFocus: handleCustomModelFocus,
+      onSelect: changeCarModel,
+      onOpenCustomInput: handleOpenCustomModel,
+    },
+    carModelInput: {
+      carBrand: selectedCarBrand,
+      field: carModel.field,
+      errors: carModelErrors,
+      onChange: handleCustomModelChange,
     },
   };
 };

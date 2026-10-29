@@ -2,13 +2,11 @@
 
 import { Button } from "@makkigo/ui";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@makkigo/ui/components/ui/sheet";
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetFooter,
+  BottomSheetHeader,
+} from "@makkigo/ui/components/ui/bottom-sheet";
 
 import type { BankTransfer } from "@/features/valet/hooks/useBankTransfer";
 
@@ -16,27 +14,14 @@ export default function BankTransferSheet({ transfer }: Readonly<{ transfer: Ban
   const { installedApps } = transfer;
 
   return (
-    <Sheet
-      open={transfer.isOpen}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) transfer.close();
-      }}
-    >
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        className="mx-auto max-h-[90dvh] max-w-md gap-0 rounded-t-2xl"
-      >
-        <div aria-hidden className="mx-auto mt-3 h-1 w-9 shrink-0 rounded-full bg-border" />
+    <BottomSheet open={transfer.isOpen} onClose={transfer.close}>
+      <BottomSheetContent className="max-h-[90dvh]">
         <div className="flex min-h-0 flex-col overflow-y-auto">
-          <SheetHeader className="gap-2 px-5 pt-5 pb-0">
-            <SheetTitle className="text-lg font-bold break-keep text-(--base-color)">
-              입금하기
-            </SheetTitle>
-            <SheetDescription className="text-sm break-keep text-(--tertiary-color)">
-              계좌번호를 복사했어요. 은행 앱에서 붙여넣어 보내 주세요.
-            </SheetDescription>
-          </SheetHeader>
+          <BottomSheetHeader
+            title="입금하기"
+            description="계좌번호를 복사했어요. 은행 앱에서 붙여넣어 보내 주세요."
+            className="pt-5 pb-0"
+          />
 
           <div className="mx-5 mt-5 flex items-center justify-between gap-3 rounded-xl bg-(--surface-color) px-4 py-3">
             <p className="min-w-0 text-sm break-all text-(--base-color)">{transfer.accountLabel}</p>
@@ -79,18 +64,18 @@ export default function BankTransferSheet({ transfer }: Readonly<{ transfer: Ban
             )}
           </div>
         </div>
-        <SheetFooter className="px-5 pt-5 pb-[calc(1.5rem+var(--safe-area-inset-bottom))]">
+        <BottomSheetFooter className="pt-5 pb-[calc(1.5rem+var(--safe-area-inset-bottom))]">
           <Button
             type="button"
             variant="ghost"
-            size="lg"
-            className="h-12 w-full text-(--tertiary-color)"
+            size="xl"
+            className="w-full text-(--tertiary-color)"
             onClick={transfer.copyAccountNumber}
           >
             {transfer.isAccountCopied ? "계좌번호를 복사했어요" : "계좌번호만 복사"}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
   );
 }

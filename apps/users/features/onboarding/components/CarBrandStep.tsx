@@ -1,4 +1,4 @@
-import { Field, FieldDescription, FieldLabel, Input } from "@makkigo/ui";
+import { Field, FieldDescription, FieldLabel } from "@makkigo/ui";
 import { Card, CardContent } from "@makkigo/ui/components/ui/card";
 import Image from "next/image";
 
@@ -6,7 +6,6 @@ import { useStaggeredReveal } from "@/hooks/useStaggeredReveal";
 
 import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboarding.schema";
 import type { CarBrandsResponse } from "@/libs/car/contracts/carBrands";
-import type { ChangeEventHandler, FocusEventHandler } from "react";
 import type { ControllerRenderProps, FieldError } from "react-hook-form";
 
 const CARD_ENTER_CLASS_NAME =
@@ -20,8 +19,7 @@ interface CarBrandStepProps {
   error?: FieldError;
   isCustomBrand: boolean;
   onSelect: (brand: string) => void;
-  onCustomBrandChange: ChangeEventHandler<HTMLInputElement>;
-  onCustomBrandFocus: FocusEventHandler<HTMLInputElement>;
+  onOpenCustomInput: () => void;
 }
 
 export default function CarBrandStep({
@@ -31,10 +29,10 @@ export default function CarBrandStep({
   error,
   isCustomBrand,
   onSelect,
-  onCustomBrandChange,
-  onCustomBrandFocus,
+  onOpenCustomInput,
 }: Readonly<CarBrandStepProps>) {
   const customBrandIndex = carBrands.length;
+  const customBrand = isCustomBrand ? field.value.trim() : "";
   const { rootRef, revealDelays } = useStaggeredReveal<HTMLDivElement>(
     CARD_STAGGER_MS,
     customBrandIndex,
@@ -49,9 +47,7 @@ export default function CarBrandStep({
 
   return (
     <Field className="h-full min-h-0" data-invalid={Boolean(error)}>
-      <FieldLabel htmlFor="car-brand" className="text-xl font-bold text-(--base-color)">
-        어떤 차량인가요?
-      </FieldLabel>
+      <FieldLabel className="text-xl font-bold text-(--base-color)">어떤 차량인가요?</FieldLabel>
       {carBrandsStatus === "error" && (
         <FieldDescription>브랜드 목록을 불러오지 못했어요. 직접 입력해주세요.</FieldDescription>
       )}
@@ -97,27 +93,24 @@ export default function CarBrandStep({
           <Card
             data-reveal-index={customBrandIndex}
             style={getRevealStyle(customBrandIndex)}
-            className={`${getRevealClassName(customBrandIndex)} border-dashed p-4 transition-all duration-200 ${
-              isCustomBrand && field.value.trim()
+            className={`${getRevealClassName(customBrandIndex)} border-dashed p-0 transition-all duration-200 ${
+              customBrand
                 ? "border-primary/40 bg-primary/5 shadow-sm ring-1 ring-primary/10 dark:bg-primary/10"
                 : "shadow-none hover:border-primary/30 hover:bg-muted/40"
             }`}
           >
-            <CardContent className="flex flex-col items-center justify-center h-full gap-3 p-0">
-              <Image src={"/icons/plus.svg"} alt="" aria-hidden width={24} height={24} />
-              <Input
-                {...field}
-                id="car-brand"
-                value={isCustomBrand ? field.value : ""}
-                placeholder="직접 입력"
-                autoComplete="off"
-                aria-invalid={Boolean(error)}
-                aria-describedby="car-brand-error"
-                className="h-auto p-0 text-base font-medium text-center border-0 shadow-none focus:border-0"
-                onChange={onCustomBrandChange}
-                onFocus={onCustomBrandFocus}
-              />
-            </CardContent>
+            <button
+              type="button"
+              className="h-full min-w-0 p-4 cursor-pointer"
+              aria-pressed={Boolean(customBrand)}
+              aria-describedby={error ? "car-brand-error" : undefined}
+              onClick={onOpenCustomInput}
+            >
+              <CardContent className="flex flex-col items-center justify-center h-full gap-3 p-0">
+                <Image src={"/icons/plus.svg"} alt="" aria-hidden width={24} height={24} />
+                <p className="w-full text-sm font-medium truncate">{customBrand || "직접 입력"}</p>
+              </CardContent>
+            </button>
           </Card>
         </div>
         <div

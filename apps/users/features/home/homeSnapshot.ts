@@ -14,7 +14,7 @@ interface HomeSnapshot {
   hasTicket: boolean;
   merchantName: string | null;
   plateNumber: string | null;
-  arrivalNotifiedAt: number | null;
+  expectedArrivalAt: number | null;
   arrivalDelayMinutes: number | null;
   parkedAt: number | null;
   waitingExitCount: number | null;
@@ -38,7 +38,7 @@ const getBeforeSessionSnapshot = (merchantName: string | null): HomeSnapshot => 
   hasTicket: false,
   merchantName,
   plateNumber: null,
-  arrivalNotifiedAt: null,
+  expectedArrivalAt: null,
   arrivalDelayMinutes: null,
   parkedAt: null,
   waitingExitCount: null,
@@ -53,7 +53,7 @@ const toHomeSnapshot = (session: CurrentSession): HomeSnapshot => ({
   hasTicket: session.hasTicket,
   merchantName: session.merchantName ?? session.boothName,
   plateNumber: session.plateNumber,
-  arrivalNotifiedAt: toTime(session.arrivalNotifiedAt),
+  expectedArrivalAt: toTime(session.expectedArrivalAt),
   arrivalDelayMinutes: session.arrivalDelayMinutes,
   parkedAt: toTime(session.parkedAt),
   waitingExitCount: session.waitingPickupCount,

@@ -22,7 +22,11 @@ const createPreviews = (now: number): Record<HomeStatus, HomeSnapshot> => {
   return {
     NONE: getBeforeSessionSnapshot(null),
     MERCHANT_SELECTED: base,
-    ARRIVAL_SCHEDULED: { ...base, status: "ARRIVAL_SCHEDULED", arrivalNotifiedAt: minutesAgo(4) },
+    ARRIVAL_SCHEDULED: {
+      ...base,
+      status: "ARRIVAL_SCHEDULED",
+      expectedArrivalAt: now + 11 * MINUTE_MS,
+    },
     PARKED: {
       ...base,
       status: "PARKED",

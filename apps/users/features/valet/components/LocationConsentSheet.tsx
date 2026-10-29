@@ -2,13 +2,11 @@
 
 import { Button, FieldError } from "@makkigo/ui";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@makkigo/ui/components/ui/sheet";
+  BottomSheet,
+  BottomSheetContent,
+  BottomSheetFooter,
+  BottomSheetHeader,
+} from "@makkigo/ui/components/ui/bottom-sheet";
 import { useState } from "react";
 
 import ConsentPanel from "@/features/consent/components/ConsentPanel";
@@ -36,29 +34,18 @@ export default function LocationConsentSheet({
   const [isDocumentOpen, setIsDocumentOpen] = useState(false);
 
   return (
-    <Sheet
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
-      }}
-    >
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
-        className="mx-auto max-w-md gap-0 rounded-t-2xl"
-      >
-        <div aria-hidden className="mx-auto mt-3 h-1 w-9 rounded-full bg-border" />
-        <SheetHeader className="gap-2 px-5 pt-4">
-          <SheetTitle className="text-lg font-bold break-keep text-(--base-color)">
-            현재 위치로
-            <br />
-            도착 예정 시간을 알려드릴까요?
-          </SheetTitle>
-          <SheetDescription className="text-sm break-keep text-(--tertiary-color)">
-            지금 위치에서 업체까지 걸리는 시간을 계산해 발렛 요원님께 알려요. 위치는 계산에만 쓰고
-            저장하지 않아요.
-          </SheetDescription>
-        </SheetHeader>
+    <BottomSheet open={open} onClose={onClose}>
+      <BottomSheetContent>
+        <BottomSheetHeader
+          title={
+            <>
+              현재 위치로
+              <br />
+              도착 예정 시간을 알려드릴까요?
+            </>
+          }
+          description="지금 위치에서 업체까지 걸리는 시간을 계산해 발렛 요원님께 알려요. 위치는 계산에만 쓰고 저장하지 않아요."
+        />
         <div className="px-5 pt-3">
           <Button
             type="button"
@@ -80,12 +67,12 @@ export default function LocationConsentSheet({
             onClose={() => setIsDocumentOpen(false)}
           />
         )}
-        <SheetFooter className="px-5 pt-4 pb-6">
+        <BottomSheetFooter>
           <FieldError>{errorMessage}</FieldError>
           <Button
             type="button"
-            size="lg"
-            className="h-12 w-full shadow-none"
+            size="xl"
+            className="w-full"
             disabled={isSending}
             onClick={onAgreeAndSend}
           >
@@ -94,15 +81,15 @@ export default function LocationConsentSheet({
           <Button
             type="button"
             variant="ghost"
-            size="lg"
-            className="h-12 w-full text-(--tertiary-color)"
+            size="xl"
+            className="w-full text-(--tertiary-color)"
             disabled={isSending}
             onClick={onSendWithoutLocation}
           >
             동의 안 하고 보내기
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </BottomSheetFooter>
+      </BottomSheetContent>
+    </BottomSheet>
   );
 }
