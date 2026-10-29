@@ -2,6 +2,7 @@
 
 import { Badge, Button, FieldError, cn } from "@makkigo/ui";
 import { Checkbox } from "@makkigo/ui/components/ui/checkbox";
+import Image from "next/image";
 
 import AppHeader from "@/components/layouts/AppHeader";
 
@@ -128,15 +129,40 @@ export default function MerchantManagement({
 
       <section
         aria-label="업체 상세"
-        className="mt-auto flex h-56 min-h-24 shrink flex-col justify-center gap-1 rounded-xl border bg-white px-5"
+        className="mt-auto flex h-56 min-h-24 shrink flex-col justify-center-safe gap-1 overflow-y-auto rounded-xl border bg-white px-5 py-4 [&>*]:shrink-0"
       >
         {detail && (
           <>
-            <h2 className="truncate text-lg font-bold text-(--base-color)">{detail.name}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-lg font-bold text-(--base-color)">{detail.name}</h2>
+              <Badge tone={STATUS_TONES[detail.status]} className="px-2 py-0.5 text-xs">
+                {CONTRACT_STATUS_LABELS[detail.status]}
+              </Badge>
+            </div>
             <p className="truncate text-sm text-(--tertiary-color)">{formatMerchantAddress(detail)}</p>
-            <Badge tone={STATUS_TONES[detail.status]} className="mt-1 self-start px-2 py-0.5 text-xs">
-              {CONTRACT_STATUS_LABELS[detail.status]}
-            </Badge>
+            {detail.photoUrls.length > 0 ? (
+              <ul
+                aria-label="업체 사진"
+                className="mt-3 flex shrink-0 snap-x gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {detail.photoUrls.map((url, index) => (
+                  <li
+                    key={url}
+                    className="relative h-22 w-30 shrink-0 snap-start overflow-hidden rounded-lg bg-muted"
+                  >
+                    <Image
+                      src={url}
+                      alt={`${detail.name} 사진 ${index + 1}`}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-(--tertiary-color)">등록된 사진이 없어요.</p>
+            )}
           </>
         )}
       </section>

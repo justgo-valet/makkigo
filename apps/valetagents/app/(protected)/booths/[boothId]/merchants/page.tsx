@@ -22,7 +22,10 @@ export default async function BoothMerchantsPage({ params }: Readonly<BoothMerch
   const boothId = Number((await params).boothId);
   if (!Number.isSafeInteger(boothId) || boothId <= 0) notFound();
 
-  const initialMerchants = await listBoothMerchants(staffId, boothId, 1);
+  const imageBaseUrl = process.env.IMAGE_BASE_URL;
+  if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required");
+
+  const initialMerchants = await listBoothMerchants(staffId, boothId, 1, imageBaseUrl);
   if (!initialMerchants.ok) notFound();
 
   const menu = await getStaffMenuAccess(staffId);
