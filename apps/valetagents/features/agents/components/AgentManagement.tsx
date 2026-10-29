@@ -58,8 +58,8 @@ export default function AgentManagement({
                 />
               </th>
               <th scope="col" className={HEADER_CELL_CLASS}>이름</th>
-              <th scope="col" className={cn(HEADER_CELL_CLASS, "w-28")}>근무시간</th>
-              <th scope="col" className={cn(HEADER_CELL_CLASS, "w-16")}>근무상태</th>
+              <th scope="col" className={cn(HEADER_CELL_CLASS, "w-24")}>근무시간</th>
+              <th scope="col" className={cn(HEADER_CELL_CLASS, "w-18")}>근무상태</th>
               <th scope="col" className={cn(HEADER_CELL_CLASS, "w-20 pr-3")}>등록상태</th>
             </tr>
           </thead>
@@ -79,7 +79,11 @@ export default function AgentManagement({
                     onClick={(event) => event.stopPropagation()}
                   />
                 </td>
-                <td className={cn(BODY_CELL_CLASS, "truncate")}>{formatAgentName(agent)}</td>
+                <td className={BODY_CELL_CLASS}>
+                  <span className="line-clamp-2 break-keep whitespace-normal wrap-anywhere">
+                    {formatAgentName(agent)}
+                  </span>
+                </td>
                 <td className={cn(BODY_CELL_CLASS, "tabular-nums")}>{formatWorkTime(agent)}</td>
                 <td className={BODY_CELL_CLASS}>{formatWorkStatus(agent)}</td>
                 <td className={cn(BODY_CELL_CLASS, "pr-3")}>
