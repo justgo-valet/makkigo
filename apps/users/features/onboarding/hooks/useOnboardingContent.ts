@@ -12,9 +12,16 @@ import type { OnboardingFormValues } from "@/features/onboarding/schemas/onboard
 import type { FormEvent } from "react";
 
 const useOnboardingContent = () => {
-  const { onboardingStep, buttonType, handleMoveNextStep, handleMoveToStep } = useOnboarding();
+  const {
+    onboardingStep,
+    isCustomInput,
+    openCustomInput,
+    buttonType,
+    handleMoveNextStep,
+    handleMoveToStep,
+  } = useOnboarding();
   const form = useFormContext<OnboardingFormValues>();
-  const stepProps = useOnboardingStep(onboardingStep);
+  const stepProps = useOnboardingStep(onboardingStep, openCustomInput);
   const { data: me } = useMe();
   const [hasAgreedConsents, setHasAgreedConsents] = useState(me?.requiredConsentsAgreed ?? false);
   const { verify: verifyNotDuplicated, isChecking } = useDuplicateCheck();
@@ -57,6 +64,7 @@ const useOnboardingContent = () => {
 
   return {
     onboardingStep,
+    isCustomInput,
     stepProps,
     isSubmitStep,
     isBusy,
