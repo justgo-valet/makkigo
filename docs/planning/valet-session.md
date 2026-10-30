@@ -117,7 +117,7 @@
 
 ## 고객 메인 화면
 
-`GET /api/v1/valet-sessions/current` 로 진행 중 세션을 받아 표시합니다 (30초마다 다시 받음).
+`GET /api/v1/valet-sessions/current` 로 진행 중 세션을 받아 표시합니다 (5초마다 다시 받고, 앱을 보고 있을 때 푸시(주차 완료 · 출차 응답 · 출차 완료)가 오면 바로 다시 받음 → [mobile.md](../architecture/mobile.md#푸시)).
 
 | 세션 | 메인 상태 | 보여주는 것 |
 |---|---|---|
