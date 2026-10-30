@@ -40,6 +40,7 @@
 | 웹 → 앱 | `{"type":"nativeLogin","provider":"kakao"\|"google"\|"apple"}` | 각 사 SDK 로 로그인하고 `window` 에 `makkigo:native-login` 이벤트로 돌려줌 (`detail: { provider, status: "success"\|"cancelled"\|"failed", accessToken?, idToken?, authorizationCode? }`). 카카오는 카카오톡이 있으면 카카오톡, 없으면 카카오계정 · 구글은 계정 선택 · 애플은 iOS 시트. 웹은 받은 값을 `POST /api/v1/auth/oauth/{provider}/native` 로 보냄. 시간 제한 없음(다른 앱에 다녀옴) → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소, **예전 로그인 방식 — 고객 웹은 지금 안 씀**) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
+| 앱 → 웹 | `makkigo:push-received` 이벤트 (`detail` 없음) | 앱을 보고 있을 때 푸시가 오면 알림을 띄우고 이 이벤트를 보냄. 웹은 보고 있는 화면의 데이터를 바로 다시 받음 (`useRefreshOnAppPush`) → [푸시](#푸시) |
 | 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |
 | 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 상태바 글자색을 바꿈 (`light` 흰 글자 · `dark` 검은 글자). 페이지를 새로 열면 `dark` 로 되돌리므로 어두운 화면(고객 · 요원 로그인)이 켜질 때 `light`, 벗어날 때 `dark` 를 보냄 (mobile #9) |
 | 앱 → 웹 | CSS 변수 `--safe-area-inset-top/bottom/left/right` | 페이지가 뜰 때와 화면 크기 · 키보드가 바뀔 때 `document.documentElement` 인라인 스타일에 px 로 넣음. 아래 여백은 키보드 높이만큼 줄인 값(키보드가 떠 있으면 보통 0 — 내비게이션 바 · 홈 인디케이터가 키보드에 가려짐). 브라우저에서는 `env(safe-area-inset-*)` 값이 되도록 `@makkigo/ui` 전역 CSS 에 기본값이 있음. Android 웹뷰의 `env()` 는 믿을 수 없어 앱이 넣어 준다 |
@@ -63,6 +64,7 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 | 받은 토큰을 `POST /api/v1/push-devices` 로 등록, 로그아웃 때 `DELETE` | 웹 (등록한 토큰은 기기 `localStorage` 에 기억) |
 | 발송: 기기 토큰으로 FCM 발송 → 없는 토큰 삭제 → 알림 내역(`notifications`) 기록 | 서버 `@makkigo/push` 의 `sendUserNotification` |
 | 알림 데이터 `link`(웹 경로)를 누르면 그 화면을 웹뷰로 엶 | 앱 |
+| 앱을 보고 있을 때 온 푸시는 `makkigo:push-received` 로 웹에 알림 → 웹이 진행 중 세션 등 보고 있는 데이터를 바로 다시 받음. 알림을 꺼 둔 회원 · 브라우저는 5초 폴링으로 반영 | 앱 `onForegroundMessage`, 웹 `useRefreshOnAppPush` (`MemberGate`) |
 
 요원 앱은 승인 완료된 `VALET_AGENT`에게만 최초 권한을 요청합니다. 업체 관리자와 승인 대기 사용자는 요청하지 않습니다. OS 권한과 부스의 업무 알림 설정은 독립적이며, 서버의 기존 `APPROVED + notificationsEnabled` 발송 정책을 유지합니다.
 
