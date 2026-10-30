@@ -44,6 +44,15 @@ const onAppPushToken = (listener: (state: AppPushState) => void) => {
   return () => window.removeEventListener(PUSH_TOKEN_EVENT, handleEvent);
 };
 
+const PUSH_RECEIVED_EVENT = "makkigo:push-received";
+
+/** 앱을 보고 있을 때 푸시가 오면 앱이 알려준다. 푸시는 서버 상태가 바뀌었을 때 오므로 화면 데이터를 다시 받는 데 쓴다. */
+const onAppPushReceived = (listener: () => void) => {
+  window.addEventListener(PUSH_RECEIVED_EVENT, listener);
+
+  return () => window.removeEventListener(PUSH_RECEIVED_EVENT, listener);
+};
+
 const askAppForPushToken = () => {
   getAppChannel()?.postMessage(JSON.stringify({ type: "requestPushToken" }));
 };
@@ -198,6 +207,7 @@ const requestAppNativeLogin = (provider: SocialLoginProvider) =>
 export {
   askAppForPushToken,
   isInApp,
+  onAppPushReceived,
   onAppPushToken,
   openAppNotificationSettings,
   queryAppInstalledSchemes,

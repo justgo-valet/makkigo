@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { useAppPushRegistration } from "@/features/push/hooks/useAppPushRegistration";
+import { useRefreshOnAppPush } from "@/features/push/hooks/useRefreshOnAppPush";
 import { useMe } from "@/features/user/hooks/useMe";
 
 import type { MeResponse } from "@/libs/user/contracts/me";
@@ -36,7 +37,10 @@ const useMemberGate = (area: MemberArea) => {
   const freshMe = isFetchedAfterMount && !isError ? me : undefined;
   const redirectPath = freshMe ? getRedirectPath(area, freshMe) : null;
 
-  useAppPushRegistration(area === "member" && Boolean(freshMe) && !redirectPath);
+  const isMemberReady = area === "member" && Boolean(freshMe) && !redirectPath;
+
+  useAppPushRegistration(isMemberReady);
+  useRefreshOnAppPush(isMemberReady);
 
   useEffect(() => {
     if (redirectPath) router.replace(redirectPath);
