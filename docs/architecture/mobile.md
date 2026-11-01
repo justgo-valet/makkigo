@@ -74,6 +74,7 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 
 - 푸시를 못 보내면(미동의 · 기기 없음 · 발송 실패) 알림 내역의 채널을 비워 둡니다. 알림톡 대체는 알림톡 연동 때 이 자리에서 보냅니다.
 - Android 알림 채널: `makkigo_default` (중요도 높음).
+- 요원 앱 도착 예정 · 출차 요청 알림은 전용 알림음으로 보냅니다 (`pushStaffNotifications(ids, { sound: "valet-alert" })`). Android 는 채널 `makkigo_valet_alert`, iOS 는 소리 파일 `valet_alert.caf` 를 고르고, 둘 다 요원 앱에 들어 있습니다. 이 채널 · 파일이 없는 예전 앱은 기본 알림음으로 울립니다. Android 는 만든 채널의 소리를 바꿀 수 없으므로 소리를 바꾸려면 새 채널 id 를 씁니다.
 - 로컬 테스트 발송: `node --env-file=apps/users/.env.development.local packages/push/scripts/send-test.mjs <토큰> [경로]`
 
 ## 빌드 · 서명

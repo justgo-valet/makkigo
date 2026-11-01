@@ -59,6 +59,15 @@ describe("pushStaffNotifications", () => {
     });
   });
 
+  it("알림음을 고르면 그대로 넘긴다", async () => {
+    prisma.notification.findMany.mockResolvedValue([target(1, ["a"])]);
+    sendPushToTokens.mockResolvedValue({ sentCount: 1, sentTokens: ["a"], invalidTokens: [] });
+
+    await pushStaffNotifications([1], { sound: "valet-alert" });
+
+    expect(sendPushToTokens).toHaveBeenCalledWith(["a"], expect.objectContaining({ sound: "valet-alert" }));
+  });
+
   it("하나도 못 보내면 알림 내역은 그대로 둔다", async () => {
     prisma.notification.findMany.mockResolvedValue([target(1, [])]);
     sendPushToTokens.mockResolvedValue({ sentCount: 0, sentTokens: [], invalidTokens: [] });

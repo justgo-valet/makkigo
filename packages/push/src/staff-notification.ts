@@ -2,6 +2,8 @@ import { prisma } from "database";
 
 import { sendPushToTokens } from "./fcm";
 
+import type { PushSound } from "./fcm";
+
 interface StaffPushGroup {
   title: string;
   body: string;
@@ -39,7 +41,10 @@ const groupByMessage = (targets: Awaited<ReturnType<typeof findPushTargets>>) =>
   return [...groups.values()];
 };
 
-export const pushStaffNotifications = async (notificationIds: number[]) => {
+export const pushStaffNotifications = async (
+  notificationIds: number[],
+  { sound }: { sound?: PushSound } = {},
+) => {
   if (notificationIds.length === 0) return;
 
   try {
@@ -51,6 +56,7 @@ export const pushStaffNotifications = async (notificationIds: number[]) => {
         title,
         body,
         link: "/",
+        sound,
       });
 
       if (invalidTokens.length > 0) {
