@@ -26,12 +26,8 @@
     100% {
       --pickup-blink: #ff3b30;
     }
-    25%,
-    75% {
-      --pickup-blink: #c9cfd8;
-    }
     50% {
-      --pickup-blink: #ffffff;
+      --pickup-blink: #c9cfd8;
     }
   }
 }
