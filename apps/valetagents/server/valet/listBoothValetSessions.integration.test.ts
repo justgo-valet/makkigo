@@ -139,6 +139,8 @@ describe("listBoothValetSessions database integration", () => {
 
     const result = await listBoothValetSessions(managerId, boothId, IMAGE_BASE_URL, now);
 
-    expect(result.ok && result.value.completed.map(({ id }) => id)).toEqual([today]);
+    expect(
+      result.ok && result.value.completed.map(({ id, completedAt }) => ({ id, completedAt })),
+    ).toEqual([{ id: today, completedAt: "2026-10-13T15:00:00.000Z" }]);
   });
 });

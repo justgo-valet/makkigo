@@ -62,7 +62,7 @@ const listBoothValetSessions = async (
     prisma.valetSession.findMany({
       where: { boothId, status: "COMPLETED", completedAt: { gte: startOfSeoulDay(now) } },
       orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-      select: { id: true, plateNumber: true, ...carImageSelect },
+      select: { id: true, plateNumber: true, completedAt: true, ...carImageSelect },
     }),
     prisma.boothAgent.findUnique({
       where: { boothId_staffId: { boothId, staffId } },
@@ -99,6 +99,7 @@ const listBoothValetSessions = async (
         id: session.id,
         plateNumber: session.plateNumber,
         carImageUrl: toCarImageUrl(session),
+        completedAt: session.completedAt?.toISOString(),
       })),
       notificationsEnabled: membership?.notificationsEnabled ?? false,
     }),
