@@ -11,3 +11,27 @@
 * {
   box-sizing: border-box;
 }
+
+@property --pickup-blink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ff3b30;
+}
+
+@theme {
+  --animate-pickup-blink: pickup-blink 1.6s ease-in-out infinite;
+
+  @keyframes pickup-blink {
+    0%,
+    100% {
+      --pickup-blink: #ff3b30;
+    }
+    25%,
+    75% {
+      --pickup-blink: #c9cfd8;
+    }
+    50% {
+      --pickup-blink: #ffffff;
+    }
+  }
+}

@@ -1,12 +1,11 @@
 "use client";
 
-import { Badge, Button, FieldError, cn } from "@makkigo/ui";
-import Image from "next/image";
+import { Button, FieldError, cn } from "@makkigo/ui";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
 
-import { formatPlateNumber, formatSessionLabel } from "../formatters";
+import { formatCompletedLabel, formatPlateNumber, formatSessionLabel } from "../formatters";
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useCompletePickup } from "../hooks/useCompletePickup";
@@ -18,49 +17,10 @@ import AddVehicleSheet from "./AddVehicleSheet";
 import NotificationToggleSheet from "./NotificationToggleSheet";
 import PickupResponseSheet from "./PickupResponseSheet";
 import PlateConfirmSheet from "./PlateConfirmSheet";
+import { VehicleCardContent, vehicleCardClass } from "./VehicleCard";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
-
-const STATUS_TONES = {
-  ARRIVING: "neutral",
-  PICKUP_REQUESTED: "danger",
-  PICKUP_PREPARING: "info",
-} as const;
-
-interface CarFigureProps {
-  imageUrl: string;
-  plateNumber: string;
-  label: string;
-  tone?: (typeof STATUS_TONES)[keyof typeof STATUS_TONES];
-  gray: boolean;
-}
-
-function CarFigure({ imageUrl, plateNumber, label, tone, gray }: Readonly<CarFigureProps>) {
-  return (
-    <>
-      <span className="relative block h-16 w-full max-w-30">
-        <Image
-          src={imageUrl}
-          alt=""
-          fill
-          unoptimized
-          className={cn("object-contain", gray && "opacity-60 grayscale")}
-        />
-      </span>
-      <span className="mt-1 text-sm font-semibold whitespace-nowrap tabular-nums">
-        {formatPlateNumber(plateNumber)}
-      </span>
-      {tone ? (
-        <Badge tone={tone} className="mt-1 px-2 py-0.5 text-xs">
-          {label}
-        </Badge>
-      ) : (
-        <span className="mt-1 text-xs text-(--tertiary-color)">{label}</span>
-      )}
-    </>
-  );
-}
 
 interface VehicleManagementProps {
   staffId: number;
@@ -118,9 +78,22 @@ export default function VehicleManagement({
     }
   };
 
-  return (
-    <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
+  const countOf = (...statuses: BoothValetSession["status"][]) =>
+    sessions.filter(({ status }) => statuses.includes(status)).length;
+  const legend = [
+    { label: "출차 요청", count: countOf("PICKUP_REQUESTED", "PICKUP_PREPARING"), dot: "bg-(--pickup-blink)" },
+    { label: "주차 중", count: countOf("PARKED"), dot: "bg-[#ff3b30]" },
+    { label: "도착", count: countOf("ARRIVING"), dot: "bg-[#ffcc00]" },
+    { label: "완료", count: completed.length, dot: "bg-[#34c759]" },
+  ];
 
+  return (
+    <div
+      className={cn(
+        "mx-auto flex min-h-full w-full max-w-md flex-col",
+        pickupRequest && "animate-pickup-blink motion-reduce:animate-none",
+      )}
+    >
       <AppHeader
         menu={menu}
         home
@@ -128,33 +101,31 @@ export default function VehicleManagement({
         onBellClick={notifications.openSheet}
       />
 
-      <div role="status">
-        {pickupRequest && (
-          <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm break-keep text-(--base-color)">
-            {formatPlateNumber(pickupRequest.plateNumber)} 차량이{" "}
-            <strong className="font-bold text-red-600">출차 요청</strong>을 보냈어요.
-          </p>
-        )}
-      </div>
+      <p role="status" className="sr-only">
+        {pickupRequest && `${formatPlateNumber(pickupRequest.plateNumber)} 차량이 출차 요청을 보냈어요.`}
+      </p>
+
+      <ul className="mt-3 flex min-h-12 flex-wrap items-center justify-between gap-x-1 gap-y-1 rounded-2xl bg-white px-2 py-1.5 whitespace-nowrap text-(--base-color)">
+        {legend.map(({ label, count, dot }) => (
+          <li key={label} className="flex items-center gap-1">
+            <span aria-hidden="true" className={cn("size-3 rounded-full", dot)} />
+            <span className="text-[15px] font-medium">{label}</span>
+            <span className="text-base font-bold tabular-nums">{count}</span>
+          </li>
+        ))}
+      </ul>
 
       {errorMessage && <FieldError className="mt-3 text-center">{errorMessage}</FieldError>}
 
-      <ul className="mt-4 grid grid-cols-3 gap-2 text-(--base-color)">
+      <ul className="mt-3 grid grid-cols-2 gap-2.5">
         {sessions.map((session) => {
           const label = formatSessionLabel(session, updatedAt);
-          const cellClass = cn(
-            "flex min-h-30 w-full min-w-0 flex-col items-center rounded-xl border bg-white px-1 py-3",
-            session.status === "ARRIVING" && "text-(--tertiary-color)",
-            session.status === "PICKUP_REQUESTED" && "border-red-300 bg-red-50",
-            session.status === "PICKUP_PREPARING" && "border-primary/40 bg-primary/5",
-          );
-          const car = (
-            <CarFigure
+          const content = (
+            <VehicleCardContent
+              status={session.status}
               imageUrl={session.carImageUrl}
               plateNumber={session.plateNumber}
-              label={session.status === "PARKED" && session.parkedAt ? `주차 ${label}` : label}
-              tone={session.status === "PARKED" ? undefined : STATUS_TONES[session.status]}
-              gray={session.status === "ARRIVING"}
+              label={label}
             />
           );
 
@@ -163,32 +134,27 @@ export default function VehicleManagement({
               {session.status !== "PARKED" ? (
                 <button
                   type="button"
-                  className={cn(cellClass, "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary")}
-                  aria-label={`${formatPlateNumber(session.plateNumber)}, ${label}`}
+                  className={cn(
+                    vehicleCardClass(session.status),
+                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                  )}
                   onClick={() => selectSession(session)}
                 >
-                  {car}
+                  {content}
                 </button>
               ) : (
-                <div className={cellClass}>{car}</div>
+                <div className={vehicleCardClass(session.status)}>{content}</div>
               )}
             </li>
           );
         })}
-      </ul>
-
-      <h2 className="mt-8 border-b-2 border-primary pb-2 text-base font-bold text-(--base-color)">
-        출차 완료 차량
-      </h2>
-
-      <ul className="mt-3 grid grid-cols-3 gap-2 text-(--tertiary-color)">
         {completed.map((session) => (
-          <li key={session.id} className="flex min-h-30 min-w-0 flex-col items-center px-1 py-3">
-            <CarFigure
+          <li key={`completed-${session.id}`} className={vehicleCardClass("COMPLETED")}>
+            <VehicleCardContent
+              status="COMPLETED"
               imageUrl={session.carImageUrl}
               plateNumber={session.plateNumber}
-              label="출차 완료"
-              gray
+              label={formatCompletedLabel(session.completedAt, updatedAt)}
             />
           </li>
         ))}
@@ -198,12 +164,23 @@ export default function VehicleManagement({
         <Button
           type="button"
           size="xl"
-          className="w-full"
+          className="h-15 w-full rounded-[18px] text-[19px] font-bold"
           onClick={() => {
             adding.resetError();
             setAddOpen(true);
           }}
         >
+          <svg
+            viewBox="0 0 22 22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            aria-hidden="true"
+            className="size-5.5"
+          >
+            <path d="M11 4.6v12.8M4.6 11h12.8" />
+          </svg>
           차량 추가하기
         </Button>
       </div>
