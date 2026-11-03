@@ -35,6 +35,7 @@ const completedValetSessionSchema = z.object({
   id: z.number().int().positive(),
   plateNumber: z.string(),
   carImageUrl: z.string().url(),
+  completedAt: z.string().datetime(),
 });
 
 const boothValetSessionListResponseSchema = z.object({

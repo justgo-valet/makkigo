@@ -15,6 +15,11 @@ const formatDuration = (minutes: number) => {
   return minutes % 60 === 0 ? `${hours}시간` : `${hours}시간 ${minutes % 60}분`;
 };
 
+const formatAgo = (iso: string, now: number, action: string) => {
+  const minutes = minutesSince(iso, now);
+  return minutes === 0 ? `방금 ${action}` : `${formatDuration(minutes)} 전 ${action}`;
+};
+
 const formatWon = (amount: number) => `${amount.toLocaleString("ko-KR")}원`;
 
 const formatFeeBreakdown = (fee: ValetFee) =>
@@ -26,20 +31,31 @@ const formatSessionLabel = (session: BoothValetSession, now: number) => {
       if (!session.expectedArrivalAt) return "도착 시간 미정";
       const delayMs = (session.arrivalDelayMinutes ?? 0) * MINUTE_MS;
       const minutes = minutesBetween(now, Date.parse(session.expectedArrivalAt) + delayMs);
-      return minutes > 0 ? `${minutes}분 후 도착` : "곧 도착";
+      return minutes > 0 ? `${minutes}분 뒤 도착` : "곧 도착";
     }
     case "PARKED": {
       if (!session.parkedAt) return "주차 완료";
-      return formatDuration(minutesSince(session.parkedAt, now));
+      return `${formatDuration(minutesSince(session.parkedAt, now))}째`;
     }
-    case "PICKUP_REQUESTED":
-      return "출차 요청";
+    case "PICKUP_REQUESTED": {
+      if (!session.pickupRequestedAt) return "출차 요청";
+      return formatAgo(session.pickupRequestedAt, now, "요청");
+    }
     case "PICKUP_PREPARING": {
       if (!session.expectedPickupAt) return "출차 준비 중";
       const minutes = minutesBetween(now, Date.parse(session.expectedPickupAt));
-      return minutes > 0 ? `${minutes}분 후 출차` : "곧 출차";
+      return minutes > 0 ? `${minutes}분 뒤 출차` : "곧 출차";
     }
   }
 };
 
-export { formatDuration, formatFeeBreakdown, formatPlateNumber, formatSessionLabel, minutesSince };
+const formatCompletedLabel = (completedAt: string, now: number) => formatAgo(completedAt, now, "출차");
+
+export {
+  formatCompletedLabel,
+  formatDuration,
+  formatFeeBreakdown,
+  formatPlateNumber,
+  formatSessionLabel,
+  minutesSince,
+};
