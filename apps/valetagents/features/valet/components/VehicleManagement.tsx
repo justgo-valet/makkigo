@@ -82,7 +82,7 @@ export default function VehicleManagement({
     sessions.filter(({ status }) => statuses.includes(status)).length;
   const legend = [
     { label: "출차 요청", count: countOf("PICKUP_REQUESTED", "PICKUP_PREPARING"), dot: "bg-(--pickup-blink)" },
-    { label: "주차 중", count: countOf("PARKED"), dot: "bg-[#ff3b30]" },
+    { label: "주차 중", count: countOf("PARKED"), dot: "border border-[#c9cfd8] bg-white" },
     { label: "도착", count: countOf("ARRIVING"), dot: "bg-[#ffcc00]" },
     { label: "완료", count: completed.length, dot: "bg-[#34c759]" },
   ];
