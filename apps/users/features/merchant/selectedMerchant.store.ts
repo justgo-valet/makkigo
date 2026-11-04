@@ -25,4 +25,9 @@ const useSelectedMerchant = create<SelectedMerchantState>()(
   ),
 );
 
-export { useSelectedMerchant };
+const clearSelectedMerchant = () => {
+  useSelectedMerchant.getState().clearMerchant();
+  useSelectedMerchant.persist.clearStorage();
+};
+
+export { clearSelectedMerchant, useSelectedMerchant };

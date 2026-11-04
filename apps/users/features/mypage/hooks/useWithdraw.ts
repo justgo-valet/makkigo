@@ -2,6 +2,7 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { clearSelectedMerchant } from "@/features/merchant/selectedMerchant.store";
 import { saveRegisteredPushToken } from "@/features/push/registeredPushToken";
 import { getWithdrawErrorCode, withdraw } from "@/features/user/apis/withdraw";
 
@@ -26,6 +27,7 @@ const useWithdraw = () => {
     mutationFn: withdraw,
     onSuccess: () => {
       saveRegisteredPushToken(null);
+      clearSelectedMerchant();
       window.location.replace(LOGIN_PATH);
     },
   });
