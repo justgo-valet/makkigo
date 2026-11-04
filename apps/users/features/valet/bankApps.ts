@@ -14,6 +14,7 @@ interface BankApp {
 interface InstalledBankApp {
   id: string;
   name: string;
+  iconSrc: string;
   scheme: string;
   /** 받는 계좌 · 금액을 채운 송금 화면까지 열어 준다 (토스만) */
   prefillsTransfer: boolean;
@@ -35,7 +36,7 @@ const BANK_APPS: readonly BankApp[] = [
   { id: "kakaobank", name: "카카오뱅크", schemes: ["kakaobank"] },
   { id: "kakaopay", name: "카카오페이", schemes: ["kakaopay"] },
   { id: "kb", name: "KB스타뱅킹", schemes: ["kbbank"] },
-  { id: "shinhan", name: "신한 SOL뱅크", schemes: ["shinhansol"] },
+  { id: "shinhan", name: "신한 슈퍼SOL", schemes: ["shinhansol"] },
   { id: "nh", name: "NH올원뱅크", schemes: ["nhallone", "nhallonebank"] },
   { id: "woori", name: "우리WON뱅킹", schemes: ["newsmartpib", "wooribank"] },
   { id: "hana", name: "하나원큐", schemes: ["hanapush"] },
@@ -50,7 +51,15 @@ const getInstalledBankApps = (installedSchemes: readonly string[]): InstalledBan
     const scheme = app.schemes.find((candidate) => installedSchemes.includes(candidate));
 
     return scheme
-      ? [{ id: app.id, name: app.name, scheme, prefillsTransfer: scheme === TOSS_SCHEME }]
+      ? [
+          {
+            id: app.id,
+            name: app.name,
+            iconSrc: `/icons/banks/${app.id}.png`,
+            scheme,
+            prefillsTransfer: scheme === TOSS_SCHEME,
+          },
+        ]
       : [];
   });
 

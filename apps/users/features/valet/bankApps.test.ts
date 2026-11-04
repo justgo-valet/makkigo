@@ -27,7 +27,13 @@ describe("getInstalledBankApps", () => {
 
   it("후보 스킴이 여럿이면 설치된 첫 스킴을 쓴다", () => {
     expect(getInstalledBankApps(["wooribank"])).toEqual([
-      { id: "woori", name: "우리WON뱅킹", scheme: "wooribank", prefillsTransfer: false },
+      {
+        id: "woori",
+        name: "우리WON뱅킹",
+        iconSrc: "/icons/banks/woori.png",
+        scheme: "wooribank",
+        prefillsTransfer: false,
+      },
     ]);
   });
 
