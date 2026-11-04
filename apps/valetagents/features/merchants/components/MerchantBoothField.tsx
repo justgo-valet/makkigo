@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@makkigo/ui";
+import { useId } from "react";
 
 import RequiredMark from "./RequiredMark";
 import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
@@ -19,14 +20,16 @@ const VIEW_MESSAGES = {
 } as const;
 
 export default function MerchantBoothField({ field, disabled }: Readonly<MerchantBoothFieldProps>) {
+  const inputId = useId();
+
   return (
     <div className="relative mt-6" onBlur={field.handleBlur}>
-      <label htmlFor="merchant-booth" className={LABEL_CLASS}>
+      <label htmlFor={inputId} className={LABEL_CLASS}>
         부스 검색
         <RequiredMark />
       </label>
       <input
-        id="merchant-booth"
+        id={inputId}
         type="text"
         role="combobox"
         aria-required

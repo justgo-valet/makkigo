@@ -6,6 +6,7 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import MerchantApprovalPending from "@/features/merchants/components/MerchantApprovalPending";
 import MerchantRegistrationForm from "@/features/merchants/components/MerchantRegistrationForm";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
+import { listOwnMerchants } from "@/server/merchant/listOwnMerchants";
 import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
 
 export default async function MerchantOnboardingPage() {
@@ -30,5 +31,16 @@ export default async function MerchantOnboardingPage() {
     );
   }
 
-  return <MerchantApprovalPending />;
+  const imageBaseUrl = process.env.IMAGE_BASE_URL;
+  if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required");
+  const { items } = await listOwnMerchants(staffId, imageBaseUrl);
+
+  return (
+    <QueryProvider sessionKey={staffId}>
+      <MerchantApprovalPending
+        staffId={staffId}
+        merchants={items.map(({ id, name, booths }) => ({ id, name, booths }))}
+      />
+    </QueryProvider>
+  );
 }
