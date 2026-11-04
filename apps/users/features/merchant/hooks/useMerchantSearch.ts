@@ -3,6 +3,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { searchMerchants } from "@/features/merchant/apis/searchMerchants";
+import { useMerchantSearchMemory } from "@/features/merchant/merchantSearchMemory.store";
 import { MERCHANT_SEARCH_QUERY_MAX_LENGTH } from "@/libs/merchant/contracts/merchants";
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -11,8 +12,9 @@ const FALLBACK_ERROR_MESSAGE = "업체를 검색하지 못했어요. 잠시 후 
 type MerchantSearchView = "idle" | "loading" | "error" | "empty" | "results";
 
 const useMerchantSearch = () => {
-  const [keyword, setKeyword] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const keyword = useMerchantSearchMemory((state) => state.keyword);
+  const setKeyword = useMerchantSearchMemory((state) => state.setKeyword);
+  const [debouncedQuery, setDebouncedQuery] = useState(() => keyword.trim());
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(keyword.trim()), SEARCH_DEBOUNCE_MS);
@@ -38,15 +40,9 @@ const useMerchantSearch = () => {
   const changeKeyword = (value: string) =>
     setKeyword(value.slice(0, MERCHANT_SEARCH_QUERY_MAX_LENGTH));
 
-  const reset = () => {
-    setKeyword("");
-    setDebouncedQuery("");
-  };
-
   return {
     keyword,
     changeKeyword,
-    reset,
     view: getView(),
     merchants: data ?? [],
     errorMessage: error ? getErrorMessage(error, FALLBACK_ERROR_MESSAGE) : null,

@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 
 import { isInApp } from "@/features/auth/appBridge";
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
+import { useMerchantSearchMemory } from "@/features/merchant/merchantSearchMemory.store";
 import { useSelectedMerchant } from "@/features/merchant/selectedMerchant.store";
 import { useMe } from "@/features/user/hooks/useMe";
 import { useSendArrival } from "@/features/valet/hooks/useSendArrival";
@@ -23,6 +24,9 @@ const useMerchantSearchFlow = () => {
   const [pickedMerchant, setPickedMerchant] = useState<Merchant | null>(null);
   const selectMerchant = useSelectedMerchant((state) => state.selectMerchant);
   const selectedMerchant = useSelectedMerchantValue();
+  const rememberedMerchantId = useMerchantSearchMemory((state) => state.detailMerchantId);
+  const rememberDetail = useMerchantSearchMemory((state) => state.setDetailMerchantId);
+  const clearSearchMemory = useMerchantSearchMemory((state) => state.clear);
   const { data: me } = useMe();
   const arrival = useSendArrival(() => setStep(null));
 
@@ -48,21 +52,28 @@ const useMerchantSearchFlow = () => {
     window.history.replaceState(null, "", buildUrl(null));
   };
 
-  const open = () => setStep("search");
+  const viewMerchant = (merchant: Pick<Merchant, "id">) => {
+    hasPushedDetailRef.current = true;
+    window.history.pushState(null, "", buildUrl(merchant.id));
+  };
+
+  const open = () => {
+    if (rememberedMerchantId !== null && !searchParams.has(MERCHANT_PARAM)) {
+      viewMerchant({ id: rememberedMerchantId });
+    }
+    setStep("search");
+  };
 
   const close = () => {
     if (arrival.isSending) return;
+    if (step === "search") rememberDetail(detailMerchantId);
     arrival.resetError();
     leaveDetail();
     setStep(null);
   };
 
-  const viewMerchant = (merchant: Merchant) => {
-    hasPushedDetailRef.current = true;
-    window.history.pushState(null, "", buildUrl(merchant.id));
-  };
-
   const chooseMerchant = (merchant: Merchant) => {
+    clearSearchMemory();
     leaveDetail();
     selectMerchant(merchant);
     setPickedMerchant(merchant);
