@@ -186,6 +186,7 @@ const useHome = () => {
     badge: STATUS_BADGES[snapshot.status] ?? null,
     metaItems: getMetaItems(snapshot, snapshot.plateNumber ?? vehicle.plateNumber, now),
     carImageUrl: vehicle.carImageUrl,
+    isCarImagePlaceholder: vehicle.isCarImagePlaceholder,
     carImageAlt: `${formatVehicleNumber(vehicle.plateNumber)} 차량`,
     exitSummary: getExitSummary(snapshot),
     actions: getHomeActions(snapshot.status),
