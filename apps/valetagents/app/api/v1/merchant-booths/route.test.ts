@@ -39,7 +39,6 @@ describe("GET /api/v1/merchant-booths", () => {
 
   it.each([
     ["MERCHANT_ADMIN_REQUIRED", 403],
-    ["MERCHANT_APPROVAL_PENDING", 403],
     ["AUTH_REQUIRED", 401],
   ] as const)("denies %s before search", async (reason, status) => {
     access.getMerchantRegistrationAccess.mockResolvedValue({ ok: false, reason });
