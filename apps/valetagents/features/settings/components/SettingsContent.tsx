@@ -7,10 +7,12 @@ import { useSyncExternalStore } from "react";
 import AppHeader from "@/components/layouts/AppHeader";
 import { isInApp, openAppNotificationSettings } from "@/features/auth/appBridge";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useWithdraw } from "@/features/settings/hooks/useWithdraw";
 
 import { SOCIAL_PROVIDER_LABELS, getRoleLabel } from "../settingsItems";
 import SettingsRow from "./SettingsRow";
 import SettingsSection from "./SettingsSection";
+import WithdrawSheet from "./WithdrawSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { StaffSocialAccount } from "@/libs/auth/socialAccounts";
@@ -29,6 +31,7 @@ export default function SettingsContent({
   socialAccounts,
 }: Readonly<SettingsContentProps>) {
   const logout = useLogout(staffId);
+  const withdraw = useWithdraw(staffId);
   const canOpenNotificationSettings = useSyncExternalStore(subscribeNothing, isInApp, () => false);
 
   return (
@@ -93,8 +96,27 @@ export default function SettingsContent({
           >
             {logout.isLoggingOut ? "로그아웃하는 중…" : "로그아웃"}
           </Button>
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-auto px-1 py-0.5 text-sm font-normal text-(--tertiary-color) hover:bg-transparent"
+              onClick={withdraw.open}
+            >
+              회원탈퇴
+            </Button>
+          </div>
         </div>
       </div>
+
+      <WithdrawSheet
+        open={withdraw.isOpen}
+        menu={menu}
+        isWithdrawing={withdraw.isWithdrawing}
+        errorMessage={withdraw.errorMessage}
+        onConfirm={withdraw.confirm}
+        onClose={withdraw.close}
+      />
     </div>
   );
 }
