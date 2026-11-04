@@ -20,6 +20,7 @@ const vehicleSchema = z.object({
   customBrandName: z.string().nullable(),
   customModelName: z.string().nullable(),
   carImageUrl: z.url(),
+  isCarImagePlaceholder: z.boolean(),
 });
 
 type Vehicle = z.infer<typeof vehicleSchema>;

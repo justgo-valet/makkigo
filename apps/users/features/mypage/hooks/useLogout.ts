@@ -2,6 +2,7 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useMutation } from "@tanstack/react-query";
 
 import { logout } from "@/features/auth/apis/logout";
+import { clearSelectedMerchant } from "@/features/merchant/selectedMerchant.store";
 import { useRemoveAppPushDevice } from "@/features/push/hooks/useRemoveAppPushDevice";
 
 const LOGIN_PATH = "/login";
@@ -16,7 +17,10 @@ const useLogout = () => {
       });
       await logout();
     },
-    onSuccess: () => window.location.replace(LOGIN_PATH),
+    onSuccess: () => {
+      clearSelectedMerchant();
+      window.location.replace(LOGIN_PATH);
+    },
   });
 
   return {
