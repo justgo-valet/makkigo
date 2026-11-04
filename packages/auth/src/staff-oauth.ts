@@ -1,7 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
 
+import { requireEnv } from "./config";
 import { SocialAuthError } from "./errors";
 import { oauthProviders } from "./oauth";
+import { exchangeAppleProviderToken } from "./oauth/apple-token";
 import { readOAuthState, signOAuthState } from "./oauth/state";
 import { findOrCreateStaffBySocialIdentity } from "./staff-social-account";
 import { createRandomToken } from "./tokens";
@@ -53,5 +55,14 @@ export const completeStaffOAuth = async (input: {
     nonce: input.nonce,
   });
   if (identity.provider !== input.provider) throw new SocialAuthError();
-  return findOrCreateStaffBySocialIdentity(identity);
+
+  const appleToken =
+    identity.provider === "APPLE" && input.params.code
+      ? await exchangeAppleProviderToken(input.params.code, {
+          clientId: requireEnv("APPLE_SERVICES_ID"),
+          redirectUri: input.redirectUri,
+        })
+      : null;
+
+  return findOrCreateStaffBySocialIdentity(identity, appleToken);
 };

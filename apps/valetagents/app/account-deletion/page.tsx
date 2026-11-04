@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 const DATA_HANDLING = [
   {
     data: "소셜 계정 연결, 이름 · 휴대폰 번호, 로그인 정보, 알림 토큰, 알림 내역",
-    handling: "탈퇴 즉시 삭제",
+    handling: "탈퇴 즉시 삭제. Apple 로 가입했다면 Apple 에도 연결 해제를 요청",
   },
   {
     data: "직접 만든 부스, 관리하는 업체",

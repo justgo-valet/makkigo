@@ -1,6 +1,8 @@
 import "server-only";
 import { ACTIVE_VALET_SESSION_STATUSES, prisma } from "database";
 
+import { revokeAppleTokens } from "@/server/auth/revokeAppleTokens";
+
 import type { WithdrawErrorCode } from "@/libs/auth/contracts/withdraw";
 
 type WithdrawStaffResult = { ok: true } | { ok: false; reason: WithdrawErrorCode };
@@ -9,6 +11,10 @@ class ActiveValetSessionError extends Error {}
 
 const withdrawStaff = async (staffId: number): Promise<WithdrawStaffResult> => {
   const now = new Date();
+  const appleAccounts = await prisma.staffSocialAccount.findMany({
+    where: { staffId, provider: "APPLE", providerRefreshToken: { not: null } },
+    select: { providerRefreshToken: true, providerClientId: true },
+  });
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -68,6 +74,9 @@ const withdrawStaff = async (staffId: number): Promise<WithdrawStaffResult> => {
     }
     throw error;
   }
+
+  // 데이터를 다 지운 뒤에 애플에 연결 해제를 요청한다 (App Store 심사 5.1.1(v)).
+  await revokeAppleTokens(appleAccounts);
 
   return { ok: true };
 };
