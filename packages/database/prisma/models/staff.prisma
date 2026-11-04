@@ -27,13 +27,15 @@ model Staff {
 }
 
 model StaffSocialAccount {
-  id             Int            @id @default(autoincrement())
-  staffId        Int            @map("staff_id")
-  provider       SocialProvider
-  providerUserId String         @map("provider_user_id")
-  email          String?
-  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id                   Int            @id @default(autoincrement())
+  staffId              Int            @map("staff_id")
+  provider             SocialProvider
+  providerUserId       String         @map("provider_user_id")
+  email                String?
+  providerRefreshToken String?        @map("provider_refresh_token")
+  providerClientId     String?        @map("provider_client_id")
+  createdAt            DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
 

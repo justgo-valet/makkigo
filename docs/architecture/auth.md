@@ -54,11 +54,12 @@
 |---|---|---|---|
 | 카카오 | 인가 코드 → 액세스 토큰 → `/v2/user/me` | 우리 REST 키(+ 시크릿)로 교환 | 인증된 카카오계정 이메일 (동의 항목 설정 시) |
 | 구글 | 인가 코드 → ID 토큰 | 공개키 서명, `aud` = `GOOGLE_CLIENT_ID`, `nonce` | 인증된 이메일 |
-| 애플 | ID 토큰 (`form_post` 로 콜백에 POST) + 고객은 인가 코드 → 리프레시 토큰 | 공개키 서명, `aud` = `APPLE_SERVICES_ID`, `nonce` | 이메일 (가리기 선택 시 중계 주소) |
+| 애플 | ID 토큰 (`form_post` 로 콜백에 POST) + 인가 코드 → 리프레시 토큰 (고객 · 요원) | 공개키 서명, `aud` = `APPLE_SERVICES_ID`, `nonce` | 이메일 (가리기 선택 시 중계 주소) |
 
 - `state` = 우리 키로 서명한 JWT (10분, 제공자 · nonce · CSRF 값 · 웹/앱 · `app_challenge`). CSRF 값은 `makkigo_oauth_csrf` 쿠키(path `/api/v1/auth/oauth`)와 맞춰 봅니다. 애플은 다른 사이트에서 POST 로 돌아오므로 운영에서 이 쿠키는 `SameSite=None; Secure` 입니다.
-- 애플 탈퇴 토큰 철회 (App Store 심사 5.1.1(v)): 고객이 애플로 로그인하면 인가 코드를 애플 리프레시 토큰으로 바꿔 `user_social_accounts.provider_refresh_token` 에 저장하고, 탈퇴 때 `https://appleid.apple.com/auth/revoke` 로 철회합니다. 애플 키(`APPLE_TEAM_ID` · `APPLE_KEY_ID` · `APPLE_PRIVATE_KEY`)가 없으면 교환 · 철회 모두 건너뜁니다. 교환이 실패해도 로그인은 되고, 철회가 실패해도 탈퇴는 됩니다. 이 토큰은 우리 애플 키 없이는 쓸 수 없고 API 응답에 내보내지 않습니다. 요원 로그인은 교환하지 않습니다.
-- 애플 리프레시 토큰은 발급받은 클라이언트 ID(웹 = Services ID, 앱 SDK = 번들 ID)로만 철회되므로 `user_social_accounts.provider_client_id` 에 함께 저장합니다. 이 칸이 비어 있는 예전 토큰은 Services ID 로 철회합니다.
+- 애플 탈퇴 토큰 철회 (App Store 심사 5.1.1(v)): 고객 · 요원이 애플로 로그인하면 인가 코드를 애플 리프레시 토큰으로 바꿔 `user_social_accounts` · `staff_social_accounts` 의 `provider_refresh_token` 에 저장하고, 탈퇴 때 `https://appleid.apple.com/auth/revoke` 로 철회합니다. 애플 키(`APPLE_TEAM_ID` · `APPLE_KEY_ID` · `APPLE_PRIVATE_KEY`)가 없으면 교환 · 철회 모두 건너뜁니다. 교환이 실패해도 로그인은 되고, 철회가 실패해도 탈퇴는 됩니다. 이 토큰은 우리 애플 키 없이는 쓸 수 없고 API 응답에 내보내지 않습니다. 요원은 웹 로그인만 있어 Services ID 로 교환 · 철회합니다.
+- 고객 웹 로그인과 요원 로그인은 **같은 Services ID** 를 씁니다. 애플 철회는 클라이언트 ID 단위라, 같은 Apple ID 로 두 앱에 가입한 사람이 한쪽만 탈퇴하면 다른 쪽(같은 Services ID 로 받은 토큰)의 애플 연결도 풀립니다. 계정은 애플 `sub` 로 찾으므로 그대로 남고, 다음 애플 로그인 때 동의 화면이 다시 뜨며, 나중에 그쪽을 탈퇴할 때 철회는 실패 로그만 남깁니다. 고객 앱 SDK 로그인은 번들 ID 토큰이라 영향이 없습니다. 이 영향을 없애려면 요원용 Services ID 를 따로 만듭니다.
+- 애플 리프레시 토큰은 발급받은 클라이언트 ID(웹 = Services ID, 앱 SDK = 번들 ID)로만 철회되므로 `provider_client_id` 에 함께 저장합니다. 이 칸이 비어 있는 예전 토큰은 Services ID 로 철회합니다.
 - 1회용 로그인 코드: `user_login_codes` 에 해시만 저장, 2분, 한 번 쓰면 끝 (틀린 `verifier` 로 시도해도 버려짐).
 
 ## 로그인 화면
@@ -164,6 +165,6 @@
 | `GOOGLE_CLIENT_SECRET` | 위 클라이언트의 보안 비밀번호 |
 | `APPLE_SERVICES_ID` | 애플 Services ID (예: `com.makkigo.user.web`) |
 | `APPLE_BUNDLE_ID` | 고객 앱 번들 ID (`com.makkigo.user`). 앱 SDK 로그인 ID 토큰의 `aud`. 고객 앱만 |
-| `APPLE_TEAM_ID` | 애플 팀 ID (`8Z9ZNRXURC`). 고객 앱만 |
-| `APPLE_KEY_ID` | Sign in with Apple 을 켠 키(.p8)의 Key ID. 고객 앱만 |
-| `APPLE_PRIVATE_KEY` | 위 .p8 파일 내용을 **한 줄로** (줄바꿈을 `\n` 으로), SecureString. 고객 앱만 |
+| `APPLE_TEAM_ID` | 애플 팀 ID (`8Z9ZNRXURC`). 고객 · 요원 앱 (같은 값) |
+| `APPLE_KEY_ID` | Sign in with Apple 을 켠 키(.p8)의 Key ID. 고객 · 요원 앱 (같은 값) |
+| `APPLE_PRIVATE_KEY` | 위 .p8 파일 내용을 **한 줄로** (줄바꿈을 `\n` 으로), SecureString. 고객 · 요원 앱 (같은 값) |
