@@ -7,6 +7,7 @@ import {
   BottomSheetFooter,
   BottomSheetHeader,
 } from "@makkigo/ui/components/ui/bottom-sheet";
+import Image from "next/image";
 
 import type { BankTransfer } from "@/features/valet/hooks/useBankTransfer";
 
@@ -51,9 +52,19 @@ export default function BankTransferSheet({ transfer }: Readonly<{ transfer: Ban
                       className="h-12 w-full justify-between rounded-xl px-4 text-base font-bold shadow-none"
                       onClick={() => transfer.openBankApp(app)}
                     >
-                      <span>{app.name}</span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <Image
+                          src={app.iconSrc}
+                          alt=""
+                          aria-hidden="true"
+                          width={28}
+                          height={28}
+                          className="shrink-0 rounded-[7px] border border-black/5"
+                        />
+                        <span className="truncate">{app.name}</span>
+                      </span>
                       {app.prefillsTransfer && (
-                        <span className="text-xs font-normal text-(--tertiary-color)">
+                        <span className="shrink-0 text-xs font-normal text-(--tertiary-color)">
                           계좌 · 금액 자동 입력
                         </span>
                       )}
