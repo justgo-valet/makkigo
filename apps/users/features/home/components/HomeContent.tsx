@@ -71,6 +71,11 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
           className="object-contain"
         />
       </div>
+      {home.isCarImagePlaceholder && (
+        <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color)">
+          차량 사진 준비 중이에요. 실제 차량과 다를 수 있어요
+        </p>
+      )}
 
       {home.exitSummary && (
         <ExitSummaryCard

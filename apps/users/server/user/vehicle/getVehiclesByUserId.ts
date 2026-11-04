@@ -23,16 +23,21 @@ const getVehiclesByUserId = async (userId: number): Promise<VehicleResponse> => 
   });
 
   return vehicleResponseSchema.parse(
-    vehicles.map((vehicle) => ({
-      ...vehicle,
-      brand: vehicle.brand
-        ? { ...vehicle.brand, logoUrl: toImageUrl(vehicle.brand.logoUrl) }
-        : null,
-      model: vehicle.model
-        ? { ...vehicle.model, imageUrl: toImageUrl(vehicle.model.imageUrl) }
-        : null,
-      carImageUrl: toImageUrl(vehicle.model?.imageUrl ?? DEFAULT_CAR_IMAGE_PATH),
-    })),
+    vehicles.map((vehicle) => {
+      const modelImagePath = vehicle.model?.imageUrl ?? null;
+
+      return {
+        ...vehicle,
+        brand: vehicle.brand
+          ? { ...vehicle.brand, logoUrl: toImageUrl(vehicle.brand.logoUrl) }
+          : null,
+        model: vehicle.model
+          ? { ...vehicle.model, imageUrl: toImageUrl(vehicle.model.imageUrl) }
+          : null,
+        carImageUrl: toImageUrl(modelImagePath ?? DEFAULT_CAR_IMAGE_PATH),
+        isCarImagePlaceholder: modelImagePath === null,
+      };
+    }),
   );
 };
 
