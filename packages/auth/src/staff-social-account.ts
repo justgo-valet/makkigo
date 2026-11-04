@@ -1,9 +1,11 @@
 import { Prisma, prisma } from "database";
 
 import type { SocialIdentity } from "./oauth";
+import type { ProviderToken } from "./oauth/types";
 
 export const findOrCreateStaffBySocialIdentity = async (
   identity: SocialIdentity,
+  providerToken: ProviderToken | null = null,
 ): Promise<{ staffId: number; isNewStaff: boolean }> => {
   const where = {
     provider_providerUserId: {
@@ -14,8 +16,19 @@ export const findOrCreateStaffBySocialIdentity = async (
   const existing = await prisma.staffSocialAccount.findUnique({ where });
 
   if (existing) {
-    if (identity.email && identity.email !== existing.email) {
-      await prisma.staffSocialAccount.update({ where, data: { email: identity.email } });
+    const emailChanged = identity.email !== null && identity.email !== existing.email;
+
+    if (emailChanged || providerToken) {
+      await prisma.staffSocialAccount.update({
+        where,
+        data: {
+          ...(emailChanged && { email: identity.email }),
+          ...(providerToken && {
+            providerRefreshToken: providerToken.refreshToken,
+            providerClientId: providerToken.clientId,
+          }),
+        },
+      });
     }
     return { staffId: existing.staffId, isNewStaff: false };
   }
@@ -28,6 +41,8 @@ export const findOrCreateStaffBySocialIdentity = async (
             provider: identity.provider,
             providerUserId: identity.providerUserId,
             email: identity.email,
+            providerRefreshToken: providerToken?.refreshToken ?? null,
+            providerClientId: providerToken?.clientId ?? null,
           },
         },
       },

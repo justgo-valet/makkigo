@@ -57,6 +57,8 @@ const handleCallback = async (
   });
   if (!state || !callback.state) return fail(null, "failed");
   if (callback.error) return fail(state, CANCEL_ERRORS.has(callback.error) ? "cancelled" : "failed");
+  // 로그인 코드를 못 만들 요청이면 제공자 확인 · 애플 토큰 교환 · 요원 저장 전에 끝낸다.
+  if (!state.appChallenge) return fail(state, "failed");
 
   try {
     const { staffId } = await completeStaffOAuth({
@@ -66,8 +68,6 @@ const handleCallback = async (
       nonce: state.nonce,
       redirectUri: getOAuthRedirectUri(provider),
     });
-    if (!state.appChallenge) return fail(state, "failed");
-
     const code = await createStaffLoginCode(staffId, state.appChallenge);
     if (state.client === "app") {
       const response = createAppRedirectPage(getAppCallbackUrl({ code }));

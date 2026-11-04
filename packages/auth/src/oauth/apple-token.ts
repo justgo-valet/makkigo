@@ -3,6 +3,8 @@ import { SignJWT, importPKCS8 } from "jose";
 import { optionalEnv } from "../config";
 import { postForm } from "./http";
 
+import type { ProviderToken } from "./types";
+
 const APPLE_AUDIENCE = "https://appleid.apple.com";
 const CLIENT_SECRET_TTL_SECONDS = 5 * 60;
 const REQUEST_TIMEOUT_MS = 5000;
@@ -46,6 +48,23 @@ export const exchangeAppleCodeForRefreshToken = async (
   })) as { refresh_token?: unknown };
 
   return typeof body.refresh_token === "string" && body.refresh_token ? body.refresh_token : null;
+};
+
+/** 탈퇴 때 철회할 애플 리프레시 토큰. 교환이 실패해도 로그인은 막지 않는다. */
+export const exchangeAppleProviderToken = async (
+  code: string,
+  client: { clientId: string; redirectUri: string | null },
+): Promise<ProviderToken | null> => {
+  const refreshToken = await exchangeAppleCodeForRefreshToken(code, client).catch(
+    (error: unknown) => {
+      console.warn("Failed to exchange Apple authorization code", {
+        errorName: error instanceof Error ? error.name : "UnknownError",
+      });
+      return null;
+    },
+  );
+
+  return refreshToken ? { refreshToken, clientId: client.clientId } : null;
 };
 
 /** `clientId` 가 없으면(이 칸이 생기기 전에 저장된 토큰) Services ID 로 철회한다. */
