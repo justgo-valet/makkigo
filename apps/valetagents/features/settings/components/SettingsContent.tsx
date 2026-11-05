@@ -10,7 +10,7 @@ import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useWithdraw } from "@/features/settings/hooks/useWithdraw";
 
 import { SOCIAL_PROVIDER_LABELS, TERMS_ITEMS, getRoleLabel } from "../settingsItems";
-import PolicyPanel from "./PolicyPanel";
+import PolicyPanel from "@/features/consent/components/PolicyPanel";
 import SettingsRow from "./SettingsRow";
 import SettingsSection from "./SettingsSection";
 import WithdrawSheet from "./WithdrawSheet";

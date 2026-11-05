@@ -7,6 +7,7 @@ import OnboardingShell from "@/features/onboarding/components/OnboardingShell";
 import RoleSelection from "@/features/onboarding/RoleSelection";
 import { getOnboardingMenu } from "@/libs/auth/menuItems";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
+import { hasStaffConsents } from "@/server/consent/staffConsents";
 import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
 
 interface OnboardingPageProps {
@@ -22,7 +23,13 @@ export default async function OnboardingPage({ searchParams }: Readonly<Onboardi
   if (!initialStatus) redirect("/login");
   if (initialStatus.state === "COMPLETE") redirect("/");
   const menu = getOnboardingMenu(staffId, initialStatus.role);
-  if (initialStatus.state === "ROLE_REQUIRED") return <RoleSelection menu={menu} />;
+  if (initialStatus.state === "ROLE_REQUIRED") {
+    return (
+      <QueryProvider sessionKey={staffId}>
+        <RoleSelection menu={menu} consentRequired={!(await hasStaffConsents(staffId))} />
+      </QueryProvider>
+    );
+  }
   if (initialStatus.role === "MERCHANT_ADMIN") redirect("/onboarding/merchant");
 
   const requestedView = (await searchParams).view;

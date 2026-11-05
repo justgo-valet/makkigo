@@ -68,3 +68,8 @@ enum NotificationChannel {
     PUSH
     ALIMTALK
 }
+
+enum StaffConsentType {
+    PARTNER_TERMS
+    PARTNER_PRIVACY_COLLECTION
+}

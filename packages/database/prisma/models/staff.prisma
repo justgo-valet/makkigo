@@ -12,6 +12,7 @@ model Staff {
   loginCodes     StaffLoginCode[]
   pushDevices    PushDevice[]
   notifications  Notification[]
+  consents       StaffConsent[]
 
   boothMemberships BoothAgent[]
   createdBooths    Booth[]      @relation("BoothCreator")
@@ -75,4 +76,17 @@ model StaffLoginCode {
   @@index([staffId])
   @@index([expiresAt])
   @@map("staff_login_codes")
+}
+
+model StaffConsent {
+  id              Int              @id @default(autoincrement())
+  staffId         Int              @map("staff_id")
+  type            StaffConsentType
+  documentVersion String           @map("document_version")
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([staffId, type])
+  @@map("staff_consents")
 }

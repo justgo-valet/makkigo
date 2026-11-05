@@ -5,6 +5,10 @@ import { prisma } from "database";
 
 import { apiError, privateJson } from "@/server/common/apiResponse";
 import { hasInternalToken } from "@/server/common/internalToken";
+import {
+  countIncompleteStaffSignups,
+  purgeIncompleteStaffSignups,
+} from "@/server/consent/purgeIncompleteStaffSignups";
 import { createMerchantUploadCleanupService } from "@/server/merchantUploads/cleanupMerchantUploads";
 import { prismaMerchantUploadCleanupRepository } from "@/server/merchantUploads/prismaMerchantUploadCleanupRepository";
 import { createS3MerchantUploadStorage } from "@/server/merchantUploads/s3MerchantUploadStorage";
@@ -44,7 +48,8 @@ export async function POST(request: NextRequest) {
       storage,
       createClaimId: randomUUID,
     });
-    const [merchantUploads, ticketUploads] = await Promise.all([
+    const now = new Date();
+    const [merchantUploads, ticketUploads, incompleteStaffSignups] = await Promise.all([
       cleanup({
         dryRun: body.data.dryRun,
         batchSize: body.data.batchSize,
@@ -58,6 +63,9 @@ export async function POST(request: NextRequest) {
           now: () => new Date(),
         },
       ),
+      body.data.dryRun
+        ? countIncompleteStaffSignups(now).then((remaining) => ({ purged: 0, remaining }))
+        : purgeIncompleteStaffSignups(now, body.data.batchSize),
     ]);
     return privateJson({
       ...merchantUploads,
@@ -66,6 +74,7 @@ export async function POST(request: NextRequest) {
       failed: merchantUploads.failed + ticketUploads.failed,
       partial: merchantUploads.partial || ticketUploads.partial,
       ticketUploads,
+      incompleteStaffSignups,
     });
   } catch (error) {
     console.error("Merchant upload cleanup failed", {

@@ -12,8 +12,8 @@
 | [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 (공개 주소 `https://app.makkigo.com/privacy-third-party`) | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
 | [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함, 공개 주소 `https://app.makkigo.com/location-terms`) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
 | [privacyPolicy.ts](../../packages/legal/src/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 고객 마이페이지 · 요원 앱 설정 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
-| [partnerTerms.ts](../../apps/valetagents/features/consent/documents/partnerTerms.ts) 파트너 이용약관 (시행 2026-10-31, 요원 앱 설정 "약관 및 정책") | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
-| [partnerPrivacyCollection.ts](../../apps/valetagents/features/consent/documents/partnerPrivacyCollection.ts) 파트너 개인정보 수집 · 이용 (시행 2026-10-31, 요원 앱 설정 "약관 및 정책") | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
+| [partnerTerms.ts](../../apps/valetagents/features/consent/documents/partnerTerms.ts) 파트너 이용약관 (시행 2026-10-31, 요원 앱 설정 "약관 및 정책") | 요원 · 업체 관리자 | `PARTNER_TERMS` (요원 앱 역할 선택 전 동의 시트, `staff_consents`) | 필수 |
+| [partnerPrivacyCollection.ts](../../apps/valetagents/features/consent/documents/partnerPrivacyCollection.ts) 파트너 개인정보 수집 · 이용 (시행 2026-10-31, 요원 앱 설정 "약관 및 정책") | 요원 · 업체 관리자 | `PARTNER_PRIVACY_COLLECTION` (같은 시트) | 필수 |
 
 결제(PG) · 광고성 알림이 없어 결제 약관, 마케팅 동의는 없습니다.
 
@@ -84,7 +84,6 @@
 
 | 할 일 | 앱 | 상태 · 근거 |
 |---|---|---|
-| 요원 앱 약관 · 개인정보 동의 시트 | 요원 | **미구현.** 소셜 로그인 즉시 `staff` 행 · 이메일을 만들고 이어서 부스 · 업체 · 계좌 · 푸시 토큰을 받는데 동의 절차가 없음 (개인정보 보호법 제15조 · 제22조). 파트너 약관 · 동의서는 초안만 있음 |
 | 비회원 동의 기록 저장 | 고객 | 화면은 [#198](https://github.com/justgo-valet/makkigo/pull/198) 로 추가: 출차 요청 버튼 위 필수 체크(서비스 이용약관 · 차량 번호 · 이용 기록 제공) + 이용약관 · 제3자 제공 · 처리방침 보기, 체크해야 버튼이 켜짐. **`/guest` 가 아직 더미라** 동의 기록(문서 버전 · 시각)은 비회원 출차 요청 API 를 만들 때 함께 저장해야 함 |
 | 앱 첫 실행 접근 권한 안내 (위치 · 알림 = 선택) | Flutter | **미구현.** 정보통신망법 제22조의2 |
 | 애플 리프레시 토큰 암호화 저장 | 고객 · 요원 | 평문 저장 중 (`user_social_accounts` · `staff_social_accounts` 의 `provider_refresh_token`) |

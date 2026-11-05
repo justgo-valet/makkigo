@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
+import ConsentSheet from "@/features/consent/components/ConsentSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 
@@ -16,9 +17,10 @@ const ROLES = [
 
 interface RoleSelectionProps {
   menu: MenuAccess;
+  consentRequired: boolean;
 }
 
-export default function RoleSelection({ menu }: Readonly<RoleSelectionProps>) {
+export default function RoleSelection({ menu, consentRequired }: Readonly<RoleSelectionProps>) {
   const router = useRouter();
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,6 +81,7 @@ export default function RoleSelection({ menu }: Readonly<RoleSelectionProps>) {
         </div>
         {error && <FieldError>{error}</FieldError>}
       </div>
+      <ConsentSheet open={consentRequired} onAgreed={() => router.refresh()} />
     </div>
   );
 }
