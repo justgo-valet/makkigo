@@ -16,6 +16,7 @@ const onboardingStatusResponseSchema = z.object({
   role: staffRoleSchema.nullable(),
   state: onboardingStateSchema,
   nextPath: z.enum(["/onboarding", "/"]),
+  name: z.string().nullable(),
   requests: z.array(requestSummarySchema),
 });
 

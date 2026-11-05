@@ -11,6 +11,7 @@ const status = (
   role,
   state,
   nextPath: state === "COMPLETE" ? "/" : "/onboarding",
+  name: null,
   requests: [],
 });
 

@@ -42,6 +42,7 @@ describe("onboarding client schemas", () => {
         role: "VALET_AGENT",
         state: "AWAITING_APPROVAL",
         nextPath: "/onboarding",
+        name: "김요원",
         requests: [request, { ...request, id: 11, status: "REJECTED" }],
       }).requests,
     ).toHaveLength(2);

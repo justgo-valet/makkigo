@@ -135,6 +135,7 @@ afterAll(async () => {
 describe("saveAgentRequest database integration", () => {
   it("creates, updates, and reopens the same membership row", async () => {
     const created = await saveAgentRequest(agentId, boothId, {
+      name: "김요원",
       workStartTime: "22:00",
       workEndTime: "06:00",
     });
@@ -142,6 +143,7 @@ describe("saveAgentRequest database integration", () => {
     if (!created.ok) throw new Error(created.reason);
 
     const updated = await saveAgentRequest(agentId, boothId, {
+      name: "박요원",
       workStartTime: "21:30",
       workEndTime: "05:30",
     });
@@ -149,12 +151,16 @@ describe("saveAgentRequest database integration", () => {
       ok: true,
       value: { outcome: "UPDATED", request: { id: created.value.request.id } },
     });
+    await expect(
+      prisma.staff.findUniqueOrThrow({ where: { id: agentId }, select: { name: true } }),
+    ).resolves.toEqual({ name: "박요원" });
 
     await prisma.boothAgent.update({
       where: { boothId_staffId: { boothId, staffId: agentId } },
       data: { status: "REJECTED", notificationsEnabled: false },
     });
     const reopened = await saveAgentRequest(agentId, boothId, {
+      name: "김요원",
       workStartTime: "20:00",
       workEndTime: "04:00",
     });
@@ -184,7 +190,11 @@ describe("saveAgentRequest database integration", () => {
     });
 
     await expect(
-      saveAgentRequest(agentId, boothId, { workStartTime: "09:00", workEndTime: "18:00" }),
+      saveAgentRequest(agentId, boothId, {
+        name: "김요원",
+        workStartTime: "09:00",
+        workEndTime: "18:00",
+      }),
     ).resolves.toEqual({ ok: false, reason: "ALREADY_APPROVED" });
 
     const after = await prisma.boothAgent.findUniqueOrThrow({
@@ -202,8 +212,16 @@ describe("saveAgentRequest database integration", () => {
     fixtureIds.booth.push(booth.id);
 
     const results = await Promise.all([
-      saveAgentRequest(agentId, booth.id, { workStartTime: "08:00", workEndTime: "16:00" }),
-      saveAgentRequest(agentId, booth.id, { workStartTime: "10:00", workEndTime: "19:00" }),
+      saveAgentRequest(agentId, booth.id, {
+        name: "김요원",
+        workStartTime: "08:00",
+        workEndTime: "16:00",
+      }),
+      saveAgentRequest(agentId, booth.id, {
+        name: "김요원",
+        workStartTime: "10:00",
+        workEndTime: "19:00",
+      }),
     ]);
 
     expect(results.every((result) => result.ok || result.reason === "REQUEST_CONFLICT")).toBe(true);
@@ -224,12 +242,14 @@ describe("saveAgentRequest database integration", () => {
     const raceBoothId = await createRaceBooth("requested-approval-race");
     await expect(
       saveAgentRequest(agentId, raceBoothId, {
+        name: "김요원",
         workStartTime: "07:00",
         workEndTime: "15:00",
       }),
     ).resolves.toMatchObject({ ok: true, value: { outcome: "CREATED" } });
 
     const result = await approveWhileRequestIsWaiting(raceBoothId, {
+      name: "김요원",
       workStartTime: "08:30",
       workEndTime: "17:30",
     });
@@ -252,6 +272,7 @@ describe("saveAgentRequest database integration", () => {
   it("does not downgrade approval that races a rejected-request reopen", async () => {
     const raceBoothId = await createRaceBooth("rejected-approval-race");
     const created = await saveAgentRequest(agentId, raceBoothId, {
+      name: "김요원",
       workStartTime: "22:00",
       workEndTime: "06:00",
     });
@@ -262,6 +283,7 @@ describe("saveAgentRequest database integration", () => {
     });
 
     const result = await approveWhileRequestIsWaiting(raceBoothId, {
+      name: "김요원",
       workStartTime: "21:00",
       workEndTime: "05:00",
     });

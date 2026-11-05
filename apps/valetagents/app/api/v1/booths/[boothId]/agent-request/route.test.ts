@@ -35,7 +35,11 @@ describe("PUT /api/v1/booths/:boothId/agent-request", () => {
   it("requires authentication and marks the response private", async () => {
     auth.getCurrentStaffId.mockResolvedValue(null);
 
-    const response = await callPut({ workStartTime: "09:00", workEndTime: "18:00" });
+    const response = await callPut({
+      name: "김요원",
+      workStartTime: "09:00",
+      workEndTime: "18:00",
+    });
 
     expect(response.status).toBe(401);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
@@ -44,9 +48,13 @@ describe("PUT /api/v1/booths/:boothId/agent-request", () => {
 
   it.each([
     [{ workStartTime: "09:00" }, "INVALID_REQUEST"],
-    [{ workStartTime: "09:00", workEndTime: "18:00", status: "APPROVED" }, "INVALID_REQUEST"],
-    [{ workStartTime: "9:00", workEndTime: "18:00" }, "INVALID_WORK_TIME"],
-    [{ workStartTime: "09:00", workEndTime: "09:00" }, "INVALID_WORK_TIME"],
+    [
+      { name: "김요원", workStartTime: "09:00", workEndTime: "18:00", status: "APPROVED" },
+      "INVALID_REQUEST",
+    ],
+    [{ name: " ", workStartTime: "09:00", workEndTime: "18:00" }, "INVALID_REQUEST"],
+    [{ name: "김요원", workStartTime: "9:00", workEndTime: "18:00" }, "INVALID_WORK_TIME"],
+    [{ name: "김요원", workStartTime: "09:00", workEndTime: "09:00" }, "INVALID_WORK_TIME"],
   ] as const)("rejects invalid payload %# with %s", async (body, code) => {
     const response = await callPut(body);
 
@@ -78,11 +86,16 @@ describe("PUT /api/v1/booths/:boothId/agent-request", () => {
       },
     });
 
-    const response = await callPut({ workStartTime: "22:00", workEndTime: "06:00" });
+    const response = await callPut({
+      name: "김요원",
+      workStartTime: "22:00",
+      workEndTime: "06:00",
+    });
 
     expect(response.status).toBe(201);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     expect(requestService.saveAgentRequest).toHaveBeenCalledWith(7, 3, {
+      name: "김요원",
       workStartTime: "22:00",
       workEndTime: "06:00",
     });
@@ -94,7 +107,11 @@ describe("PUT /api/v1/booths/:boothId/agent-request", () => {
       reason: "ALREADY_APPROVED",
     });
 
-    const response = await callPut({ workStartTime: "09:00", workEndTime: "18:00" });
+    const response = await callPut({
+      name: "김요원",
+      workStartTime: "09:00",
+      workEndTime: "18:00",
+    });
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({ code: "ALREADY_APPROVED" });

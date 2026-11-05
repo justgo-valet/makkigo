@@ -63,6 +63,7 @@ export default function OnboardingShell({
                 staffId={staffId}
                 booth={flow.selection.booth}
                 request={flow.selection.request}
+                staffName={flow.staffName}
                 kakaoMapAppKey={kakaoMapAppKey}
                 canReturnToPending={flow.hasRequests}
                 onShowPending={flow.showPending}

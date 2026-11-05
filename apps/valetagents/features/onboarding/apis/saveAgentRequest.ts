@@ -6,18 +6,20 @@ import type { AgentRequestResponse } from "../schemas/onboarding";
 
 interface SaveAgentRequestInput {
   boothId: number;
+  name: string;
   workStartTime: string;
   workEndTime: string;
 }
 
 const saveAgentRequest = async ({
   boothId,
+  name,
   workStartTime,
   workEndTime,
 }: SaveAgentRequestInput): Promise<AgentRequestResponse> => {
   const response = await apiClient
     .put(`booths/${boothId}/agent-request`, {
-      json: { workStartTime, workEndTime },
+      json: { name, workStartTime, workEndTime },
     })
     .json<unknown>();
 

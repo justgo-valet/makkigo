@@ -28,7 +28,10 @@ const savedRequest = {
 };
 
 const createTransaction = () => ({
-  staff: { findFirst: vi.fn().mockResolvedValue({ role: "VALET_AGENT" }) },
+  staff: {
+    findFirst: vi.fn().mockResolvedValue({ role: "VALET_AGENT" }),
+    update: vi.fn().mockResolvedValue({}),
+  },
   booth: { findFirst: vi.fn().mockResolvedValue({ id: 3 }) },
   boothAgent: {
     findUnique: vi.fn().mockResolvedValue(null),
@@ -38,7 +41,7 @@ const createTransaction = () => ({
   },
 });
 
-const body = { workStartTime: "22:00", workEndTime: "06:00" };
+const body = { name: "김요원", workStartTime: "22:00", workEndTime: "06:00" };
 
 const driverAdapterError = (cause: { kind: string; originalCode?: string; originalMessage?: string }) =>
   Object.assign(new Error(cause.kind), { name: "DriverAdapterError", cause });

@@ -200,6 +200,7 @@ describe("reviewBoothAgents database integration", () => {
     const untouched = await createMembership(agentIds[0], "REQUESTED");
     const edited = await createMembership(agentIds[1], "REQUESTED");
     const saved = await saveAgentRequest(agentIds[1], boothId, {
+      name: "김요원",
       workStartTime: "22:00",
       workEndTime: "06:00",
     });
@@ -235,7 +236,11 @@ describe("reviewBoothAgents database integration", () => {
     await reviewBoothAgents(managerId, boothId, { status: "APPROVED", agents: [pending] });
 
     await expect(
-      saveAgentRequest(agentIds[0], boothId, { workStartTime: "09:00", workEndTime: "18:00" }),
+      saveAgentRequest(agentIds[0], boothId, {
+        name: "김요원",
+        workStartTime: "09:00",
+        workEndTime: "18:00",
+      }),
     ).resolves.toEqual({ ok: false, reason: "ALREADY_APPROVED" });
     expect(await statusOf(pending.id)).toBe("APPROVED");
   });
