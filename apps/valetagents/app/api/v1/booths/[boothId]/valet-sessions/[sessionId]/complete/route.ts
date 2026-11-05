@@ -11,7 +11,7 @@ const ERROR_RESPONSES = {
   BOOTH_NOT_FOUND: { status: 404, message: "부스를 찾을 수 없습니다." },
   BOOTH_AGENT_REQUIRED: { status: 403, message: "부스에 등록된 요원만 이용할 수 있습니다." },
   SESSION_NOT_FOUND: { status: 404, message: "차량을 찾을 수 없습니다." },
-  NOT_COMPLETABLE: { status: 409, message: "이미 출차 완료했거나 출차 준비 중이 아닌 차량입니다." },
+  NOT_COMPLETABLE: { status: 409, message: "이미 출차 완료했거나 출차 요청이 없는 차량입니다." },
 } as const;
 
 const parseId = (value: string) => {

@@ -53,6 +53,7 @@ const reconcileAgentRequestStatus = (
     role: "VALET_AGENT",
     state: "AWAITING_APPROVAL",
     nextPath: "/onboarding",
+    name: current?.name ?? null,
     requests: [incoming, ...otherRequests],
   };
 };

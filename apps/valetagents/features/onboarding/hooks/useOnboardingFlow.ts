@@ -90,6 +90,7 @@ const useOnboardingFlow = ({ staffId, initialStatus, initialView }: UseOnboardin
     showsPending: view === "pending" && hasRequests,
     hasRequests,
     requests,
+    staffName: status.data.name,
     pollErrorMessage: status.isRefetchError
       ? getErrorMessage(status.error, STATUS_ERROR_MESSAGE)
       : null,

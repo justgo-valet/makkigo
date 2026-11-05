@@ -33,13 +33,10 @@ export async function PUT(
     const json = await request.json().catch(() => null);
     const body = agentRequestBodySchema.safeParse(json);
     if (!body.success) {
-      const invalidWorkTime =
-        typeof json === "object" &&
-        json !== null &&
-        !Array.isArray(json) &&
-        Object.keys(json).length === 2 &&
-        typeof (json as Record<string, unknown>).workStartTime === "string" &&
-        typeof (json as Record<string, unknown>).workEndTime === "string";
+      const invalidWorkTime = body.error.issues.every(
+        ({ code, path }) =>
+          code === "invalid_format" && (path[0] === "workStartTime" || path[0] === "workEndTime"),
+      );
       return invalidWorkTime
         ? apiError("INVALID_WORK_TIME", "근무 시간을 HH:mm 형식으로 입력해 주세요.", 400)
         : apiError("INVALID_REQUEST", "요청 본문이 올바르지 않습니다.", 400);

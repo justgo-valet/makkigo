@@ -2,6 +2,7 @@ import { prisma } from "database";
 import { NextResponse } from "next/server";
 
 import { getCurrentStaffId } from "@/server/auth/getCurrentStaffId";
+import { resetStaffRole } from "@/server/onboarding/resetStaffRole";
 
 import type { NextRequest } from "next/server";
 
@@ -31,5 +32,26 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Failed to complete staff onboarding", error);
     return NextResponse.json({ message: "역할을 저장하지 못했습니다." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const staffId = await getCurrentStaffId(request);
+    if (!staffId) {
+      return NextResponse.json({ message: "로그인이 필요합니다." }, { status: 401 });
+    }
+
+    if (!(await resetStaffRole(staffId))) {
+      return NextResponse.json(
+        { message: "부스 요청이나 업체 등록을 한 뒤에는 역할을 바꿀 수 없습니다." },
+        { status: 409 },
+      );
+    }
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("Failed to reset staff role", error);
+    return NextResponse.json({ message: "역할을 되돌리지 못했습니다." }, { status: 500 });
   }
 }

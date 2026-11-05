@@ -1,12 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { completePickup as CompletePickup } from "./completePickup";
+import type { updateCompletedFee as UpdateCompletedFee } from "./updateCompletedFee";
 import type { PrismaClient } from "database";
 
 const TEST_DATABASE_NAME_PATTERN = /(?:^|[_-])test(?:$|[_-])/i;
 
 let prisma: PrismaClient;
 let completePickup: typeof CompletePickup;
+let updateCompletedFee: typeof UpdateCompletedFee;
 let staffId: number;
 let boothId: number;
 
@@ -25,6 +27,7 @@ beforeAll(async () => {
   process.env.DATABASE_URL = requireTestDatabaseUrl();
   ({ prisma } = await import("database"));
   ({ completePickup } = await import("./completePickup"));
+  ({ updateCompletedFee } = await import("./updateCompletedFee"));
 
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   staffId = (
@@ -55,17 +58,16 @@ afterAll(async () => {
 });
 
 describe("completePickup database integration", () => {
-  it("completes a car being prepared for pickup once", async () => {
+  it("completes a car right after its pickup request, once", async () => {
     const now = new Date("2026-10-14T03:10:00.000Z");
     const session = await prisma.valetSession.create({
       data: {
-        status: "PICKUP_PREPARING",
+        status: "PICKUP_REQUESTED",
         plateNumber: "12가3456",
         boothId,
         parkedAt: new Date("2026-10-14T01:50:00.000Z"),
         pickupRequestedAt: new Date("2026-10-14T02:58:00.000Z"),
-        actualFee: 15000,
-        expectedPickupAt: new Date("2026-10-14T03:05:00.000Z"),
+        baseFee: 15000,
       },
       select: { id: true },
     });
@@ -84,5 +86,31 @@ describe("completePickup database integration", () => {
       completedAt: now,
       completedById: staffId,
     });
+  });
+
+  it("changes the fee of a completed car only", async () => {
+    const parked = await prisma.valetSession.create({
+      data: { status: "PARKED", plateNumber: "34나5678", boothId, baseFee: 12000 },
+      select: { id: true },
+    });
+    const completed = await prisma.valetSession.create({
+      data: { status: "COMPLETED", plateNumber: "56다7890", boothId, baseFee: 12000 },
+      select: { id: true },
+    });
+
+    await expect(updateCompletedFee(staffId, boothId, parked.id, 9000)).resolves.toEqual({
+      ok: false,
+      reason: "SESSION_NOT_FOUND",
+    });
+    await expect(updateCompletedFee(staffId, boothId, completed.id, 9000)).resolves.toEqual({
+      ok: true,
+    });
+
+    const sessions = await prisma.valetSession.findMany({
+      where: { id: { in: [parked.id, completed.id] } },
+      orderBy: { id: "asc" },
+      select: { actualFee: true },
+    });
+    expect(sessions).toEqual([{ actualFee: null }, { actualFee: 9000 }]);
   });
 });

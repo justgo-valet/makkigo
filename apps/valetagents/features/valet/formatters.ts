@@ -1,4 +1,4 @@
-import type { BoothValetSession, ValetFee } from "./schemas/sessions";
+import type { BoothValetSession } from "./schemas/sessions";
 
 const MINUTE_MS = 60_000;
 
@@ -22,9 +22,6 @@ const formatAgo = (iso: string, now: number, action: string) => {
 
 const formatWon = (amount: number) => `${amount.toLocaleString("ko-KR")}원`;
 
-const formatFeeBreakdown = (fee: ValetFee) =>
-  `기본 요금 ${formatWon(fee.baseFee)}(${formatDuration(fee.baseMinutes)}) + 추가 요금 ${formatWon(fee.extraFee)}`;
-
 const formatSessionLabel = (session: BoothValetSession, now: number) => {
   switch (session.status) {
     case "ARRIVING": {
@@ -37,25 +34,14 @@ const formatSessionLabel = (session: BoothValetSession, now: number) => {
       if (!session.parkedAt) return "주차 완료";
       return `${formatDuration(minutesSince(session.parkedAt, now))}째`;
     }
-    case "PICKUP_REQUESTED": {
+    case "PICKUP_REQUESTED":
+    case "PICKUP_PREPARING": {
       if (!session.pickupRequestedAt) return "출차 요청";
       return formatAgo(session.pickupRequestedAt, now, "요청");
-    }
-    case "PICKUP_PREPARING": {
-      if (!session.expectedPickupAt) return "출차 준비 중";
-      const minutes = minutesBetween(now, Date.parse(session.expectedPickupAt));
-      return minutes > 0 ? `${minutes}분 뒤 출차` : "곧 출차";
     }
   }
 };
 
 const formatCompletedLabel = (completedAt: string, now: number) => formatAgo(completedAt, now, "출차");
 
-export {
-  formatCompletedLabel,
-  formatDuration,
-  formatFeeBreakdown,
-  formatPlateNumber,
-  formatSessionLabel,
-  minutesSince,
-};
+export { formatCompletedLabel, formatPlateNumber, formatSessionLabel, formatWon };

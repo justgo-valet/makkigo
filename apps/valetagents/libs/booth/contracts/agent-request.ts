@@ -3,11 +3,17 @@ import { z } from "zod";
 import { selectedBoothSchema } from "./booths";
 import { WORK_TIME_PATTERN } from "../workTime";
 
+const STAFF_NAME_MAX_LENGTH = 20;
+
 const boothAgentRequestStatusSchema = z.enum(["REQUESTED", "APPROVED", "REJECTED"]);
 const workTimeSchema = z.string().regex(WORK_TIME_PATTERN);
 
 const agentRequestBodySchema = z
-  .object({ workStartTime: workTimeSchema, workEndTime: workTimeSchema })
+  .object({
+    name: z.string().trim().min(1).max(STAFF_NAME_MAX_LENGTH),
+    workStartTime: workTimeSchema,
+    workEndTime: workTimeSchema,
+  })
   .strict();
 
 const requestSummaryWithoutBoothSchema = z.object({
@@ -33,6 +39,7 @@ const agentRequestResponseSchema = z.object({
 });
 
 export {
+  STAFF_NAME_MAX_LENGTH,
   agentRequestBodySchema,
   agentRequestOutcomeSchema,
   agentRequestResponseSchema,

@@ -26,9 +26,16 @@ interface VehicleCardContentProps {
   imageUrl: string;
   plateNumber: string;
   label: string;
+  fee?: string;
 }
 
-function VehicleCardContent({ status, imageUrl, plateNumber, label }: Readonly<VehicleCardContentProps>) {
+function VehicleCardContent({
+  status,
+  imageUrl,
+  plateNumber,
+  label,
+  fee,
+}: Readonly<VehicleCardContentProps>) {
   return (
     <>
       <span className="sr-only">{STATUS_STYLES[status].title}</span>
@@ -39,6 +46,11 @@ function VehicleCardContent({ status, imageUrl, plateNumber, label }: Readonly<V
         {formatPlateNumber(plateNumber)}
       </span>
       <span className="mt-1 text-[15px] leading-[21px] font-medium whitespace-nowrap">{label}</span>
+      {fee && (
+        <span className="text-[15px] leading-[21px] font-bold whitespace-nowrap tabular-nums">
+          {fee}
+        </span>
+      )}
     </>
   );
 }

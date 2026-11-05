@@ -23,7 +23,7 @@ const isPickupStatus = (session: CurrentSession) =>
 
 const getFeeDescription = (session: CurrentSession | null) =>
   session && isPickupStatus(session)
-    ? "출차 요청 시각 기준 요금입니다. 실제 요금은 요원님이 안내해요."
+    ? "출차 요청 시각 기준 요금입니다."
     : "지금 출차하실 경우 기준입니다. 출차 시각에 따라 달라져요.";
 
 const usePickupRequestFlow = () => {
@@ -93,7 +93,7 @@ const usePickupRequestFlow = () => {
     errorMessage: error && getErrorMessage(error, FALLBACK_ERROR_MESSAGE),
     pickupTimeLabel:
       expectedPickupAt === null
-        ? "요원님 확인 후 시각 안내"
+        ? "요원님이 차량을 준비하고 있어요"
         : `${formatClockTime(Date.parse(expectedPickupAt))} 출차 예정`,
     accountLabel: bankTransfer.accountLabel,
     bankTransfer,

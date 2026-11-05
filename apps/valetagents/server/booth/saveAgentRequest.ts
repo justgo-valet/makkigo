@@ -89,6 +89,8 @@ const saveInTransaction = async (
   });
   if (existing?.status === "APPROVED") return { ok: false, reason: "ALREADY_APPROVED" };
 
+  await transaction.staff.update({ where: { id: staffId }, data: { name: body.name } });
+
   const workStartTime = parseWorkTime(body.workStartTime);
   const workEndTime = parseWorkTime(body.workEndTime);
   let outcome: AgentRequestOutcome;

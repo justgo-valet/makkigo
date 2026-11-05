@@ -1,7 +1,6 @@
 import { Button, cn } from "@makkigo/ui";
+import { PolicyMarkdown } from "@makkigo/ui/components/ui/policy-markdown";
 import Image from "next/image";
-
-import PolicyMarkdown from "@/features/consent/components/PolicyMarkdown";
 
 interface ConsentPanelProps {
   id: string;

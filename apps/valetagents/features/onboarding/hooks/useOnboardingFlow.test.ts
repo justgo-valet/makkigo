@@ -7,7 +7,7 @@ import type { AgentRequestResponse, OnboardingStatusResponse } from "../schemas/
 const status = (state: OnboardingStatusResponse["state"]): OnboardingStatusResponse => ({
   role: "VALET_AGENT",
   state,
-  nextPath: "/onboarding",
+  nextPath: "/onboarding", name: null,
   requests: [],
 });
 

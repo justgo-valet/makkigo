@@ -1,0 +1,1 @@
+export { privacyPolicy } from "./privacyPolicy";
