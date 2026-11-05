@@ -48,7 +48,7 @@ export default function BoothRegistrationForm({
           width={95}
           height={39}
           priority
-          className="absolute left-1/2 -translate-x-1/2"
+          className="absolute left-[calc(50%+0.5rem)] -translate-x-1/2"
         />
       </header>
 
