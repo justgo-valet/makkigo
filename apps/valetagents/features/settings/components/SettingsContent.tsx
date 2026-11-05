@@ -9,7 +9,7 @@ import { isInApp, openAppNotificationSettings } from "@/features/auth/appBridge"
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useWithdraw } from "@/features/settings/hooks/useWithdraw";
 
-import { SOCIAL_PROVIDER_LABELS, getRoleLabel } from "../settingsItems";
+import { PRIVACY_POLICY_URL, SOCIAL_PROVIDER_LABELS, getRoleLabel } from "../settingsItems";
 import SettingsRow from "./SettingsRow";
 import SettingsSection from "./SettingsSection";
 import WithdrawSheet from "./WithdrawSheet";
@@ -83,6 +83,20 @@ export default function SettingsContent({
             </SettingsRow>
           </SettingsSection>
         )}
+
+        <SettingsSection title="약관 및 정책">
+          <a
+            href={PRIVACY_POLICY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-xl"
+          >
+            <SettingsRow>
+              <span className="min-w-0 flex-1">개인정보 처리방침</span>
+              <span className="shrink-0 text-sm text-(--primary-color)">보기</span>
+            </SettingsRow>
+          </a>
+        </SettingsSection>
 
         <div className="flex flex-col gap-3">
           {logout.errorMessage && <FieldError>{logout.errorMessage}</FieldError>}
