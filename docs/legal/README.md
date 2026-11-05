@@ -103,7 +103,7 @@
 - 접속 기록(IP)은 수집하지 않습니다. Caddy 접속 로그를 켜게 되면 처리방침 1 · 2 절에 항목과 보관 기간을 다시 넣습니다.
 - 운영 DB 직접 접속 기록을 1년 이상 남기고 점검합니다 (위 할 일 표, 미설정). DB 백업에도 같은 보관 기간을 적용합니다.
 - 로그인 화면에는 약관 · 처리방침 안내를 두지 않습니다 (2026-10-29, 고객 · 요원 앱 같음). 처리방침 공개(개인정보 보호법 제30조)는 공개 주소와 앱 안 마이페이지로, 필수 동의는 가입 동의 시트로 합니다. 로그인 직후 동의 전에 저장하는 소셜 식별자는 계약 체결 · 이행 근거라 그 자리에서 고지할 의무는 없다고 보았습니다. 변호사 확인 필요.
-- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다. 이용약관 주소는 `https://app.makkigo.com/terms` 입니다. Play 데이터 보안 양식의 계정 삭제 주소는 `https://app.makkigo.com/account-deletion` (고객 앱, 본문 [accountDeletion.ts](../../apps/users/features/consent/documents/accountDeletion.ts)), 요원 앱은 `https://valet.makkigo.com/account-deletion` ([page.tsx](../../apps/valetagents/app/account-deletion/page.tsx)) 입니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
+- 처리방침 공개 주소 `https://app.makkigo.com/privacy` (로그인 없이 열림)를 두 스토어에 등록합니다 (고객 · 요원 앱 같음). 앱 안에서는 고객 앱 마이페이지 "약관 및 정책", 요원 앱 설정 "약관 및 정책" 에서 엽니다. 스토어 지원 URL 은 `https://app.makkigo.com/support` (문의 이메일 · 사업자 정보, 본문 [support.ts](../../apps/users/features/consent/documents/support.ts), 두 앱 같음) 입니다. 이용약관 주소는 `https://app.makkigo.com/terms` 입니다. Play 데이터 보안 양식의 계정 삭제 주소는 `https://app.makkigo.com/account-deletion` (고객 앱, 본문 [accountDeletion.ts](../../apps/users/features/consent/documents/accountDeletion.ts)), 요원 앱은 `https://valet.makkigo.com/account-deletion` ([page.tsx](../../apps/valetagents/app/account-deletion/page.tsx)) 입니다. App Store 개인정보 라벨 · Play 데이터 보안 양식을 처리방침과 맞춥니다.
 - 비회원 QR 화면에 차량 번호 제공 동의와 "개인정보 처리방침" 링크를 둡니다 (위 할 일 표).
 
 ## 버전
