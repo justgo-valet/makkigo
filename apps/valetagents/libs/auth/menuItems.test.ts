@@ -24,4 +24,10 @@ describe("getMenuItems", () => {
       { label: "설정", href: "/settings" },
     ]);
   });
+
+  it("shows settings only while the staff is still onboarding", () => {
+    expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: null, onboarding: true })).toEqual([
+      { label: "설정", href: "/settings" },
+    ]);
+  });
 });

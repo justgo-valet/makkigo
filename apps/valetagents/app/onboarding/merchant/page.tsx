@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import QueryProvider from "@/components/providers/QueryProvider";
 import MerchantApprovalPending from "@/features/merchants/components/MerchantApprovalPending";
 import MerchantRegistrationForm from "@/features/merchants/components/MerchantRegistrationForm";
+import { getOnboardingMenu } from "@/libs/auth/menuItems";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { listOwnMerchants } from "@/server/merchant/listOwnMerchants";
 import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
@@ -18,12 +19,14 @@ export default async function MerchantOnboardingPage() {
   if (!onboarding) redirect("/login");
   if (onboarding.role !== "MERCHANT_ADMIN") redirect(onboarding.nextPath);
   if (onboarding.state === "COMPLETE") redirect("/");
+  const menu = getOnboardingMenu(staffId, onboarding.role);
 
   if (onboarding.state === "MERCHANT_REGISTRATION_REQUIRED") {
     return (
       <QueryProvider sessionKey={staffId}>
         <MerchantRegistrationForm
           staffId={staffId}
+          menu={menu}
           kakaoMapAppKey={process.env.KAKAO_MAP_APP_KEY ?? ""}
           donePath="/onboarding/merchant"
         />
@@ -39,6 +42,7 @@ export default async function MerchantOnboardingPage() {
     <QueryProvider sessionKey={staffId}>
       <MerchantApprovalPending
         staffId={staffId}
+        menu={menu}
         merchants={items.map(({ id, name, booths }) => ({ id, name, booths }))}
       />
     </QueryProvider>

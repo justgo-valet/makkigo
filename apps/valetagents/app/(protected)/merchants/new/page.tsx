@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import QueryProvider from "@/components/providers/QueryProvider";
 import MerchantRegistrationForm from "@/features/merchants/components/MerchantRegistrationForm";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
+import { getStaffMenuAccess } from "@/server/auth/getStaffMenuAccess";
 import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
 
 export default async function NewMerchantPage() {
@@ -14,11 +15,14 @@ export default async function NewMerchantPage() {
 
   const onboarding = await requireProtectedStaff(staffId);
   if (onboarding.role !== "MERCHANT_ADMIN") redirect(onboarding.nextPath);
+  const menu = await getStaffMenuAccess(staffId);
+  if (!menu) redirect("/login");
 
   return (
     <QueryProvider sessionKey={staffId}>
       <MerchantRegistrationForm
         staffId={staffId}
+        menu={menu}
         kakaoMapAppKey={process.env.KAKAO_MAP_APP_KEY ?? ""}
         donePath="/merchants"
         returnPath="/merchants"
