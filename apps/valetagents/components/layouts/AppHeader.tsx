@@ -51,7 +51,7 @@ export default function AppHeader({
         width={95}
         height={39}
         priority
-        className={cn(!home && "absolute left-1/2 -translate-x-1/2")}
+        className={cn(!home && "absolute left-[calc(50%+0.5rem)] -translate-x-1/2")}
       />
       <nav className="ml-auto flex items-center gap-3">
         {home && (
