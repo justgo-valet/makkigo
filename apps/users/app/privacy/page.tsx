@@ -1,5 +1,5 @@
-import { PolicyMarkdown } from "@makkigo/ui/components/ui/policy-markdown";
 import { privacyPolicy } from "@makkigo/legal";
+import { PolicyMarkdown } from "@makkigo/ui/components/ui/policy-markdown";
 
 import type { Metadata } from "next";
 

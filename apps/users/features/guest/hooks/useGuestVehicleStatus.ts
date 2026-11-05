@@ -1,6 +1,6 @@
+import { privacyPolicy } from "@makkigo/legal";
 import { useState } from "react";
 
-import { privacyPolicy } from "@makkigo/legal";
 import privacyThirdParty from "@/features/consent/documents/privacyThirdParty";
 import termsOfService from "@/features/consent/documents/termsOfService";
 
