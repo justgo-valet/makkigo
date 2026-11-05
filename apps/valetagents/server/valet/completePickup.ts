@@ -11,6 +11,8 @@ type CompletePickupResult =
   | { ok: true; notice: PickupCompletedNotice | null }
   | { ok: false; reason: BoothAgentFailure | "SESSION_NOT_FOUND" | "NOT_COMPLETABLE" };
 
+const COMPLETABLE_STATUSES = ["PICKUP_REQUESTED", "PICKUP_PREPARING"] as const;
+
 const completePickup = async (
   staffId: number,
   boothId: number,
@@ -31,10 +33,12 @@ const completePickup = async (
   });
 
   if (!session) return { ok: false, reason: "SESSION_NOT_FOUND" };
-  if (session.status !== "PICKUP_PREPARING") return { ok: false, reason: "NOT_COMPLETABLE" };
+  if (!COMPLETABLE_STATUSES.some((status) => status === session.status)) {
+    return { ok: false, reason: "NOT_COMPLETABLE" };
+  }
 
   const { count } = await prisma.valetSession.updateMany({
-    where: { id: valetSessionId, boothId, status: "PICKUP_PREPARING" },
+    where: { id: valetSessionId, boothId, status: { in: [...COMPLETABLE_STATUSES] } },
     data: { status: "COMPLETED", completedAt: now, completedById: staffId },
   });
 

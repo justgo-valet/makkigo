@@ -2,6 +2,8 @@
 
 import { Button, FieldError, TimePickerSheet } from "@makkigo/ui";
 
+import { INPUT_CLASS } from "@/components/fieldStyles";
+
 import BoothMap from "./BoothMap";
 import OnboardingLinks from "./OnboardingLinks";
 import {
@@ -23,6 +25,7 @@ interface BoothRequestFormProps {
   staffId: number;
   booth: SelectedBooth;
   request: AgentRequestSummary | null;
+  staffName: string | null;
   kakaoMapAppKey: string;
   canReturnToPending: boolean;
   onShowPending: () => void;
@@ -38,12 +41,13 @@ export default function BoothRequestForm({
   staffId,
   booth,
   request,
+  staffName,
   kakaoMapAppKey,
   canReturnToPending,
   onShowPending,
   onSaved,
 }: Readonly<BoothRequestFormProps>) {
-  const form = useBoothRequestForm({ staffId, booth, request, onSaved });
+  const form = useBoothRequestForm({ staffId, booth, request, staffName, onSaved });
   const feePolicy = booth.feePolicy;
   const pickerCopy = TIME_PICKER_COPY[form.editingField ?? "start"];
 
@@ -75,6 +79,23 @@ export default function BoothRequestForm({
       ) : (
         <p className="mt-2 text-base leading-relaxed text-(--tertiary-color)">요금 정보가 아직 등록되지 않았어요</p>
       )}
+
+      <label htmlFor="agent-name" className="mt-6 text-base font-bold text-(--base-color)">
+        이름을 입력해 주세요
+        <span aria-hidden className="ml-1 text-destructive">*</span>
+      </label>
+      <p className="mt-1 text-xs text-(--tertiary-color)">부스 관리자에게 보이는 이름이에요</p>
+      <input
+        id="agent-name"
+        type="text"
+        aria-required
+        autoComplete="name"
+        maxLength={form.nameMaxLength}
+        disabled={form.isSaving}
+        value={form.name}
+        className={INPUT_CLASS}
+        onChange={(event) => form.changeName(event.target.value)}
+      />
 
       <fieldset className="mt-6">
         <legend className="text-base font-bold text-(--base-color)">

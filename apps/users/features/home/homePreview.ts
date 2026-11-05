@@ -40,6 +40,7 @@ const createPreviews = (now: number): Record<HomeStatus, HomeSnapshot> => {
       parkedAt: minutesAgo(72),
       waitingExitCount: 6,
       currentFee: 17000,
+      bankAccount: { bankName: "국민", accountNumber: "123-456-789012" },
     },
     EXIT_PREPARING: {
       ...base,

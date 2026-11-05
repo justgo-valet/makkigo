@@ -41,6 +41,7 @@ const status = (
   role: "VALET_AGENT",
   state,
   nextPath: state === "COMPLETE" ? "/" : "/onboarding",
+  name: null,
   requests,
 });
 

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { STAFF_NAME_MAX_LENGTH } from "@/libs/booth/contracts/agent-request";
+
 import { useAgentRequest } from "./useAgentRequest";
 import { isOvernightWorkTime, isValidWorkTime } from "../schemas/onboarding";
 
@@ -17,6 +19,7 @@ interface UseBoothRequestFormOptions {
   staffId: number;
   booth: SelectedBooth;
   request: AgentRequestSummary | null;
+  staffName: string | null;
   onSaved: (result: AgentRequestResponse) => void;
 }
 
@@ -27,8 +30,10 @@ const useBoothRequestForm = ({
   staffId,
   booth,
   request,
+  staffName,
   onSaved,
 }: UseBoothRequestFormOptions) => {
+  const [name, setName] = useState(staffName ?? "");
   const [workStartTime, setWorkStartTime] = useState<string | null>(request?.workStartTime ?? null);
   const [workEndTime, setWorkEndTime] = useState<string | null>(request?.workEndTime ?? null);
   const [editingField, setEditingField] = useState<WorkTimeField | null>(null);
@@ -36,9 +41,17 @@ const useBoothRequestForm = ({
 
   const hasValidTimes = isValidWorkTime(workStartTime) && isValidWorkTime(workEndTime);
   const hasEqualTimes = hasValidTimes && workStartTime === workEndTime;
-  const canSubmit = hasValidTimes && !hasEqualTimes && !agentRequest.isSaving;
+  const trimmedName = name.trim();
+  const canSubmit =
+    trimmedName !== "" && hasValidTimes && !hasEqualTimes && !agentRequest.isSaving;
 
   return {
+    name,
+    nameMaxLength: STAFF_NAME_MAX_LENGTH,
+    changeName: (value: string) => {
+      agentRequest.resetError();
+      setName(value);
+    },
     workStartTime,
     workEndTime,
     editingField,
@@ -60,8 +73,8 @@ const useBoothRequestForm = ({
       setEditingField(null);
     },
     submit: () => {
-      if (!hasValidTimes || hasEqualTimes || agentRequest.isSaving) return;
-      agentRequest.save({ boothId: booth.id, workStartTime, workEndTime });
+      if (!canSubmit) return;
+      agentRequest.save({ boothId: booth.id, name: trimmedName, workStartTime, workEndTime });
     },
   };
 };

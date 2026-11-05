@@ -1,6 +1,6 @@
 import "server-only";
 
-import { calculateValetFee, findFeePolicy, prisma } from "database";
+import { prisma } from "database";
 
 import { boothValetSessionListResponseSchema } from "@/libs/valet/contracts/sessions";
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
@@ -54,15 +54,20 @@ const listBoothValetSessions = async (
         arrivalDelayMinutes: true,
         parkedAt: true,
         pickupRequestedAt: true,
-        baseFee: true,
-        expectedPickupAt: true,
         ...carImageSelect,
       },
     }),
     prisma.valetSession.findMany({
       where: { boothId, status: "COMPLETED", completedAt: { gte: startOfSeoulDay(now) } },
       orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-      select: { id: true, plateNumber: true, completedAt: true, ...carImageSelect },
+      select: {
+        id: true,
+        plateNumber: true,
+        completedAt: true,
+        baseFee: true,
+        actualFee: true,
+        ...carImageSelect,
+      },
     }),
     prisma.boothAgent.findUnique({
       where: { boothId_staffId: { boothId, staffId } },
@@ -70,20 +75,10 @@ const listBoothValetSessions = async (
     }),
   ]);
 
-  const fees = await Promise.all(
-    sessions.map(async ({ status, parkedAt, pickupRequestedAt, baseFee }) => {
-      if (status !== "PICKUP_REQUESTED" || !parkedAt || !pickupRequestedAt || baseFee === null) {
-        return null;
-      }
-      const policy = await findFeePolicy(prisma, boothId, pickupRequestedAt);
-      return policy ? { ...calculateValetFee(policy, parkedAt, pickupRequestedAt), total: baseFee } : null;
-    }),
-  );
-
   return {
     ok: true,
     value: boothValetSessionListResponseSchema.parse({
-      items: sessions.map((session, index) => ({
+      items: sessions.map((session) => ({
         id: session.id,
         status: session.status,
         plateNumber: session.plateNumber,
@@ -92,14 +87,13 @@ const listBoothValetSessions = async (
         arrivalDelayMinutes: session.arrivalDelayMinutes,
         parkedAt: session.parkedAt?.toISOString() ?? null,
         pickupRequestedAt: session.pickupRequestedAt?.toISOString() ?? null,
-        fee: fees[index],
-        expectedPickupAt: session.expectedPickupAt?.toISOString() ?? null,
       })),
       completed: completed.map((session) => ({
         id: session.id,
         plateNumber: session.plateNumber,
         carImageUrl: toCarImageUrl(session),
         completedAt: session.completedAt?.toISOString(),
+        fee: session.actualFee ?? session.baseFee,
       })),
       notificationsEnabled: membership?.notificationsEnabled ?? false,
     }),

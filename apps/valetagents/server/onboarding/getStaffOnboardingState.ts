@@ -41,6 +41,7 @@ const getStaffOnboardingState = async (
     where: { id: staffId, deletedAt: null },
     select: {
       role: true,
+      name: true,
       boothMemberships: {
         where: { booth: { deletedAt: null } },
         select: {
@@ -91,6 +92,7 @@ const getStaffOnboardingState = async (
     role: staff.role,
     state,
     nextPath: state === "COMPLETE" ? "/" : "/onboarding",
+    name: staff.name,
     requests: staff.role === "VALET_AGENT" ? memberships.map(serializeRequest) : [],
   };
 };

@@ -5,22 +5,26 @@ import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
 
-import { formatCompletedLabel, formatPlateNumber, formatSessionLabel } from "../formatters";
+import { formatCompletedLabel, formatPlateNumber, formatSessionLabel, formatWon } from "../formatters";
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useCompletePickup } from "../hooks/useCompletePickup";
 import { useNotificationToggle } from "../hooks/useNotificationToggle";
 import { useParkValetSession } from "../hooks/useParkValetSession";
-import { useRespondPickup } from "../hooks/useRespondPickup";
+import { useUpdateCompletedFee } from "../hooks/useUpdateCompletedFee";
 
 import AddVehicleSheet from "./AddVehicleSheet";
+import FeeEditSheet from "./FeeEditSheet";
 import NotificationToggleSheet from "./NotificationToggleSheet";
-import PickupResponseSheet from "./PickupResponseSheet";
 import PlateConfirmSheet from "./PlateConfirmSheet";
 import { VehicleCardContent, vehicleCardClass } from "./VehicleCard";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
-import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
+import type {
+  BoothValetSession,
+  BoothValetSessionListResponse,
+  CompletedValetSession,
+} from "../schemas/sessions";
 
 interface VehicleManagementProps {
   staffId: number;
@@ -50,11 +54,11 @@ export default function VehicleManagement({
   const [addOpen, setAddOpen] = useState(false);
   const parking = useParkValetSession({ staffId, boothId, onParked: () => setParkTarget(null) });
   const adding = useAddVehicle({ staffId, boothId, onAdded: () => setAddOpen(false) });
-  const [responseTarget, setResponseTarget] = useState<BoothValetSession | null>(null);
-  const responding = useRespondPickup({
+  const [feeTarget, setFeeTarget] = useState<CompletedValetSession | null>(null);
+  const feeEditing = useUpdateCompletedFee({
     staffId,
     boothId,
-    onResponded: () => setResponseTarget(null),
+    onUpdated: () => setFeeTarget(null),
   });
 
   const notifications = useNotificationToggle({ staffId, boothId, enabled: notificationsEnabled });
@@ -69,10 +73,7 @@ export default function VehicleManagement({
     if (session.status === "ARRIVING") {
       parking.resetError();
       setParkTarget(session);
-    } else if (session.status === "PICKUP_REQUESTED") {
-      responding.resetError();
-      setResponseTarget(session);
-    } else if (session.status === "PICKUP_PREPARING") {
+    } else if (session.status === "PICKUP_REQUESTED" || session.status === "PICKUP_PREPARING") {
       completing.resetError();
       setCompleteTarget(session);
     }
@@ -149,13 +150,27 @@ export default function VehicleManagement({
           );
         })}
         {completed.map((session) => (
-          <li key={`completed-${session.id}`} className={vehicleCardClass("COMPLETED")}>
-            <VehicleCardContent
-              status="COMPLETED"
-              imageUrl={session.carImageUrl}
-              plateNumber={session.plateNumber}
-              label={formatCompletedLabel(session.completedAt, updatedAt)}
-            />
+          <li key={`completed-${session.id}`} className="min-w-0">
+            <button
+              type="button"
+              aria-label={`${formatPlateNumber(session.plateNumber)} 발렛 금액 수정`}
+              className={cn(
+                vehicleCardClass("COMPLETED"),
+                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+              )}
+              onClick={() => {
+                feeEditing.resetError();
+                setFeeTarget(session);
+              }}
+            >
+              <VehicleCardContent
+                status="COMPLETED"
+                imageUrl={session.carImageUrl}
+                plateNumber={session.plateNumber}
+                label={formatCompletedLabel(session.completedAt, updatedAt)}
+                fee={session.fee === null ? "금액 미입력" : formatWon(session.fee)}
+              />
+            </button>
           </li>
         ))}
       </ul>
@@ -203,13 +218,12 @@ export default function VehicleManagement({
         onConfirm={() => completeTarget && completing.complete(completeTarget.id)}
         onClose={() => !completing.isCompleting && setCompleteTarget(null)}
       />
-      <PickupResponseSheet
-        session={responseTarget}
-        now={updatedAt}
-        isResponding={responding.isResponding}
-        errorMessage={responding.errorMessage}
-        onRespond={(body) => responseTarget && responding.respond(responseTarget.id, body)}
-        onClose={() => !responding.isResponding && setResponseTarget(null)}
+      <FeeEditSheet
+        session={feeTarget}
+        isUpdating={feeEditing.isUpdating}
+        errorMessage={feeEditing.errorMessage}
+        onSave={(fee) => feeTarget && feeEditing.update(feeTarget.id, fee)}
+        onClose={() => !feeEditing.isUpdating && setFeeTarget(null)}
       />
       <NotificationToggleSheet
         open={notifications.open}
