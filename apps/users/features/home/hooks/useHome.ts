@@ -91,7 +91,7 @@ const getExitSummary = (snapshot: HomeSnapshot): ExitSummary | null => {
       return {
         headline: "현재 출차 요청",
         emphasis: `${snapshot.waitingExitCount ?? 0}대`,
-        note: "요원님 확인 후 시각 안내",
+        note: "요청 순서대로 차량을 준비해요",
         feeLabel: "지금 출차 시 요금",
         fee: formatWon(snapshot.currentFee ?? 0),
         canSeeFeeDetail: true,
@@ -101,11 +101,13 @@ const getExitSummary = (snapshot: HomeSnapshot): ExitSummary | null => {
       return {
         headline: "출차 요청을 보냈어요",
         emphasis: null,
-        note: "요원님 확인 후 시각 안내",
-        feeLabel: "기준 요금",
+        note: "요원님이 차량을 준비하고 있어요",
+        feeLabel: "발렛 요금",
         fee: formatWon(snapshot.currentFee ?? 0),
         canSeeFeeDetail: true,
-        accountLabel: null,
+        accountLabel:
+          snapshot.bankAccount &&
+          `${snapshot.bankAccount.bankName} ${snapshot.bankAccount.accountNumber}`,
       };
     case "EXIT_PREPARING":
       return {

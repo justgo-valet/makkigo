@@ -4,7 +4,6 @@ import type {
   BoothValetSession,
   BoothValetSessionListResponse,
   CompletedValetSession,
-  ValetFee,
 } from "@/libs/valet/contracts/sessions";
 
 const parseBoothValetSessionListResponse = (value: unknown): BoothValetSessionListResponse => {
@@ -14,9 +13,4 @@ const parseBoothValetSessionListResponse = (value: unknown): BoothValetSessionLi
 };
 
 export { parseBoothValetSessionListResponse };
-export type {
-  BoothValetSession,
-  BoothValetSessionListResponse,
-  CompletedValetSession,
-  ValetFee,
-};
+export type { BoothValetSession, BoothValetSessionListResponse, CompletedValetSession };
