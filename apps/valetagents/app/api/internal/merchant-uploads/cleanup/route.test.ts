@@ -24,6 +24,10 @@ vi.mock("@/server/merchantUploads/s3MerchantUploadStorage", () => ({
   createS3MerchantUploadStorage: () => storage,
 }));
 vi.mock("database", () => ({ prisma: { ticketImageUpload: ticketUploads } }));
+vi.mock("@/server/consent/purgeIncompleteStaffSignups", () => ({
+  countIncompleteStaffSignups: vi.fn().mockResolvedValue(0),
+  purgeIncompleteStaffSignups: vi.fn().mockResolvedValue({ purged: 0, remaining: 0 }),
+}));
 
 import { NextRequest } from "next/server";
 

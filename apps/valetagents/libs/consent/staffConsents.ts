@@ -1,0 +1,7 @@
+const STAFF_CONSENT_TYPES = ["PARTNER_TERMS", "PARTNER_PRIVACY_COLLECTION"] as const;
+const PARTNER_DOCUMENT_VERSION = "2026-10-31";
+
+type StaffConsentType = (typeof STAFF_CONSENT_TYPES)[number];
+
+export { PARTNER_DOCUMENT_VERSION, STAFF_CONSENT_TYPES };
+export type { StaffConsentType };

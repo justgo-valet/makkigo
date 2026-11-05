@@ -2,6 +2,7 @@ import { prisma } from "database";
 import { NextResponse } from "next/server";
 
 import { getCurrentStaffId } from "@/server/auth/getCurrentStaffId";
+import { hasStaffConsents } from "@/server/consent/staffConsents";
 import { resetStaffRole } from "@/server/onboarding/resetStaffRole";
 
 import type { NextRequest } from "next/server";
@@ -18,6 +19,13 @@ export async function POST(request: NextRequest) {
     const body = (await request.json().catch(() => null)) as { role?: unknown } | null;
     if (!body || typeof body.role !== "string" || !STAFF_ROLES.has(body.role)) {
       return NextResponse.json({ message: "역할을 선택해주세요." }, { status: 400 });
+    }
+
+    if (!(await hasStaffConsents(staffId))) {
+      return NextResponse.json(
+        { code: "CONSENT_REQUIRED", message: "약관에 동의해주세요." },
+        { status: 403 },
+      );
     }
 
     const { count } = await prisma.staff.updateMany({
