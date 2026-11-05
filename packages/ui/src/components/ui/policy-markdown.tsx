@@ -1,6 +1,7 @@
-import { cn } from "@makkigo/ui";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+import { cn } from "../../lib/utils";
 
 const MARKDOWN_REMARK_PLUGINS = [remarkGfm];
 
@@ -9,7 +10,7 @@ interface PolicyMarkdownProps {
   className?: string;
 }
 
-export default function PolicyMarkdown({ content, className }: Readonly<PolicyMarkdownProps>) {
+function PolicyMarkdown({ content, className }: Readonly<PolicyMarkdownProps>) {
   return (
     <section
       className={cn(
@@ -21,3 +22,5 @@ export default function PolicyMarkdown({ content, className }: Readonly<PolicyMa
     </section>
   );
 }
+
+export { PolicyMarkdown };

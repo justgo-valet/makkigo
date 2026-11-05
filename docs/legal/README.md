@@ -1,6 +1,6 @@
 # 약관 · 개인정보 문서 (초안)
 
-출시 전 **변호사 검토**를 거쳐 확정합니다. 고객 동의 문서는 **앱 코드가 원본**이고(`apps/users/features/consent/documents/`, 마크다운 문자열), 동의 화면에서 `>` 를 누르면 펼쳐집니다. 아직 화면에 붙지 않은 문서만 이 폴더에 둡니다.
+출시 전 **변호사 검토**를 거쳐 확정합니다. 동의 문서는 **앱 코드가 원본**입니다(마크다운 문자열). 고객 문서는 `apps/users/features/consent/documents/`, 파트너 문서는 `apps/valetagents/features/consent/documents/`, 두 앱이 함께 보여 주는 개인정보 처리방침은 `packages/legal/src/` 에 있습니다. 고객 동의 화면에서 `>` 를 누르면 펼쳐지고, 고객 마이페이지 · 요원 앱 설정의 "약관 및 정책"에서도 봅니다. 아직 화면에 붙지 않은 문서만 이 폴더에 둡니다.
 
 ## 문서
 
@@ -11,9 +11,9 @@
 | [privacyCollection.ts](../../apps/users/features/consent/documents/privacyCollection.ts) 개인정보 수집 · 이용 (공개 주소 `https://app.makkigo.com/privacy-collection`) | 고객 | `PRIVACY_COLLECTION` | 필수 |
 | [privacyThirdParty.ts](../../apps/users/features/consent/documents/privacyThirdParty.ts) 개인정보 제3자 제공 (공개 주소 `https://app.makkigo.com/privacy-third-party`) | 고객 | `PRIVACY_THIRD_PARTY` | 필수 |
 | [locationBasedService.ts](../../apps/users/features/consent/documents/locationBasedService.ts) 위치기반서비스 이용약관 (개인위치정보 수집 · 이용 포함, 공개 주소 `https://app.makkigo.com/location-terms`) | 고객 | `LOCATION_BASED_SERVICE` | 선택 |
-| [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 마이페이지 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
-| [staff-terms.md](staff-terms.md) 파트너 이용약관 | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
-| [staff-privacy-collection.md](staff-privacy-collection.md) 파트너 개인정보 수집 · 이용 | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
+| [privacyPolicy.ts](../../packages/legal/src/privacyPolicy.ts) 개인정보 처리방침 (공개 주소 `https://app.makkigo.com/privacy`, 고객 마이페이지 · 요원 앱 설정 "약관 및 정책") | 전체 (공개) | 동의 대상 아님 | 공개 의무 |
+| [partnerTerms.ts](../../apps/valetagents/features/consent/documents/partnerTerms.ts) 파트너 이용약관 (시행 2026-10-31, 요원 앱 설정 "약관 및 정책") | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
+| [partnerPrivacyCollection.ts](../../apps/valetagents/features/consent/documents/partnerPrivacyCollection.ts) 파트너 개인정보 수집 · 이용 (시행 2026-10-31, 요원 앱 설정 "약관 및 정책") | 요원 · 업체 관리자 | 요원 앱 (동의 화면 미구현) | 필수 |
 
 결제(PG) · 광고성 알림이 없어 결제 약관, 마케팅 동의는 없습니다.
 
@@ -69,7 +69,7 @@
 | 목적 달성 후 개인위치정보 파기 | 코드 | 좌표는 계산에만 쓰고 저장하지 않음 |
 | 동의 철회 시 확인자료 파기 (제24조 제4항) | 코드 | 위치기반서비스 미동의를 기록하거나 탈퇴하면 그 회원의 위치 이용 기록을 바로 지움 |
 | 확인자료 6개월 지나면 정리 | 코드 | 정기 작업이 한 시간마다 6개월 지난 기록을 지움 → [runbook.md](../operations/runbook.md#정기-정리-작업) |
-| 처리방침에 위치정보 · 길찾기 API 제공사(카카오모빌리티) 반영 | 문서 | [privacyPolicy.ts](../../apps/users/features/consent/documents/privacyPolicy.ts) |
+| 처리방침에 위치정보 · 길찾기 API 제공사(카카오모빌리티) 반영 | 문서 | [privacyPolicy.ts](../../packages/legal/src/privacyPolicy.ts) |
 
 **변호사 검토 때 물을 것**
 - 위치정보사업 허가 · 등록이 따로 필요한지. 기기 OS 가 준 좌표를 받아 우리 서비스에만 쓰는 경우라 위치기반서비스사업 신고만으로 되는지

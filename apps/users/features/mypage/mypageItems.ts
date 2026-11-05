@@ -1,6 +1,6 @@
 import { consentItems } from "@/features/consent/consentItems";
 import { consentDocuments } from "@/features/consent/documents";
-import privacyPolicy from "@/features/consent/documents/privacyPolicy";
+import { privacyPolicy } from "@makkigo/legal";
 
 import type { ConsentType } from "@/libs/consent/contracts/consents";
 import type { ProfileResponse, SocialProvider } from "@/libs/user/contracts/profile";
