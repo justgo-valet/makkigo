@@ -1,3 +1,8 @@
+import { privacyPolicy } from "@makkigo/legal";
+
+import { partnerPrivacyCollection } from "@/features/consent/documents/partnerPrivacyCollection";
+import { partnerTerms } from "@/features/consent/documents/partnerTerms";
+
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { SocialProvider } from "@/libs/auth/socialAccounts";
 
@@ -7,8 +12,13 @@ const SOCIAL_PROVIDER_LABELS: Record<SocialProvider, { name: string; iconSrc: st
   APPLE: { name: "Apple", iconSrc: "/images/social/apple.png" },
 };
 
-// 처리방침 원본은 고객 앱 공개 페이지 하나다 (파트너 항목 포함). 앱 웹뷰는 다른 도메인을 시스템 브라우저로 연다.
-const PRIVACY_POLICY_URL = "https://app.makkigo.com/privacy";
+const TERMS_ITEMS = [
+  { label: "파트너 이용약관", content: partnerTerms },
+  { label: "개인정보 수집 · 이용", content: partnerPrivacyCollection },
+  { label: "개인정보 처리방침", content: privacyPolicy },
+] as const;
+
+type TermsItem = (typeof TERMS_ITEMS)[number];
 
 const getRoleLabel = ({ role, managedBoothId }: MenuAccess) => {
   if (role === "MERCHANT_ADMIN") return "업체 관리자";
@@ -16,4 +26,5 @@ const getRoleLabel = ({ role, managedBoothId }: MenuAccess) => {
   return "-";
 };
 
-export { PRIVACY_POLICY_URL, SOCIAL_PROVIDER_LABELS, getRoleLabel };
+export { SOCIAL_PROVIDER_LABELS, TERMS_ITEMS, getRoleLabel };
+export type { TermsItem };

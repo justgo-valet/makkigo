@@ -1,18 +1,20 @@
 "use client";
 
 import { Badge, Button } from "@makkigo/ui";
-import { makkigoLogo } from "@makkigo/ui/assets";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+import AppHeader from "@/components/layouts/AppHeader";
 
 import MerchantBoothRequest from "./MerchantBoothRequest";
 
+import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { MerchantContractStatus, OwnedMerchant } from "@/libs/merchant/contracts/merchants";
 
 type PendingMerchant = Pick<OwnedMerchant, "id" | "name" | "booths">;
 
 interface MerchantApprovalPendingProps {
   staffId: number;
+  menu: MenuAccess;
   merchants: PendingMerchant[];
 }
 
@@ -30,15 +32,14 @@ const STATUS_TONES = {
 
 export default function MerchantApprovalPending({
   staffId,
+  menu,
   merchants,
 }: Readonly<MerchantApprovalPendingProps>) {
   const router = useRouter();
 
   return (
     <main className="mx-auto flex min-h-full w-full max-w-md flex-col">
-      <header className="flex h-12 w-full shrink-0 items-center justify-center">
-        <Image src={makkigoLogo} alt="마끼고" width={95} height={39} priority />
-      </header>
+      <AppHeader menu={menu} />
 
       <h1 className="mt-6 text-xl font-bold text-(--base-color)">승인을 기다리고 있어요</h1>
       <p className="mt-1 text-sm break-keep text-(--tertiary-color)">

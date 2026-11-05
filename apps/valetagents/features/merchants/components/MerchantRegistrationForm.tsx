@@ -1,9 +1,9 @@
 "use client";
 
 import { Button, FieldError, cn } from "@makkigo/ui";
-import { makkigoLogo } from "@makkigo/ui/assets";
-import Image from "next/image";
-import Link from "next/link";
+
+import AppHeader from "@/components/layouts/AppHeader";
+import { useResetRole } from "@/features/onboarding/hooks/useResetRole";
 
 import MerchantAddressField from "./MerchantAddressField";
 import MerchantBoothField from "./MerchantBoothField";
@@ -12,8 +12,11 @@ import RequiredMark from "./RequiredMark";
 import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
 import { NAME_MAX_LENGTH, useMerchantRegistrationForm } from "../hooks/useMerchantRegistrationForm";
 
+import type { MenuAccess } from "@/libs/auth/menuItems";
+
 interface MerchantRegistrationFormProps {
   staffId: number;
+  menu: MenuAccess;
   kakaoMapAppKey: string;
   donePath: string;
   returnPath?: string;
@@ -21,6 +24,7 @@ interface MerchantRegistrationFormProps {
 
 export default function MerchantRegistrationForm({
   staffId,
+  menu,
   kakaoMapAppKey,
   donePath,
   returnPath,
@@ -30,6 +34,8 @@ export default function MerchantRegistrationForm({
     kakaoMapAppKey,
     donePath,
   });
+  const role = useResetRole();
+  const canGoBack = !form.isSubmitting && !role.isResetting;
 
   return (
     <form
@@ -39,21 +45,11 @@ export default function MerchantRegistrationForm({
         form.submit();
       }}
     >
-      <header className="relative flex h-12 w-full shrink-0 items-center">
-        {returnPath && !form.isSubmitting && (
-          <Link href={returnPath} aria-label="뒤로 가기" className="z-10 flex h-full items-center">
-            <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
-          </Link>
-        )}
-        <Image
-          src={makkigoLogo}
-          alt="마끼고"
-          width={95}
-          height={39}
-          priority
-          className="absolute left-1/2 -translate-x-1/2"
-        />
-      </header>
+      <AppHeader
+        menu={menu}
+        backHref={canGoBack ? returnPath : undefined}
+        onBack={canGoBack && menu.onboarding ? role.reset : undefined}
+      />
 
       <h1 className="mt-4 text-xl font-bold text-(--base-color)">업체 등록</h1>
 

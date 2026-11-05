@@ -2,20 +2,22 @@
 
 import { Button, FieldError } from "@makkigo/ui";
 import Image from "next/image";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
 import { isInApp, openAppNotificationSettings } from "@/features/auth/appBridge";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useWithdraw } from "@/features/settings/hooks/useWithdraw";
 
-import { PRIVACY_POLICY_URL, SOCIAL_PROVIDER_LABELS, getRoleLabel } from "../settingsItems";
+import { SOCIAL_PROVIDER_LABELS, TERMS_ITEMS, getRoleLabel } from "../settingsItems";
+import PolicyPanel from "./PolicyPanel";
 import SettingsRow from "./SettingsRow";
 import SettingsSection from "./SettingsSection";
 import WithdrawSheet from "./WithdrawSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type { StaffSocialAccount } from "@/libs/auth/socialAccounts";
+import type { TermsItem } from "../settingsItems";
 
 interface SettingsContentProps {
   staffId: number;
@@ -33,6 +35,7 @@ export default function SettingsContent({
   const logout = useLogout(staffId);
   const withdraw = useWithdraw(staffId);
   const canOpenNotificationSettings = useSyncExternalStore(subscribeNothing, isInApp, () => false);
+  const [openedTerms, setOpenedTerms] = useState<TermsItem | null>(null);
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
@@ -85,17 +88,25 @@ export default function SettingsContent({
         )}
 
         <SettingsSection title="약관 및 정책">
-          <a
-            href={PRIVACY_POLICY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block rounded-xl"
-          >
-            <SettingsRow>
-              <span className="min-w-0 flex-1">개인정보 처리방침</span>
-              <span className="shrink-0 text-sm text-(--primary-color)">보기</span>
-            </SettingsRow>
-          </a>
+          {TERMS_ITEMS.map((terms) => (
+            <button
+              key={terms.label}
+              type="button"
+              className="w-full cursor-pointer text-left"
+              onClick={() => setOpenedTerms(terms)}
+            >
+              <SettingsRow>
+                <span className="min-w-0 flex-1">{terms.label}</span>
+                <Image
+                  src="/icons/chevron_right.svg"
+                  alt=""
+                  aria-hidden="true"
+                  width={16}
+                  height={16}
+                />
+              </SettingsRow>
+            </button>
+          ))}
         </SettingsSection>
 
         <div className="flex flex-col gap-3">
@@ -131,6 +142,13 @@ export default function SettingsContent({
         onConfirm={withdraw.confirm}
         onClose={withdraw.close}
       />
+      {openedTerms && (
+        <PolicyPanel
+          title={openedTerms.label}
+          content={openedTerms.content}
+          onClose={() => setOpenedTerms(null)}
+        />
+      )}
     </div>
   );
 }

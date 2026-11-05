@@ -1,4 +1,5 @@
-import PolicyMarkdown from "@/features/consent/components/PolicyMarkdown";
+import { PolicyMarkdown } from "@makkigo/ui/components/ui/policy-markdown";
+
 import termsOfService from "@/features/consent/documents/termsOfService";
 
 import type { Metadata } from "next";

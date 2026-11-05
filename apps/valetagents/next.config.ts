@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   output: 'standalone',
   outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)),
-  transpilePackages: ['@makkigo/ui'],
+  transpilePackages: ['@makkigo/legal', '@makkigo/ui'],
 }
 
 export default nextConfig

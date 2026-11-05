@@ -4,6 +4,7 @@ interface MenuAccess {
   staffId?: number;
   role: StaffRole | null;
   managedBoothId: number | null;
+  onboarding?: boolean;
 }
 
 interface MenuItem {
@@ -13,7 +14,15 @@ interface MenuItem {
 
 const SETTINGS_ITEM: MenuItem = { label: "설정", href: "/settings" };
 
-const getMenuItems = ({ role, managedBoothId }: MenuAccess): MenuItem[] => {
+const getOnboardingMenu = (staffId: number, role: StaffRole | null): MenuAccess => ({
+  staffId,
+  role,
+  managedBoothId: null,
+  onboarding: true,
+});
+
+const getMenuItems = ({ role, managedBoothId, onboarding }: MenuAccess): MenuItem[] => {
+  if (onboarding) return [SETTINGS_ITEM];
   if (role === "VALET_AGENT" && managedBoothId !== null) {
     return [
       { label: "요원 관리", href: `/booths/${managedBoothId}/agents` },
@@ -26,5 +35,5 @@ const getMenuItems = ({ role, managedBoothId }: MenuAccess): MenuItem[] => {
   return [SETTINGS_ITEM];
 };
 
-export { getMenuItems };
+export { getMenuItems, getOnboardingMenu };
 export type { MenuAccess, MenuItem };

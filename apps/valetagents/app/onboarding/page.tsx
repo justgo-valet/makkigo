@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import QueryProvider from "@/components/providers/QueryProvider";
 import OnboardingShell from "@/features/onboarding/components/OnboardingShell";
 import RoleSelection from "@/features/onboarding/RoleSelection";
+import { getOnboardingMenu } from "@/libs/auth/menuItems";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
 
@@ -20,7 +21,8 @@ export default async function OnboardingPage({ searchParams }: Readonly<Onboardi
   const initialStatus = await getStaffOnboardingState(staffId);
   if (!initialStatus) redirect("/login");
   if (initialStatus.state === "COMPLETE") redirect("/");
-  if (initialStatus.state === "ROLE_REQUIRED") return <RoleSelection />;
+  const menu = getOnboardingMenu(staffId, initialStatus.role);
+  if (initialStatus.state === "ROLE_REQUIRED") return <RoleSelection menu={menu} />;
   if (initialStatus.role === "MERCHANT_ADMIN") redirect("/onboarding/merchant");
 
   const requestedView = (await searchParams).view;
@@ -30,6 +32,7 @@ export default async function OnboardingPage({ searchParams }: Readonly<Onboardi
     <QueryProvider sessionKey={staffId}>
       <OnboardingShell
         staffId={staffId}
+        menu={menu}
         initialStatus={initialStatus}
         initialView={initialView}
         kakaoMapAppKey={process.env.KAKAO_MAP_APP_KEY ?? ""}

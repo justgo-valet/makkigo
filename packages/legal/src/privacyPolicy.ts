@@ -108,4 +108,4 @@ const privacyPolicy = `
 - 전자우편: dooininc@naver.com
 `;
 
-export default privacyPolicy;
+export { privacyPolicy };

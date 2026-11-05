@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     "@makkigo/ui",
     "@makkigo/api-client",
     "@makkigo/auth",
+    "@makkigo/legal",
     "@makkigo/push",
     "@makkigo/ticket-design",
     "database",

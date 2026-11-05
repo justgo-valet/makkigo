@@ -13,6 +13,7 @@ import type { MenuAccess } from "@/libs/auth/menuItems";
 interface AppHeaderProps {
   menu: MenuAccess;
   backHref?: string;
+  onBack?: () => void;
   home?: boolean;
   notificationsEnabled?: boolean;
   onBellClick?: () => void;
@@ -21,16 +22,28 @@ interface AppHeaderProps {
 export default function AppHeader({
   menu,
   backHref,
+  onBack,
   home,
   notificationsEnabled,
   onBellClick,
 }: Readonly<AppHeaderProps>) {
   return (
     <header className="relative flex h-12 w-full shrink-0 items-center">
-      {backHref && (
+      {backHref ? (
         <Link href={backHref} aria-label="뒤로 가기" className="z-10 flex h-full items-center">
           <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
         </Link>
+      ) : (
+        onBack && (
+          <button
+            type="button"
+            aria-label="뒤로 가기"
+            className="z-10 flex h-full items-center"
+            onClick={onBack}
+          >
+            <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
+          </button>
+        )
       )}
       <Image
         src={makkigoLogo}

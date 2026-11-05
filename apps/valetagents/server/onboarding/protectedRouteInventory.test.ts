@@ -9,7 +9,6 @@ const protectedPages = [
   "../../app/(protected)/booths/[boothId]/agents/page.tsx",
   "../../app/(protected)/booths/[boothId]/merchants/page.tsx",
   "../../app/(protected)/booths/[boothId]/payment-settings/page.tsx",
-  "../../app/(protected)/settings/page.tsx",
   "../../app/(protected)/tickets/page.tsx",
   "../../app/(protected)/tickets/new/page.tsx",
   "../../app/(protected)/tickets/[ticketId]/page.tsx",
@@ -24,10 +23,11 @@ describe("protected route inventory", () => {
     expect(source).toMatch(/await requireProtectedStaff\(staffId\)/);
   });
 
-  it("keeps login and onboarding outside the protected route group", () => {
+  it("keeps login, onboarding and settings outside the protected route group", () => {
     const publicRoutes = [
       "../../app/login/page.tsx",
       "../../app/onboarding/page.tsx",
+      "../../app/settings/page.tsx",
       "../../app/api/v1/auth/oauth/[provider]/callback/route.ts",
       "../../app/api/v1/auth/oauth/[provider]/app-session/route.ts",
     ];
