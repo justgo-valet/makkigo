@@ -29,7 +29,7 @@ export default function MerchantRegistrationForm({
   donePath,
   returnPath,
 }: Readonly<MerchantRegistrationFormProps>) {
-  const { addressContainerRef, addressTriggerRef, ...form } = useMerchantRegistrationForm({
+  const { addressTriggerRef, ...form } = useMerchantRegistrationForm({
     staffId,
     kakaoMapAppKey,
     donePath,
@@ -72,7 +72,6 @@ export default function MerchantRegistrationForm({
       <MerchantBoothField field={form.booth} disabled={form.isLocked} />
       <MerchantAddressField
         address={form.address}
-        containerRef={addressContainerRef}
         triggerRef={addressTriggerRef}
         detail={form.addressDetail}
         disabled={form.isLocked}

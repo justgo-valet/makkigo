@@ -89,7 +89,7 @@ const useMerchantRegistrationForm = ({
   const sessionId = session.data?.kind === "open" ? session.data.sessionId : null;
 
   const booth = useMerchantBoothField(staffId);
-  const { containerRef, triggerRef, ...address } = useMerchantAddress(kakaoMapAppKey);
+  const { triggerRef, ...address } = useMerchantAddress(kakaoMapAppKey);
   const photos = useMerchantPhotos(sessionId, () => {
     setFailure("uploads");
     openSession();
@@ -165,7 +165,6 @@ const useMerchantRegistrationForm = ({
     addressDetail,
     booth,
     address,
-    addressContainerRef: containerRef,
     addressTriggerRef: triggerRef,
     photos,
     notice,
