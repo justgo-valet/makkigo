@@ -55,13 +55,13 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
   }
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none [&::-webkit-scrollbar]:hidden">
+    <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none short:gap-3 short:pt-2 short:pb-3 [&::-webkit-scrollbar]:hidden">
       {pushPermissionBanner.isVisible && (
         <PushPermissionBanner onOpenSettings={pushPermissionBanner.openSettings} />
       )}
       <ValetStatusHeader title={home.title} badge={home.badge} metaItems={home.metaItems} />
 
-      <div className="relative mx-auto aspect-[16/9] w-full max-w-sm">
+      <div className="relative mx-auto aspect-video min-h-20 w-full max-w-sm shrink">
         <Image
           src={home.carImageUrl}
           alt={home.carImageAlt}
@@ -72,7 +72,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         />
       </div>
       {home.isCarImagePlaceholder && (
-        <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color)">
+        <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color) short:-mt-1 short:text-xs">
           차량 사진 준비 중이에요. 실제 차량과 다를 수 있어요
         </p>
       )}
@@ -85,7 +85,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         />
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 short:gap-2">
         {home.hasTicket && (
           <Button asChild variant="link" className="h-auto self-start px-0 font-semibold">
             <Link href="/ticket">
