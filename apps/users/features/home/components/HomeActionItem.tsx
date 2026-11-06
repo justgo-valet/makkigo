@@ -14,10 +14,10 @@ export default function HomeActionItem({ action, onClick }: Readonly<HomeActionI
       type="button"
       variant="outline"
       onClick={onClick}
-      className="h-auto w-full justify-between gap-4 rounded-xl px-4 py-4 shadow-none"
+      className="h-auto w-full justify-between gap-4 rounded-xl px-4 py-4 shadow-none short:py-2.5"
     >
-      <span className="flex items-center gap-4">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+      <span className="flex items-center gap-4 short:gap-3">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 short:size-10">
           <Image src={action.iconSrc} alt="" aria-hidden="true" width={24} height={24} />
         </span>
         <span className="flex flex-col items-start gap-0.5">
