@@ -54,7 +54,7 @@ export default function AppHeader({
         className={cn(!home && "absolute left-[calc(50%+0.5rem)] -translate-x-1/2")}
       />
       <nav className="ml-auto flex items-center gap-3">
-        {home && (
+        {onBellClick && (
           <button
             type="button"
             aria-label={notificationsEnabled ? "알림 켜짐" : "알림 꺼짐"}

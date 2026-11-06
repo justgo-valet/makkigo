@@ -4,19 +4,11 @@ import { prisma } from "database";
 
 import { boothValetSessionListResponseSchema } from "@/libs/valet/contracts/sessions";
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
-import { toImageUrl } from "@/server/merchant/listOwnMerchants";
+
+import { readValetSessionLists } from "./readValetSessionLists";
 
 import type { BoothValetSessionListResponse } from "@/libs/valet/contracts/sessions";
 import type { BoothAgentFailure } from "@/server/booth/boothAgent";
-
-const DEFAULT_CAR_IMAGE_PATH = "cars/_default.png";
-const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const startOfSeoulDay = (now: Date) =>
-  new Date(Math.floor((now.getTime() + SEOUL_OFFSET_MS) / DAY_MS) * DAY_MS - SEOUL_OFFSET_MS);
-
-const carImageSelect = { vehicle: { select: { model: { select: { imageUrl: true } } } } } as const;
 
 type ListBoothValetSessionsResult =
   | { ok: true; value: BoothValetSessionListResponse }
@@ -31,44 +23,23 @@ const listBoothValetSessions = async (
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
 
-  const toCarImageUrl = (session: { vehicle: { model: { imageUrl: string } | null } | null }) =>
-    toImageUrl(imageBaseUrl, session.vehicle?.model?.imageUrl ?? DEFAULT_CAR_IMAGE_PATH);
-
-  const [sessions, completed, membership] = await Promise.all([
-    prisma.valetSession.findMany({
-      where: {
-        OR: [
-          {
-            status: "ARRIVING",
-            merchant: { booths: { some: { boothId, status: "APPROVED" } } },
-          },
-          { status: { in: ["PARKED", "PICKUP_REQUESTED", "PICKUP_PREPARING"] }, boothId },
-        ],
+  const [lists, membership] = await Promise.all([
+    readValetSessionLists(
+      {
+        active: {
+          OR: [
+            {
+              status: "ARRIVING",
+              merchant: { booths: { some: { boothId, status: "APPROVED" } } },
+            },
+            { status: { in: ["PARKED", "PICKUP_REQUESTED", "PICKUP_PREPARING"] }, boothId },
+          ],
+        },
+        completed: { boothId },
       },
-      orderBy: { id: "asc" },
-      select: {
-        id: true,
-        status: true,
-        plateNumber: true,
-        expectedArrivalAt: true,
-        arrivalDelayMinutes: true,
-        parkedAt: true,
-        pickupRequestedAt: true,
-        ...carImageSelect,
-      },
-    }),
-    prisma.valetSession.findMany({
-      where: { boothId, status: "COMPLETED", completedAt: { gte: startOfSeoulDay(now) } },
-      orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-      select: {
-        id: true,
-        plateNumber: true,
-        completedAt: true,
-        baseFee: true,
-        actualFee: true,
-        ...carImageSelect,
-      },
-    }),
+      imageBaseUrl,
+      now,
+    ),
     prisma.boothAgent.findUnique({
       where: { boothId_staffId: { boothId, staffId } },
       select: { notificationsEnabled: true },
@@ -78,23 +49,7 @@ const listBoothValetSessions = async (
   return {
     ok: true,
     value: boothValetSessionListResponseSchema.parse({
-      items: sessions.map((session) => ({
-        id: session.id,
-        status: session.status,
-        plateNumber: session.plateNumber,
-        carImageUrl: toCarImageUrl(session),
-        expectedArrivalAt: session.expectedArrivalAt?.toISOString() ?? null,
-        arrivalDelayMinutes: session.arrivalDelayMinutes,
-        parkedAt: session.parkedAt?.toISOString() ?? null,
-        pickupRequestedAt: session.pickupRequestedAt?.toISOString() ?? null,
-      })),
-      completed: completed.map((session) => ({
-        id: session.id,
-        plateNumber: session.plateNumber,
-        carImageUrl: toCarImageUrl(session),
-        completedAt: session.completedAt?.toISOString(),
-        fee: session.actualFee ?? session.baseFee,
-      })),
+      ...lists,
       notificationsEnabled: membership?.notificationsEnabled ?? false,
     }),
   };
