@@ -4,31 +4,29 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useQuery } from "@tanstack/react-query";
 
 import { getBoothValetSessions } from "../apis/getBoothValetSessions";
+import { getMerchantValetSessions } from "../apis/getMerchantValetSessions";
 
-import type { BoothValetSessionListResponse } from "../schemas/sessions";
+import type { QueryKey } from "@tanstack/react-query";
+import type { BoothValetSessionListResponse, ValetSessionListResponse } from "../schemas/sessions";
 
 const BOOTH_VALET_SESSIONS_POLL_INTERVAL_MS = 5_000;
 const LIST_ERROR_MESSAGE = "차량 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.";
 
-interface UseBoothValetSessionsOptions {
-  staffId: number;
-  boothId: number;
-  initialData: BoothValetSessionListResponse;
-  initialDataUpdatedAt: number;
-}
-
 const boothValetSessionsQueryKey = (staffId: number, boothId: number) =>
   ["staff", staffId, "booth-valet-sessions", boothId] as const;
 
-const useBoothValetSessions = ({
-  staffId,
-  boothId,
-  initialData,
-  initialDataUpdatedAt,
-}: UseBoothValetSessionsOptions) => {
+const merchantValetSessionsQueryKey = (staffId: number) =>
+  ["staff", staffId, "merchant-valet-sessions"] as const;
+
+const useValetSessionsQuery = <T extends ValetSessionListResponse>(
+  queryKey: QueryKey,
+  queryFn: (signal: AbortSignal) => Promise<T>,
+  initialData: T,
+  initialDataUpdatedAt: number,
+) => {
   const query = useQuery({
-    queryKey: boothValetSessionsQueryKey(staffId, boothId),
-    queryFn: ({ signal }) => getBoothValetSessions(boothId, signal),
+    queryKey,
+    queryFn: ({ signal }) => queryFn(signal),
     initialData,
     initialDataUpdatedAt,
     retry: false,
@@ -39,13 +37,63 @@ const useBoothValetSessions = ({
     refetchOnReconnect: true,
   });
 
+  const data = query.data as T;
   return {
-    sessions: query.data.items,
-    completed: query.data.completed,
-    notificationsEnabled: query.data.notificationsEnabled,
-    updatedAt: Math.max(query.dataUpdatedAt, query.errorUpdatedAt),
-    errorMessage: query.isError ? getErrorMessage(query.error, LIST_ERROR_MESSAGE) : null,
+    data,
+    lists: {
+      sessions: data.items,
+      completed: data.completed,
+      updatedAt: Math.max(query.dataUpdatedAt, query.errorUpdatedAt),
+      errorMessage: query.isError ? getErrorMessage(query.error, LIST_ERROR_MESSAGE) : null,
+    },
   };
 };
 
-export { BOOTH_VALET_SESSIONS_POLL_INTERVAL_MS, boothValetSessionsQueryKey, useBoothValetSessions };
+interface UseBoothValetSessionsOptions {
+  staffId: number;
+  boothId: number;
+  initialData: BoothValetSessionListResponse;
+  initialDataUpdatedAt: number;
+}
+
+const useBoothValetSessions = ({
+  staffId,
+  boothId,
+  initialData,
+  initialDataUpdatedAt,
+}: UseBoothValetSessionsOptions) => {
+  const { data, lists } = useValetSessionsQuery(
+    boothValetSessionsQueryKey(staffId, boothId),
+    (signal) => getBoothValetSessions(boothId, signal),
+    initialData,
+    initialDataUpdatedAt,
+  );
+
+  return { ...lists, notificationsEnabled: data.notificationsEnabled };
+};
+
+interface UseMerchantValetSessionsOptions {
+  staffId: number;
+  initialData: ValetSessionListResponse;
+  initialDataUpdatedAt: number;
+}
+
+const useMerchantValetSessions = ({
+  staffId,
+  initialData,
+  initialDataUpdatedAt,
+}: UseMerchantValetSessionsOptions) => {
+  return useValetSessionsQuery(
+    merchantValetSessionsQueryKey(staffId),
+    getMerchantValetSessions,
+    initialData,
+    initialDataUpdatedAt,
+  ).lists;
+};
+
+export {
+  BOOTH_VALET_SESSIONS_POLL_INTERVAL_MS,
+  boothValetSessionsQueryKey,
+  useBoothValetSessions,
+  useMerchantValetSessions,
+};

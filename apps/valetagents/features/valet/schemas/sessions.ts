@@ -1,9 +1,13 @@
-import { boothValetSessionListResponseSchema } from "@/libs/valet/contracts/sessions";
+import {
+  boothValetSessionListResponseSchema,
+  valetSessionListResponseSchema,
+} from "@/libs/valet/contracts/sessions";
 
 import type {
   BoothValetSession,
   BoothValetSessionListResponse,
   CompletedValetSession,
+  ValetSessionListResponse,
 } from "@/libs/valet/contracts/sessions";
 
 const parseBoothValetSessionListResponse = (value: unknown): BoothValetSessionListResponse => {
@@ -12,5 +16,16 @@ const parseBoothValetSessionListResponse = (value: unknown): BoothValetSessionLi
   return result.data;
 };
 
-export { parseBoothValetSessionListResponse };
-export type { BoothValetSession, BoothValetSessionListResponse, CompletedValetSession };
+const parseValetSessionListResponse = (value: unknown): ValetSessionListResponse => {
+  const result = valetSessionListResponseSchema.safeParse(value);
+  if (!result.success) throw new Error("유효하지 않은 차량 목록 응답입니다.");
+  return result.data;
+};
+
+export { parseBoothValetSessionListResponse, parseValetSessionListResponse };
+export type {
+  BoothValetSession,
+  BoothValetSessionListResponse,
+  CompletedValetSession,
+  ValetSessionListResponse,
+};
