@@ -1,6 +1,6 @@
 "use client";
 
-import { TicketRenderer, ticketEditorShapePresets, ticketDesignSchema } from "@makkigo/ticket-design";
+import { getTextStyle, TicketRenderer, ticketEditorShapePresets, ticketDesignSchema } from "@makkigo/ticket-design";
 import { Button, FieldError } from "@makkigo/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
@@ -247,7 +247,7 @@ export default function TicketEditor({
                 tabIndex={layer.type === "IMAGE" ? 0 : undefined}
                 aria-label={layer.type === "IMAGE" ? "이미지 이동" : undefined}
                 className={selectedLayerId === layer.id ? "outline-2 outline-primary" : ""}
-                style={{ ...style, overflow: "visible", pointerEvents: "auto", touchAction: layer.type === "IMAGE" ? "none" : "auto", ...(layer.type === "TEXT" ? { color: layer.color, fontSize: `${layer.fontSize * 100}cqw`, lineHeight: 1.2 } : {}) }}
+                style={{ ...style, overflow: "visible", pointerEvents: "auto", touchAction: layer.type === "IMAGE" ? "none" : "auto", ...(layer.type === "TEXT" ? getTextStyle(layer) : {}) }}
                 onPointerDown={(event) => beginInteraction(layer, event, null)}
                 onPointerMove={moveInteraction}
                 onPointerUp={endInteraction}
@@ -272,7 +272,7 @@ export default function TicketEditor({
                 ) : (
                   // Uploaded images use the same sizing as the customer ticket renderer.
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={resolveAssetUrl(layer.assetPath)} alt="업로드한 이미지" draggable={false} className="pointer-events-none block h-full w-full object-cover" />
+                  <img src={resolveAssetUrl(layer.assetPath)} alt="업로드한 이미지" draggable={false} className="pointer-events-none block h-full w-full object-cover" style={{ objectPosition: `${(layer.focusX ?? 0.5) * 100}% ${(layer.focusY ?? 0.5) * 100}%` }} />
                 )}
                 {selectedLayerId === layer.id && (
                   <>

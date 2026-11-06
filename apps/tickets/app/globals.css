@@ -1,0 +1,12 @@
+@import "@makkigo/ui/styles/globals.css";
+
+@source './**/*.{ts,tsx}';
+
+:root {
+  font-family: "Pretendard Variable", "Apple SD Gothic Neo", system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
