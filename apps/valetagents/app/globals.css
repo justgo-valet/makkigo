@@ -19,7 +19,7 @@
 }
 
 @theme {
-  --animate-pickup-blink: pickup-blink 1.6s ease-in-out infinite;
+  --animate-pickup-blink: pickup-blink 0.8s ease-in-out infinite;
 
   @keyframes pickup-blink {
     0%,
