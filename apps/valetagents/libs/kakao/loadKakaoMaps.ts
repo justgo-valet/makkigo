@@ -18,6 +18,14 @@ interface KakaoMarker {
 interface KakaoGeocoderResult {
   x: string;
   y: string;
+  address: { address_name: string } | null;
+  road_address: { address_name: string; zone_no: string } | null;
+}
+
+interface KakaoPlace {
+  place_name: string;
+  road_address_name: string;
+  address_name: string;
 }
 
 interface KakaoMapsApi {
@@ -30,10 +38,19 @@ interface KakaoMapsApi {
       addressSearch(
         address: string,
         callback: (results: KakaoGeocoderResult[], status: string) => void,
+        options?: { size?: number },
+      ): void;
+    };
+    Places: new () => {
+      keywordSearch(
+        keyword: string,
+        callback: (results: KakaoPlace[], status: string) => void,
+        options?: { size?: number },
       ): void;
     };
     Status: {
       OK: string;
+      ZERO_RESULT: string;
     };
   };
 }
@@ -149,4 +166,4 @@ export {
   loadKakaoMaps,
   resetKakaoMapsLoaderForTests,
 };
-export type { KakaoGeocoderResult, KakaoMap, KakaoMapsApi, KakaoMarker };
+export type { KakaoGeocoderResult, KakaoMap, KakaoMapsApi, KakaoMarker, KakaoPlace };

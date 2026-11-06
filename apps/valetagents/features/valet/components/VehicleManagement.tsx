@@ -1,11 +1,10 @@
 "use client";
 
-import { Button, FieldError, cn } from "@makkigo/ui";
+import { Button, cn } from "@makkigo/ui";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
 
-import { formatCompletedLabel, formatPlateNumber, formatSessionLabel, formatWon } from "../formatters";
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useCompletePickup } from "../hooks/useCompletePickup";
@@ -17,7 +16,7 @@ import AddVehicleSheet from "./AddVehicleSheet";
 import FeeEditSheet from "./FeeEditSheet";
 import NotificationToggleSheet from "./NotificationToggleSheet";
 import PlateConfirmSheet from "./PlateConfirmSheet";
-import { VehicleCardContent, vehicleCardClass } from "./VehicleCard";
+import VehicleBoard from "./VehicleBoard";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type {
@@ -79,15 +78,6 @@ export default function VehicleManagement({
     }
   };
 
-  const countOf = (...statuses: BoothValetSession["status"][]) =>
-    sessions.filter(({ status }) => statuses.includes(status)).length;
-  const legend = [
-    { label: "출차 요청", count: countOf("PICKUP_REQUESTED", "PICKUP_PREPARING"), dot: "bg-(--pickup-blink)" },
-    { label: "주차 중", count: countOf("PARKED"), dot: "border border-[#c9cfd8] bg-white" },
-    { label: "도착", count: countOf("ARRIVING"), dot: "bg-[#ffcc00]" },
-    { label: "완료", count: completed.length, dot: "bg-[#34c759]" },
-  ];
-
   return (
     <div
       className={cn(
@@ -102,78 +92,17 @@ export default function VehicleManagement({
         onBellClick={notifications.openSheet}
       />
 
-      <p role="status" className="sr-only">
-        {pickupRequest && `${formatPlateNumber(pickupRequest.plateNumber)} 차량이 출차 요청을 보냈어요.`}
-      </p>
-
-      <ul className="mt-3 flex min-h-12 flex-wrap items-center justify-between gap-x-1 gap-y-1 rounded-2xl bg-white px-2 py-1.5 whitespace-nowrap text-(--base-color)">
-        {legend.map(({ label, count, dot }) => (
-          <li key={label} className="flex items-center gap-1">
-            <span aria-hidden="true" className={cn("size-3 rounded-full", dot)} />
-            <span className="text-[15px] font-medium">{label}</span>
-            <span className="text-base font-bold tabular-nums">{count}</span>
-          </li>
-        ))}
-      </ul>
-
-      {errorMessage && <FieldError className="mt-3 text-center">{errorMessage}</FieldError>}
-
-      <ul className="mt-3 grid grid-cols-2 gap-2.5">
-        {sessions.map((session) => {
-          const label = formatSessionLabel(session, updatedAt);
-          const content = (
-            <VehicleCardContent
-              status={session.status}
-              imageUrl={session.carImageUrl}
-              plateNumber={session.plateNumber}
-              label={label}
-            />
-          );
-
-          return (
-            <li key={session.id} className="min-w-0">
-              {session.status !== "PARKED" ? (
-                <button
-                  type="button"
-                  className={cn(
-                    vehicleCardClass(session.status),
-                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  )}
-                  onClick={() => selectSession(session)}
-                >
-                  {content}
-                </button>
-              ) : (
-                <div className={vehicleCardClass(session.status)}>{content}</div>
-              )}
-            </li>
-          );
-        })}
-        {completed.map((session) => (
-          <li key={`completed-${session.id}`} className="min-w-0">
-            <button
-              type="button"
-              aria-label={`${formatPlateNumber(session.plateNumber)} 발렛 금액 수정`}
-              className={cn(
-                vehicleCardClass("COMPLETED"),
-                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-              )}
-              onClick={() => {
-                feeEditing.resetError();
-                setFeeTarget(session);
-              }}
-            >
-              <VehicleCardContent
-                status="COMPLETED"
-                imageUrl={session.carImageUrl}
-                plateNumber={session.plateNumber}
-                label={formatCompletedLabel(session.completedAt, updatedAt)}
-                fee={session.fee === null ? "금액 미입력" : formatWon(session.fee)}
-              />
-            </button>
-          </li>
-        ))}
-      </ul>
+      <VehicleBoard
+        sessions={sessions}
+        completed={completed}
+        updatedAt={updatedAt}
+        errorMessage={errorMessage}
+        onSelectSession={selectSession}
+        onSelectCompleted={(session) => {
+          feeEditing.resetError();
+          setFeeTarget(session);
+        }}
+      />
 
       <div className="mt-auto pt-6">
         <Button

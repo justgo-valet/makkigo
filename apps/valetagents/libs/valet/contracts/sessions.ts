@@ -26,9 +26,12 @@ const completedValetSessionSchema = z.object({
   fee: z.number().int().nullable(),
 });
 
-const boothValetSessionListResponseSchema = z.object({
+const valetSessionListResponseSchema = z.object({
   items: z.array(boothValetSessionSchema),
   completed: z.array(completedValetSessionSchema),
+});
+
+const boothValetSessionListResponseSchema = valetSessionListResponseSchema.extend({
   notificationsEnabled: z.boolean(),
 });
 
@@ -36,7 +39,9 @@ export {
   BOOTH_VALET_SESSION_STATUSES,
   boothValetSessionListResponseSchema,
   boothValetSessionSchema,
+  valetSessionListResponseSchema,
 };
 export type BoothValetSession = z.infer<typeof boothValetSessionSchema>;
 export type CompletedValetSession = z.infer<typeof completedValetSessionSchema>;
 export type BoothValetSessionListResponse = z.infer<typeof boothValetSessionListResponseSchema>;
+export type ValetSessionListResponse = z.infer<typeof valetSessionListResponseSchema>;
