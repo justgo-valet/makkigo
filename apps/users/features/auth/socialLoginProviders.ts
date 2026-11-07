@@ -1,8 +1,10 @@
+import { getDevicePlatform } from "@/libs/device/getDevicePlatform";
+
+import type { DevicePlatform } from "@/libs/device/getDevicePlatform";
+
 const SOCIAL_LOGIN_PROVIDERS = ["kakao", "google", "apple"] as const;
 
 type SocialLoginProvider = (typeof SOCIAL_LOGIN_PROVIDERS)[number];
-
-type DevicePlatform = "ios" | "android" | "other";
 
 const PROVIDERS_BY_PLATFORM: Record<DevicePlatform, readonly SocialLoginProvider[]> = {
   ios: ["kakao", "google", "apple"],
@@ -16,13 +18,6 @@ const LOGIN_ERROR_MESSAGES = {
 } as const;
 
 type LoginError = keyof typeof LOGIN_ERROR_MESSAGES;
-
-const getDevicePlatform = (userAgent: string): DevicePlatform => {
-  if (/iPhone|iPad|iPod/i.test(userAgent)) return "ios";
-  if (/Android/i.test(userAgent)) return "android";
-
-  return "other";
-};
 
 const parseLoginError = (value: string | string[] | undefined): LoginError | null =>
   value === "cancelled" || value === "failed" ? value : null;
