@@ -1,6 +1,6 @@
 # 모바일 앱 (Flutter)
 
-웹(Next.js)을 Flutter 웹뷰로 감싼 앱입니다. 소셜 로그인은 Next.js 서버가 OAuth 로 처리하고, 앱은 로그인 페이지를 시스템 브라우저 창으로 열어 주기만 합니다. 푸시는 Flutter 네이티브가 맡습니다. → [auth.md](auth.md)
+웹(Next.js)을 Flutter 웹뷰로 감싼 앱입니다. 소셜 로그인은 **고객 앱**은 앱이 카카오 · 구글 · 애플 SDK 로 로그인하고 받은 토큰을 서버가 확인하며(decisions 2026-10-19), **요원 앱**은 앱이 로그인 페이지를 시스템 브라우저 창으로 열고 Next.js 서버가 OAuth 로 처리합니다. 푸시는 Flutter 네이티브가 맡습니다. → [auth.md](auth.md)
 
 ## 앱
 
@@ -9,11 +9,11 @@
 | 앱 | 폴더 | 앱 ID (iOS 번들 ID = Android 패키지명) | 이름 | 담당 |
 |---|---|---|---|---|
 | 고객 앱 | `apps/users` | `com.makkigo.user` | 마끼고 | 태균 |
-| 요원 · 업체 관리자 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 요원 | 지상님 |
+| 요원 · 업체 관리자 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 파트너 | 지상님 |
 
 두 앱이 같은 로그인 창 열기 · 웹뷰 브리지 · 푸시 토큰 코드를 쓰므로 `packages/` 에 공통으로 둡니다.
 
-앱 ID 는 스토어에 올린 뒤 바꿀 수 없습니다. 로그인 후 앱으로 돌아오는 주소도 이 ID 를 씁니다 (`com.makkigo.user://auth`).
+앱 ID 는 스토어에 올린 뒤 바꿀 수 없습니다. 로그인 후 앱으로 돌아오는 주소도 이 ID 를 씁니다 (`com.makkigo.user://auth` · `com.makkigo.valetagent://auth`).
 
 웹과 **다른 저장소**에 둡니다. 스토어 버전 · 빌드 · CI 가 서버(release-please 서버 버전 하나)와 섞이지 않게 하기 위해서입니다. 대신 웹 ↔ 앱 사이 규칙(브리지 메시지, 로그인 전달)은 이 문서에 적고, 바꿀 때는 두 저장소 PR 을 서로 링크합니다.
 
@@ -38,7 +38,7 @@
 | 방향 | 메시지 | 앱이 하는 일 |
 |---|---|---|
 | 웹 → 앱 | `{"type":"nativeLogin","provider":"kakao"\|"google"\|"apple"}` | 각 사 SDK 로 로그인하고 `window` 에 `makkigo:native-login` 이벤트로 돌려줌 (`detail: { provider, status: "success"\|"cancelled"\|"failed", accessToken?, idToken?, authorizationCode? }`). 카카오는 카카오톡이 있으면 카카오톡, 없으면 카카오계정 · 구글은 계정 선택 · 애플은 iOS 시트. 웹은 받은 값을 `POST /api/v1/auth/oauth/{provider}/native` 로 보냄. 시간 제한 없음(다른 앱에 다녀옴) → [auth.md](auth.md#흐름) |
-| 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소, **예전 로그인 방식 — 고객 웹은 지금 안 씀**) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
+| 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소. **요원 앱이 지금 쓰는 로그인 방식**, 고객 웹은 예전 방식이라 지금 안 씀) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` (요원 앱 `com.makkigo.valetagent://`) 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
 | 앱 → 웹 | `makkigo:push-received` 이벤트 (`detail` 없음) | 앱을 보고 있을 때 푸시가 오면 알림을 띄우고 이 이벤트를 보냄. 웹은 보고 있는 화면의 데이터를 바로 다시 받음 (`useRefreshOnAppPush`) → [푸시](#푸시) |
 | 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |

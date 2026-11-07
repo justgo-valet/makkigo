@@ -28,11 +28,13 @@
 |---|---|---|---|
 | `GET /api/v1/cars/brands` | 차량 브랜드 이름 · 로고 전체 주소 (`display_order` 순) | | [#51](https://github.com/justgo-valet/makkigo/pull/51) |
 | `GET /api/v1/cars/models?brand=` | 브랜드별 차량 모델 이름 (한국어 순). 옛 경로 `/api/car/get-car-models` 는 삭제 | | dev (#5), [#26](https://github.com/justgo-valet/makkigo/pull/26) |
-| `GET /api/v1/auth/oauth/{kakao\|google\|apple}` | 소셜 로그인 시작 → 제공자 로그인 페이지로 이동. 앱은 `?app_challenge=` | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
+| `POST /api/v1/auth/oauth/{kakao\|google\|apple}/native` | **앱(웹뷰) 로그인** — 앱이 SDK 로 받은 토큰 확인(카카오 `{ accessToken }`, 구글 `{ idToken }`, 애플 `{ idToken, authorizationCode? }`) → 회원 확인 · 가입, 로그인 쿠키 + `{ redirectTo }`. JSON 요청만(아니면 415), 토큰이 틀리면 401, 그 밖은 500 | | [#190](https://github.com/justgo-valet/makkigo/pull/190) |
+| `GET /api/v1/auth/oauth/{kakao\|google\|apple}` | 소셜 로그인 시작(일반 브라우저) → 제공자 로그인 페이지로 이동. 예전 앱 방식은 `?app_challenge=` | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
 | `GET · POST /api/v1/auth/oauth/{provider}/callback` | 제공자 콜백: 회원 확인 · 가입 → 웹은 쿠키 + 이동, 앱은 1회용 코드로 앱 복귀 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
-| `POST /api/v1/auth/oauth/{provider}/app-session` | 앱 로그인 준비: `verifier` 를 웹뷰 쿠키에 심고, 앱이 열 `authUrl` · 돌아올 `returnUrl` 을 돌려줌 | | [#46](https://github.com/justgo-valet/makkigo/pull/46) |
-| `GET /api/v1/auth/oauth/exchange?code=` (또는 `?error=`) | 앱 웹뷰에서 1회용 코드 + `verifier` 쿠키 → 로그인 쿠키 + 이동 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
-| `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
+| `POST /api/v1/auth/oauth/{provider}/app-session` | (예전 앱 방식, 고객 앱은 지금 안 씀) 앱 로그인 준비: `verifier` 를 웹뷰 쿠키에 심고, 앱이 열 `authUrl` · 돌아올 `returnUrl` 을 돌려줌 | | [#46](https://github.com/justgo-valet/makkigo/pull/46) |
+| `GET /api/v1/auth/oauth/exchange?code=` (또는 `?error=`) | (예전 앱 방식) 앱 웹뷰에서 1회용 코드 + `verifier` 쿠키 → 로그인 쿠키 + 이동 | | [#38](https://github.com/justgo-valet/makkigo/pull/38) |
+| `POST /api/v1/auth/refresh` | 토큰 재발급 (리프레시 토큰 교체, 새 리프레시 토큰은 다시 30일) | 리프레시 쿠키 | [#12](https://github.com/justgo-valet/makkigo/pull/12) → [#24](https://github.com/justgo-valet/makkigo/pull/24) |
+| `GET /api/v1/auth/refresh?next=` | 페이지용 재발급: 액세스 쿠키 없이 로그인 표시 쿠키(`makkigo_session`)만 있는 페이지 요청을 `proxy.ts` 가 여기로 보냄. 성공하면 새 쿠키 + `next` 로, 실패하면 표시 쿠키만 지우고 `next` 로 (`next` 는 같은 주소의 `/api/` 가 아닌 경로만, 아니면 `/`). 요원 앱도 같은 경로 | 리프레시 쿠키 | [#249](https://github.com/justgo-valet/makkigo/pull/249) |
 | `POST /api/v1/auth/logout` | 이 기기 로그아웃 | | [#13](https://github.com/justgo-valet/makkigo/pull/13) |
 | `POST /api/v1/consents` | 약관 동의 기록 (선택 항목 동의 · 철회도 같은 API, 필수 항목 철회는 400). 위치기반서비스를 철회하면 위치 이용 기록을 모두 삭제 | ✅ | [#14](https://github.com/justgo-valet/makkigo/pull/14), [#113](https://github.com/justgo-valet/makkigo/pull/113), [#117](https://github.com/justgo-valet/makkigo/pull/117), [#176](https://github.com/justgo-valet/makkigo/pull/176) |
 | `GET /api/v1/users/me` | 내 정보: 필수 약관 동의 여부(`requiredConsentsAgreed`), 온보딩 완료 여부(`onboardingCompleted`), 위치기반서비스 동의 여부(`locationAgreed`) | ✅ | [#37](https://github.com/justgo-valet/makkigo/pull/37), [#75](https://github.com/justgo-valet/makkigo/pull/75), [#112](https://github.com/justgo-valet/makkigo/pull/112), [#176](https://github.com/justgo-valet/makkigo/pull/176) |

@@ -9,7 +9,7 @@
 | 고객 앱 | 회원 고객, 비회원 고객(QR → 브라우저) | `apps/users` |
 | 요원·관리자 앱 | 발렛 요원, 부스 관리자, 업체 관리자 | `apps/valetagents` |
 
-- 웹은 Next.js, 모바일 앱은 **Flutter 웹뷰**로 감쌉니다. 소셜 로그인은 Next.js 서버가 OAuth 로 처리하고 앱은 시스템 브라우저 창만 열어 줍니다. 푸시는 Flutter 네이티브가 처리합니다. → [auth.md](../architecture/auth.md)
+- 웹은 Next.js, 모바일 앱은 **Flutter 웹뷰**로 감쌉니다. 소셜 로그인은 고객 앱은 앱이 각 사 SDK 로 하고 서버가 토큰을 확인하며, 요원 앱은 시스템 브라우저 창에서 Next.js 서버가 OAuth 로 처리합니다. 푸시는 Flutter 네이티브가 처리합니다. → [auth.md](../architecture/auth.md)
 
 ## 용어
 

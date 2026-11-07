@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "계정 삭제 요청 | 마끼고 파트너",
-  description: "마끼고 요원 앱 계정과 데이터 삭제 방법",
+  description: "마끼고 파트너 앱 계정과 데이터 삭제 방법",
 };
 
 const DATA_HANDLING = [
@@ -30,11 +30,11 @@ export default function AccountDeletionPage() {
   return (
     <article className="h-full overflow-y-auto pt-2 pb-8 text-sm leading-relaxed break-keep text-muted-foreground">
       <h1 className="mb-4 text-xl font-bold text-(--base-color)">계정 삭제 요청</h1>
-      <p>마끼고(오로라 주식회사) 요원 앱 계정과 데이터를 지우는 방법입니다.</p>
+      <p>마끼고 파트너(오로라 주식회사) 앱 계정과 데이터를 지우는 방법입니다.</p>
 
       <h2 className={SECTION_TITLE_CLASS}>앱에서 바로 탈퇴하기</h2>
       <ol className="list-decimal pl-4">
-        <li>마끼고 요원 앱에 로그인합니다.</li>
+        <li>마끼고 파트너 앱에 로그인합니다.</li>
         <li>
           화면 오른쪽 위 메뉴를 열어 <strong>설정</strong>으로 갑니다.
         </li>
@@ -53,7 +53,7 @@ export default function AccountDeletionPage() {
         받은 날부터 10일 이내에 처리하고 결과를 회신합니다.
       </p>
       <ul className="list-disc pl-4">
-        <li>제목: 마끼고 요원 계정 삭제 요청</li>
+        <li>제목: 마끼고 파트너 계정 삭제 요청</li>
         <li>가입한 소셜 계정 종류(카카오 · 구글 · Apple)와 그 계정의 이메일</li>
         <li>소속 부스 또는 관리하는 업체 이름</li>
       </ul>

@@ -38,7 +38,7 @@
 - 로그인 CSRF: `native` API 는 `Content-Type: application/json` 요청만 받습니다. 다른 사이트의 폼 · `text/plain` 요청은 415 로 거절되고, JSON 은 CORS 확인을 통과하지 못합니다.
 - 실패: 토큰이 틀리면 401, 그 밖은 500. 공통 API 클라이언트는 `/auth/oauth/*` 의 401 에 토큰 재발급을 하지 않습니다.
 
-**예전 방식(시스템 브라우저 창)**: `app-session` → 창에서 웹 OAuth → `com.makkigo.user://auth?code=…` → `exchange` 흐름은 서버 · 앱에 남아 있습니다. 고객 웹은 지금 쓰지 않고, SDK 로그인에 문제가 생기면 웹 배포만으로 되돌릴 수 있습니다. 창과 웹뷰는 쿠키 저장소가 달라 2분짜리 1회용 코드로 로그인을 옮깁니다(구글은 웹뷰 안 로그인 페이지를 `disallowed_useragent` 로 막아 웹뷰에서 바로 할 수 없음).
+**시스템 브라우저 창 방식 (요원 앱 · 고객 앱 예전 방식)**: `app-session` → 창에서 웹 OAuth → `com.makkigo.user://auth?code=…`(요원 앱 `com.makkigo.valetagent://auth`) → `exchange` 흐름입니다. **요원 앱은 지금 이 방식**으로 로그인합니다(SDK 로그인은 고객 앱만). 고객 웹은 지금 쓰지 않고, SDK 로그인에 문제가 생기면 웹 배포만으로 되돌릴 수 있습니다. 창과 웹뷰는 쿠키 저장소가 달라 2분짜리 1회용 코드로 로그인을 옮깁니다(구글은 웹뷰 안 로그인 페이지를 `disallowed_useragent` 로 막아 웹뷰에서 바로 할 수 없음).
 
 **`app_challenge` / `verifier`**: 서버가 앱 로그인 준비(`app-session`) 때 임의 값(`verifier`, 43자)을 만들어 **웹뷰 쿠키**(`makkigo_app_login_verifier`, HttpOnly, path `/api/v1/auth/oauth`, 10분)에 심고, 그 SHA-256(base64url, 43자)을 `app_challenge` 로 `authUrl` 에 넣습니다. 교환할 때 그 쿠키가 있어야 합니다. 다른 앱이 같은 복귀 주소(`com.makkigo.user://`)를 가로채도 `verifier` 가 없어서 로그인할 수 없습니다 (OAuth PKCE 와 같은 원리).
 
@@ -124,7 +124,7 @@
 | | 액세스 토큰 | 리프레시 토큰 |
 |---|---|---|
 | 형식 | JWT HS256 (`sub`=회원 ID, `aud`=`users`, `iss`=`makkigo`) | 무작위 32바이트 |
-| 유효기간 | 15분 | 30일 |
+| 유효기간 | 15분 | 30일. 재발급 때마다 새 토큰을 다시 30일로 발급 → **마지막으로 쓴 때부터 30일** (로그인 시점 고정 아님) |
 | 쿠키 | `makkigo_access_token`, path `/` | `makkigo_refresh_token`, path `/api/v1/auth` |
 | 로그인 표시 쿠키 | — | `makkigo_session`(값 `1`), path `/`, 리프레시와 같은 만료. 토큰이 아니라 "재발급을 시도할 만함" 표시 |
 | 저장 | 안 함 | DB 에 **SHA-256 해시만** |
