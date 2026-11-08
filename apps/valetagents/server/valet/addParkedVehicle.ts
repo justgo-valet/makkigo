@@ -18,21 +18,24 @@ const addParkedVehicle = async (
   staffId: number,
   boothId: number,
   plateNumber: string,
-  merchantId: number | null = null,
+  merchantId?: number | null,
   now = new Date(),
 ): Promise<AddParkedVehicleResult> => {
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
 
-  const contracts = await prisma.boothMerchant.findMany({
-    where: {
-      ...contractedMerchantWhere(boothId),
-      ...(merchantId === null ? {} : { merchantId }),
-    },
-    select: { merchant: { select: { id: true, name: true } } },
-    take: 2,
-  });
-  if (merchantId !== null && contracts.length === 0) {
+  const contracts =
+    merchantId === null
+      ? []
+      : await prisma.boothMerchant.findMany({
+          where: {
+            ...contractedMerchantWhere(boothId),
+            ...(merchantId === undefined ? {} : { merchantId }),
+          },
+          select: { merchant: { select: { id: true, name: true } } },
+          take: 2,
+        });
+  if (typeof merchantId === "number" && contracts.length === 0) {
     return { ok: false, reason: "MERCHANT_NOT_CONTRACTED" };
   }
   const merchant = contracts.length === 1 ? contracts[0].merchant : null;

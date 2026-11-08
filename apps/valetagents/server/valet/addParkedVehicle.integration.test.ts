@@ -91,7 +91,7 @@ describe("addParkedVehicle database integration", () => {
     expect(session).toMatchObject({ status: "PARKED", plateNumber, userId, merchantId, parkedById: staffId });
   });
 
-  it("links the chosen merchant only when it has an approved contract with the booth", async () => {
+  it("links the chosen merchant only when contracted, and none when the agent chose none", async () => {
     const createMerchant = (status: "APPROVED" | "PENDING") =>
       prisma.merchant.create({
         data: {
@@ -111,14 +111,16 @@ describe("addParkedVehicle database integration", () => {
     });
     const added = await addParkedVehicle(staffId, boothId, "11가1111", chosen.id);
     const defaulted = await addParkedVehicle(staffId, boothId, "22가2222");
+    await prisma.boothMerchant.deleteMany({ where: { merchantId: chosen.id } });
+    const unchosen = await addParkedVehicle(staffId, boothId, "33가3333", null);
 
     const sessions = await prisma.valetSession.findMany({
-      where: { boothId, plateNumber: { in: ["11가1111", "22가2222"] } },
+      where: { boothId, plateNumber: { in: ["11가1111", "22가2222", "33가3333"] } },
       orderBy: { id: "asc" },
       select: { id: true, merchantId: true },
     });
-    expect(added.ok && defaulted.ok).toBe(true);
-    expect(sessions.map(({ merchantId }) => merchantId)).toEqual([chosen.id, null]);
+    expect(added.ok && defaulted.ok && unchosen.ok).toBe(true);
+    expect(sessions.map(({ merchantId }) => merchantId)).toEqual([chosen.id, null, null]);
 
     await prisma.valetSession.deleteMany({ where: { id: { in: sessions.map(({ id }) => id) } } });
     await prisma.merchant.deleteMany({ where: { id: { in: [chosen.id, pending.id] } } });
