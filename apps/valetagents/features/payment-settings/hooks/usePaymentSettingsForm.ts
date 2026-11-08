@@ -24,7 +24,6 @@ interface UsePaymentSettingsFormOptions {
   bankAccount: BankAccountSettings | null;
 }
 
-
 const usePaymentSettingsForm = ({ boothId, feePolicy, bankAccount }: UsePaymentSettingsFormOptions) => {
   const fee = useFeePolicyFields(feePolicy);
   const [bankName, setBankName] = useState(bankAccount?.bankName ?? "");
