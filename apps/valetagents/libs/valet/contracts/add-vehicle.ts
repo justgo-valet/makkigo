@@ -7,6 +7,7 @@ const normalizePlateNumber = (value: string) => value.replace(/[\s-]/g, "");
 const addVehicleRequestSchema = z
   .object({
     plateNumber: z.string().transform(normalizePlateNumber).pipe(z.string().regex(PLATE_NUMBER_PATTERN)),
+    merchantId: z.number().int().positive().nullable().optional().default(null),
   })
   .strict();
 

@@ -3,6 +3,7 @@ import "server-only";
 import { prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
+import { listContractedMerchants } from "@/server/booth/listContractedMerchants";
 
 import { seoulDayRange, toSeoulDate } from "./seoulDay";
 
@@ -36,14 +37,10 @@ const listCompletedValetSessions = async (
         merchant: { select: { id: true, name: true } },
       },
     }),
-    prisma.boothMerchant.findMany({
-      where: { boothId, status: "APPROVED", merchant: { deletedAt: null } },
-      orderBy: { merchant: { name: "asc" } },
-      select: { merchant: { select: { id: true, name: true } } },
-    }),
+    listContractedMerchants(boothId),
   ]);
 
-  const merchants = new Map(contracts.map(({ merchant }) => [merchant.id, merchant]));
+  const merchants = new Map(contracts.map((merchant) => [merchant.id, merchant]));
   for (const { merchant } of sessions) if (merchant) merchants.set(merchant.id, merchant);
 
   return {

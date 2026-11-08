@@ -3,6 +3,7 @@ import "server-only";
 import { ACTIVE_VALET_SESSION_STATUSES, lockPlateNumber, prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
+import { contractedMerchantWhere } from "@/server/booth/listContractedMerchants";
 
 import { findLatestTicketVersionId } from "./findLatestTicketVersionId";
 
@@ -11,22 +12,29 @@ import type { BoothAgentFailure } from "@/server/booth/boothAgent";
 
 type AddParkedVehicleResult =
   | { ok: true; valetSessionId: number; notice: ParkedNotice | null }
-  | { ok: false; reason: BoothAgentFailure | "ACTIVE_SESSION_EXISTS" };
+  | { ok: false; reason: BoothAgentFailure | "ACTIVE_SESSION_EXISTS" | "MERCHANT_NOT_CONTRACTED" };
 
 const addParkedVehicle = async (
   staffId: number,
   boothId: number,
   plateNumber: string,
+  merchantId: number | null = null,
   now = new Date(),
 ): Promise<AddParkedVehicleResult> => {
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
 
   const contracts = await prisma.boothMerchant.findMany({
-    where: { boothId, status: "APPROVED", merchant: { deletedAt: null } },
+    where: {
+      ...contractedMerchantWhere(boothId),
+      ...(merchantId === null ? {} : { merchantId }),
+    },
     select: { merchant: { select: { id: true, name: true } } },
     take: 2,
   });
+  if (merchantId !== null && contracts.length === 0) {
+    return { ok: false, reason: "MERCHANT_NOT_CONTRACTED" };
+  }
   const merchant = contracts.length === 1 ? contracts[0].merchant : null;
   const ticketVersionId = merchant ? await findLatestTicketVersionId(merchant.id) : null;
 
