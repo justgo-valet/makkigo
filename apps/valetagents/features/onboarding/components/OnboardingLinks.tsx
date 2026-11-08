@@ -1,5 +1,4 @@
 import { cn } from "@makkigo/ui";
-import Link from "next/link";
 
 interface OnboardingLinksProps {
   canReturnToPending: boolean;
@@ -12,6 +11,8 @@ export default function OnboardingLinks({
   onShowPending,
   className,
 }: Readonly<OnboardingLinksProps>) {
+  if (!canReturnToPending) return null;
+
   return (
     <nav
       className={cn(
@@ -20,12 +21,9 @@ export default function OnboardingLinks({
         "leading-[1.15]",
       )}
     >
-      {canReturnToPending && (
-        <button type="button" className="underline" onClick={onShowPending}>
-          요청 현황 보기
-        </button>
-      )}
-      <Link href="/booths/new">부스 등록하러 가기</Link>
+      <button type="button" className="underline" onClick={onShowPending}>
+        요청 현황 보기
+      </button>
     </nav>
   );
 }

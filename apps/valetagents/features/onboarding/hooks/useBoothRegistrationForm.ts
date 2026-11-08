@@ -5,12 +5,17 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { feePolicySchema } from "@/libs/booth/contracts/payment-settings";
+
+import { useFeePolicyFields } from "@/features/payment-settings/hooks/useFeePolicyFields";
+
 import { createBooth } from "../apis/createBooth";
 import { useBoothMap } from "./useBoothMap";
 import { useBoothPhotos } from "./useBoothPhotos";
 
 const ADDRESS_DEBOUNCE_MS = 300;
 const SAVE_ERROR_MESSAGE = "부스를 등록하지 못했어요. 잠시 후 다시 시도해 주세요.";
+const INVALID_FEE_MESSAGE = "기본 1~24시간, 요금 100만 원 이하, 추가 1~180분으로 입력해 주세요.";
 
 type BoothMapState = ReturnType<typeof useBoothMap>["state"];
 type BoothRegistrationMapView = "idle" | BoothMapState;
@@ -33,10 +38,14 @@ const getBoothRegistrationMapView = ({
 
 const getBoothRegistrationAvailability = ({
   name,
+  feePolicyValid,
   isSaving,
   ...address
-}: BoothRegistrationAddress & { name: string; isSaving: boolean }) =>
-  name.trim().length > 0 && getBoothRegistrationMapView(address) === "ready" && !isSaving;
+}: BoothRegistrationAddress & { name: string; feePolicyValid: boolean; isSaving: boolean }) =>
+  name.trim().length > 0 &&
+  feePolicyValid &&
+  getBoothRegistrationMapView(address) === "ready" &&
+  !isSaving;
 
 const isAlreadyOnboardedError = (error: unknown) => {
   if (typeof error !== "object" || error === null || !("data" in error)) return false;
@@ -57,6 +66,8 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
   const [addressDetail, setAddressDetail] = useState("");
   const [geocodedAddress, setGeocodedAddress] = useState("");
   const photos = useBoothPhotos();
+  const fee = useFeePolicyFields(null);
+  const feePolicy = feePolicySchema.safeParse(fee.feePolicy);
 
   useEffect(() => {
     const nextAddress = address.trim();
@@ -81,6 +92,7 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
   const isSaving = mutation.isPending || isLeaving;
   const canSubmit = getBoothRegistrationAvailability({
     name,
+    feePolicyValid: feePolicy.success,
     address,
     geocodedAddress,
     mapState: map.state,
@@ -95,6 +107,9 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
     mapView: getBoothRegistrationMapView({ address, geocodedAddress, mapState: map.state }),
     mapErrorMessage: map.errorMessage,
     photos,
+    feeValues: fee.values,
+    changeFee: fee.change,
+    feeErrorMessage: fee.filled && !feePolicy.success ? INVALID_FEE_MESSAGE : null,
     isSaving,
     canSubmit,
     errorMessage:
@@ -104,8 +119,8 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
     changeAddressDetail: setAddressDetail,
     retryMap: map.retry,
     submit: () => {
-      if (!canSubmit) return;
-      mutation.mutate({ name, address, addressDetail, photos: photos.files });
+      if (!canSubmit || !feePolicy.success) return;
+      mutation.mutate({ name, address, addressDetail, feePolicy: feePolicy.data, photos: photos.files });
     },
   };
 };

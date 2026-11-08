@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { feePolicySchema } from "./payment-settings";
 import { boothPhotoUploadMetadataSchema, MAX_BOOTH_PHOTOS } from "./photos";
 
 const BOOTH_NAME_MAX_LENGTH = 50;
@@ -16,6 +17,7 @@ const createBoothBodySchema = z
       .max(BOOTH_ADDRESS_DETAIL_MAX_LENGTH)
       .optional()
       .transform((value) => value || null),
+    feePolicy: feePolicySchema,
   })
   .strict();
 

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { paymentSettingsSchema } from "@/libs/booth/contracts/payment-settings";
 
 import { savePaymentSettings } from "../apis/savePaymentSettings";
+import { useFeePolicyFields } from "./useFeePolicyFields";
 
 import type {
   BankAccountSettings,
@@ -23,28 +24,16 @@ interface UsePaymentSettingsFormOptions {
   bankAccount: BankAccountSettings | null;
 }
 
-const toText = (value: number | undefined) => (value === undefined ? "" : String(value));
-const toDigits = (value: string, maxLength: number) => value.replace(/\D/g, "").slice(0, maxLength);
 
 const usePaymentSettingsForm = ({ boothId, feePolicy, bankAccount }: UsePaymentSettingsFormOptions) => {
-  const [baseHours, setBaseHours] = useState(
-    feePolicy ? toText(feePolicy.baseMinutes / 60) : "",
-  );
-  const [baseFee, setBaseFee] = useState(toText(feePolicy?.baseFee));
-  const [extraUnitMinutes, setExtraUnitMinutes] = useState(toText(feePolicy?.extraUnitMinutes));
-  const [extraUnitFee, setExtraUnitFee] = useState(toText(feePolicy?.extraUnitFee));
+  const fee = useFeePolicyFields(feePolicy);
   const [bankName, setBankName] = useState(bankAccount?.bankName ?? "");
   const [accountNumber, setAccountNumber] = useState(bankAccount?.accountNumber ?? "");
   const [accountHolder, setAccountHolder] = useState(bankAccount?.accountHolder ?? "");
   const [saved, setSaved] = useState(false);
 
   const parsed = paymentSettingsSchema.safeParse({
-    feePolicy: {
-      baseMinutes: baseHours === "" ? Number.NaN : Number(baseHours) * 60,
-      baseFee: baseFee === "" ? Number.NaN : Number(baseFee),
-      extraUnitMinutes: extraUnitMinutes === "" ? Number.NaN : Number(extraUnitMinutes),
-      extraUnitFee: extraUnitFee === "" ? Number.NaN : Number(extraUnitFee),
-    },
+    feePolicy: fee.feePolicy,
     bankAccount: { bankName, accountNumber, accountHolder },
   });
 
@@ -65,26 +54,24 @@ const usePaymentSettingsForm = ({ boothId, feePolicy, bankAccount }: UsePaymentS
   };
 
   return {
-    baseHours,
-    baseFee,
-    extraUnitMinutes,
-    extraUnitFee,
+    feeValues: fee.values,
+    changeFee: {
+      baseHours: edit(fee.change.baseHours),
+      baseFee: edit(fee.change.baseFee),
+      extraUnitMinutes: edit(fee.change.extraUnitMinutes),
+      extraUnitFee: edit(fee.change.extraUnitFee),
+    },
     bankName,
     accountNumber,
     accountHolder,
-    changeBaseHours: edit((value: string) => setBaseHours(toDigits(value, 2))),
-    changeBaseFee: edit((value: string) => setBaseFee(toDigits(value, 7))),
-    changeExtraUnitMinutes: edit((value: string) => setExtraUnitMinutes(toDigits(value, 3))),
-    changeExtraUnitFee: edit((value: string) => setExtraUnitFee(toDigits(value, 7))),
     changeBankName: edit(setBankName),
     changeAccountNumber: edit((value: string) => setAccountNumber(value.replace(/[^\d-]/g, "").slice(0, 30))),
     changeAccountHolder: edit(setAccountHolder),
     canSave: parsed.success && !mutation.isPending,
     invalidMessage:
       !parsed.success &&
-      [baseHours, baseFee, extraUnitMinutes, extraUnitFee, bankName, accountNumber, accountHolder].every(
-        (value) => value.trim() !== "",
-      )
+      fee.filled &&
+      [bankName, accountNumber, accountHolder].every((value) => value.trim() !== "")
         ? INVALID_MESSAGE
         : null,
     save: () => mutation.mutate(),
