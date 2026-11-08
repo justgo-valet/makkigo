@@ -41,7 +41,7 @@ export async function GET(
       return apiError(result.reason, error.message, error.status);
     }
 
-    return privateJson(result.value);
+    return privateJson({ ...result.value, completed: [] });
   } catch (error) {
     console.error("Failed to list booth valet sessions", error);
     return apiError("INTERNAL_ERROR", "차량 목록을 불러오지 못했습니다.", 500);
