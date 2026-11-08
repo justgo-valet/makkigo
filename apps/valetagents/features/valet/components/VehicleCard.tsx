@@ -17,7 +17,7 @@ const STATUS_STYLES: Record<VehicleStatus, { title: string; className: string }>
 
 const vehicleCardClass = (status: VehicleStatus) =>
   cn(
-    "flex h-[145px] w-full min-w-0 flex-col items-center justify-center rounded-[20px] px-3 text-(--base-color)",
+    "flex h-[170px] w-full min-w-0 flex-col items-center justify-center rounded-[20px] px-3 text-(--base-color)",
     STATUS_STYLES[status].className,
   );
 
@@ -39,7 +39,12 @@ function VehicleCardContent({
   return (
     <>
       <span className="sr-only">{STATUS_STYLES[status].title}</span>
-      <span className="relative mb-0.5 block h-11 w-full max-w-28">
+      <span
+        className={cn(
+          "relative mb-0.5 block h-16 w-full max-w-40",
+          status === "ARRIVING" && "animate-arrival-drive",
+        )}
+      >
         <Image src={imageUrl} alt="" fill unoptimized className="object-contain" />
       </span>
       <span className="text-[19px] leading-[27px] font-bold whitespace-nowrap tabular-nums">
