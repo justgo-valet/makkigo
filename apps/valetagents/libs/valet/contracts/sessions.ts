@@ -31,7 +31,9 @@ const valetSessionListResponseSchema = z.object({
   completed: z.array(completedValetSessionSchema),
 });
 
-const boothValetSessionListResponseSchema = valetSessionListResponseSchema.extend({
+const boothValetSessionListResponseSchema = z.object({
+  items: z.array(boothValetSessionSchema),
+  completedCount: z.number().int().nonnegative(),
   notificationsEnabled: z.boolean(),
 });
 

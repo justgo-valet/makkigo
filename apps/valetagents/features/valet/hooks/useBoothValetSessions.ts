@@ -18,7 +18,7 @@ const boothValetSessionsQueryKey = (staffId: number, boothId: number) =>
 const merchantValetSessionsQueryKey = (staffId: number) =>
   ["staff", staffId, "merchant-valet-sessions"] as const;
 
-const useValetSessionsQuery = <T extends ValetSessionListResponse>(
+const useValetSessionsQuery = <T extends { items: ValetSessionListResponse["items"] }>(
   queryKey: QueryKey,
   queryFn: (signal: AbortSignal) => Promise<T>,
   initialData: T,
@@ -42,7 +42,6 @@ const useValetSessionsQuery = <T extends ValetSessionListResponse>(
     data,
     lists: {
       sessions: data.items,
-      completed: data.completed,
       updatedAt: Math.max(query.dataUpdatedAt, query.errorUpdatedAt),
       errorMessage: query.isError ? getErrorMessage(query.error, LIST_ERROR_MESSAGE) : null,
     },
@@ -69,7 +68,11 @@ const useBoothValetSessions = ({
     initialDataUpdatedAt,
   );
 
-  return { ...lists, notificationsEnabled: data.notificationsEnabled };
+  return {
+    ...lists,
+    completedCount: data.completedCount,
+    notificationsEnabled: data.notificationsEnabled,
+  };
 };
 
 interface UseMerchantValetSessionsOptions {
@@ -83,12 +86,14 @@ const useMerchantValetSessions = ({
   initialData,
   initialDataUpdatedAt,
 }: UseMerchantValetSessionsOptions) => {
-  return useValetSessionsQuery(
+  const { data, lists } = useValetSessionsQuery(
     merchantValetSessionsQueryKey(staffId),
     getMerchantValetSessions,
     initialData,
     initialDataUpdatedAt,
-  ).lists;
+  );
+
+  return { ...lists, completed: data.completed };
 };
 
 export {

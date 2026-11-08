@@ -5,7 +5,7 @@ import { prisma } from "database";
 import { boothValetSessionListResponseSchema } from "@/libs/valet/contracts/sessions";
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
 
-import { readValetSessionLists } from "./readValetSessionLists";
+import { completedTodayWhere, readActiveValetSessions } from "./readValetSessionLists";
 
 import type { BoothValetSessionListResponse } from "@/libs/valet/contracts/sessions";
 import type { BoothAgentFailure } from "@/server/booth/boothAgent";
@@ -23,23 +23,20 @@ const listBoothValetSessions = async (
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
 
-  const [lists, membership] = await Promise.all([
-    readValetSessionLists(
+  const [items, completedCount, membership] = await Promise.all([
+    readActiveValetSessions(
       {
-        active: {
-          OR: [
-            {
-              status: "ARRIVING",
-              merchant: { booths: { some: { boothId, status: "APPROVED" } } },
-            },
-            { status: { in: ["PARKED", "PICKUP_REQUESTED", "PICKUP_PREPARING"] }, boothId },
-          ],
-        },
-        completed: { boothId },
+        OR: [
+          {
+            status: "ARRIVING",
+            merchant: { booths: { some: { boothId, status: "APPROVED" } } },
+          },
+          { status: { in: ["PARKED", "PICKUP_REQUESTED", "PICKUP_PREPARING"] }, boothId },
+        ],
       },
       imageBaseUrl,
-      now,
     ),
+    prisma.valetSession.count({ where: completedTodayWhere({ boothId }, now) }),
     prisma.boothAgent.findUnique({
       where: { boothId_staffId: { boothId, staffId } },
       select: { notificationsEnabled: true },
@@ -49,7 +46,8 @@ const listBoothValetSessions = async (
   return {
     ok: true,
     value: boothValetSessionListResponseSchema.parse({
-      ...lists,
+      items,
+      completedCount,
       notificationsEnabled: membership?.notificationsEnabled ?? false,
     }),
   };

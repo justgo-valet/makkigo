@@ -15,8 +15,10 @@ import { formatPlateNumber } from "../formatters";
 
 import type { CompletedValetSession } from "../schemas/sessions";
 
+type FeeTarget = Pick<CompletedValetSession, "id" | "plateNumber" | "fee">;
+
 interface FeeEditFormProps {
-  session: CompletedValetSession;
+  session: FeeTarget;
   isUpdating: boolean;
   errorMessage: string | null;
   onSave: (fee: number) => void;
@@ -84,7 +86,7 @@ function FeeEditForm({
 }
 
 interface FeeEditSheetProps extends Omit<FeeEditFormProps, "session"> {
-  session: CompletedValetSession | null;
+  session: FeeTarget | null;
 }
 
 export default function FeeEditSheet({ session, ...form }: Readonly<FeeEditSheetProps>) {

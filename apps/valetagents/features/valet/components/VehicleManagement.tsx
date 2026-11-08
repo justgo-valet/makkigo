@@ -10,20 +10,14 @@ import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
 import { useCompletePickup } from "../hooks/useCompletePickup";
 import { useNotificationToggle } from "../hooks/useNotificationToggle";
 import { useParkValetSession } from "../hooks/useParkValetSession";
-import { useUpdateCompletedFee } from "../hooks/useUpdateCompletedFee";
 
 import AddVehicleSheet from "./AddVehicleSheet";
-import FeeEditSheet from "./FeeEditSheet";
 import NotificationToggleSheet from "./NotificationToggleSheet";
 import PlateConfirmSheet from "./PlateConfirmSheet";
 import VehicleBoard from "./VehicleBoard";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
-import type {
-  BoothValetSession,
-  BoothValetSessionListResponse,
-  CompletedValetSession,
-} from "../schemas/sessions";
+import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
 
 interface VehicleManagementProps {
   staffId: number;
@@ -42,7 +36,7 @@ export default function VehicleManagement({
   hasWorkTime,
   menu,
 }: Readonly<VehicleManagementProps>) {
-  const { sessions, completed, notificationsEnabled, updatedAt, errorMessage } = useBoothValetSessions({
+  const { sessions, completedCount, notificationsEnabled, updatedAt, errorMessage } = useBoothValetSessions({
     staffId,
     boothId,
     initialData,
@@ -53,12 +47,6 @@ export default function VehicleManagement({
   const [addOpen, setAddOpen] = useState(false);
   const parking = useParkValetSession({ staffId, boothId, onParked: () => setParkTarget(null) });
   const adding = useAddVehicle({ staffId, boothId, onAdded: () => setAddOpen(false) });
-  const [feeTarget, setFeeTarget] = useState<CompletedValetSession | null>(null);
-  const feeEditing = useUpdateCompletedFee({
-    staffId,
-    boothId,
-    onUpdated: () => setFeeTarget(null),
-  });
 
   const notifications = useNotificationToggle({ staffId, boothId, enabled: notificationsEnabled });
   const [completeTarget, setCompleteTarget] = useState<BoothValetSession | null>(null);
@@ -94,14 +82,10 @@ export default function VehicleManagement({
 
       <VehicleBoard
         sessions={sessions}
-        completed={completed}
+        completedCount={completedCount}
         updatedAt={updatedAt}
         errorMessage={errorMessage}
         onSelectSession={selectSession}
-        onSelectCompleted={(session) => {
-          feeEditing.resetError();
-          setFeeTarget(session);
-        }}
       />
 
       <div className="mt-auto pt-6">
@@ -146,13 +130,6 @@ export default function VehicleManagement({
         errorMessage={completing.errorMessage}
         onConfirm={() => completeTarget && completing.complete(completeTarget.id)}
         onClose={() => !completing.isCompleting && setCompleteTarget(null)}
-      />
-      <FeeEditSheet
-        session={feeTarget}
-        isUpdating={feeEditing.isUpdating}
-        errorMessage={feeEditing.errorMessage}
-        onSave={(fee) => feeTarget && feeEditing.update(feeTarget.id, fee)}
-        onClose={() => !feeEditing.isUpdating && setFeeTarget(null)}
       />
       <NotificationToggleSheet
         open={notifications.open}

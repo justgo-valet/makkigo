@@ -12,6 +12,17 @@ describe("getMenuItems", () => {
     ]);
   });
 
+  it("puts the history of the joined booth first for an approved agent", () => {
+    expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: null, agentBoothId: 5 })).toEqual([
+      { label: "집계", href: "/booths/5/history" },
+      { label: "설정", href: "/settings" },
+    ]);
+    expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: 3, agentBoothId: 3 })[0]).toEqual({
+      label: "집계",
+      href: "/booths/3/history",
+    });
+  });
+
   it("shows a merchant admin ticket management and settings", () => {
     expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: 3 })).toEqual([
       { label: "티켓 관리", href: "/tickets" },
