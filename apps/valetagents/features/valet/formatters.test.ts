@@ -19,6 +19,7 @@ const session = (fields: Partial<BoothValetSession>): BoothValetSession => ({
   arrivalDelayMinutes: null,
   parkedAt: null,
   pickupRequestedAt: null,
+  fee: null,
   ...fields,
 });
 

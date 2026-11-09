@@ -16,6 +16,7 @@ const boothValetSessionSchema = z.object({
   arrivalDelayMinutes: z.number().int().positive().nullable(),
   parkedAt: z.string().datetime().nullable(),
   pickupRequestedAt: z.string().datetime().nullable(),
+  fee: z.number().int().nullable(),
 });
 
 const completedValetSessionSchema = z.object({

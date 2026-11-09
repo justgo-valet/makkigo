@@ -38,6 +38,7 @@ const readActiveValetSessions = async (where: Prisma.ValetSessionWhereInput, ima
       arrivalDelayMinutes: true,
       parkedAt: true,
       pickupRequestedAt: true,
+      baseFee: true,
       ...carImageSelect,
     },
   });
@@ -51,6 +52,7 @@ const readActiveValetSessions = async (where: Prisma.ValetSessionWhereInput, ima
     arrivalDelayMinutes: session.arrivalDelayMinutes,
     parkedAt: session.parkedAt?.toISOString() ?? null,
     pickupRequestedAt: session.pickupRequestedAt?.toISOString() ?? null,
+    fee: session.baseFee,
   }));
 };
 

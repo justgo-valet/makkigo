@@ -70,7 +70,7 @@ export default function VehicleManagement({
     <div
       className={cn(
         "mx-auto flex min-h-full w-full max-w-md flex-col",
-        pickupRequest && "animate-pickup-blink motion-reduce:animate-none",
+        pickupRequest && "animate-pickup-blink",
       )}
     >
       <AppHeader
