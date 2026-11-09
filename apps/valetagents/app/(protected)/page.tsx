@@ -10,6 +10,7 @@ import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
 import { getStaffMenuAccess } from "@/server/auth/getStaffMenuAccess";
 import { findApprovedMembership } from "@/server/booth/boothAgent";
+import { listContractedMerchants } from "@/server/booth/listContractedMerchants";
 import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
 import { listBoothValetSessions } from "@/server/valet/listBoothValetSessions";
 import { listMerchantValetSessions } from "@/server/valet/listMerchantValetSessions";
@@ -26,13 +27,17 @@ const loadBoothSessions = async (staffId: number) => {
   const { boothId } = membership;
   const imageBaseUrl = requireImageBaseUrl();
 
-  const sessions = await listBoothValetSessions(staffId, boothId, imageBaseUrl);
+  const [sessions, merchants] = await Promise.all([
+    listBoothValetSessions(staffId, boothId, imageBaseUrl),
+    listContractedMerchants(boothId),
+  ]);
   return sessions.ok
     ? {
         boothId,
         data: sessions.value,
         loadedAt: Date.now(),
         hasWorkTime: membership.workStartTime !== null && membership.workEndTime !== null,
+        merchants,
       }
     : null;
 };
@@ -77,6 +82,7 @@ export default async function Home() {
           initialData={booth.data}
           initialDataUpdatedAt={booth.loadedAt}
           hasWorkTime={booth.hasWorkTime}
+          merchants={booth.merchants}
           menu={menu}
         />
       </QueryProvider>
