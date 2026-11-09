@@ -13,6 +13,7 @@ const ERROR_RESPONSES = {
   BOOTH_NOT_FOUND: { status: 404, message: "부스를 찾을 수 없습니다." },
   BOOTH_AGENT_REQUIRED: { status: 403, message: "부스에 등록된 요원만 이용할 수 있습니다." },
   ACTIVE_SESSION_EXISTS: { status: 409, message: "이미 맡아 둔 차량 번호입니다." },
+  MERCHANT_NOT_CONTRACTED: { status: 409, message: "이 부스와 계약된 업체가 아닙니다." },
 } as const;
 
 const parseBoothId = (value: string) => {
@@ -62,7 +63,7 @@ export async function POST(
     const body = addVehicleRequestSchema.safeParse(await request.json().catch(() => null));
     if (!body.success) return apiError("INVALID_REQUEST", "올바른 차량 번호를 입력해 주세요.", 400);
 
-    const result = await addParkedVehicle(staffId, boothId, body.data.plateNumber);
+    const result = await addParkedVehicle(staffId, boothId, body.data.plateNumber, body.data.merchantId);
     if (!result.ok) {
       const error = ERROR_RESPONSES[result.reason];
       return apiError(result.reason, error.message, error.status);

@@ -25,6 +25,7 @@ interface VehicleManagementProps {
   initialData: BoothValetSessionListResponse;
   initialDataUpdatedAt: number;
   hasWorkTime: boolean;
+  merchants: { id: number; name: string }[];
   menu: MenuAccess;
 }
 
@@ -34,6 +35,7 @@ export default function VehicleManagement({
   initialData,
   initialDataUpdatedAt,
   hasWorkTime,
+  merchants,
   menu,
 }: Readonly<VehicleManagementProps>) {
   const { sessions, completedCount, notificationsEnabled, updatedAt, errorMessage } = useBoothValetSessions({
@@ -70,7 +72,7 @@ export default function VehicleManagement({
     <div
       className={cn(
         "mx-auto flex min-h-full w-full max-w-md flex-col",
-        pickupRequest && "animate-pickup-blink motion-reduce:animate-none",
+        pickupRequest && "animate-pickup-blink",
       )}
     >
       <AppHeader
@@ -141,6 +143,7 @@ export default function VehicleManagement({
         onClose={notifications.close}
       />
       <AddVehicleSheet
+        merchants={merchants}
         open={addOpen}
         isAdding={adding.isAdding}
         errorMessage={adding.errorMessage}
