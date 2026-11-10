@@ -44,4 +44,31 @@ const formatSessionLabel = (session: BoothValetSession, now: number) => {
 
 const formatCompletedLabel = (completedAt: string, now: number) => formatAgo(completedAt, now, "출차");
 
-export { formatCompletedLabel, formatPlateNumber, formatSessionLabel, formatWon };
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
+const formatHistoryDate = (date: string) => {
+  const day = new Date(`${date}T00:00:00.000Z`);
+  return `${day.getUTCMonth() + 1}월 ${day.getUTCDate()}일 (${WEEKDAYS[day.getUTCDay()]})`;
+};
+
+const shiftDate = (date: string, days: number) =>
+  new Date(Date.parse(`${date}T00:00:00.000Z`) + days * 24 * 60 * MINUTE_MS).toISOString().slice(0, 10);
+
+const clockFormat = new Intl.DateTimeFormat("ko-KR", {
+  timeZone: "Asia/Seoul",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+const formatClock = (iso: string) => clockFormat.format(new Date(iso));
+
+export {
+  formatClock,
+  formatCompletedLabel,
+  formatHistoryDate,
+  formatPlateNumber,
+  formatSessionLabel,
+  formatWon,
+  shiftDate,
+};

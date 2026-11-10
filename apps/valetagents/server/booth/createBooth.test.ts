@@ -16,7 +16,12 @@ const createTransaction = () => ({
   booth: { create: vi.fn().mockResolvedValue({ id: 3 }) },
 });
 
-const body = { name: "시청 부스", address: "서울특별시 중구 세종대로 110", addressDetail: null };
+const body = {
+  name: "시청 부스",
+  address: "서울특별시 중구 세종대로 110",
+  addressDetail: null,
+  feePolicy: { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 },
+};
 
 describe("createBooth", () => {
   beforeEach(() => vi.clearAllMocks());

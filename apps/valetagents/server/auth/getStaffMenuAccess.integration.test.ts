@@ -61,20 +61,24 @@ describe("getStaffMenuAccess database integration", () => {
     await createBooth("second", managerId);
 
     await expect(getStaffMenuAccess(managerId)).resolves.toEqual({
+      staffId: managerId,
       role: "VALET_AGENT",
       managedBoothId: firstBoothId,
+      agentBoothId: null,
     });
   });
 
-  it("has no managed booth for an agent who created none", async () => {
+  it("has no managed booth but the joined booth for an agent who created none", async () => {
     const managerId = await createStaff("other-manager", "VALET_AGENT");
     const agentId = await createStaff("agent", "VALET_AGENT");
     const boothId = await createBooth("joined", managerId);
     await prisma.boothAgent.create({ data: { boothId, staffId: agentId, status: "APPROVED" } });
 
     await expect(getStaffMenuAccess(agentId)).resolves.toEqual({
+      staffId: agentId,
       role: "VALET_AGENT",
       managedBoothId: null,
+      agentBoothId: boothId,
     });
   });
 

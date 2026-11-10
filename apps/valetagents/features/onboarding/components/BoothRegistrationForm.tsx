@@ -15,6 +15,8 @@ import {
 
 import { INPUT_CLASS, LABEL_CLASS } from "@/components/fieldStyles";
 
+import FeePolicyFields from "@/features/payment-settings/components/FeePolicyFields";
+
 import { useBoothRegistrationForm } from "../hooks/useBoothRegistrationForm";
 
 interface BoothRegistrationFormProps {
@@ -117,6 +119,14 @@ export default function BoothRegistrationForm({
           </div>
         )}
       </div>
+
+      <p className={cn(LABEL_CLASS, "mt-6")}>
+        발렛 요금
+        <RequiredMark />
+      </p>
+      <p className="text-xs leading-5 text-(--tertiary-color)">고객에게 보여 주는 기준 요금이에요</p>
+      <FeePolicyFields values={form.feeValues} onChange={form.changeFee} disabled={form.isSaving} />
+      {form.feeErrorMessage && <FieldError className="mt-1.5">{form.feeErrorMessage}</FieldError>}
 
       <p id="booth-photos-label" className={cn(LABEL_CLASS, "mt-6")}>부스 사진 업로드</p>
       <p className="text-xs leading-5 text-(--tertiary-color)">선택 사항 · 최대 5장, 장당 5MB</p>

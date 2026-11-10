@@ -1,6 +1,7 @@
 "use client";
 
-import { cn } from "@makkigo/ui";
+import { Button, cn } from "@makkigo/ui";
+import Link from "next/link";
 
 import OnboardingLinks from "./OnboardingLinks";
 import { useBoothCombobox } from "../hooks/useBoothCombobox";
@@ -51,6 +52,11 @@ export default function BoothSearch({
 
   return (
     <div className="flex flex-1 flex-col">
+      <div className="mb-2 flex justify-end">
+        <Button asChild variant="outline" size="sm" className="bg-white text-sm text-(--base-color)">
+          <Link href="/booths/new">+ 부스 등록하기</Link>
+        </Button>
+      </div>
       <div className="relative z-10 h-14" onBlur={combobox.handleBlur}>
         <div
           className={cn(

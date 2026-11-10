@@ -16,6 +16,7 @@ const boothValetSessionSchema = z.object({
   arrivalDelayMinutes: z.number().int().positive().nullable(),
   parkedAt: z.string().datetime().nullable(),
   pickupRequestedAt: z.string().datetime().nullable(),
+  fee: z.number().int().nullable(),
 });
 
 const completedValetSessionSchema = z.object({
@@ -31,7 +32,9 @@ const valetSessionListResponseSchema = z.object({
   completed: z.array(completedValetSessionSchema),
 });
 
-const boothValetSessionListResponseSchema = valetSessionListResponseSchema.extend({
+const boothValetSessionListResponseSchema = z.object({
+  items: z.array(boothValetSessionSchema),
+  completedCount: z.number().int().nonnegative(),
   notificationsEnabled: z.boolean(),
 });
 

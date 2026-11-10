@@ -20,6 +20,17 @@
 
 @theme {
   --animate-pickup-blink: pickup-blink 0.8s ease-in-out infinite;
+  --animate-arrival-drive: arrival-drive 1.2s ease-in-out infinite;
+
+  @keyframes arrival-drive {
+    0%,
+    100% {
+      transform: translateX(-6px);
+    }
+    50% {
+      transform: translateX(6px);
+    }
+  }
 
   @keyframes pickup-blink {
     0%,

@@ -4,7 +4,11 @@ vi.mock("server-only", () => ({}));
 
 import { readBoothRegistration } from "./readBoothRegistration";
 
-const body = { name: "부스", address: "서울특별시 중구 세종대로 110" };
+const body = {
+  name: "부스",
+  address: "서울특별시 중구 세종대로 110",
+  feePolicy: { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 },
+};
 const upload = {
   uploadId: "018f47a3-7b4c-7b1f-8db8-743c634d9651",
   contentType: "image/png",
