@@ -1,11 +1,10 @@
 import "server-only";
 
-import { ACTIVE_VALET_SESSION_STATUSES, lockPlateNumber, prisma } from "database";
+import { ACTIVE_VALET_SESSION_STATUSES, findLatestTicketVersionId, lockPlateNumber, prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
 import { contractedMerchantWhere } from "@/server/booth/listContractedMerchants";
 
-import { findLatestTicketVersionId } from "./findLatestTicketVersionId";
 
 import type { ParkedNotice } from "./notifyParked";
 import type { BoothAgentFailure } from "@/server/booth/boothAgent";
@@ -39,7 +38,7 @@ const addParkedVehicle = async (
     return { ok: false, reason: "MERCHANT_NOT_CONTRACTED" };
   }
   const merchant = contracts.length === 1 ? contracts[0].merchant : null;
-  const ticketVersionId = merchant ? await findLatestTicketVersionId(merchant.id) : null;
+  const ticketVersionId = merchant ? await findLatestTicketVersionId(prisma, merchant.id) : null;
 
   const added = await prisma.$transaction(async (tx) => {
     await lockPlateNumber(tx, plateNumber);
