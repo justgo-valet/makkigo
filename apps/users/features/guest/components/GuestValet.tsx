@@ -99,10 +99,10 @@ export default function GuestValet({
               차량 번호 재입력
             </button>
 
-            <p role="status" className="mt-4 text-center text-sm text-(--tertiary-color)">
+            <output className="mt-4 block text-center text-sm text-(--tertiary-color)">
               {plate} ·{" "}
               {guest.isCompleted || !session ? "출차 완료" : STATUS_LABELS[session.status]}
-            </p>
+            </output>
 
             <div className="mx-auto mt-3 w-full max-w-[300px]">
               {ticket ? (
