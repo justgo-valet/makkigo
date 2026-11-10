@@ -1,10 +1,9 @@
 import "server-only";
 
-import { prisma } from "database";
+import { findLatestTicketVersionId, prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
 
-import { findLatestTicketVersionId } from "./findLatestTicketVersionId";
 
 import type { ParkedNotice } from "./notifyParked";
 import type { BoothAgentFailure } from "@/server/booth/boothAgent";
@@ -45,7 +44,7 @@ const parkValetSession = async (
       boothId,
       parkedAt: now,
       parkedById: staffId,
-      ticketVersionId: await findLatestTicketVersionId(session.merchant.id),
+      ticketVersionId: await findLatestTicketVersionId(prisma, session.merchant.id),
     },
   });
 

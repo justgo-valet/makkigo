@@ -14,11 +14,11 @@ model Staff {
   notifications  Notification[]
   consents       StaffConsent[]
 
-  boothMemberships BoothAgent[]
-  createdBooths    Booth[]      @relation("BoothCreator")
-  merchants        Merchant[]
+  boothMemberships             BoothAgent[]
+  createdBooths                Booth[]                       @relation("BoothCreator")
+  merchants                    Merchant[]
   merchantRegistrationSessions MerchantRegistrationSession[]
-  ticketImageUploads            TicketImageUpload[]
+  ticketImageUploads           TicketImageUpload[]
 
   parkedSessions    ValetSession[] @relation("SessionParkedBy")
   respondedSessions ValetSession[] @relation("SessionRespondedBy")
