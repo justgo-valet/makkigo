@@ -41,11 +41,13 @@ const readPlate = (merchantId: number) => {
 const useGuestValet = (merchantId: number) => {
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
-  const plateNumber = useSyncExternalStore(
+  const savedPlate = useSyncExternalStore(
     subscribePlate,
     () => readPlate(merchantId),
     () => null,
   );
+  const [typedPlate, setTypedPlate] = useState<string | null>(null);
+  const plateNumber = savedPlate ?? typedPlate;
   const [agreed, setAgreed] = useState(false);
   const [isAcceptedOpen, setIsAcceptedOpen] = useState(false);
   const [isFeeExpanded, setIsFeeExpanded] = useState(false);
@@ -54,7 +56,11 @@ const useGuestValet = (merchantId: number) => {
   const queryKey = ["guest", merchantId, plateNumber] as const;
   const query = useQuery({
     queryKey,
-    queryFn: ({ signal }) => getGuestSession(merchantId, plateNumber ?? "", signal),
+    queryFn: async ({ signal }) => {
+      const data = await getGuestSession(merchantId, plateNumber ?? "", signal);
+      savePlate(merchantId, data.session.plateNumber);
+      return data;
+    },
     enabled: plateNumber !== null,
     refetchInterval: GUEST_SESSION_REFETCH_MS,
     retry: false,
@@ -70,7 +76,7 @@ const useGuestValet = (merchantId: number) => {
   });
 
   const session = query.data?.session ?? null;
-  const isCompleted = session !== null && isSessionNotFound(query.error);
+  const isCompleted = savedPlate !== null && isSessionNotFound(query.error);
   const bankTransfer = useBankTransfer(
     session?.bankAccount
       ? { bankName: session.bankAccount.bankName, accountNumber: session.bankAccount.accountNumber }
@@ -83,7 +89,7 @@ const useGuestValet = (merchantId: number) => {
   const lookup = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!PLATE_NUMBER_PATTERN.test(normalizedInput)) return;
-    savePlate(merchantId, normalizedInput);
+    setTypedPlate(normalizedInput);
   };
 
   const reset = () => {
@@ -91,6 +97,7 @@ const useGuestValet = (merchantId: number) => {
     pickup.reset();
     setAgreed(false);
     setIsAcceptedOpen(false);
+    setTypedPlate(null);
     savePlate(merchantId, null);
   };
 
@@ -102,7 +109,10 @@ const useGuestValet = (merchantId: number) => {
     canLookup: PLATE_NUMBER_PATTERN.test(normalizedInput),
     isLookingUp: query.isFetching && !session,
     lookupErrorMessage:
-      query.error && !session ? getErrorMessage(query.error, LOOKUP_ERROR_MESSAGE) : null,
+      query.error && !session && !isCompleted
+        ? getErrorMessage(query.error, LOOKUP_ERROR_MESSAGE)
+        : null,
+    plateNumber,
     session,
     ticket: query.data?.ticket ?? null,
     isCompleted,

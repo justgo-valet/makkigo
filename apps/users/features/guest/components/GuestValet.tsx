@@ -44,13 +44,14 @@ export default function GuestValet({
     new URL(path, imageBaseUrl.endsWith("/") ? imageBaseUrl : `${imageBaseUrl}/`).toString();
   const ticket = guest.ticket ?? merchantTicket;
   const { session } = guest;
+  const plate = formatPlate(session?.plateNumber ?? guest.plateNumber ?? "");
 
   return (
     <div className="mx-auto h-full w-full max-w-[375px]">
       <div className="flex min-h-full flex-col rounded-lg bg-white px-6 py-6">
         <Image src={makkigoLogo} alt="마끼고" width={95} height={39} priority />
 
-        {!session ? (
+        {!session && !guest.isCompleted ? (
           <form className="flex flex-1 flex-col" onSubmit={guest.lookup}>
             <div className="mt-5">
               <h1 className="text-lg font-bold text-(--base-color)">{merchant.name}</h1>
@@ -99,8 +100,8 @@ export default function GuestValet({
             </button>
 
             <p role="status" className="mt-4 text-center text-sm text-(--tertiary-color)">
-              {formatPlate(session.plateNumber)} ·{" "}
-              {guest.isCompleted ? "출차 완료" : STATUS_LABELS[session.status]}
+              {plate} ·{" "}
+              {guest.isCompleted || !session ? "출차 완료" : STATUS_LABELS[session.status]}
             </p>
 
             <div className="mx-auto mt-3 w-full max-w-[300px]">
@@ -117,17 +118,15 @@ export default function GuestValet({
                   className="flex aspect-[3/4] w-full flex-col items-center justify-center rounded-lg bg-white px-6 text-center shadow-[0_4px_5px_rgba(2,8,23,0.22)]"
                 >
                   <p className="text-base font-bold text-(--base-color)">
-                    {session.merchantName ?? merchant.name}
+                    {session?.merchantName ?? merchant.name}
                   </p>
-                  <p className="mt-3 text-xl font-bold text-(--base-color)">
-                    {formatPlate(session.plateNumber)}
-                  </p>
+                  <p className="mt-3 text-xl font-bold text-(--base-color)">{plate}</p>
                 </section>
               )}
             </div>
 
             <div className="mt-auto">
-              {guest.isCompleted ? (
+              {guest.isCompleted || !session ? (
                 <p className="pt-6 text-center text-sm text-(--base-color)">
                   출차가 완료되었어요. 이용해 주셔서 감사합니다.
                 </p>
