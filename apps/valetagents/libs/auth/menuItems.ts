@@ -37,7 +37,13 @@ const getMenuItems = ({ role, managedBoothId, agentBoothId, onboarding }: MenuAc
       SETTINGS_ITEM,
     ];
   }
-  if (role === "MERCHANT_ADMIN") return [{ label: "티켓 관리", href: "/tickets" }, SETTINGS_ITEM];
+  if (role === "MERCHANT_ADMIN") {
+    return [
+      { label: "티켓 관리", href: "/tickets" },
+      { label: "QR 코드", href: "/merchants/qr" },
+      SETTINGS_ITEM,
+    ];
+  }
   return [SETTINGS_ITEM];
 };
 

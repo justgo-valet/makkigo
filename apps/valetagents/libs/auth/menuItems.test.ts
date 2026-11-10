@@ -23,9 +23,10 @@ describe("getMenuItems", () => {
     });
   });
 
-  it("shows a merchant admin ticket management and settings", () => {
+  it("shows a merchant admin ticket management, QR codes and settings", () => {
     expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: 3 })).toEqual([
       { label: "티켓 관리", href: "/tickets" },
+      { label: "QR 코드", href: "/merchants/qr" },
       { label: "설정", href: "/settings" },
     ]);
   });
