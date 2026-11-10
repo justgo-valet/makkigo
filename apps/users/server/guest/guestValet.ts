@@ -64,14 +64,16 @@ const getGuestSession = async (
   const session = await findSessionView(guestSessionWhere(merchantId, plateNumber), now);
   if (!session) return null;
 
-  const { ticketVersionId } = await prisma.valetSession.findUniqueOrThrow({
+  const linked = await prisma.valetSession.findUniqueOrThrow({
     where: { id: session.id },
-    select: { ticketVersionId: true },
+    select: { ticketVersionId: true, merchantId: true },
   });
   const ticket =
-    ticketVersionId === null
-      ? await findLatestTicketDesign(merchantId)
-      : await findTicketDesign(ticketVersionId);
+    linked.ticketVersionId !== null
+      ? await findTicketDesign(linked.ticketVersionId)
+      : linked.merchantId === null || linked.merchantId === merchantId
+        ? await findLatestTicketDesign(merchantId)
+        : null;
 
   return { session, ticket };
 };
