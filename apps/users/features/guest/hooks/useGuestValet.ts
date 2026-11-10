@@ -62,7 +62,8 @@ const useGuestValet = (merchantId: number) => {
       return data;
     },
     enabled: plateNumber !== null,
-    refetchInterval: GUEST_SESSION_REFETCH_MS,
+    refetchInterval: (current) =>
+      isSessionNotFound(current.state.error) ? false : GUEST_SESSION_REFETCH_MS,
     retry: false,
   });
 
@@ -107,7 +108,7 @@ const useGuestValet = (merchantId: number) => {
   return {
     input,
     canLookup: PLATE_NUMBER_PATTERN.test(normalizedInput),
-    isLookingUp: query.isFetching && !session,
+    isLookingUp: query.isLoading,
     lookupErrorMessage:
       query.error && !session && !isCompleted
         ? getErrorMessage(query.error, LOOKUP_ERROR_MESSAGE)
