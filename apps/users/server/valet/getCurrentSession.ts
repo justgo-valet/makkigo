@@ -106,4 +106,4 @@ const getCurrentSession = (userId: number, now: Date = new Date()) =>
 const getMyActiveSession = (userId: number, valetSessionId: number, now: Date = new Date()) =>
   findSessionView({ id: valetSessionId, userId }, now);
 
-export { getCurrentSession, getMyActiveSession };
+export { findSessionView, getCurrentSession, getMyActiveSession };
