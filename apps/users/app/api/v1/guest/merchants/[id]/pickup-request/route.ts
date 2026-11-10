@@ -24,7 +24,7 @@ const PICKUP_ERRORS: Record<PickupRequestErrorCode, { message: string; status: n
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const started = await startGuestRequest(request, params);
+    const started = await startGuestRequest(request, params, "pickup");
     if ("response" in started) return started.response;
 
     const body = guestPickupRequestSchema.safeParse(await request.json().catch(() => null));

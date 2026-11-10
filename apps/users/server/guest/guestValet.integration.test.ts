@@ -154,6 +154,9 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("guest valet integration", () =>
     await prisma.boothMerchant.create({
       data: { boothId, merchantId: otherMerchantId, status: "APPROVED" },
     });
+    await expect(guest.getGuestSession(merchantId, plate("55가"), NOW)).resolves.toMatchObject({
+      ticket: null,
+    });
     const request = (plateNumber: string) =>
       guest.requestGuestPickup(
         merchantId,

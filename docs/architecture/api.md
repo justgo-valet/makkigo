@@ -56,9 +56,9 @@
 | `POST /api/v1/valet-sessions/{id}/delay` | 지연 알림 보내기: `{ minutes }`(5분 단위, 5 ~ 60) → 내 도착 예정 세션의 지연 시간 · 시각 저장(204, 다시 보내면 덮어씀) + 도착 알림을 받았던 요원에게 지연 알림 기록, 응답 뒤 푸시. 400 잘못된 `minutes` · 404 `SESSION_NOT_FOUND` · 409 `NOT_DELAYABLE`(이미 취소 · 주차 시작) | ✅ | [#121](https://github.com/justgo-valet/makkigo/pull/121) |
 | `POST /api/v1/notifications/read` | 내 안 읽은 알림을 모두 읽음으로(204). 알림 바텀시트를 열 때 부름 | ✅ | [#130](https://github.com/justgo-valet/makkigo/pull/130) |
 | `GET /api/v1/guest/merchants/{id}` | **비회원(업체 QR)**: 업체 정보와 최신 티켓 `{ merchant: { id, name }, ticket }`(티켓 없으면 `null`). 닫힌 업체 · 승인된 부스 계약이 없는 업체는 404 `MERCHANT_NOT_FOUND` | 없음 | |
-| `POST /api/v1/guest/merchants/{id}/session` | **비회원**: `{ plateNumber }`(공백 · 하이픈 허용) → `{ session, ticket }`. `session` 은 현재 세션 조회와 같은 형식. 찾는 범위는 그 번호의 진행 중 세션 중 **이 업체와 승인된 계약이 있는 부스**에 있거나 **이 업체로 연결된** 것. `ticket` 은 세션의 티켓, 세션에 티켓이 없으면 업체 최신 티켓. 번호가 주소 · 로그에 남지 않게 POST. 400 `INVALID_PLATE_NUMBER` · 404 `MERCHANT_NOT_FOUND` · `SESSION_NOT_FOUND` | 없음 | |
+| `POST /api/v1/guest/merchants/{id}/session` | **비회원**: `{ plateNumber }`(공백 · 하이픈 허용) → `{ session, ticket }`. `session` 은 현재 세션 조회와 같은 형식. 찾는 범위는 그 번호의 진행 중 세션 중 **이 업체와 승인된 계약이 있는 부스**에 있거나 **이 업체로 연결된** 것. `ticket` 은 세션의 티켓, 세션에 티켓이 없으면 (세션에 업체가 없거나 이 업체일 때만) 이 업체 최신 티켓. 번호가 주소 · 로그에 남지 않게 POST. 400 `INVALID_PLATE_NUMBER` · 404 `MERCHANT_NOT_FOUND` · `SESSION_NOT_FOUND` | 없음 | |
 | `POST /api/v1/guest/merchants/{id}/pickup-request` | **비회원 출차 요청**: `{ plateNumber, agreed: true, documentVersion }` → 회원 출차 요청과 같은 처리(기준 요금 고정 · 요원 알림 · 푸시) + 세션에 업체가 없었으면 **이 업체 · 최신 티켓 연결** + `guest_consents` 에 이용약관 · 제3자 제공 동의 기록 → 200 `{ session, ticket }`. 400 `CONSENT_REQUIRED` · 404 · 409 `NOT_PARKED` · `ALREADY_REQUESTED` · 422 `NO_BOOTH` | 없음 | |
-| (비회원 API 공통) | 로그인 없음, `Cache-Control: no-store`. **IP 당 분당 30회**(세 API 합산, 서버 메모리 — EC2 한 대 기준) 넘으면 429 `TOO_MANY_REQUESTS`. IP 는 Caddy 가 채우는 `X-Forwarded-For` 첫 값 | | |
+| (비회원 API 공통) | 로그인 없음, `Cache-Control: no-store`. **IP 당 분당 조회 120회 · 출차 요청 10회**(따로 셈, 서버 메모리 — EC2 한 대 기준) 넘으면 429 `TOO_MANY_REQUESTS`. 화면이 5초마다 다시 읽어(탭 하나 분당 12회) 같은 와이파이 · 통신사 IP 를 쓰는 손님 여럿을 고려. IP 는 Caddy 가 채우는 `X-Forwarded-For` 첫 값 | | |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
 
