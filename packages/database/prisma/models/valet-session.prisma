@@ -44,10 +44,24 @@ model ValetSession {
     completedBy     Staff?           @relation("SessionCompletedBy", fields: [completedById], references: [id])
     notifications   Notification[]
     locationUseLogs LocationUseLog[]
+    guestConsents   GuestConsent[]
 
     @@index([plateNumber, status])
     @@index([userId, createdAt])
     @@index([boothId, status])
     @@index([merchantId, status])
     @@map("valet_sessions")
+}
+
+model GuestConsent {
+    id              Int         @id @default(autoincrement())
+    valetSessionId  Int         @map("valet_session_id")
+    type            ConsentType
+    documentVersion String      @map("document_version")
+    createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+    valetSession ValetSession @relation(fields: [valetSessionId], references: [id], onDelete: Cascade)
+
+    @@index([valetSessionId])
+    @@map("guest_consents")
 }

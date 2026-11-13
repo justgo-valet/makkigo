@@ -4,6 +4,7 @@ interface MenuAccess {
   staffId?: number;
   role: StaffRole | null;
   managedBoothId: number | null;
+  agentBoothId?: number | null;
   onboarding?: boolean;
 }
 
@@ -21,17 +22,28 @@ const getOnboardingMenu = (staffId: number, role: StaffRole | null): MenuAccess 
   onboarding: true,
 });
 
-const getMenuItems = ({ role, managedBoothId, onboarding }: MenuAccess): MenuItem[] => {
+const getMenuItems = ({ role, managedBoothId, agentBoothId, onboarding }: MenuAccess): MenuItem[] => {
   if (onboarding) return [SETTINGS_ITEM];
-  if (role === "VALET_AGENT" && managedBoothId !== null) {
+  if (role === "VALET_AGENT") {
     return [
-      { label: "요원 관리", href: `/booths/${managedBoothId}/agents` },
-      { label: "업체 관리", href: `/booths/${managedBoothId}/merchants` },
-      { label: "요금 · 계좌", href: `/booths/${managedBoothId}/payment-settings` },
+      ...(agentBoothId ? [{ label: "집계", href: `/booths/${agentBoothId}/history` }] : []),
+      ...(managedBoothId !== null
+        ? [
+            { label: "요원 관리", href: `/booths/${managedBoothId}/agents` },
+            { label: "업체 관리", href: `/booths/${managedBoothId}/merchants` },
+            { label: "요금 · 계좌", href: `/booths/${managedBoothId}/payment-settings` },
+          ]
+        : []),
       SETTINGS_ITEM,
     ];
   }
-  if (role === "MERCHANT_ADMIN") return [{ label: "티켓 관리", href: "/tickets" }, SETTINGS_ITEM];
+  if (role === "MERCHANT_ADMIN") {
+    return [
+      { label: "티켓 관리", href: "/tickets" },
+      { label: "QR 코드", href: "/merchants/qr" },
+      SETTINGS_ITEM,
+    ];
+  }
   return [SETTINGS_ITEM];
 };
 

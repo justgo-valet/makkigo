@@ -2,7 +2,7 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getHomeActions } from "@/features/home/homeActions";
+import { getCarAction, getHomeActions } from "@/features/home/homeActions";
 import {
   formatClockTime,
   formatElapsed,
@@ -190,6 +190,7 @@ const useHome = () => {
     carImageUrl: vehicle.carImageUrl,
     isCarImagePlaceholder: vehicle.isCarImagePlaceholder,
     carImageAlt: `${formatVehicleNumber(vehicle.plateNumber)} 차량`,
+    carAction: getCarAction(snapshot.status),
     exitSummary: getExitSummary(snapshot),
     actions: getHomeActions(snapshot.status),
     bankTransfer,

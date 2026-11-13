@@ -12,16 +12,18 @@ const filled = {
   address: ADDRESS,
   geocodedAddress: ADDRESS,
   mapState: "ready",
+  feePolicyValid: true,
   isSaving: false,
 } as const;
 
 describe("getBoothRegistrationAvailability", () => {
-  it("allows registering only a named booth whose typed address the map has found", () => {
+  it("allows registering only a named booth with a valid fee policy whose typed address the map has found", () => {
     expect(getBoothRegistrationAvailability(filled)).toBe(true);
     expect(getBoothRegistrationAvailability({ ...filled, name: " " })).toBe(false);
     expect(getBoothRegistrationAvailability({ ...filled, mapState: "error" })).toBe(false);
     expect(getBoothRegistrationAvailability({ ...filled, address: `${ADDRESS} 1` })).toBe(false);
     expect(getBoothRegistrationAvailability({ ...filled, isSaving: true })).toBe(false);
+    expect(getBoothRegistrationAvailability({ ...filled, feePolicyValid: false })).toBe(false);
   });
 });
 

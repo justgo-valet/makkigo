@@ -1,34 +1,44 @@
 import "server-only";
 
-import { ACTIVE_VALET_SESSION_STATUSES, lockPlateNumber, prisma } from "database";
+import { ACTIVE_VALET_SESSION_STATUSES, findLatestTicketVersionId, lockPlateNumber, prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
+import { contractedMerchantWhere } from "@/server/booth/listContractedMerchants";
 
-import { findLatestTicketVersionId } from "./findLatestTicketVersionId";
 
 import type { ParkedNotice } from "./notifyParked";
 import type { BoothAgentFailure } from "@/server/booth/boothAgent";
 
 type AddParkedVehicleResult =
   | { ok: true; valetSessionId: number; notice: ParkedNotice | null }
-  | { ok: false; reason: BoothAgentFailure | "ACTIVE_SESSION_EXISTS" };
+  | { ok: false; reason: BoothAgentFailure | "ACTIVE_SESSION_EXISTS" | "MERCHANT_NOT_CONTRACTED" };
 
 const addParkedVehicle = async (
   staffId: number,
   boothId: number,
   plateNumber: string,
+  merchantId?: number | null,
   now = new Date(),
 ): Promise<AddParkedVehicleResult> => {
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
 
-  const contracts = await prisma.boothMerchant.findMany({
-    where: { boothId, status: "APPROVED", merchant: { deletedAt: null } },
-    select: { merchant: { select: { id: true, name: true } } },
-    take: 2,
-  });
+  const contracts =
+    merchantId === null
+      ? []
+      : await prisma.boothMerchant.findMany({
+          where: {
+            ...contractedMerchantWhere(boothId),
+            ...(merchantId === undefined ? {} : { merchantId }),
+          },
+          select: { merchant: { select: { id: true, name: true } } },
+          take: 2,
+        });
+  if (typeof merchantId === "number" && contracts.length === 0) {
+    return { ok: false, reason: "MERCHANT_NOT_CONTRACTED" };
+  }
   const merchant = contracts.length === 1 ? contracts[0].merchant : null;
-  const ticketVersionId = merchant ? await findLatestTicketVersionId(merchant.id) : null;
+  const ticketVersionId = merchant ? await findLatestTicketVersionId(prisma, merchant.id) : null;
 
   const added = await prisma.$transaction(async (tx) => {
     await lockPlateNumber(tx, plateNumber);

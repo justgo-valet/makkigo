@@ -6,6 +6,8 @@ import AppHeader from "@/components/layouts/AppHeader";
 
 import { usePaymentSettingsForm } from "../hooks/usePaymentSettingsForm";
 
+import FeePolicyFields from "./FeePolicyFields";
+
 import type { MenuAccess } from "@/libs/auth/menuItems";
 import type {
   BankAccountSettings,
@@ -14,8 +16,6 @@ import type {
 
 const SECTION_TITLE_CLASS = "text-base font-bold text-(--base-color)";
 const SECTION_DESCRIPTION_CLASS = "mt-1 text-xs text-(--tertiary-color)";
-const NUMBER_INPUT_CLASS =
-  "h-10 bg-white px-2 text-right text-base tabular-nums text-(--base-color) md:text-base";
 const TEXT_INPUT_CLASS = "mt-2 h-12 bg-white text-base text-(--base-color) md:text-base";
 
 interface PaymentSettingsFormProps {
@@ -50,48 +50,7 @@ export default function PaymentSettingsForm({
         <RequiredMark />
       </h2>
       <p className={SECTION_DESCRIPTION_CLASS}>고객에게 보여 주는 기준 요금이에요</p>
-      <p className="mt-3 flex items-center gap-1.5 text-base text-(--base-color)">
-        기본요금
-        <Input
-          aria-label="기본 시간"
-          inputMode="numeric"
-          autoComplete="off"
-          value={form.baseHours}
-          onChange={(event) => form.changeBaseHours(event.target.value)}
-          className={cn(NUMBER_INPUT_CLASS, "w-12")}
-        />
-        시간
-        <Input
-          aria-label="기본요금"
-          inputMode="numeric"
-          autoComplete="off"
-          value={form.baseFee}
-          onChange={(event) => form.changeBaseFee(event.target.value)}
-          className={cn(NUMBER_INPUT_CLASS, "w-28")}
-        />
-        원
-      </p>
-      <p className="mt-3 flex items-center gap-1.5 text-base text-(--base-color)">
-        추가요금
-        <Input
-          aria-label="추가 단위 시간(분)"
-          inputMode="numeric"
-          autoComplete="off"
-          value={form.extraUnitMinutes}
-          onChange={(event) => form.changeExtraUnitMinutes(event.target.value)}
-          className={cn(NUMBER_INPUT_CLASS, "w-14")}
-        />
-        분 당
-        <Input
-          aria-label="추가요금"
-          inputMode="numeric"
-          autoComplete="off"
-          value={form.extraUnitFee}
-          onChange={(event) => form.changeExtraUnitFee(event.target.value)}
-          className={cn(NUMBER_INPUT_CLASS, "w-28")}
-        />
-        원
-      </p>
+      <FeePolicyFields values={form.feeValues} onChange={form.changeFee} />
 
       <h2 className={cn(SECTION_TITLE_CLASS, "mt-8")}>
         입금 계좌

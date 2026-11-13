@@ -2,6 +2,7 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useMutation } from "@tanstack/react-query";
 
 import { logout } from "@/features/auth/apis/logout";
+import { clearWatchedExit } from "@/features/home/exitCompletion.store";
 import { clearSelectedMerchant } from "@/features/merchant/selectedMerchant.store";
 import { useRemoveAppPushDevice } from "@/features/push/hooks/useRemoveAppPushDevice";
 
@@ -19,6 +20,7 @@ const useLogout = () => {
     },
     onSuccess: () => {
       clearSelectedMerchant();
+      clearWatchedExit();
       window.location.replace(LOGIN_PATH);
     },
   });

@@ -77,6 +77,7 @@ const createInTransaction = async (
       addressDetail: body.addressDetail,
       creatorId: staffId,
       agents: { create: { staffId, status: "APPROVED" } },
+      feePolicies: { create: { ...body.feePolicy, effectiveFrom: new Date() } },
       ...(photoPaths.length > 0 ? { photos: { create: photoPaths.map((path, sortOrder) => ({ path, sortOrder })) } } : {}),
     },
     select: { id: true },

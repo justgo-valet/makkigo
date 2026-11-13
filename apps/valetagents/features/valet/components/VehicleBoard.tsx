@@ -13,20 +13,20 @@ const FOCUS_CLASS =
 
 interface VehicleBoardProps {
   sessions: BoothValetSession[];
-  completed: CompletedValetSession[];
+  completed?: CompletedValetSession[];
+  completedCount?: number;
   updatedAt: number;
   errorMessage: string | null;
   onSelectSession?: (session: BoothValetSession) => void;
-  onSelectCompleted?: (session: CompletedValetSession) => void;
 }
 
 export default function VehicleBoard({
   sessions,
-  completed,
+  completed = [],
+  completedCount = completed.length,
   updatedAt,
   errorMessage,
   onSelectSession,
-  onSelectCompleted,
 }: Readonly<VehicleBoardProps>) {
   const pickupRequest = sessions.find(({ status }) => status === "PICKUP_REQUESTED");
   const countOf = (...statuses: BoothValetSession["status"][]) =>
@@ -35,7 +35,7 @@ export default function VehicleBoard({
     { label: "출차 요청", count: countOf("PICKUP_REQUESTED", "PICKUP_PREPARING"), dot: "bg-(--pickup-blink)" },
     { label: "주차 중", count: countOf("PARKED"), dot: "border border-[#c9cfd8] bg-white" },
     { label: "도착", count: countOf("ARRIVING"), dot: "bg-[#ffcc00]" },
-    { label: "완료", count: completed.length, dot: "bg-[#34c759]" },
+    { label: "완료", count: completedCount, dot: "bg-[#34c759]" },
   ];
 
   return (
@@ -64,6 +64,11 @@ export default function VehicleBoard({
               imageUrl={session.carImageUrl}
               plateNumber={session.plateNumber}
               label={formatSessionLabel(session, updatedAt)}
+              fee={
+                session.fee !== null && session.status !== "ARRIVING" && session.status !== "PARKED"
+                  ? formatWon(session.fee)
+                  : undefined
+              }
             />
           );
 
@@ -96,18 +101,7 @@ export default function VehicleBoard({
 
           return (
             <li key={`completed-${session.id}`} className="min-w-0">
-              {onSelectCompleted ? (
-                <button
-                  type="button"
-                  aria-label={`${formatPlateNumber(session.plateNumber)} 발렛 금액 수정`}
-                  className={cn(vehicleCardClass("COMPLETED"), FOCUS_CLASS)}
-                  onClick={() => onSelectCompleted(session)}
-                >
-                  {content}
-                </button>
-              ) : (
-                <div className={vehicleCardClass("COMPLETED")}>{content}</div>
-              )}
+              <div className={vehicleCardClass("COMPLETED")}>{content}</div>
             </li>
           );
         })}

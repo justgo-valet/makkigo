@@ -1,11 +1,17 @@
 import "server-only";
-import { calculateValetFee, findFeePolicy, prisma } from "database";
+import { calculateValetFee, findFeePolicy, findLatestTicketVersionId, prisma } from "database";
 
 import type { PickupRequestErrorCode } from "@/libs/valet/contracts/pickupRequest";
+import type { ConsentType, Prisma } from "database";
 
 type RequestPickupResult =
-  | { ok: true; notificationIds: number[] }
+  | { ok: true; valetSessionId: number; notificationIds: number[] }
   | { ok: false; reason: PickupRequestErrorCode };
+
+interface GuestPickup {
+  merchantId: number;
+  consents: { type: ConsentType; documentVersion: string }[];
+}
 
 const getNotParkedReason = (status: string): PickupRequestErrorCode => {
   switch (status) {
@@ -19,19 +25,22 @@ const getNotParkedReason = (status: string): PickupRequestErrorCode => {
   }
 };
 
-const requestPickup = async (
-  userId: number,
-  valetSessionId: number,
-  now: Date = new Date(),
+const requestPickupWhere = (
+  where: Prisma.ValetSessionWhereInput,
+  now: Date,
+  guest?: GuestPickup,
 ): Promise<RequestPickupResult> =>
   prisma.$transaction(async (tx) => {
     const session = await tx.valetSession.findFirst({
-      where: { id: valetSessionId, userId },
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       select: {
+        id: true,
         status: true,
         plateNumber: true,
         boothId: true,
         parkedAt: true,
+        merchantId: true,
         merchant: { select: { name: true } },
       },
     });
@@ -41,20 +50,40 @@ const requestPickup = async (
       return { ok: false, reason: getNotParkedReason(session.status) } as const;
     }
 
-    const { boothId, parkedAt } = session;
+    const { id: valetSessionId, boothId, parkedAt } = session;
 
     if (boothId === null) return { ok: false, reason: "NO_BOOTH" } as const;
 
     const feePolicy = await findFeePolicy(tx, boothId, now);
     const baseFee =
       feePolicy && parkedAt ? calculateValetFee(feePolicy, parkedAt, now).total : null;
+    const connectsMerchant = guest !== undefined && session.merchantId === null;
 
     const { count } = await tx.valetSession.updateMany({
-      where: { id: valetSessionId, userId, status: "PARKED" },
-      data: { status: "PICKUP_REQUESTED", pickupRequestedAt: now, baseFee },
+      where: { id: valetSessionId, status: "PARKED" },
+      data: {
+        status: "PICKUP_REQUESTED",
+        pickupRequestedAt: now,
+        baseFee,
+        ...(connectsMerchant && {
+          merchantId: guest.merchantId,
+          ticketVersionId: await findLatestTicketVersionId(tx, guest.merchantId),
+        }),
+      },
     });
 
     if (count === 0) return { ok: false, reason: "ALREADY_REQUESTED" } as const;
+
+    if (guest) {
+      await tx.guestConsent.createMany({
+        data: guest.consents.map((consent) => ({ valetSessionId, ...consent })),
+      });
+    }
+
+    const merchantName = connectsMerchant
+      ? (await tx.merchant.findUnique({ where: { id: guest.merchantId }, select: { name: true } }))
+          ?.name
+      : session.merchant?.name;
 
     const agents = await tx.boothAgent.findMany({
       where: {
@@ -65,7 +94,7 @@ const requestPickup = async (
       },
       select: { staffId: true },
     });
-    const place = session.merchant ? `${session.merchant.name} · ` : "";
+    const place = merchantName ? `${merchantName} · ` : "";
 
     const notifications = await tx.notification.createManyAndReturn({
       data: agents.map(({ staffId }) => ({
@@ -78,7 +107,15 @@ const requestPickup = async (
       select: { id: true },
     });
 
-    return { ok: true, notificationIds: notifications.map(({ id }) => id) } as const;
+    return {
+      ok: true,
+      valetSessionId,
+      notificationIds: notifications.map(({ id }) => id),
+    } as const;
   });
 
-export { requestPickup };
+const requestPickup = (userId: number, valetSessionId: number, now: Date = new Date()) =>
+  requestPickupWhere({ id: valetSessionId, userId }, now);
+
+export { requestPickup, requestPickupWhere };
+export type { GuestPickup, RequestPickupResult };

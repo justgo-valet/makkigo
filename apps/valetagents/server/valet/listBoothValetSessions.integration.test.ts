@@ -122,7 +122,16 @@ describe("listBoothValetSessions database integration", () => {
     expect(result.ok && result.value.items.map(({ id }) => id)).toEqual([arriving, parked]);
   });
 
-  it("lists cars completed at the booth since midnight in Seoul", async () => {
+  it("shows the base fee fixed when the pickup was requested", async () => {
+    const requested = await createSession("PICKUP_REQUESTED", { boothId });
+    await prisma.valetSession.update({ where: { id: requested }, data: { baseFee: 12_000 } });
+
+    const result = await listBoothValetSessions(managerId, boothId, IMAGE_BASE_URL);
+
+    expect(result.ok && result.value.items.find(({ id }) => id === requested)?.fee).toBe(12_000);
+  });
+
+  it("counts cars completed at the booth since midnight in Seoul", async () => {
     const now = new Date("2026-10-14T03:00:00.000Z");
     const merchantId = await createMerchant(boothId, "APPROVED");
     const today = await createSession("COMPLETED", { merchantId, boothId });
@@ -139,8 +148,6 @@ describe("listBoothValetSessions database integration", () => {
 
     const result = await listBoothValetSessions(managerId, boothId, IMAGE_BASE_URL, now);
 
-    expect(
-      result.ok && result.value.completed.map(({ id, completedAt }) => ({ id, completedAt })),
-    ).toEqual([{ id: today, completedAt: "2026-10-13T15:00:00.000Z" }]);
+    expect(result.ok && result.value.completedCount).toBe(1);
   });
 });

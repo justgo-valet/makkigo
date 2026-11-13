@@ -5,6 +5,8 @@ vi.mock("@/libs/common/api/apiClient", () => ({ apiClient: api }));
 
 import { createBooth } from "./createBooth";
 
+const FEE_POLICY = { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 };
+
 describe("createBooth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -28,7 +30,7 @@ describe("createBooth", () => {
     vi.stubGlobal("fetch", fetch);
     const photo = new File([Uint8Array.from([0xff, 0xd8, 0xff])], "booth.jpg", { type: "image/jpeg" });
 
-    await createBooth({ name: "시청 부스", address: "서울시", photos: [photo] });
+    await createBooth({ name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, photos: [photo] });
 
     expect(fetch).toHaveBeenCalledWith("https://s3.example.test", expect.objectContaining({
       method: "POST",
@@ -48,11 +50,11 @@ describe("createBooth", () => {
   });
 
   it("keeps the existing JSON request when no photos are selected", async () => {
-    await createBooth({ name: "시청 부스", address: "서울시", photos: [] });
+    await createBooth({ name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, photos: [] });
 
     expect(api.post).toHaveBeenCalledOnce();
     expect(api.post).toHaveBeenCalledWith("booths", expect.objectContaining({
-      json: { name: "시청 부스", address: "서울시" },
+      json: { name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY },
     }));
   });
 });

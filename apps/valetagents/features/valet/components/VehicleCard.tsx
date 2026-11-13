@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@makkigo/ui";
 import Image from "next/image";
+import { useLayoutEffect, useRef } from "react";
 
 import { formatPlateNumber } from "../formatters";
 
@@ -17,9 +20,39 @@ const STATUS_STYLES: Record<VehicleStatus, { title: string; className: string }>
 
 const vehicleCardClass = (status: VehicleStatus) =>
   cn(
-    "flex h-[145px] w-full min-w-0 flex-col items-center justify-center rounded-[20px] px-3 text-(--base-color)",
+    "flex h-[170px] w-full min-w-0 flex-col items-center justify-center rounded-[20px] px-3 text-(--base-color)",
     STATUS_STYLES[status].className,
   );
+
+function FitLine({ className, children }: Readonly<{ className: string; children: string }>) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    const line = ref.current;
+    const card = line?.parentElement;
+    if (!line || !card) return;
+
+    const fit = () => {
+      const style = getComputedStyle(card);
+      const available =
+        card.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const ratio = available / line.offsetWidth;
+      line.style.transform = ratio < 1 ? `scale(${ratio})` : "";
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(card);
+    observer.observe(line);
+    return () => observer.disconnect();
+  }, [children]);
+
+  return (
+    <span ref={ref} className={cn("whitespace-nowrap", className)}>
+      {children}
+    </span>
+  );
+}
 
 interface VehicleCardContentProps {
   status: VehicleStatus;
@@ -39,18 +72,19 @@ function VehicleCardContent({
   return (
     <>
       <span className="sr-only">{STATUS_STYLES[status].title}</span>
-      <span className="relative mb-0.5 block h-11 w-full max-w-28">
+      <span
+        className={cn(
+          "relative mb-0.5 block h-16 w-full max-w-40",
+          status === "ARRIVING" && "animate-arrival-drive",
+        )}
+      >
         <Image src={imageUrl} alt="" fill unoptimized className="object-contain" />
       </span>
-      <span className="text-[19px] leading-[27px] font-bold whitespace-nowrap tabular-nums">
+      <FitLine className="text-[19px] leading-[27px] font-bold tabular-nums">
         {formatPlateNumber(plateNumber)}
-      </span>
-      <span className="mt-1 text-[15px] leading-[21px] font-medium whitespace-nowrap">{label}</span>
-      {fee && (
-        <span className="text-[15px] leading-[21px] font-bold whitespace-nowrap tabular-nums">
-          {fee}
-        </span>
-      )}
+      </FitLine>
+      <FitLine className="mt-1 text-[15px] leading-[21px] font-medium">{label}</FitLine>
+      {fee && <FitLine className="text-[15px] leading-[21px] font-bold tabular-nums">{fee}</FitLine>}
     </>
   );
 }

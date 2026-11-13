@@ -40,6 +40,10 @@ const boothBody = (label: string) => ({
   addressDetail: null,
 });
 
+const FEE_POLICY = { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 };
+
+const registration = (label: string) => ({ ...boothBody(label), feePolicy: FEE_POLICY });
+
 const countCreatedBooths = (...staffIds: number[]) =>
   prisma.booth.count({ where: { creatorId: { in: staffIds } } });
 
@@ -67,12 +71,19 @@ afterAll(async () => {
 });
 
 describe("createBooth database integration", () => {
-  it("creates the booth with its creator as an approved agent and completes onboarding", async () => {
+  it("creates the booth with its creator as an approved agent, its fee policy and completes onboarding", async () => {
     const staffId = await createStaff("VALET_AGENT");
-    const body = { ...boothBody("created"), addressDetail: "1층 로비" };
+    const { feePolicy, ...body } = { ...registration("created"), addressDetail: "1층 로비" };
 
-    const result = await createBooth(staffId, body);
+    const result = await createBooth(staffId, { ...body, feePolicy });
     if (!result.ok) throw new Error(result.reason);
+
+    await expect(
+      prisma.boothFeePolicy.findMany({
+        where: { boothId: result.value.id },
+        select: { baseMinutes: true, baseFee: true, extraUnitMinutes: true, extraUnitFee: true },
+      }),
+    ).resolves.toEqual([feePolicy]);
 
     await expect(
       prisma.booth.findMany({
@@ -92,7 +103,7 @@ describe("createBooth database integration", () => {
       data: { boothId: otherBoothId, staffId: approvedAgentId, status: "APPROVED" },
     });
 
-    await expect(createBooth(approvedAgentId, boothBody("approved-agent"))).resolves.toEqual({
+    await expect(createBooth(approvedAgentId, registration("approved-agent"))).resolves.toEqual({
       ok: false,
       reason: "ALREADY_ONBOARDED",
     });
@@ -105,8 +116,8 @@ describe("createBooth database integration", () => {
       const staffId = await createStaff("VALET_AGENT");
 
       const results = await Promise.all([
-        createBooth(staffId, boothBody(`double-a-${round}`)),
-        createBooth(staffId, boothBody(`double-b-${round}`)),
+        createBooth(staffId, registration(`double-a-${round}`)),
+        createBooth(staffId, registration(`double-b-${round}`)),
       ]);
 
       expect(results.filter((result) => result.ok)).toHaveLength(1);

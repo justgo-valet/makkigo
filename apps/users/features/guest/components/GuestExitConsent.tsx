@@ -1,9 +1,9 @@
 import { Field, FieldLabel } from "@makkigo/ui";
 import { Checkbox } from "@makkigo/ui/components/ui/checkbox";
 
-import { GUEST_LEGAL_DOCUMENTS } from "@/features/guest/hooks/useGuestVehicleStatus";
+import { GUEST_LEGAL_DOCUMENTS } from "@/features/guest/legalDocuments";
 
-import type { GuestLegalDocumentType } from "@/features/guest/hooks/useGuestVehicleStatus";
+import type { GuestLegalDocumentType } from "@/features/guest/legalDocuments";
 
 interface GuestExitConsentProps {
   agreed: boolean;

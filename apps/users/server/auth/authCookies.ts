@@ -4,6 +4,7 @@ import type { NextResponse } from "next/server";
 
 const ACCESS_TOKEN_COOKIE = "makkigo_access_token";
 const REFRESH_TOKEN_COOKIE = "makkigo_refresh_token";
+const SESSION_HINT_COOKIE = "makkigo_session";
 
 const REFRESH_TOKEN_COOKIE_PATH = "/api/v1/auth";
 
@@ -27,6 +28,15 @@ const setAuthCookies = (
     path: REFRESH_TOKEN_COOKIE_PATH,
     expires: tokens.refreshToken.expiresAt,
   });
+  response.cookies.set(SESSION_HINT_COOKIE, "1", {
+    ...baseCookieOptions,
+    path: "/",
+    expires: tokens.refreshToken.expiresAt,
+  });
+};
+
+const clearSessionHintCookie = (response: NextResponse) => {
+  response.cookies.set(SESSION_HINT_COOKIE, "", { ...baseCookieOptions, path: "/", maxAge: 0 });
 };
 
 const clearAuthCookies = (response: NextResponse) => {
@@ -36,6 +46,14 @@ const clearAuthCookies = (response: NextResponse) => {
     path: REFRESH_TOKEN_COOKIE_PATH,
     maxAge: 0,
   });
+  clearSessionHintCookie(response);
 };
 
-export { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE, clearAuthCookies, setAuthCookies };
+export {
+  ACCESS_TOKEN_COOKIE,
+  REFRESH_TOKEN_COOKIE,
+  SESSION_HINT_COOKIE,
+  clearAuthCookies,
+  clearSessionHintCookie,
+  setAuthCookies,
+};
