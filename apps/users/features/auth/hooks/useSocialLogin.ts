@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { completeNativeLogin } from "@/features/auth/apis/completeNativeLogin";
@@ -22,6 +23,7 @@ const loginWithApp = async (provider: SocialLoginProvider): Promise<AppLoginOutc
 };
 
 const useSocialLogin = (error: LoginError | null) => {
+  const router = useRouter();
   // 서버에서는 기기를 모르므로 버튼은 브라우저에서만 그린다.
   const platform = useSyncExternalStore(
     subscribe,
@@ -48,7 +50,7 @@ const useSocialLogin = (error: LoginError | null) => {
       }
 
       setIsRedirecting(true);
-      window.location.assign(outcome.redirectTo);
+      router.replace(outcome.redirectTo);
     },
     onError: () => setAppLoginError("failed"),
   });
