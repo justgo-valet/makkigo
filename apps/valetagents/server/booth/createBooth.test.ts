@@ -21,6 +21,7 @@ const body = {
   address: "서울특별시 중구 세종대로 110",
   addressDetail: null,
   feePolicy: { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 },
+  bankAccount: { bankName: "국민은행", accountNumber: "123-456-7890", accountHolder: "마끼고" },
 };
 
 describe("createBooth", () => {

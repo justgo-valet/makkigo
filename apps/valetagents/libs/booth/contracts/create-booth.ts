@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { feePolicySchema } from "./payment-settings";
+import { bankAccountSchema, feePolicySchema } from "./payment-settings";
 import { boothPhotoUploadMetadataSchema, MAX_BOOTH_PHOTOS } from "./photos";
 
 const BOOTH_NAME_MAX_LENGTH = 50;
@@ -18,6 +18,7 @@ const createBoothBodySchema = z
       .optional()
       .transform((value) => value || null),
     feePolicy: feePolicySchema,
+    bankAccount: bankAccountSchema,
   })
   .strict();
 

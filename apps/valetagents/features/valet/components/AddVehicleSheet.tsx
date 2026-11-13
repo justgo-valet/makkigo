@@ -9,7 +9,7 @@ import {
 } from "@makkigo/ui/components/ui/bottom-sheet";
 import { useState } from "react";
 
-import { INPUT_CLASS } from "@/components/fieldStyles";
+import { INPUT_CLASS, SELECT_ARROW_CLASS } from "@/components/fieldStyles";
 import { PLATE_NUMBER_PATTERN, normalizePlateNumber } from "@/libs/valet/contracts/add-vehicle";
 
 import type { AddVehicleInput } from "../apis/addVehicle";
@@ -69,7 +69,7 @@ function AddVehicleForm({
               id="add-vehicle-merchant"
               value={merchantId}
               onChange={(event) => setMerchantId(event.target.value)}
-              className={cn(INPUT_CLASS, "mt-0")}
+              className={cn(INPUT_CLASS, SELECT_ARROW_CLASS, "mt-0")}
             >
               <option value="">선택 안 함</option>
               {merchants.map(({ id, name }) => (

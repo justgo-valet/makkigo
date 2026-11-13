@@ -2,22 +2,21 @@
 
 import { cn } from "@makkigo/ui";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
-import { INPUT_CLASS } from "@/components/fieldStyles";
+import { INPUT_CLASS, SELECT_ARROW_CLASS } from "@/components/fieldStyles";
 
 import {
   formatClock,
   formatHistoryDate,
   formatPlateNumber,
   formatWon,
-  shiftDate,
 } from "../formatters";
 import { useUpdateCompletedFee } from "../hooks/useUpdateCompletedFee";
 
+import DatePickerSheet from "./DatePickerSheet";
 import FeeEditSheet from "./FeeEditSheet";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
@@ -47,7 +46,6 @@ const historyHref = (boothId: number, date: string, merchant: string) => {
   return `/booths/${boothId}/history?${params}`;
 };
 
-const DAY_LINK_CLASS = "flex size-10 items-center justify-center rounded-full";
 
 export default function CompletedHistory({
   boothId,
@@ -72,7 +70,7 @@ export default function CompletedHistory({
       : history.items.filter((item) => merchantKey(item) === merchant);
   const total = items.reduce((sum, { fee }) => sum + (fee ?? 0), 0);
   const missingFeeCount = items.filter(({ fee }) => fee === null).length;
-  const isToday = history.date >= history.today;
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col pb-6">
@@ -80,35 +78,21 @@ export default function CompletedHistory({
 
       <h1 className="mt-4 text-xl font-bold text-(--base-color)">집계</h1>
 
-      <nav aria-label="날짜" className="mt-4 flex items-center justify-between text-(--base-color)">
-        <Link
-          href={historyHref(boothId, shiftDate(history.date, -1), merchant)}
-          aria-label="이전 날"
-          className={DAY_LINK_CLASS}
-        >
-          <Image src="/icons/chevron_right.svg" alt="" aria-hidden="true" width={24} height={24} className="rotate-180" />
-        </Link>
-        <p className="text-lg font-bold">{formatHistoryDate(history.date)}</p>
-        {isToday ? (
-          <span aria-hidden="true" className={cn(DAY_LINK_CLASS, "opacity-30")}>
-            <Image src="/icons/chevron_right.svg" alt="" width={24} height={24} />
-          </span>
-        ) : (
-          <Link
-            href={historyHref(boothId, shiftDate(history.date, 1), merchant)}
-            aria-label="다음 날"
-            className={DAY_LINK_CLASS}
-          >
-            <Image src="/icons/chevron_right.svg" alt="" aria-hidden="true" width={24} height={24} />
-          </Link>
-        )}
-      </nav>
+      <button
+        type="button"
+        aria-label={`${formatHistoryDate(history.date)}, 날짜 선택`}
+        className="mt-4 flex h-12 items-center justify-center gap-1 self-center rounded-full px-4 text-lg font-bold text-(--base-color) focus-visible:outline-2 focus-visible:outline-primary"
+        onClick={() => setPickerOpen(true)}
+      >
+        {formatHistoryDate(history.date)}
+        <Image src="/icons/chevron_right.svg" alt="" aria-hidden="true" width={20} height={20} className="rotate-90" />
+      </button>
 
       <select
         aria-label="업체"
         value={merchant}
         onChange={(event) => router.replace(historyHref(boothId, history.date, event.target.value))}
-        className={INPUT_CLASS}
+        className={cn(INPUT_CLASS, SELECT_ARROW_CLASS)}
       >
         <option value={ALL_MERCHANTS}>업체 전체</option>
         {history.merchants.map(({ id, name }) => (
@@ -172,6 +156,17 @@ export default function CompletedHistory({
         </ul>
       )}
 
+      <DatePickerSheet
+        open={pickerOpen}
+        date={history.date}
+        today={history.today}
+        firstYear={history.firstYear}
+        onSelect={(date) => {
+          setPickerOpen(false);
+          router.push(historyHref(boothId, date, merchant));
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
       <FeeEditSheet
         session={feeTarget}
         isUpdating={feeEditing.isUpdating}

@@ -42,7 +42,13 @@ const boothBody = (label: string) => ({
 
 const FEE_POLICY = { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 };
 
-const registration = (label: string) => ({ ...boothBody(label), feePolicy: FEE_POLICY });
+const BANK_ACCOUNT = { bankName: "국민은행", accountNumber: "123-456-7890", accountHolder: "마끼고" };
+
+const registration = (label: string) => ({
+  ...boothBody(label),
+  feePolicy: FEE_POLICY,
+  bankAccount: BANK_ACCOUNT,
+});
 
 const countCreatedBooths = (...staffIds: number[]) =>
   prisma.booth.count({ where: { creatorId: { in: staffIds } } });
@@ -71,11 +77,11 @@ afterAll(async () => {
 });
 
 describe("createBooth database integration", () => {
-  it("creates the booth with its creator as an approved agent, its fee policy and completes onboarding", async () => {
+  it("creates the booth with its creator as an approved agent, its fee policy and bank account and completes onboarding", async () => {
     const staffId = await createStaff("VALET_AGENT");
-    const { feePolicy, ...body } = { ...registration("created"), addressDetail: "1층 로비" };
+    const { feePolicy, bankAccount, ...body } = { ...registration("created"), addressDetail: "1층 로비" };
 
-    const result = await createBooth(staffId, { ...body, feePolicy });
+    const result = await createBooth(staffId, { ...body, feePolicy, bankAccount });
     if (!result.ok) throw new Error(result.reason);
 
     await expect(
@@ -84,6 +90,12 @@ describe("createBooth database integration", () => {
         select: { baseMinutes: true, baseFee: true, extraUnitMinutes: true, extraUnitFee: true },
       }),
     ).resolves.toEqual([feePolicy]);
+    await expect(
+      prisma.boothBankAccount.findMany({
+        where: { boothId: result.value.id },
+        select: { bankName: true, accountNumber: true, accountHolder: true },
+      }),
+    ).resolves.toEqual([bankAccount]);
 
     await expect(
       prisma.booth.findMany({

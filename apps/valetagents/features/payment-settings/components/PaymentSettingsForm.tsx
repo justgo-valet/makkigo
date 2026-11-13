@@ -1,11 +1,12 @@
 "use client";
 
-import { Button, FieldError, Input, cn } from "@makkigo/ui";
+import { Button, FieldError, cn } from "@makkigo/ui";
 
 import AppHeader from "@/components/layouts/AppHeader";
 
 import { usePaymentSettingsForm } from "../hooks/usePaymentSettingsForm";
 
+import BankAccountFields from "./BankAccountFields";
 import FeePolicyFields from "./FeePolicyFields";
 
 import type { MenuAccess } from "@/libs/auth/menuItems";
@@ -16,7 +17,6 @@ import type {
 
 const SECTION_TITLE_CLASS = "text-base font-bold text-(--base-color)";
 const SECTION_DESCRIPTION_CLASS = "mt-1 text-xs text-(--tertiary-color)";
-const TEXT_INPUT_CLASS = "mt-2 h-12 bg-white text-base text-(--base-color) md:text-base";
 
 interface PaymentSettingsFormProps {
   boothId: number;
@@ -57,33 +57,7 @@ export default function PaymentSettingsForm({
         <RequiredMark />
       </h2>
       <p className={SECTION_DESCRIPTION_CLASS}>출차할 때 고객에게 보여줘요</p>
-      <Input
-        aria-label="은행"
-        placeholder="은행"
-        autoComplete="off"
-        maxLength={20}
-        value={form.bankName}
-        onChange={(event) => form.changeBankName(event.target.value)}
-        className={TEXT_INPUT_CLASS}
-      />
-      <Input
-        aria-label="계좌번호"
-        placeholder="계좌번호"
-        inputMode="numeric"
-        autoComplete="off"
-        value={form.accountNumber}
-        onChange={(event) => form.changeAccountNumber(event.target.value)}
-        className={TEXT_INPUT_CLASS}
-      />
-      <Input
-        aria-label="예금주"
-        placeholder="예금주"
-        autoComplete="off"
-        maxLength={30}
-        value={form.accountHolder}
-        onChange={(event) => form.changeAccountHolder(event.target.value)}
-        className={TEXT_INPUT_CLASS}
-      />
+      <BankAccountFields values={form.accountValues} onChange={form.changeAccount} />
 
       <div className="mt-auto pt-6" aria-live="polite">
         {(form.errorMessage ?? form.invalidMessage) && (

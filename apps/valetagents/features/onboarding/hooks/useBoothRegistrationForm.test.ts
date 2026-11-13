@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getBoothRegistrationAvailability,
+  getBoothInfoAvailability,
   isAlreadyOnboardedError,
 } from "./useBoothRegistrationForm";
 
@@ -12,18 +12,16 @@ const filled = {
   address: ADDRESS,
   geocodedAddress: ADDRESS,
   mapState: "ready",
-  feePolicyValid: true,
   isSaving: false,
 } as const;
 
-describe("getBoothRegistrationAvailability", () => {
-  it("allows registering only a named booth with a valid fee policy whose typed address the map has found", () => {
-    expect(getBoothRegistrationAvailability(filled)).toBe(true);
-    expect(getBoothRegistrationAvailability({ ...filled, name: " " })).toBe(false);
-    expect(getBoothRegistrationAvailability({ ...filled, mapState: "error" })).toBe(false);
-    expect(getBoothRegistrationAvailability({ ...filled, address: `${ADDRESS} 1` })).toBe(false);
-    expect(getBoothRegistrationAvailability({ ...filled, isSaving: true })).toBe(false);
-    expect(getBoothRegistrationAvailability({ ...filled, feePolicyValid: false })).toBe(false);
+describe("getBoothInfoAvailability", () => {
+  it("moves on only with a named booth whose typed address the map has found", () => {
+    expect(getBoothInfoAvailability(filled)).toBe(true);
+    expect(getBoothInfoAvailability({ ...filled, name: " " })).toBe(false);
+    expect(getBoothInfoAvailability({ ...filled, mapState: "error" })).toBe(false);
+    expect(getBoothInfoAvailability({ ...filled, address: `${ADDRESS} 1` })).toBe(false);
+    expect(getBoothInfoAvailability({ ...filled, isSaving: true })).toBe(false);
   });
 });
 
