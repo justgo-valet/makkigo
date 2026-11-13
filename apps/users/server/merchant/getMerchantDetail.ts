@@ -6,6 +6,8 @@ import { availableBoothWhere } from "@/server/merchant/availableBooth";
 
 import type { MerchantDetail } from "@/libs/merchant/contracts/merchantDetail";
 
+const photoOrder = [{ sortOrder: "asc" as const }, { id: "asc" as const }];
+
 const getMerchantDetail = async (merchantId: number): Promise<MerchantDetail | null> => {
   const now = new Date();
   const merchant = await prisma.merchant.findFirst({
@@ -21,7 +23,7 @@ const getMerchantDetail = async (merchantId: number): Promise<MerchantDetail | n
       addressDetail: true,
       latitude: true,
       longitude: true,
-      photos: { select: { path: true }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] },
+      photos: { select: { path: true }, orderBy: photoOrder },
       booths: {
         where: availableBoothWhere(now),
         select: {
@@ -29,6 +31,7 @@ const getMerchantDetail = async (merchantId: number): Promise<MerchantDetail | n
             select: {
               id: true,
               name: true,
+              photos: { select: { path: true }, orderBy: photoOrder },
               feePolicies: {
                 where: { effectiveFrom: { lte: now } },
                 select: {
@@ -60,7 +63,15 @@ const getMerchantDetail = async (merchantId: number): Promise<MerchantDetail | n
     photoUrls: merchant.photos.map((photo) => toImageUrl(photo.path)),
     booths: merchant.booths.flatMap(({ booth }) => {
       const feePolicy = booth.feePolicies[0];
-      return feePolicy ? [{ id: booth.id, name: booth.name, feePolicy }] : [];
+      if (!feePolicy) return [];
+      return [
+        {
+          id: booth.id,
+          name: booth.name,
+          photoUrls: booth.photos.map((photo) => toImageUrl(photo.path)),
+          feePolicy,
+        },
+      ];
     }),
   };
 };
