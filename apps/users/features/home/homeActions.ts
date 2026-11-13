@@ -51,8 +51,19 @@ const ACTION_KEYS_BY_STATUS: Record<HomeStatus, HomeActionKey[]> = {
   EXIT_PREPARING: [],
 };
 
+const CAR_ACTION_KEY_BY_STATUS: Partial<Record<HomeStatus, HomeActionKey>> = {
+  MERCHANT_SELECTED: "ARRIVAL",
+  PARKED: "EXIT_REQUEST",
+};
+
 const getHomeActions = (status: HomeStatus) =>
   ACTION_KEYS_BY_STATUS[status].map((key) => HOME_ACTIONS[key]);
 
-export { getHomeActions };
+const getCarAction = (status: HomeStatus) => {
+  const key = CAR_ACTION_KEY_BY_STATUS[status];
+
+  return key ? HOME_ACTIONS[key] : null;
+};
+
+export { getCarAction, getHomeActions };
 export type { HomeAction, HomeActionKey };
