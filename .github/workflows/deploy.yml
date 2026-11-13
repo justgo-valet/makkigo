@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
-        target: [users, valetagents, migrate]
+        target: [users, valetagents, tickets, migrate]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
