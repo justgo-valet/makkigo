@@ -23,7 +23,7 @@ const listCompletedValetSessions = async (
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false, reason: failure };
 
-  const [sessions, contracts] = await Promise.all([
+  const [sessions, contracts, booth] = await Promise.all([
     prisma.valetSession.findMany({
       where: { boothId, status: "COMPLETED", completedAt: seoulDayRange(date) },
       orderBy: [{ completedAt: "desc" }, { id: "desc" }],
@@ -38,6 +38,7 @@ const listCompletedValetSessions = async (
       },
     }),
     listContractedMerchants(boothId),
+    prisma.booth.findUniqueOrThrow({ where: { id: boothId }, select: { createdAt: true } }),
   ]);
 
   const merchants = new Map(contracts.map((merchant) => [merchant.id, merchant]));
@@ -48,6 +49,7 @@ const listCompletedValetSessions = async (
     value: {
       date,
       today: toSeoulDate(now),
+      firstYear: Number(toSeoulDate(booth.createdAt).slice(0, 4)),
       merchants: [...merchants.values()],
       items: sessions.map((session) => ({
         id: session.id,

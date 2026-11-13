@@ -6,6 +6,7 @@ const body = {
   name: "시청 부스",
   address: "서울특별시 중구 세종대로 110",
   feePolicy: { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 },
+  bankAccount: { bankName: "국민은행", accountNumber: "123-456-7890", accountHolder: "마끼고" },
 };
 
 describe("createBoothBodySchema", () => {
@@ -16,12 +17,13 @@ describe("createBoothBodySchema", () => {
   });
 
   it("rejects a missing name", () => {
-    expect(createBoothBodySchema.safeParse({ address: body.address, feePolicy: body.feePolicy }).success).toBe(false);
+    expect(createBoothBodySchema.safeParse({ ...body, name: undefined }).success).toBe(false);
   });
 
-  it("requires a valid fee policy", () => {
-    const { feePolicy, ...withoutFee } = body;
-    expect(createBoothBodySchema.safeParse(withoutFee).success).toBe(false);
+  it("requires a valid fee policy and bank account", () => {
+    const { feePolicy, bankAccount, ...rest } = body;
+    expect(createBoothBodySchema.safeParse({ ...rest, bankAccount }).success).toBe(false);
     expect(createBoothBodySchema.safeParse({ ...body, feePolicy: { ...feePolicy, baseMinutes: 30 } }).success).toBe(false);
+    expect(createBoothBodySchema.safeParse({ ...rest, feePolicy }).success).toBe(false);
   });
 });

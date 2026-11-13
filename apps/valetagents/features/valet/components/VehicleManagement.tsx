@@ -128,6 +128,7 @@ export default function VehicleManagement({
         title="출차 완료"
         description="확인을 누르면 이 차량을 출차 완료로 처리해요."
         plateNumber={completeTarget?.plateNumber ?? null}
+        fee={completeTarget?.fee ?? null}
         isPending={completing.isCompleting}
         errorMessage={completing.errorMessage}
         onConfirm={() => completeTarget && completing.complete(completeTarget.id)}

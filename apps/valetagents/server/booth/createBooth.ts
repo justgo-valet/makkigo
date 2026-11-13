@@ -70,6 +70,7 @@ const createInTransaction = async (
   const failure = getCreationFailure(staff);
   if (failure) return { ok: false, reason: failure };
 
+  const effectiveFrom = new Date();
   const booth = await transaction.booth.create({
     data: {
       name: body.name,
@@ -77,7 +78,8 @@ const createInTransaction = async (
       addressDetail: body.addressDetail,
       creatorId: staffId,
       agents: { create: { staffId, status: "APPROVED" } },
-      feePolicies: { create: { ...body.feePolicy, effectiveFrom: new Date() } },
+      feePolicies: { create: { ...body.feePolicy, effectiveFrom } },
+      bankAccounts: { create: { ...body.bankAccount, effectiveFrom } },
       ...(photoPaths.length > 0 ? { photos: { create: photoPaths.map((path, sortOrder) => ({ path, sortOrder })) } } : {}),
     },
     select: { id: true },
