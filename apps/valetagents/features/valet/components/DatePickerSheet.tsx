@@ -10,9 +10,13 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
+import { SELECT_ARROW_CLASS } from "@/components/fieldStyles";
+
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const SELECT_CLASS =
-  "h-10 rounded-md border border-input bg-white px-2 text-base font-bold text-(--base-color) outline-none focus-visible:border-primary";
+const SELECT_CLASS = cn(
+  "h-10 rounded-md border border-input bg-white pl-3 text-base font-bold text-(--base-color) outline-none focus-visible:border-primary",
+  SELECT_ARROW_CLASS,
+);
 const MONTH_BUTTON_CLASS = "flex size-10 items-center justify-center rounded-full disabled:opacity-30";
 
 const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, index) => from + index);

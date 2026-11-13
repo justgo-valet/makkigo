@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
-import { INPUT_CLASS } from "@/components/fieldStyles";
+import { INPUT_CLASS, SELECT_ARROW_CLASS } from "@/components/fieldStyles";
 
 import {
   formatClock,
@@ -92,7 +92,7 @@ export default function CompletedHistory({
         aria-label="업체"
         value={merchant}
         onChange={(event) => router.replace(historyHref(boothId, history.date, event.target.value))}
-        className={INPUT_CLASS}
+        className={cn(INPUT_CLASS, SELECT_ARROW_CLASS)}
       >
         <option value={ALL_MERCHANTS}>업체 전체</option>
         {history.merchants.map(({ id, name }) => (
