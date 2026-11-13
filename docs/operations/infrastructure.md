@@ -84,7 +84,7 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 
 | 항목 | 상태 |
 |---|---|
-| 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `https://valet.makkigo.com` 의 POST 가 허용되는 것을 확인 |
+| 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `http://localhost:3002` · `https://valet.makkigo.com` · `https://app.makkigo.com` · `https://tickets.makkigo.com` 의 POST 허용. GET · HEAD 규칙에도 `https://tickets.makkigo.com` (티켓 편집기가 이미지를 캔버스에 그림) |
 | EC2 역할의 S3 권한 | 적용됨 — 운영 역할 정책이 `booths/staging/*` · `booths/final/*` 쓰기를 허용하는 것을 확인. `deploy/aws/setup-iam.sh` 는 업체 · 부스 · 티켓 경로를 포함 |
 | CloudFront staging 차단 | 업체 · 부스 staging 은 403 확인됨. **티켓 staging 은 미검증** — 공개 전 `tickets/staging/*` Deny 적용 및 URL 403 확인 필요 (아래 "staging 비공개") |
 | 부스 staging lifecycle | 활성화됨 — `booths/staging/` 객체는 업로드 후 1일 만료 |
@@ -120,7 +120,7 @@ EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain
 CORS 는 기존 GET · HEAD 규칙에 POST 규칙을 하나 더한 형태입니다:
 
 ```json
-{"AllowedOrigins":["https://valet.makkigo.com","http://localhost:3000"],"AllowedMethods":["POST"],"AllowedHeaders":["*"],"MaxAgeSeconds":300}
+{"AllowedOrigins":["https://valet.makkigo.com","https://app.makkigo.com","https://tickets.makkigo.com","http://localhost:3000","http://localhost:3002"],"AllowedMethods":["POST"],"AllowedHeaders":["*"],"MaxAgeSeconds":300}
 ```
 
 CORS 는 인증 · 쓰기 권한을 주지 않습니다. 2026-10-13 에 로컬 요원 앱에서 이 버킷으로 presigned POST,

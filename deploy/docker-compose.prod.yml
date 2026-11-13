@@ -17,6 +17,7 @@ services:
     environment:
       USERS_DOMAIN: ${USERS_DOMAIN:-app.makkigo.com}
       VALET_DOMAIN: ${VALET_DOMAIN:-valet.makkigo.com}
+      TICKETS_DOMAIN: ${TICKETS_DOMAIN:-tickets.makkigo.com}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -25,6 +26,8 @@ services:
       users:
         condition: service_healthy
       valetagents:
+        condition: service_healthy
+      tickets:
         condition: service_healthy
     logging: *logging
 
@@ -41,6 +44,15 @@ services:
     image: ghcr.io/justgo-valet/makkigo-valetagents:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
     restart: unless-stopped
     env_file: ${ENV_DIR:-/opt/makkigo/env}/valetagents.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  tickets:
+    image: ghcr.io/justgo-valet/makkigo-tickets:${IMAGE_TAG:?IMAGE_TAG 가 필요합니다}
+    restart: unless-stopped
+    env_file: ${ENV_DIR:-/opt/makkigo/env}/tickets.env
     depends_on:
       postgres:
         condition: service_healthy
