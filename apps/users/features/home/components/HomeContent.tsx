@@ -70,6 +70,14 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
           priority
           className="object-contain"
         />
+        {home.carAction && (
+          <button
+            type="button"
+            aria-label={home.carAction.title}
+            className="absolute inset-0 rounded-xl"
+            onClick={actionHandlers[home.carAction.key]}
+          />
+        )}
       </div>
       {home.isCarImagePlaceholder && (
         <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color) short:-mt-1 short:text-xs">
@@ -94,9 +102,17 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
             </Link>
           </Button>
         )}
-        {home.actions.map((action) => (
-          <HomeActionItem key={action.key} action={action} onClick={actionHandlers[action.key]} />
-        ))}
+        {home.actions.length > 0 && (
+          <div className="grid grid-cols-2 gap-3 *:odd:last:col-span-2 short:gap-2">
+            {home.actions.map((action) => (
+              <HomeActionItem
+                key={action.key}
+                action={action}
+                onClick={actionHandlers[action.key]}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <MerchantSearchSheet
