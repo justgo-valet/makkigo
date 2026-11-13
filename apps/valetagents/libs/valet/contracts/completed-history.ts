@@ -10,6 +10,7 @@ interface CompletedHistoryItem {
 interface CompletedHistory {
   date: string;
   today: string;
+  firstYear: number;
   merchants: { id: number; name: string }[];
   items: CompletedHistoryItem[];
 }

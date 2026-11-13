@@ -7,6 +7,7 @@ import { useState } from "react";
 import { paymentSettingsSchema } from "@/libs/booth/contracts/payment-settings";
 
 import { savePaymentSettings } from "../apis/savePaymentSettings";
+import { useBankAccountFields } from "./useBankAccountFields";
 import { useFeePolicyFields } from "./useFeePolicyFields";
 
 import type {
@@ -26,14 +27,12 @@ interface UsePaymentSettingsFormOptions {
 
 const usePaymentSettingsForm = ({ boothId, feePolicy, bankAccount }: UsePaymentSettingsFormOptions) => {
   const fee = useFeePolicyFields(feePolicy);
-  const [bankName, setBankName] = useState(bankAccount?.bankName ?? "");
-  const [accountNumber, setAccountNumber] = useState(bankAccount?.accountNumber ?? "");
-  const [accountHolder, setAccountHolder] = useState(bankAccount?.accountHolder ?? "");
+  const account = useBankAccountFields(bankAccount);
   const [saved, setSaved] = useState(false);
 
   const parsed = paymentSettingsSchema.safeParse({
     feePolicy: fee.feePolicy,
-    bankAccount: { bankName, accountNumber, accountHolder },
+    bankAccount: account.values,
   });
 
   const mutation = useMutation({
@@ -60,19 +59,14 @@ const usePaymentSettingsForm = ({ boothId, feePolicy, bankAccount }: UsePaymentS
       extraUnitMinutes: edit(fee.change.extraUnitMinutes),
       extraUnitFee: edit(fee.change.extraUnitFee),
     },
-    bankName,
-    accountNumber,
-    accountHolder,
-    changeBankName: edit(setBankName),
-    changeAccountNumber: edit((value: string) => setAccountNumber(value.replace(/[^\d-]/g, "").slice(0, 30))),
-    changeAccountHolder: edit(setAccountHolder),
+    accountValues: account.values,
+    changeAccount: {
+      bankName: edit(account.change.bankName),
+      accountNumber: edit(account.change.accountNumber),
+      accountHolder: edit(account.change.accountHolder),
+    },
     canSave: parsed.success && !mutation.isPending,
-    invalidMessage:
-      !parsed.success &&
-      fee.filled &&
-      [bankName, accountNumber, accountHolder].every((value) => value.trim() !== "")
-        ? INVALID_MESSAGE
-        : null,
+    invalidMessage: !parsed.success && fee.filled && account.filled ? INVALID_MESSAGE : null,
     save: () => mutation.mutate(),
     saved,
     errorMessage: mutation.error ? getErrorMessage(mutation.error, SAVE_ERROR_MESSAGE) : null,
