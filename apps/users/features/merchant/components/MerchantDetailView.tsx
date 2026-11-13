@@ -101,27 +101,7 @@ function MerchantInfo({
         <p className="text-xs break-keep text-(--tertiary-color)">{formatAddress(merchant)}</p>
       </div>
 
-      {merchant.photoUrls.length > 0 && (
-        <ul
-          aria-label="업체 사진"
-          className="flex shrink-0 snap-x gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
-        >
-          {merchant.photoUrls.map((url, index) => (
-            <li
-              key={url}
-              className="relative h-[88px] w-[120px] shrink-0 snap-start overflow-hidden rounded-lg bg-slate-100"
-            >
-              <Image
-                src={url}
-                alt={`${merchant.name} 사진 ${index + 1}`}
-                fill
-                unoptimized
-                className="object-cover"
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      <PhotoStrip label="업체 사진" altPrefix={`${merchant.name} 사진`} urls={merchant.photoUrls} />
 
       <section className="flex flex-col gap-2">
         <h4 className="text-sm font-bold text-(--base-color)">발렛 비용</h4>
@@ -130,11 +110,51 @@ function MerchantInfo({
             {hasManyBooths && (
               <p className="text-xs font-medium text-(--tertiary-color)">{booth.name}</p>
             )}
+            {booth.photoUrls.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <p className="text-xs font-medium text-(--tertiary-color)">부스 위치</p>
+                <PhotoStrip
+                  label={`${booth.name} 부스 위치 사진`}
+                  altPrefix="부스 위치 사진"
+                  urls={booth.photoUrls}
+                />
+              </div>
+            )}
             <FeePolicyTable feePolicy={booth.feePolicy} />
           </div>
         ))}
       </section>
     </div>
+  );
+}
+
+function PhotoStrip({
+  label,
+  altPrefix,
+  urls,
+}: Readonly<{ label: string; altPrefix: string; urls: string[] }>) {
+  if (urls.length === 0) return null;
+
+  return (
+    <ul
+      aria-label={label}
+      className="flex shrink-0 snap-x gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
+    >
+      {urls.map((url, index) => (
+        <li
+          key={url}
+          className="relative h-[88px] w-[120px] shrink-0 snap-start overflow-hidden rounded-lg bg-slate-100"
+        >
+          <Image
+            src={url}
+            alt={`${altPrefix} ${index + 1}`}
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 
