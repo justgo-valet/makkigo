@@ -5,8 +5,9 @@ import type {
   TicketImageLayer,
   TicketLayer,
   TicketShapePreset,
+  TicketTextLayer,
 } from "./ticketDesign";
-import { ticketEditorShapePresets } from "./ticketDesign";
+import { ticketEditorShapePresets, ticketFontStacks } from "./ticketDesign";
 
 type ResolveTicketAssetUrl = (assetPath: string) => string;
 type TicketImageAltResolver = (layer: TicketImageLayer) => string;
@@ -67,6 +68,21 @@ function getLayerStyle(layer: TicketLayer): CSSProperties {
     top: `${layer.y * 100}%`,
     width: `${layer.width * 100}%`,
     zIndex: layer.order,
+    ...(layer.rotation ? { transform: `rotate(${layer.rotation}deg)` } : {}),
+  };
+}
+
+function getTextStyle(layer: TicketTextLayer): CSSProperties {
+  return {
+    color: layer.color,
+    fontSize: `${layer.fontSize * 100}cqw`,
+    lineHeight: 1.2,
+    ...(layer.fontFamily ? { fontFamily: ticketFontStacks[layer.fontFamily] } : {}),
+    ...(layer.fontWeight ? { fontWeight: layer.fontWeight } : {}),
+    ...(layer.italic ? { fontStyle: "italic" } : {}),
+    ...(layer.underline ? { textDecoration: "underline" } : {}),
+    ...(layer.textAlign ? { textAlign: layer.textAlign } : {}),
+    fontSynthesis: "weight style",
   };
 }
 
@@ -103,9 +119,7 @@ function TicketRenderer({
               key={layer.id}
               style={{
                 ...layerStyle,
-                color: layer.color,
-                fontSize: `${layer.fontSize * 100}cqw`,
-                lineHeight: 1.2,
+                ...getTextStyle(layer),
                 overflowWrap: "anywhere",
                 whiteSpace: "pre-wrap",
               }}
@@ -121,7 +135,13 @@ function TicketRenderer({
               alt={ariaLabel ? "" : (resolveImageAlt?.(layer) ?? "")}
               draggable={false}
               src={resolveAssetUrl(layer.assetPath)}
-              style={{ display: "block", height: "100%", objectFit: "cover", width: "100%" }}
+              style={{
+                display: "block",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: `${(layer.focusX ?? 0.5) * 100}% ${(layer.focusY ?? 0.5) * 100}%`,
+                width: "100%",
+              }}
             />
           </div>
         );
@@ -130,5 +150,5 @@ function TicketRenderer({
   );
 }
 
-export { TicketRenderer };
+export { getTextStyle, TicketRenderer };
 export type { ResolveTicketAssetUrl, TicketImageAltResolver, TicketRendererProps };

@@ -38,6 +38,18 @@ describe("ticketDesignSchema", () => {
     expect(ticketDesignSchema.parse(validDesign)).toEqual(validDesign);
   });
 
+  it("accepts optional text styles, rotation and image focus", () => {
+    const styled = {
+      ...validDesign,
+      layers: [
+        { ...validDesign.layers[0], fontFamily: "SERIF", fontWeight: 700, italic: true, underline: true, textAlign: "center", rotation: -15 },
+        { ...validDesign.layers[1], x: -0.3, y: 0.8, width: 1.4, focusX: 0, focusY: 1, rotation: 90 },
+      ],
+    };
+    expect(ticketDesignSchema.parse(styled)).toEqual(styled);
+    expect(ticketDesignSchema.safeParse({ ...styled, layers: [{ ...styled.layers[0], fontWeight: 450 }] }).success).toBe(false);
+  });
+
   it.each([
     ["unknown fields", { ...validDesign, html: "<script>alert(1)</script>" }],
     [
@@ -67,10 +79,10 @@ describe("ticketDesignSchema", () => {
       },
     ],
     [
-      "out-of-bounds layers",
+      "layers entirely outside the ticket",
       {
         ...validDesign,
-        layers: [{ ...validDesign.layers[0], x: 0.9, width: 0.2 }],
+        layers: [{ ...validDesign.layers[0], x: -0.5, width: 0.3 }],
       },
     ],
     [

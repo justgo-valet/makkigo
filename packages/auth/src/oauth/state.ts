@@ -7,7 +7,7 @@ import type { SocialProvider } from "database";
 const STATE_AUDIENCE = "users-oauth-state";
 const ISSUER = "makkigo";
 
-export type OAuthClient = "web" | "app";
+export type OAuthClient = "web" | "app" | "tickets";
 
 export interface OAuthState {
   provider: SocialProvider;
@@ -35,7 +35,7 @@ export const readOAuthState = async (token: string): Promise<OAuthState | null> 
     });
     const { provider, nonce, csrf, client, appChallenge } = payload as Partial<OAuthState>;
 
-    if (!provider || !nonce || !csrf || (client !== "web" && client !== "app")) {
+    if (!provider || !nonce || !csrf || (client !== "web" && client !== "app" && client !== "tickets")) {
       return null;
     }
 
