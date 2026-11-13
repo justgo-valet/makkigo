@@ -51,7 +51,7 @@ export default function ArrivalConfirmSheet({
             disabled={isSending}
             onClick={onClose}
           >
-            나중에 할게요
+            도착 알림은 나중에 보낼게요
           </Button>
         </BottomSheetFooter>
       </BottomSheetContent>
