@@ -7,6 +7,7 @@ import Link from "next/link";
 import ExitSummaryCard from "@/features/home/components/ExitSummaryCard";
 import HomeActionItem from "@/features/home/components/HomeActionItem";
 import ValetStatusHeader from "@/features/home/components/ValetStatusHeader";
+import { useExitCompletion } from "@/features/home/hooks/useExitCompletion";
 import { useHome } from "@/features/home/hooks/useHome";
 import { useHomeHeader } from "@/features/home/hooks/useHomeHeader";
 import ArrivalConfirmSheet from "@/features/merchant/components/ArrivalConfirmSheet";
@@ -28,6 +29,7 @@ import type { HomeActionKey } from "@/features/home/homeActions";
 export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKey: string }>) {
   useHomeHeader();
   const home = useHome();
+  const exitCompletion = useExitCompletion();
   const merchantSearch = useMerchantSearchFlow();
   const pushPermissionBanner = usePushPermissionBanner();
   const pickupRequest = usePickupRequestFlow();
@@ -70,6 +72,14 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
           priority
           className="object-contain"
         />
+        {home.carAction && (
+          <button
+            type="button"
+            aria-label={home.carAction.title}
+            className="absolute inset-0 rounded-xl"
+            onClick={actionHandlers[home.carAction.key]}
+          />
+        )}
       </div>
       {home.isCarImagePlaceholder && (
         <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color) short:-mt-1 short:text-xs">
@@ -94,9 +104,17 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
             </Link>
           </Button>
         )}
-        {home.actions.map((action) => (
-          <HomeActionItem key={action.key} action={action} onClick={actionHandlers[action.key]} />
-        ))}
+        {home.actions.length > 0 && (
+          <div className="grid grid-cols-2 gap-3 *:odd:last:col-span-2 short:gap-2">
+            {home.actions.map((action) => (
+              <HomeActionItem
+                key={action.key}
+                action={action}
+                onClick={actionHandlers[action.key]}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <MerchantSearchSheet
@@ -178,6 +196,14 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
         confirmLabel="확인"
         onConfirm={arrivalDelay.close}
         onClose={arrivalDelay.close}
+      />
+      <ValetNoticeSheet
+        open={exitCompletion.isOpen}
+        title="출차가 완료됐어요"
+        description={exitCompletion.description}
+        confirmLabel="확인"
+        onConfirm={exitCompletion.confirm}
+        onClose={exitCompletion.confirm}
       />
     </div>
   );
