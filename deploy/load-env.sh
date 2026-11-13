@@ -9,7 +9,7 @@ TAB="$(printf '\t')"
 umask 077
 mkdir -p "$ENV_DIR"
 
-for target in users valetagents postgres deploy; do
+for target in users valetagents tickets postgres deploy; do
   tmp="$(mktemp "$ENV_DIR/.$target.XXXXXX")"
   aws ssm get-parameters-by-path \
     --region "$REGION" \

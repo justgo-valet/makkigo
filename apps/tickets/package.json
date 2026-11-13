@@ -1,0 +1,41 @@
+{
+  "name": "@makkigo/tickets",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1149.0",
+    "@aws-sdk/s3-presigned-post": "3.1149.0",
+    "@makkigo/api-client": "workspace:*",
+    "@makkigo/auth": "workspace:*",
+    "@makkigo/ticket-design": "workspace:*",
+    "@makkigo/ui": "workspace:*",
+    "database": "workspace:*",
+    "fabric": "^7.4.0",
+    "lucide-react": "^1.46.0",
+    "next": "^16.3.5",
+    "pretendard": "^1.3.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.5",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^4.3.3",
+    "typescript": "6.0.3"
+  }
+}

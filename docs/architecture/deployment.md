@@ -4,9 +4,9 @@
 
 - AWS **EC2 1대**, 서울 리전(`ap-northeast-2`). **운영 서버만** 둡니다 (개발 서버 없음).
 - 서버 CPU 는 **ARM(aarch64, Graviton)**, OS 는 Ubuntu 26.04. 그래서 이미지는 GitHub 의 **ARM 빌드 서버(`ubuntu-24.04-arm`)** 에서 `linux/arm64` 로 빌드합니다
-- 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), PostgreSQL. 직접 운영합니다.
+- 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), 티켓 관리 웹(`apps/tickets`), PostgreSQL. 직접 운영합니다.
 - DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
-- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com` (Route 53 A 레코드 → EC2 탄력적 IP. 도메인 등록은 가비아, DNS 는 Route 53). 루트 `makkigo.com` 은 비워 둠
+- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com`, 티켓 관리 웹 `tickets.makkigo.com` (Route 53 A 레코드 → EC2 탄력적 IP. 도메인 등록은 가비아, DNS 는 Route 53). 루트 `makkigo.com` 은 비워 둠
 - HTTPS: **Caddy** 가 Let's Encrypt 인증서를 자동 발급 · 갱신
 - PostgreSQL 5432 는 호스트에도 열어 둠 (로컬에서 운영 DB 확인용). EC2 보안 그룹이 허용한 IP 만 접속 가능
 - 서버에서 쓰는 파일은 `deploy/` 폴더: `docker-compose.prod.yml`, `Caddyfile`, `load-env.sh`, `deploy.sh`
@@ -74,6 +74,12 @@
 | `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |
 | `/makkigo/prod/valetagents/IMAGE_BASE_URL` | CloudFront 공개 기준 URL. 브라우저 빌드 변수가 아니라 서버 런타임 값 |
 | `/makkigo/prod/valetagents/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 업체 관리자 "QR 코드" 화면이 QR 에 담는 고객 앱 주소(`/guest?merchant=<id>`). 없으면 그 화면이 오류 |
+| `/makkigo/prod/valetagents/TICKETS_PUBLIC_URL` | `https://tickets.makkigo.com`. 티켓 관리 웹에서 시작한 소셜 로그인을 요원 앱 콜백이 이 주소로 돌려보냄. 없으면 티켓 웹 로그인이 실패 |
+| `/makkigo/prod/tickets/PUBLIC_URL` | `https://tickets.makkigo.com` |
+| `/makkigo/prod/tickets/DATABASE_URL` · `AUTH_JWT_SECRET` | 요원 앱과 **같은 값**. OAuth state 를 티켓 웹이 만들고 요원 앱 콜백이 읽으므로 비밀값이 같아야 함 |
+| `/makkigo/prod/tickets/OAUTH_CALLBACK_ORIGIN` · `AUTH_COOKIE_DOMAIN` | 요원 앱과 같은 값. 소셜 콜백은 요원 앱에 등록된 주소를 같이 씀 |
+| `/makkigo/prod/tickets/KAKAO_REST_API_KEY` · `GOOGLE_CLIENT_ID` · `APPLE_SERVICES_ID` | 요원 앱과 같은 값. 로그인 시작 주소를 만들 때만 씀(코드 교환은 요원 앱 콜백) |
+| `/makkigo/prod/tickets/AWS_REGION` · `S3_IMAGE_BUCKET` · `IMAGE_BASE_URL` | 요원 앱과 같은 값. 티켓 이미지 업로드 |
 | `/makkigo/prod/valetagents/FIREBASE_SERVICE_ACCOUNT_JSON` | 고객 앱과 같은 값(한 줄 JSON, SecureString). 요원이 주차 처리 · 차량 추가를 하면 요원 앱 서버가 고객에게 주차 완료 푸시를 보냄. 없으면 알림 내역만 남고 푸시는 나가지 않음(요청은 성공) |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
@@ -114,7 +120,7 @@ Actions 는 AWS 접속 키 없이 **OIDC** 로 IAM 역할을 맡고, **SSM 명�
 | `main` | **서버에 올라간 코드.** `dev` 는 작업을 모으는 곳이고 버전이 없습니다 |
 | 버전 형식 | SemVer `MAJOR.MINOR.PATCH`, 태그 `v1.0.0` |
 | 버전 단위 | **서버 버전 하나** — 고객 앱 · 요원 앱을 같은 버전으로 함께 배포 |
-| 이미지 | GHCR `ghcr.io/justgo-valet/makkigo-users:<버전>`, `.../makkigo-valetagents:<버전>` (같은 버전) |
+| 이미지 | GHCR `ghcr.io/justgo-valet/makkigo-users:<버전>`, `.../makkigo-valetagents:<버전>`, `.../makkigo-tickets:<버전>` (같은 버전) |
 | 버전 올리기 | **release-please** 가 커밋 제목으로 자동 결정 |
 | 되돌리기 | **수동** — Actions 에서 이전 버전을 골라 배포 |
 

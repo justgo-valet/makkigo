@@ -20,3 +20,13 @@
 		reverse_proxy valetagents:3000
 	}
 }
+
+{$TICKETS_DOMAIN} {
+	encode zstd gzip
+	handle /api/internal/* {
+		respond 403
+	}
+	handle {
+		reverse_proxy tickets:3002
+	}
+}
