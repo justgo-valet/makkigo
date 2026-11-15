@@ -1,3 +1,4 @@
+import { useKeyboardInset } from "@makkigo/ui/hooks/use-keyboard-inset";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -62,6 +63,8 @@ const useOnboardingContent = () => {
     handleMoveNextStep();
   };
 
+  const keyboardInset = useKeyboardInset();
+
   return {
     onboardingStep,
     isCustomInput,
@@ -69,6 +72,7 @@ const useOnboardingContent = () => {
     isSubmitStep,
     isBusy,
     submitErrorMessage: isSubmitStep ? submitErrorMessage : null,
+    keyboardInset,
     isConsentSheetOpen: !hasAgreedConsents,
     handleConsentsAgreed: () => setHasAgreedConsents(true),
     handleSubmit: (event: FormEvent<HTMLFormElement>) => {

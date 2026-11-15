@@ -69,6 +69,7 @@ export default function OnboardingContent() {
     isSubmitStep,
     isBusy,
     submitErrorMessage,
+    keyboardInset,
     isConsentSheetOpen,
     handleConsentsAgreed,
     handleSubmit,
@@ -78,6 +79,7 @@ export default function OnboardingContent() {
     <AnimatedOnboarding>
       <form
         className="flex flex-col w-full h-full max-w-md min-h-0 pt-2 mx-auto"
+        style={keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined}
         onSubmit={handleSubmit}
       >
         <div className="flex flex-1 min-h-0 pt-4 overflow-hidden">
