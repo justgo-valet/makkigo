@@ -4,7 +4,6 @@ import { Button, FieldError } from "@makkigo/ui";
 import Image from "next/image";
 
 import MerchantMap from "@/features/merchant/components/MerchantMap";
-import SheetCloseButton from "@/features/merchant/components/SheetCloseButton";
 import { formatAddress, formatDuration, formatFee } from "@/features/merchant/formatters";
 import { useMerchantDetail } from "@/features/merchant/hooks/useMerchantDetail";
 
@@ -15,7 +14,6 @@ interface MerchantDetailViewProps {
   merchantId: number;
   kakaoMapAppKey: string;
   onBack: () => void;
-  onClose: () => void;
   onChoose: (merchant: Merchant) => void;
 }
 
@@ -23,7 +21,6 @@ export default function MerchantDetailView({
   merchantId,
   kakaoMapAppKey,
   onBack,
-  onClose,
   onChoose,
 }: Readonly<MerchantDetailViewProps>) {
   const detail = useMerchantDetail(merchantId);
@@ -53,7 +50,6 @@ export default function MerchantDetailView({
           </svg>
         </button>
         <h2 className="flex-1 text-lg font-bold text-(--base-color)">업체 정보</h2>
-        <SheetCloseButton onClick={onClose} />
       </div>
 
       <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
@@ -91,6 +87,7 @@ function MerchantInfo({
   kakaoMapAppKey,
 }: Readonly<{ merchant: MerchantDetail; kakaoMapAppKey: string }>) {
   const hasManyBooths = merchant.booths.length > 1;
+  const boothsWithPhotos = merchant.booths.filter((booth) => booth.photoUrls.length > 0);
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -101,40 +98,72 @@ function MerchantInfo({
         <p className="text-xs break-keep text-(--tertiary-color)">{formatAddress(merchant)}</p>
       </div>
 
-      {merchant.photoUrls.length > 0 && (
-        <ul
-          aria-label="업체 사진"
-          className="flex shrink-0 snap-x gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
-        >
-          {merchant.photoUrls.map((url, index) => (
-            <li
-              key={url}
-              className="relative h-[88px] w-[120px] shrink-0 snap-start overflow-hidden rounded-lg bg-slate-100"
-            >
-              <Image
-                src={url}
-                alt={`${merchant.name} 사진 ${index + 1}`}
-                fill
-                unoptimized
-                className="object-cover"
-              />
-            </li>
-          ))}
-        </ul>
+      <PhotoStrip label="업체 사진" altPrefix={`${merchant.name} 사진`} urls={merchant.photoUrls} />
+
+      {boothsWithPhotos.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h4 className="text-sm font-bold text-(--base-color)">부스 위치</h4>
+          <div className="flex flex-col gap-4">
+            {boothsWithPhotos.map((booth) => (
+              <div key={booth.id} className="flex flex-col gap-2">
+                {hasManyBooths && <BoothName name={booth.name} />}
+                <PhotoStrip
+                  label={hasManyBooths ? `${booth.name} 위치 사진` : "부스 위치 사진"}
+                  altPrefix={hasManyBooths ? `${booth.name} 위치 사진` : "부스 위치 사진"}
+                  urls={booth.photoUrls}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       <section className="flex flex-col gap-2">
         <h4 className="text-sm font-bold text-(--base-color)">발렛 비용</h4>
-        {merchant.booths.map((booth) => (
-          <div key={booth.id} className="flex flex-col gap-2">
-            {hasManyBooths && (
-              <p className="text-xs font-medium text-(--tertiary-color)">{booth.name}</p>
-            )}
-            <FeePolicyTable feePolicy={booth.feePolicy} />
-          </div>
-        ))}
+        <div className="flex flex-col gap-4">
+          {merchant.booths.map((booth) => (
+            <div key={booth.id} className="flex flex-col gap-2">
+              {hasManyBooths && <BoothName name={booth.name} />}
+              <FeePolicyTable feePolicy={booth.feePolicy} />
+            </div>
+          ))}
+        </div>
       </section>
     </div>
+  );
+}
+
+function BoothName({ name }: Readonly<{ name: string }>) {
+  return <p className="text-xs font-medium break-keep text-(--tertiary-color)">{name}</p>;
+}
+
+function PhotoStrip({
+  label,
+  altPrefix,
+  urls,
+}: Readonly<{ label: string; altPrefix: string; urls: string[] }>) {
+  if (urls.length === 0) return null;
+
+  return (
+    <ul
+      aria-label={label}
+      className="flex shrink-0 snap-x gap-2 overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden"
+    >
+      {urls.map((url, index) => (
+        <li
+          key={url}
+          className="relative h-[88px] w-[120px] shrink-0 snap-start overflow-hidden rounded-lg bg-slate-100"
+        >
+          <Image
+            src={url}
+            alt={`${altPrefix} ${index + 1}`}
+            fill
+            unoptimized
+            className="object-cover"
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 

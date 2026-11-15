@@ -1,5 +1,5 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { isInApp } from "@/features/auth/appBridge";
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
@@ -10,6 +10,8 @@ import { useSendArrival } from "@/features/valet/hooks/useSendArrival";
 import { merchantIdSchema } from "@/libs/merchant/contracts/merchantDetail";
 
 import type { Merchant } from "@/libs/merchant/contracts/merchants";
+
+const APP_BACK_EVENT = "makkigo:back";
 
 type MerchantSearchStep = "search" | "merchantRequired" | "arrival" | "locationConsent";
 
@@ -24,8 +26,6 @@ const useMerchantSearchFlow = () => {
   const [pickedMerchant, setPickedMerchant] = useState<Merchant | null>(null);
   const selectMerchant = useSelectedMerchant((state) => state.selectMerchant);
   const selectedMerchant = useSelectedMerchantValue();
-  const rememberedMerchantId = useMerchantSearchMemory((state) => state.detailMerchantId);
-  const rememberDetail = useMerchantSearchMemory((state) => state.setDetailMerchantId);
   const clearSearchMemory = useMerchantSearchMemory((state) => state.clear);
   const { data: me } = useMe();
   const arrival = useSendArrival(() => setStep(null));
@@ -52,21 +52,30 @@ const useMerchantSearchFlow = () => {
     window.history.replaceState(null, "", buildUrl(null));
   };
 
+  const handleAppBack = useEffectEvent((event: Event) => {
+    event.preventDefault();
+    leaveDetail();
+  });
+  const isDetailOpen = detailMerchantId !== null;
+
+  useEffect(() => {
+    if (!isDetailOpen) return;
+    const listener = (event: Event) => handleAppBack(event);
+    window.addEventListener(APP_BACK_EVENT, listener);
+    return () => window.removeEventListener(APP_BACK_EVENT, listener);
+  }, [isDetailOpen]);
+
   const viewMerchant = (merchant: Pick<Merchant, "id">) => {
     hasPushedDetailRef.current = true;
     window.history.pushState(null, "", buildUrl(merchant.id));
   };
 
   const open = () => {
-    if (rememberedMerchantId !== null && !searchParams.has(MERCHANT_PARAM)) {
-      viewMerchant({ id: rememberedMerchantId });
-    }
     setStep("search");
   };
 
   const close = () => {
     if (arrival.isSending) return;
-    if (step === "search") rememberDetail(detailMerchantId);
     arrival.resetError();
     leaveDetail();
     setStep(null);
