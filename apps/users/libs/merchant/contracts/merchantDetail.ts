@@ -17,7 +17,14 @@ const merchantDetailSchema = z.object({
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
   photoUrls: z.array(z.string()),
-  booths: z.array(z.object({ id: z.number().int(), name: z.string(), feePolicy: feePolicySchema })),
+  booths: z.array(
+    z.object({
+      id: z.number().int(),
+      name: z.string(),
+      photoUrls: z.array(z.string()),
+      feePolicy: feePolicySchema,
+    }),
+  ),
 });
 
 type FeePolicy = z.infer<typeof feePolicySchema>;
