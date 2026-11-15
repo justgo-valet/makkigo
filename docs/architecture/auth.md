@@ -21,7 +21,7 @@
 웹뷰 ─▶ POST /api/v1/auth/oauth/{provider}/native   (JSON)
           │ 토큰 확인 → 회원 확인 · 처음이면 가입
           ▼
-   우리 토큰 쿠키가 **웹뷰에** 심김 + { redirectTo } → /onboarding 또는 / 로 이동
+   우리 토큰 쿠키가 **웹뷰에** 심김 + { redirectTo } → /onboarding 또는 / 로 이동 (router.replace, 로그인 화면은 기록에서 빠짐)
 ```
 
 **왜 앱 SDK 로 하나** (decisions 2026-10-19): 웹 OAuth 를 시스템 브라우저 창으로 열면 iOS 가 매번 "'마끼고'이(가) 'app.makkigo.com'을(를) 사용하여 로그인하려고 합니다" 동의 모달을 띄우고, 카카오는 카카오톡이 있어도 아이디 · 비밀번호 화면부터 나옵니다. SDK 는 카카오톡 앱 · 애플 시트 · Android 계정 선택으로 바로 갑니다. 구글 iOS 는 SDK 도 내부에서 로그인 창을 써서 모달이 남습니다.

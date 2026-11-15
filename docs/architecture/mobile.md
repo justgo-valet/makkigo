@@ -24,7 +24,8 @@
 | 여는 주소 | 빌드 때 `--dart-define=WEB_BASE_URL=...` (기본값 `http://localhost:3000`) |
 | 같은 호스트 · 포트 | 웹뷰 안에서 이동 |
 | 다른 호스트, `tel:` 등 | 외부 브라우저 · 앱으로 열기 |
-| 뒤로 가기 (Android) | 웹 기록이 있으면 웹 뒤로, 없으면 앱 종료 |
+| 뒤로 가기 (Android) | 먼저 웹에 `makkigo:back` 을 보내 웹이 막으면 끝 → [브리지](#웹--앱-브리지). 아니면 홈(쿼리 · 해시 없는 `/`)은 웹 기록이 있어도 **"앱을 종료하시겠습니까?"** 시트, 그 밖의 화면은 웹 기록이 있으면 웹 뒤로 · 없으면 같은 시트. "종료하기"를 눌러야 종료 (mobile #38) |
+| 기록 덮어쓰기 | Android 앱은 페이지가 시작한 이동(링크 · `location.assign` · `location.replace`)을 막고 `loadUrl` 로 다시 열어서(webview_flutter) **`location.replace` 도 기록이 쌓임**. 기록을 덮어써야 하면 Next `router.replace`(소프트 이동)를 씀 |
 | 화면 방향 | 세로 고정 |
 | 안전영역 | 고객 · 요원 앱 같음. 웹뷰가 상태바 · 홈 인디케이터 뒤까지 채움(edge-to-edge). 상태바 · 내비게이션 바는 투명하고 반투명 막(scrim · 글라스)도 없어 웹 화면 색이 그대로 비침. 위아래 여백은 웹이 CSS 변수 `--safe-area-inset-top/bottom/left/right` 로 둠 — `env(safe-area-inset-*)` 를 직접 쓰지 않음(Android 웹뷰는 기기마다 0 이거나 앱 여백과 겹침) → [브리지](#웹--앱-브리지) |
 | 키보드 | 입력창이 있는 바텀 시트는 키보드 위로 올라옴. iOS 는 웹이 `visualViewport` 로 가려진 높이를 재서 공통 `Sheet` 를 띄우고(`useKeyboardInset`), Android 는 고객 앱 viewport 의 `interactiveWidget: resizes-content` 로 레이아웃이 키보드만큼 줄어듦 (Chrome · WebView 108+). 앱은 Android 에서만 웹뷰를 키보드만큼 줄임(iOS 까지 줄이면 웹이 키보드 높이를 두 번 빼 시트가 두 배로 올라감). 키보드로 올라간 시트는 상태바 아래까지만 커짐. **입력창 글자는 16px 이상**(`text-base`) — 더 작으면 iOS 가 포커스 때 화면을 확대함 |
@@ -40,6 +41,7 @@
 | 웹 → 앱 | `{"type":"nativeLogin","provider":"kakao"\|"google"\|"apple"}` | 각 사 SDK 로 로그인하고 `window` 에 `makkigo:native-login` 이벤트로 돌려줌 (`detail: { provider, status: "success"\|"cancelled"\|"failed", accessToken?, idToken?, authorizationCode? }`). 카카오는 카카오톡이 있으면 카카오톡, 없으면 카카오계정 · 구글은 계정 선택 · 애플은 iOS 시트. 웹은 받은 값을 `POST /api/v1/auth/oauth/{provider}/native` 로 보냄. 시간 제한 없음(다른 앱에 다녀옴) → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"openAuthSession","url":"…","returnUrl":"…"}` (둘 다 절대 주소, **예전 로그인 방식 — 고객 웹은 지금 안 씀**) | ① `url` 이 웹뷰와 같은 출처인지 확인 ② `url` 을 시스템 브라우저 창으로 열고 `com.makkigo.user://` 복귀를 기다림 ③ 복귀 주소의 쿼리(`code` 또는 `error`)를 `returnUrl` 에 그대로 붙여 웹뷰에서 엶. 사용자가 창을 닫으면 `error=cancelled`, 그 밖의 실패는 `error=failed` 를 붙임 → [auth.md](auth.md#흐름) |
 | 웹 → 앱 | `{"type":"requestPushToken"}` | 알림 권한을 묻고 FCM 토큰을 받아 `window` 에 `makkigo:push-token` 이벤트로 돌려줌 (`detail: { token, platform, permission }`, 권한 거부면 `token: null` · `permission: "denied"`). 토큰이 바뀌면 같은 이벤트를 다시 보냄. 한 번 요청받은 뒤로는 앱이 **다시 화면에 나올 때마다** 권한 창 없이 현재 권한으로 같은 이벤트를 보냄 → [푸시](#푸시) |
+| 앱 → 웹 | `makkigo:back` 이벤트 (취소 가능, `detail` 없음) | Android 뒤로 가기를 누르면 먼저 보냄. 웹이 `preventDefault()` 하면 앱은 아무것도 하지 않고(열린 시트 닫기 등은 웹이), 아니면 [뒤로 가기](#웹뷰-규칙) 규칙대로. 지금 웹은 듣지 않음 (mobile #38) |
 | 앱 → 웹 | `makkigo:push-received` 이벤트 (`detail` 없음) | 앱을 보고 있을 때 푸시가 오면 알림을 띄우고 이 이벤트를 보냄. 웹은 보고 있는 화면의 데이터를 바로 다시 받음 (`useRefreshOnAppPush`) → [푸시](#푸시) |
 | 웹 → 앱 | `{"type":"requestLocation"}` | 위치 권한을 묻고 현재 위치를 한 번 받아(최대 10초) `window` 에 `makkigo:location` 이벤트로 돌려줌 (`detail: { latitude, longitude, permission }`, 권한 거부면 좌표 `null` · `"denied"`, 위치를 못 받으면 좌표 `null` · `"granted"`). 위치기반서비스 동의 회원이 도착 알림을 보낼 때만 보내고, 웹은 15초 안에 이벤트가 없으면 위치 없이 보냄 (mobile #7) → [policies.md](../planning/policies.md#위치정보) |
 | 웹 → 앱 | `{"type":"setStatusBarStyle","style":"light"\|"dark"}` | 상태바 글자색을 바꿈 (`light` 흰 글자 · `dark` 검은 글자). 페이지를 새로 열면 `dark` 로 되돌리므로 어두운 화면(고객 · 요원 로그인)이 켜질 때 `light`, 벗어날 때 `dark` 를 보냄 (mobile #9) |
