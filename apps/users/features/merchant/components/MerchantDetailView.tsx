@@ -4,7 +4,6 @@ import { Button, FieldError } from "@makkigo/ui";
 import Image from "next/image";
 
 import MerchantMap from "@/features/merchant/components/MerchantMap";
-import SheetCloseButton from "@/features/merchant/components/SheetCloseButton";
 import { formatAddress, formatDuration, formatFee } from "@/features/merchant/formatters";
 import { useMerchantDetail } from "@/features/merchant/hooks/useMerchantDetail";
 
@@ -15,7 +14,6 @@ interface MerchantDetailViewProps {
   merchantId: number;
   kakaoMapAppKey: string;
   onBack: () => void;
-  onClose: () => void;
   onChoose: (merchant: Merchant) => void;
 }
 
@@ -23,7 +21,6 @@ export default function MerchantDetailView({
   merchantId,
   kakaoMapAppKey,
   onBack,
-  onClose,
   onChoose,
 }: Readonly<MerchantDetailViewProps>) {
   const detail = useMerchantDetail(merchantId);
@@ -53,7 +50,6 @@ export default function MerchantDetailView({
           </svg>
         </button>
         <h2 className="flex-1 text-lg font-bold text-(--base-color)">업체 정보</h2>
-        <SheetCloseButton onClick={onClose} />
       </div>
 
       <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">

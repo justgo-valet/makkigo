@@ -53,6 +53,13 @@ export default function MerchantSearchSheet({
         side="bottom"
         showCloseButton={false}
         onOpenAutoFocus={(event) => event.preventDefault()}
+        onInteractOutside={(event) => {
+          if (isDetail) event.preventDefault();
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isDetail) event.preventDefault();
+        }}
+        data-sheet-drag={isDetail ? "none" : undefined}
         className="mx-auto h-[calc(100dvh-180px)] max-w-md gap-0 rounded-t-[20px] border-none px-5 pt-3 pb-[calc(24px+var(--safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.12)]"
       >
         <SheetHeader className="sr-only">
@@ -61,7 +68,10 @@ export default function MerchantSearchSheet({
             발렛을 맡길 업체를 업체명이나 지역으로 찾아 위치와 요금을 확인해요.
           </SheetDescription>
         </SheetHeader>
-        <div aria-hidden className="mx-auto mb-4 h-1 w-9 shrink-0 rounded-full bg-slate-200" />
+        <div
+          aria-hidden
+          className={`mx-auto mb-4 h-1 w-9 shrink-0 rounded-full bg-slate-200 ${isDetail ? "invisible" : ""}`}
+        />
 
         <div
           className={
@@ -119,7 +129,6 @@ export default function MerchantSearchSheet({
             merchantId={detailMerchantId}
             kakaoMapAppKey={kakaoMapAppKey}
             onBack={onBackToList}
-            onClose={onClose}
             onChoose={onChooseMerchant}
           />
         )}
