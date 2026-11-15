@@ -28,7 +28,7 @@
 | 기록 덮어쓰기 | Android 앱은 페이지가 시작한 이동(링크 · `location.assign` · `location.replace`)을 막고 `loadUrl` 로 다시 열어서(webview_flutter) **`location.replace` 도 기록이 쌓임**. 기록을 덮어써야 하면 Next `router.replace`(소프트 이동)를 씀 |
 | 화면 방향 | 세로 고정 |
 | 안전영역 | 고객 · 요원 앱 같음. 웹뷰가 상태바 · 홈 인디케이터 뒤까지 채움(edge-to-edge). 상태바 · 내비게이션 바는 투명하고 반투명 막(scrim · 글라스)도 없어 웹 화면 색이 그대로 비침. 위아래 여백은 웹이 CSS 변수 `--safe-area-inset-top/bottom/left/right` 로 둠 — `env(safe-area-inset-*)` 를 직접 쓰지 않음(Android 웹뷰는 기기마다 0 이거나 앱 여백과 겹침) → [브리지](#웹--앱-브리지) |
-| 키보드 | 입력창이 있는 바텀 시트는 키보드 위로 올라옴. iOS 는 웹이 `visualViewport` 로 가려진 높이를 재서 공통 `Sheet` 를 띄우고(`useKeyboardInset`), Android 는 고객 앱 viewport 의 `interactiveWidget: resizes-content` 로 레이아웃이 키보드만큼 줄어듦 (Chrome · WebView 108+). 앱은 Android 에서만 웹뷰를 키보드만큼 줄임(iOS 까지 줄이면 웹이 키보드 높이를 두 번 빼 시트가 두 배로 올라감). 키보드로 올라간 시트는 상태바 아래까지만 커짐. **입력창 글자는 16px 이상**(`text-base`) — 더 작으면 iOS 가 포커스 때 화면을 확대함 |
+| 키보드 | 입력창이 있는 바텀 시트는 키보드 위로 올라옴. **고객 앱은 iOS · Android 모두 웹뷰를 줄이지 않고**(Android 는 셸 `keepAndroidWebViewSizeOnKeyboard`, [mobile #41](https://github.com/justgo-valet/makkigo-mobile/pull/41)), 웹이 `visualViewport` 로 가려진 높이를 재서(`useKeyboardInset`) 공통 `Sheet` 와 온보딩 아래 버튼만 올림 — 메인 레이아웃은 움직이지 않음. **요원 앱 Android 는 아직 웹뷰를 키보드만큼 줄임**(viewport `interactiveWidget: resizes-content` 로 레이아웃이 줄어듦). iOS 까지 줄이면 웹이 키보드 높이를 두 번 빼 시트가 두 배로 올라감. 키보드로 올라간 시트는 상태바 아래까지만 커짐. **입력창 글자는 16px 이상**(`text-base`) — 더 작으면 iOS 가 포커스 때 화면을 확대함 |
 | 지원 기기 | iOS 는 **iPhone 만** (iPad 스크린샷 · 심사 부담 없음) |
 | HTTP | 운영은 HTTPS 만. 개발용 HTTP 는 Android 디버그 빌드와 iOS 로컬 네트워크만 허용 |
 
