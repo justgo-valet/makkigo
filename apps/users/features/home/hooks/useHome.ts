@@ -11,6 +11,7 @@ import {
 } from "@/features/home/homeFormat";
 import { getHomePreview, PREVIEW_PARAM } from "@/features/home/homePreview";
 import { getBeforeSessionSnapshot, toHomeSnapshot } from "@/features/home/homeSnapshot";
+import { useBoothLocation } from "@/features/home/hooks/useBoothLocation";
 import { useSelectedMerchantValue } from "@/features/merchant/hooks/useSelectedMerchantValue";
 import { useBankTransfer } from "@/features/valet/hooks/useBankTransfer";
 import { useCurrentSession } from "@/features/valet/hooks/useCurrentSession";
@@ -154,6 +155,7 @@ const useHome = () => {
     snapshot.bankAccount,
     snapshot.actualFee ?? snapshot.currentFee,
   );
+  const boothLocation = useBoothLocation(snapshot);
 
   if (vehiclesQuery.isPending || sessionQuery.isPending) return { status: "loading" } as const;
 
@@ -194,6 +196,7 @@ const useHome = () => {
     exitSummary: getExitSummary(snapshot),
     actions: getHomeActions(snapshot.status),
     bankTransfer,
+    boothLocation,
   };
 };
 

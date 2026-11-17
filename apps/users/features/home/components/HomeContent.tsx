@@ -4,6 +4,7 @@ import { Button, FieldError } from "@makkigo/ui";
 import Image from "next/image";
 import Link from "next/link";
 
+import BoothLocationSheet from "@/features/home/components/BoothLocationSheet";
 import ExitSummaryCard from "@/features/home/components/ExitSummaryCard";
 import HomeActionItem from "@/features/home/components/HomeActionItem";
 import ValetStatusHeader from "@/features/home/components/ValetStatusHeader";
@@ -104,6 +105,17 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
             </Link>
           </Button>
         )}
+        {home.boothLocation.isVisible && (
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto self-start px-0 font-semibold"
+            onClick={home.boothLocation.open}
+          >
+            <Image src="/icons/map_pin.svg" alt="" aria-hidden="true" width={20} height={20} />
+            부스 위치 보기
+          </Button>
+        )}
         {home.actions.length > 0 && (
           <div className="grid grid-cols-2 gap-3 *:odd:last:col-span-2 short:gap-2">
             {home.actions.map((action) => (
@@ -153,6 +165,7 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
       />
       <PickupRequestSheets flow={pickupRequest} />
       <BankTransferSheet transfer={home.bankTransfer} />
+      <BoothLocationSheet location={home.boothLocation} />
       <ValetNoticeSheet
         open={cancelArrival.isOpen}
         title="도착 알림을 취소할까요?"

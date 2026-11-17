@@ -29,6 +29,7 @@ const currentSessionSchema = z.object({
   status: z.enum(CURRENT_SESSION_STATUSES),
   hasTicket: z.boolean(),
   plateNumber: z.string(),
+  merchantId: z.number().int().nullable(),
   merchantName: z.string().nullable(),
   boothName: z.string().nullable(),
   arrivalNotifiedAt: z.iso.datetime().nullable(),
