@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./password-policy": "./src/password-policy.ts"
   },
   "scripts": {
+    "create-admin": "node --env-file-if-exists=../../.env.development scripts/create-admin.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
