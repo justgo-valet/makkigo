@@ -4,9 +4,9 @@
 
 - AWS **EC2 1대**, 서울 리전(`ap-northeast-2`). **운영 서버만** 둡니다 (개발 서버 없음).
 - 서버 CPU 는 **ARM(aarch64, Graviton)**, OS 는 Ubuntu 26.04. 그래서 이미지는 GitHub 의 **ARM 빌드 서버(`ubuntu-24.04-arm`)** 에서 `linux/arm64` 로 빌드합니다
-- 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), 티켓 관리 웹(`apps/tickets`), PostgreSQL. 직접 운영합니다.
+- 같은 서버에 Docker 컨테이너로: 고객 앱(`apps/users`), 요원 앱(`apps/valetagents`), 업체 관리자 포털(`apps/tickets`), 슈퍼 어드민(`apps/admin`), PostgreSQL. 직접 운영합니다.
 - DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
-- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com`, 티켓 관리 웹 `tickets.makkigo.com` (Route 53 A 레코드 → EC2 탄력적 IP. 도메인 등록은 가비아, DNS 는 Route 53). 루트 `makkigo.com` 은 비워 둠
+- 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com`, 업체 관리자 포털 `tickets.makkigo.com`, 슈퍼 어드민 `admin.makkigo.com` (Route 53 A 레코드 → EC2 탄력적 IP. 도메인 등록은 가비아, DNS 는 Route 53). 루트 `makkigo.com` 은 비워 둠
 - HTTPS: **Caddy** 가 Let's Encrypt 인증서를 자동 발급 · 갱신
 - PostgreSQL 5432 는 호스트에도 열어 둠 (로컬에서 운영 DB 확인용). EC2 보안 그룹이 허용한 IP 만 접속 가능
 - 서버에서 쓰는 파일은 `deploy/` 폴더: `docker-compose.prod.yml`, `Caddyfile`, `load-env.sh`, `deploy.sh`
@@ -73,13 +73,14 @@
 | `/makkigo/prod/valetagents/AWS_REGION` | `ap-northeast-2` |
 | `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |
 | `/makkigo/prod/valetagents/IMAGE_BASE_URL` | CloudFront 공개 기준 URL. 브라우저 빌드 변수가 아니라 서버 런타임 값 |
-| `/makkigo/prod/valetagents/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 업체 관리자 "QR 코드" 화면이 QR 에 담는 고객 앱 주소(`/guest?merchant=<id>`). 없으면 그 화면이 오류 |
-| `/makkigo/prod/valetagents/TICKETS_PUBLIC_URL` | `https://tickets.makkigo.com`. 티켓 관리 웹에서 시작한 소셜 로그인을 요원 앱 콜백이 이 주소로 돌려보냄. 없으면 티켓 웹 로그인이 실패 |
 | `/makkigo/prod/tickets/PUBLIC_URL` | `https://tickets.makkigo.com` |
-| `/makkigo/prod/tickets/DATABASE_URL` · `AUTH_JWT_SECRET` | 요원 앱과 **같은 값**. OAuth state 를 티켓 웹이 만들고 요원 앱 콜백이 읽으므로 비밀값이 같아야 함 |
-| `/makkigo/prod/tickets/OAUTH_CALLBACK_ORIGIN` · `AUTH_COOKIE_DOMAIN` | 요원 앱과 같은 값. 소셜 콜백은 요원 앱에 등록된 주소를 같이 씀 |
-| `/makkigo/prod/tickets/KAKAO_REST_API_KEY` · `GOOGLE_CLIENT_ID` · `APPLE_SERVICES_ID` | 요원 앱과 같은 값. 로그인 시작 주소를 만들 때만 씀(코드 교환은 요원 앱 콜백) |
+| `/makkigo/prod/tickets/DATABASE_URL` · `AUTH_JWT_SECRET` | 요원 앱과 같은 DB. 2026-11-19 부터 소셜 로그인을 쓰지 않으므로 `AUTH_JWT_SECRET` 은 요원 앱과 달라도 됨(토큰 `aud` 로도 나뉨) |
+| `/makkigo/prod/tickets/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 업체 정보 화면의 고객용 QR 주소(`/guest?merchant=<id>`). 없으면 그 화면이 오류 |
 | `/makkigo/prod/tickets/AWS_REGION` · `S3_IMAGE_BUCKET` · `IMAGE_BASE_URL` | 요원 앱과 같은 값. 티켓 이미지 업로드 |
+| `/makkigo/prod/admin/PUBLIC_URL` · `DATABASE_URL` · `AUTH_JWT_SECRET` | 슈퍼 어드민. `PUBLIC_URL` = `https://admin.makkigo.com`. `DATABASE_URL` 은 요원 앱과 같은 값, `AUTH_JWT_SECRET` 은 **다른 앱과 따로 만든 값**(2026-11-19) |
+| `/makkigo/prod/admin/KAKAO_REST_API_KEY` | 요원 앱과 같은 REST API 키. 카카오 로컬 장소 검색을 서버에서만 부름 |
+| `/makkigo/prod/admin/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 업체 QR 주소 |
+| `/makkigo/prod/admin/AWS_REGION` · `S3_IMAGE_BUCKET` · `IMAGE_BASE_URL` | 요원 앱과 같은 값. 업체 사진 업로드(`merchants/staging/` → `merchants/final/`) |
 | `/makkigo/prod/valetagents/FIREBASE_SERVICE_ACCOUNT_JSON` | 고객 앱과 같은 값(한 줄 JSON, SecureString). 요원이 주차 처리 · 차량 추가를 하면 요원 앱 서버가 고객에게 주차 완료 푸시를 보냄. 없으면 알림 내역만 남고 푸시는 나가지 않음(요청은 성공) |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
@@ -226,3 +227,8 @@ dry-run 확인도 건너뜁니다.
 4. **GitHub Secrets** — `AWS_DEPLOY_ROLE_ARN`(1번 출력값), `EC2_INSTANCE_ID`
 5. 운영 값(`/makkigo/prod/users/*`, `/makkigo/prod/postgres/*`)이 SSM 에 들어 있는지 확인
 
+## 슈퍼 어드민 배포 (2026-11-19)
+
+`apps/admin` 은 tickets 와 같은 방식으로 배포합니다: `Dockerfile` 의 `admin` 단계(포트 3003), compose 의 `admin` 서비스(`admin.env`), Caddy 의 `{$ADMIN_DOMAIN}`(기본 `admin.makkigo.com`), `load-env.sh` 의 `admin` 대상, 배포 빌드 matrix 의 `admin`(이미지 `makkigo-admin`).
+
+Route 53 `admin` A 레코드와 SSM `/makkigo/prod/admin/*` · `/makkigo/prod/tickets/USERS_PUBLIC_URL` 은 2026-11-19 에 만들었습니다. S3 CORS(admin POST) · `merchants/staging/` 수명 주기 규칙도 같은 날 적용. 남은 것: 새 코드를 배포한 **뒤** 더는 쓰지 않는 SSM 값 삭제(`tickets/` 의 `OAUTH_CALLBACK_ORIGIN` · `AUTH_COOKIE_DOMAIN` · `KAKAO_REST_API_KEY` · `GOOGLE_CLIENT_ID` · `APPLE_SERVICES_ID`, `valetagents/` 의 `TICKETS_PUBLIC_URL` · `USERS_PUBLIC_URL`) → [infrastructure.md](../operations/infrastructure.md). SSM 값이 없어도 컨테이너는 뜨지만(헬스 체크는 DB 를 보지 않음) 로그인 등 모든 화면이 오류입니다.

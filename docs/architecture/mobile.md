@@ -9,7 +9,7 @@
 | 앱 | 폴더 | 앱 ID (iOS 번들 ID = Android 패키지명) | 이름 | 담당 |
 |---|---|---|---|---|
 | 고객 앱 | `apps/users` | `com.makkigo.user` | 마끼고 | 태균 |
-| 요원 · 업체 관리자 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 요원 | 지상님 |
+| 요원 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 요원 | 지상님 |
 
 두 앱이 같은 로그인 창 열기 · 웹뷰 브리지 · 푸시 토큰 코드를 쓰므로 `packages/` 에 공통으로 둡니다.
 
@@ -68,7 +68,7 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 | 알림 데이터 `link`(웹 경로)를 누르면 그 화면을 웹뷰로 엶 | 앱 |
 | 앱을 보고 있을 때 온 푸시는 `makkigo:push-received` 로 웹에 알림 → 웹이 진행 중 세션 등 보고 있는 데이터를 바로 다시 받음. 알림을 꺼 둔 회원 · 브라우저는 5초 폴링으로 반영 | 앱 `onForegroundMessage`, 웹 `useRefreshOnAppPush` (`MemberGate`) |
 
-요원 앱은 승인 완료된 `VALET_AGENT`에게만 최초 권한을 요청합니다. 업체 관리자와 승인 대기 사용자는 요청하지 않습니다. OS 권한과 부스의 업무 알림 설정은 독립적이며, 서버의 기존 `APPROVED + notificationsEnabled` 발송 정책을 유지합니다.
+요원 앱은 승인 완료된 `VALET_AGENT`에게만 최초 권한을 요청합니다. 승인 대기 사용자는 요청하지 않습니다. OS 권한과 부스의 업무 알림 설정은 독립적이며, 서버의 기존 `APPROVED + notificationsEnabled` 발송 정책을 유지합니다.
 
 요원 기기 등록은 앱 설치가 생성한 32바이트 난수의 해시로 한 행에 고정됩니다. 서버는 원문 설치 비밀값을 저장하지 않습니다. 토큰 회전·응답 유실 재시도·계정 전환은 같은 설치 행을 갱신하고, 로그아웃과 세션 만료 정리는 설치 비밀값 또는 서명된 HttpOnly 기기 권한으로만 수행합니다. 원시 FCM 토큰은 정리 권한으로 사용하지 않습니다.
 

@@ -37,6 +37,13 @@ docker ps                     # 컨테이너 상태
 - 요원 알림 자동 전환이 들어가기 전 이미지로 되돌리면 배포가 `makkigo-agent-notification-sync-1` 도 띄우지 않습니다(위 cleanup 과 같음).
 - 배포 결과 로그는 Actions 의 "EC2 배포" 단계에 출력됩니다.
 
+### 슈퍼 어드민 콘솔이 들어가는 배포 (마이그레이션 `20261119090000_super_admin_console`)
+
+- **배포 전에 백업**: 이 마이그레이션은 업체와 예전 업체 관리자의 연결(`merchants.admin_id`), `ticket_image_uploads.staff_id`, 업체 등록 세션 두 테이블을 지웁니다. 아래 "DB 백업" 으로 전체 덤프를 먼저 받아 둡니다. 되살릴 길은 덤프뿐입니다.
+- **태그로 되돌릴 수 없음**: 이 배포 뒤 옛 이미지 태그로 되돌리면 옛 코드가 지운 칸 · 테이블을 찾다가 업체 관리자 · 티켓 · 업체 등록 쪽이 오류입니다. 또 compose 가 `makkigo-admin:<태그>` 를 요구하므로 admin 이미지가 없는 옛 태그는 받기(pull)부터 실패합니다. 문제가 생기면 고쳐서 앞으로 배포합니다.
+- **짧은 오류 구간**: `deploy.sh` 는 옛 컨테이너가 떠 있는 동안 마이그레이션을 돌립니다. 새 컨테이너로 바뀌기 전까지 옛 tickets · 요원 앱의 업체 관리자 화면과 정리 runner 가 오류를 낼 수 있습니다. 고객 앱 · 요원의 부스 업무는 영향이 없습니다.
+- **배포 뒤**: 슈퍼 어드민 계정 만들기(아래) → 쓰지 않게 된 SSM 값 삭제([deployment.md](../architecture/deployment.md#슈퍼-어드민-배포-2026-11-19)).
+
 ## 로그 보기 · 재시작
 
 ```bash
@@ -78,16 +85,12 @@ docker restart makkigo-users-1                 # 한 컨테이너 재시작
 
 ## 업체 이미지 cleanup
 
-cleanup은 DB에 기록된 ATTACHED · REVOKED staging key와 TOMBSTONED staging/final key만 처리합니다.
-버킷 전체를 list하지 않으며 ATTACHED final은 절대 삭제하지 않습니다. 실행할 때마다 만료 시각이
-지난 등록 세션을 먼저 닫아(`EXPIRED`, 한 번에 100개까지) 그 사진을 TOMBSTONED로 넘깁니다.
-REVOKED · TOMBSTONED 행은 외부 요청의 늦은 완료를 찾도록 한 시간 뒤 한 번 더 지우고, 그 뒤로는
-다시 검사하지 않습니다(행은 보존). 삭제에는 ETag 조건을 붙이지 않습니다.
+2026-11-19 부터 업체 사진은 슈퍼 어드민이 올리고 등록 세션 테이블이 없어, cleanup 은 **티켓 이미지만** 처리합니다(경로 · 토큰 · `MERCHANT_UPLOAD_CLEANUP_ENABLED` 는 그대로). 남은 `merchants/staging/*` 는 S3 수명 주기 규칙으로 지웁니다 → [infrastructure.md](infrastructure.md#업체-사진-staging-수명-주기).
 
 티켓 이미지 cleanup은 만료된 RESERVED 행을 24시간 유예 후 staging에서 지우고 행을 제거합니다.
 COMPLETE 행은 presigned POST 재사용 기간이 지난 뒤 staging 삭제 성공까지 재시도합니다. `tickets/final/*`은 이 cleanup
 경로에서 삭제하지 않으므로 과거 발급 티켓의 immutable 자산은 유지됩니다. dry-run 응답의
-`ticketUploads.eligibleCount`로 대상 수를 확인합니다.
+`eligibleCount`로 대상 수를 확인합니다.
 
 ### 배포 전 필수 gate
 
@@ -145,6 +148,31 @@ webhook/플랫폼 경보를 받는지 staging에서 주입 검증합니다.
 
 schema와 tombstone은 삭제하지 않습니다. IAM/CORS나 object integrity가 의심되면 signing/runner를
 비활성화하되 업체 onboarding guard와 pending read 화면은 유지합니다.
+
+## 슈퍼 어드민 계정 만들기
+
+콘솔에는 슈퍼 어드민을 만드는 화면이 없습니다. 서버에서 migrate 이미지로 만듭니다. 비밀번호는 명령줄 인자로 받지 않고 숨김 입력으로 두 번 묻습니다.
+
+```sh
+# 서버에서
+cd /opt/makkigo/deploy
+export IMAGE_TAG=<현재 태그> ENV_DIR=/opt/makkigo/env
+docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate \
+  node /repo/packages/auth/scripts/create-admin.mjs <아이디> <이름>
+
+# 로컬 (.env.development 의 DATABASE_URL, 환경변수가 있으면 그쪽 우선)
+pnpm --filter @makkigo/auth create-admin <아이디> <이름>
+```
+
+운영 이미지에서는 아직 실행해 보지 않았습니다(로컬 Node 22 에서만 확인).
+
+## 업체 관리자 계정 발급
+
+1. 슈퍼 어드민 → 업체: 카카오 장소 검색으로 업체를 추가하고 상세 주소 · 사진을 채움
+2. 부스 → 그 부스 상세에서 업체 연결 요청 → 부스 관리자가 요원 앱에서 승인
+3. 업체 관리자 → 새 계정(아이디 · 이름 · 업체). 화면에 **한 번만** 보이는 임시 비밀번호를 업체에 전달
+4. 업체 관리자는 `tickets.makkigo.com` 에서 로그인하고 비밀번호를 바꾼 뒤 티켓을 만듦
+5. 비밀번호를 잊으면 슈퍼 어드민이 재설정(임시 비밀번호 다시 발급, 모든 기기 로그아웃). 5번 틀리면 15분 잠기고, 재설정하면 잠금도 풀림
 
 ## 운영 DB 접속
 
