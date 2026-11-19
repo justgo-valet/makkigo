@@ -30,3 +30,13 @@
 		reverse_proxy tickets:3002
 	}
 }
+
+{$ADMIN_DOMAIN} {
+	encode zstd gzip
+	handle /api/internal/* {
+		respond 403
+	}
+	handle {
+		reverse_proxy admin:3003
+	}
+}

@@ -18,6 +18,9 @@ RUN pnpm --filter @makkigo/valetagents build
 FROM deps AS build-tickets
 RUN pnpm --filter @makkigo/tickets build
 
+FROM deps AS build-admin
+RUN pnpm --filter @makkigo/admin build
+
 FROM node:22-alpine AS users
 WORKDIR /app
 ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3001
@@ -54,6 +57,17 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3002/api/health || exit 1
 CMD ["node", "apps/tickets/server.js"]
+
+FROM node:22-alpine AS admin
+WORKDIR /app
+ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3003
+COPY --from=build-admin --chown=node:node /repo/apps/admin/.next/standalone ./
+COPY --from=build-admin --chown=node:node /repo/apps/admin/.next/static ./apps/admin/.next/static
+USER node
+EXPOSE 3003
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:3003/api/health || exit 1
+CMD ["node", "apps/admin/server.js"]
 
 FROM deps AS migrate
 WORKDIR /repo/packages/database
