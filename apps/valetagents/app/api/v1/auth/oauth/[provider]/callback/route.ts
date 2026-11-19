@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 
 import { createAppRedirectPage } from "@/server/auth/appRedirectPage";
 import { clearOAuthCsrfCookie, getOAuthCsrfCookie } from "@/server/auth/oauthCookies";
-import { getAppCallbackUrl, getLoginErrorUrl, getOAuthRedirectUri, toPublicUrl, toTicketsUrl } from "@/server/auth/oauthUrls";
+import { getAppCallbackUrl, getLoginErrorUrl, getOAuthRedirectUri, toPublicUrl } from "@/server/auth/oauthUrls";
 
 import type { OAuthState } from "@makkigo/auth";
 import type { LoginError } from "@/server/auth/oauthUrls";
@@ -37,10 +37,7 @@ const readCallbackParams = async (request: NextRequest) => {
 const fail = (state: OAuthState | null, error: LoginError) => {
   const response = state?.client === "app"
     ? createAppRedirectPage(getAppCallbackUrl({ error }))
-    : NextResponse.redirect(
-        state?.client === "tickets" ? toTicketsUrl(`/login?error=${error}`) : getLoginErrorUrl(error),
-        303,
-      );
+    : NextResponse.redirect(getLoginErrorUrl(error), 303);
   clearOAuthCsrfCookie(response);
   return response;
 };
@@ -79,10 +76,7 @@ const handleCallback = async (
     }
 
     const exchangePath = `/api/v1/auth/oauth/exchange?${new URLSearchParams({ code })}`;
-    const response = NextResponse.redirect(
-      state.client === "tickets" ? toTicketsUrl(exchangePath) : toPublicUrl(exchangePath),
-      303,
-    );
+    const response = NextResponse.redirect(toPublicUrl(exchangePath), 303);
     clearOAuthCsrfCookie(response);
     return response;
   } catch (error) {

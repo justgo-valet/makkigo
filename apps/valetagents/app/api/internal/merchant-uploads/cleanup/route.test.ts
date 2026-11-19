@@ -2,13 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const repository = vi.hoisted(() => ({
-  expireSessions: vi.fn(),
-  inspect: vi.fn(),
-  claim: vi.fn(),
-  complete: vi.fn(),
-  fail: vi.fn(),
-}));
 const storage = vi.hoisted(() => ({ deleteObject: vi.fn() }));
 const ticketUploads = vi.hoisted(() => ({
   count: vi.fn(),
@@ -17,9 +10,6 @@ const ticketUploads = vi.hoisted(() => ({
   updateMany: vi.fn(),
 }));
 
-vi.mock("@/server/merchantUploads/prismaMerchantUploadCleanupRepository", () => ({
-  prismaMerchantUploadCleanupRepository: repository,
-}));
 vi.mock("@/server/merchantUploads/s3MerchantUploadStorage", () => ({
   createS3MerchantUploadStorage: () => storage,
 }));
@@ -52,9 +42,7 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
     vi.clearAllMocks();
     process.env.MERCHANT_UPLOAD_CLEANUP_TOKEN = CLEANUP_TOKEN;
     process.env.MERCHANT_UPLOAD_CLEANUP_ENABLED = "false";
-    repository.inspect.mockResolvedValue({ eligibleCount: 2, oldestEligibleAt: null });
-    repository.claim.mockResolvedValue([]);
-    ticketUploads.count.mockResolvedValue(0);
+    ticketUploads.count.mockResolvedValue(1);
     ticketUploads.findMany.mockResolvedValue([]);
   });
 
@@ -67,14 +55,14 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
     const response = await callPost({ invalid: true }, "wrong");
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toMatchObject({ code: "AUTH_REQUIRED" });
-    expect(repository.inspect).not.toHaveBeenCalled();
+    expect(ticketUploads.findMany).not.toHaveBeenCalled();
   });
 
   it("fails closed when the configured token is shorter than 256 bits", async () => {
     process.env.MERCHANT_UPLOAD_CLEANUP_TOKEN = "short-token";
     const response = await callPost({ dryRun: true }, "short-token");
     expect(response.status).toBe(401);
-    expect(repository.inspect).not.toHaveBeenCalled();
+    expect(ticketUploads.findMany).not.toHaveBeenCalled();
   });
 
   it("does not accept a staff cookie instead of the cleanup token", async () => {
@@ -88,7 +76,7 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
     );
     const response = await POST(request);
     expect(response.status).toBe(401);
-    expect(repository.inspect).not.toHaveBeenCalled();
+    expect(ticketUploads.findMany).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -102,7 +90,7 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
     const response = await callPost(body);
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({ code: "INVALID_REQUEST" });
-    expect(repository.inspect).not.toHaveBeenCalled();
+    expect(ticketUploads.findMany).not.toHaveBeenCalled();
   });
 
   it("returns 503 for execute while disabled with zero side effects", async () => {
@@ -110,8 +98,7 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
     expect(response.status).toBe(503);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     await expect(response.json()).resolves.toMatchObject({ code: "CLEANUP_DISABLED" });
-    expect(repository.inspect).not.toHaveBeenCalled();
-    expect(repository.claim).not.toHaveBeenCalled();
+    expect(ticketUploads.findMany).not.toHaveBeenCalled();
     expect(storage.deleteObject).not.toHaveBeenCalled();
   });
 
@@ -123,15 +110,14 @@ describe("POST /api/internal/merchant-uploads/cleanup", () => {
       eligibleCount: 2,
       claimed: 0,
     });
-    expect(repository.inspect).toHaveBeenCalledTimes(1);
-    expect(repository.claim).not.toHaveBeenCalled();
+    expect(ticketUploads.findMany).toHaveBeenCalledTimes(1);
     expect(storage.deleteObject).not.toHaveBeenCalled();
   });
 
-  it("executes through the claim service only when enabled", async () => {
+  it("executes the ticket upload cleanup only when enabled", async () => {
     process.env.MERCHANT_UPLOAD_CLEANUP_ENABLED = "true";
     const response = await callPost({ dryRun: false, batchSize: 25 });
     expect(response.status).toBe(200);
-    expect(repository.claim).toHaveBeenCalledWith(expect.objectContaining({ limit: 25 }));
+    expect(ticketUploads.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 25 }));
   });
 });

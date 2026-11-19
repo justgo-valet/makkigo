@@ -10,7 +10,7 @@ import type {
   OnboardingStatusResponse,
   StaffRole,
 } from "@/libs/onboarding/contracts/status";
-import type { BoothAgentStatus, BoothMerchantStatus } from "database";
+import type { BoothAgentStatus } from "database";
 
 const STATUS_ORDER: Record<BoothAgentStatus, number> = {
   REQUESTED: 0,
@@ -21,15 +21,8 @@ const STATUS_ORDER: Record<BoothAgentStatus, number> = {
 const deriveOnboardingState = (
   role: StaffRole | null,
   requestStatuses: BoothAgentStatus[],
-  merchantBoothStatuses: BoothMerchantStatus[][] = [],
 ): OnboardingState => {
   if (role === null) return "ROLE_REQUIRED";
-  if (role === "MERCHANT_ADMIN") {
-    if (merchantBoothStatuses.length === 0) return "MERCHANT_REGISTRATION_REQUIRED";
-    return merchantBoothStatuses.some((statuses) => statuses.includes("APPROVED"))
-      ? "COMPLETE"
-      : "MERCHANT_APPROVAL_PENDING";
-  }
   if (requestStatuses.includes("APPROVED")) return "COMPLETE";
   return requestStatuses.length > 0 ? "AWAITING_APPROVAL" : "BOOTH_REQUIRED";
 };
@@ -62,15 +55,6 @@ const getStaffOnboardingState = async (
           },
         },
       },
-      merchants: {
-        where: { deletedAt: null },
-        select: {
-          booths: {
-            where: { booth: { deletedAt: null } },
-            select: { status: true },
-          },
-        },
-      },
     },
   });
 
@@ -85,7 +69,6 @@ const getStaffOnboardingState = async (
   const state = deriveOnboardingState(
     staff.role,
     memberships.map(({ status }) => status),
-    staff.merchants.map(({ booths }) => booths.map(({ status }) => status)),
   );
 
   return {

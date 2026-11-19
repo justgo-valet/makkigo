@@ -100,7 +100,7 @@ beforeAll(async () => {
 
   const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const creator = await prisma.staff.create({
-    data: { role: "MERCHANT_ADMIN", name: `integration-creator-${suffix}` },
+    data: { role: "VALET_AGENT", name: `integration-creator-${suffix}` },
     select: { id: true },
   });
   const agent = await prisma.staff.create({

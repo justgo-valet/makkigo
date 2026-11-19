@@ -53,9 +53,9 @@ const createBooth = async (creatorId: number, label: string) => {
   return booth.id;
 };
 
-const createMerchant = async (adminId: number, label: string) => {
+const createMerchant = async (label: string) => {
   const merchant = await prisma.merchant.create({
-    data: { adminId, name: `integration-withdraw-${label}-${suffix}`, address: "서울시" },
+    data: { name: `integration-withdraw-${label}-${suffix}`, address: "서울시" },
     select: { id: true },
   });
   fixtureIds.merchant.push(merchant.id);
@@ -106,26 +106,20 @@ describe("withdrawStaff database integration", () => {
     );
   });
 
-  it("closes the booth and merchants the staff manages", async () => {
+  it("closes the booth the staff manages", async () => {
     const managerId = await createStaff("VALET_AGENT", "manager");
     const boothId = await createBooth(managerId, "manager-booth");
-    const adminId = await createStaff("MERCHANT_ADMIN", "admin");
-    const merchantId = await createMerchant(adminId, "admin-merchant");
 
     await expect(withdrawStaff(managerId)).resolves.toEqual({ ok: true });
-    await expect(withdrawStaff(adminId)).resolves.toEqual({ ok: true });
 
     const booth = await prisma.booth.findUniqueOrThrow({ where: { id: boothId } });
-    const merchant = await prisma.merchant.findUniqueOrThrow({ where: { id: merchantId } });
     expect(booth.deletedAt).not.toBeNull();
-    expect(merchant.deletedAt).not.toBeNull();
   });
 
   it("refuses while a car is on its way to a merchant contracted with the closing booth", async () => {
     const managerId = await createStaff("VALET_AGENT", "busy-manager");
     const boothId = await createBooth(managerId, "busy-booth");
-    const adminId = await createStaff("MERCHANT_ADMIN", "busy-admin");
-    const merchantId = await createMerchant(adminId, "busy-merchant");
+    const merchantId = await createMerchant("busy-merchant");
     await prisma.boothMerchant.create({ data: { boothId, merchantId, status: "APPROVED" } });
     await prisma.valetSession.create({
       data: { status: "ARRIVING", plateNumber: `99가${suffix.slice(-4)}`, merchantId },

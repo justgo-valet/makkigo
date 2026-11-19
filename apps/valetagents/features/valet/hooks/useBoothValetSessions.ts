@@ -4,10 +4,9 @@ import { getErrorMessage } from "@makkigo/api-client";
 import { useQuery } from "@tanstack/react-query";
 
 import { getBoothValetSessions } from "../apis/getBoothValetSessions";
-import { getMerchantValetSessions } from "../apis/getMerchantValetSessions";
 
 import type { QueryKey } from "@tanstack/react-query";
-import type { BoothValetSessionListResponse, ValetSessionListResponse } from "../schemas/sessions";
+import type { BoothValetSession, BoothValetSessionListResponse } from "../schemas/sessions";
 
 const BOOTH_VALET_SESSIONS_POLL_INTERVAL_MS = 5_000;
 const LIST_ERROR_MESSAGE = "차량 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.";
@@ -15,10 +14,7 @@ const LIST_ERROR_MESSAGE = "차량 목록을 불러오지 못했어요. 잠시 �
 const boothValetSessionsQueryKey = (staffId: number, boothId: number) =>
   ["staff", staffId, "booth-valet-sessions", boothId] as const;
 
-const merchantValetSessionsQueryKey = (staffId: number) =>
-  ["staff", staffId, "merchant-valet-sessions"] as const;
-
-const useValetSessionsQuery = <T extends { items: ValetSessionListResponse["items"] }>(
+const useValetSessionsQuery = <T extends { items: BoothValetSession[] }>(
   queryKey: QueryKey,
   queryFn: (signal: AbortSignal) => Promise<T>,
   initialData: T,
@@ -75,30 +71,8 @@ const useBoothValetSessions = ({
   };
 };
 
-interface UseMerchantValetSessionsOptions {
-  staffId: number;
-  initialData: ValetSessionListResponse;
-  initialDataUpdatedAt: number;
-}
-
-const useMerchantValetSessions = ({
-  staffId,
-  initialData,
-  initialDataUpdatedAt,
-}: UseMerchantValetSessionsOptions) => {
-  const { data, lists } = useValetSessionsQuery(
-    merchantValetSessionsQueryKey(staffId),
-    getMerchantValetSessions,
-    initialData,
-    initialDataUpdatedAt,
-  );
-
-  return { ...lists, completed: data.completed };
-};
-
 export {
   BOOTH_VALET_SESSIONS_POLL_INTERVAL_MS,
   boothValetSessionsQueryKey,
   useBoothValetSessions,
-  useMerchantValetSessions,
 };

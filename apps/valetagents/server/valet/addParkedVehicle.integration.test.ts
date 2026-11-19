@@ -51,7 +51,6 @@ beforeAll(async () => {
   merchantId = (
     await prisma.merchant.create({
       data: {
-        adminId: staffId,
         name: `integration-add-${suffix}`,
         address: "서울시 테스트구",
         booths: { create: { boothId, status: "APPROVED" } },
@@ -95,7 +94,6 @@ describe("addParkedVehicle database integration", () => {
     const createMerchant = (status: "APPROVED" | "PENDING") =>
       prisma.merchant.create({
         data: {
-          adminId: staffId,
           name: `integration-add-${status}`,
           address: "서울시 테스트구",
           booths: { create: { boothId, status } },
