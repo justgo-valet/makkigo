@@ -12,8 +12,14 @@ type MerchantInput = z.output<typeof merchantBodySchema>;
 const nameFilter = (query: string) =>
   query ? { name: { contains: query, mode: "insensitive" as const } } : {};
 
-const listMerchants = async ({ query, page }: { query: string; page: number }) => {
-  const where = { deletedAt: null, ...nameFilter(query) };
+const approvedBoothFilter = { status: "APPROVED" as const, booth: { deletedAt: null } };
+
+const listMerchants = async ({ query, page, linkedOnly }: { query: string; page: number; linkedOnly: boolean }) => {
+  const where = {
+    deletedAt: null,
+    ...nameFilter(query),
+    ...(linkedOnly ? { booths: { some: approvedBoothFilter } } : {}),
+  };
   const [merchants, total] = await prisma.$transaction([
     prisma.merchant.findMany({
       where,
@@ -24,9 +30,11 @@ const listMerchants = async ({ query, page }: { query: string; page: number }) =
         name: true,
         address: true,
         phone: true,
+        category: true,
+        publicDataId: true,
         createdAt: true,
         _count: { select: { admins: { where: { disabledAt: null } } } },
-        booths: { where: { status: "APPROVED", booth: { deletedAt: null } }, select: { boothId: true } },
+        booths: { where: approvedBoothFilter, select: { boothId: true } },
       },
     }),
     prisma.merchant.count({ where }),
@@ -101,7 +109,7 @@ const deleteMerchant = (merchantId: number) =>
       where: { merchantId, status: { in: [...ACTIVE_VALET_SESSION_STATUSES] } },
     });
     if (activeSessions > 0) return "ACTIVE_VALET_SESSION" as const;
-    await tx.merchant.update({ where: { id: merchantId }, data: { deletedAt: new Date(), kakaoPlaceId: null } });
+    await tx.merchant.update({ where: { id: merchantId }, data: { deletedAt: new Date(), kakaoPlaceId: null, importTargetId: null } });
     return "OK" as const;
   });
 

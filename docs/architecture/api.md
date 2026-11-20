@@ -120,8 +120,13 @@
 | `PATCH /api/v1/merchant-admins/{id}` | 업체 연결 · 해제 `{ merchantId \| null }` |
 | `POST /api/v1/merchant-admins/{id}/password-reset` · `disable` | 임시 비밀번호 재설정(변경 필수 + 모든 기기 로그아웃) · 사용 중지 |
 | `PUT · DELETE /api/v1/booths/{boothId}/merchants/{merchantId}` | 부스 연결 요청(없음 · 거절 → `PENDING`, 대기 · 등록이면 409) · 대기 취소 또는 등록 해제. 승인은 부스 관리자가 요원 앱에서 |
+| `GET /api/v1/regions?query=` | 업체 수집 지역 찾기: 카카오 주소 검색의 법정동코드 앞 5자리 → `{ region: { code, name } }`. 시군구가 아니면 404 `REGION_NOT_FOUND` |
+| `GET /api/v1/industry-categories?parent=` | 상가정보 업종 분류. `parent` 없으면 대분류, 있으면(2자리) 그 중분류. 서비스키가 없으면 503 `PUBLIC_DATA_KEY_MISSING` |
+| `POST /api/v1/merchant-import-targets` | 수집 대상 추가 `{ signguCode, signguName, industries: [{ code, name }] }`(중분류 1~50개) |
+| `DELETE /api/v1/merchant-import-targets/{id}` | 수집 대상 삭제. 가져온 업체는 남음 |
+| `POST /api/v1/merchant-import-targets/{id}/run` | 그 대상 하나를 바로 수집하고 `{ result }`(실패도 200 + `ok: false`, 대상에 저장). 서비스키가 없으면 503. 화면의 "전체 수집" 은 이 API 를 대상마다 차례로 부름(따로 API 없음). 규칙(추가 · 건너뜀 · 삭제 · 되살림 · 대량 삭제 멈춤) → [runbook.md](../operations/runbook.md#업체-수집) |
 
-화면: 대시보드(업체 · 업체 관리자 · 부스 · 요원 · 고객 수, 오늘 · 진행 중 세션, 연결 대기, 최근 세션), 업체, 업체 관리자, 부스, 발렛 세션.
+화면: 대시보드(업체 · 업체 관리자 · 부스 · 요원 · 고객 수, 오늘 · 진행 중 세션, 연결 대기, 최근 세션), 업체(출처 수동/공공데이터 · 업종, "부스 연결된 업체만" `?linked=1`), 업체 수집, 업체 관리자, 부스, 발렛 세션.
 
 ## 기반 PR
 
