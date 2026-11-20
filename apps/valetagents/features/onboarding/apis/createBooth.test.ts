@@ -31,7 +31,7 @@ describe("createBooth", () => {
     vi.stubGlobal("fetch", fetch);
     const photo = new File([Uint8Array.from([0xff, 0xd8, 0xff])], "booth.jpg", { type: "image/jpeg" });
 
-    await createBooth({ name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, bankAccount: BANK_ACCOUNT, photos: [photo] });
+    await createBooth({ name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, bankAccount: BANK_ACCOUNT, managerName: "김부스", photos: [photo] });
 
     expect(fetch).toHaveBeenCalledWith("https://s3.example.test", expect.objectContaining({
       method: "POST",
@@ -51,11 +51,11 @@ describe("createBooth", () => {
   });
 
   it("keeps the existing JSON request when no photos are selected", async () => {
-    await createBooth({ name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, bankAccount: BANK_ACCOUNT, photos: [] });
+    await createBooth({ name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, bankAccount: BANK_ACCOUNT, managerName: "김부스", photos: [] });
 
     expect(api.post).toHaveBeenCalledOnce();
     expect(api.post).toHaveBeenCalledWith("booths", expect.objectContaining({
-      json: { name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, bankAccount: BANK_ACCOUNT },
+      json: { name: "시청 부스", address: "서울시", feePolicy: FEE_POLICY, bankAccount: BANK_ACCOUNT, managerName: "김부스" },
     }));
   });
 });

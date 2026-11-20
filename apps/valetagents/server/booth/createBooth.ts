@@ -84,6 +84,7 @@ const createInTransaction = async (
     },
     select: { id: true },
   });
+  await transaction.staff.update({ where: { id: staffId }, data: { name: body.managerName } });
 
   return { ok: true, value: booth };
 };
