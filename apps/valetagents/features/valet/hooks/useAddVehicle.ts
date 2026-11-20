@@ -13,7 +13,7 @@ const ADD_ERROR_MESSAGE = "차량을 추가하지 못했어요. 잠시 후 다�
 interface UseAddVehicleOptions {
   staffId: number;
   boothId: number;
-  onAdded: () => void;
+  onAdded: (input: AddVehicleInput) => void;
 }
 
 const useAddVehicle = ({ staffId, boothId, onAdded }: UseAddVehicleOptions) => {
@@ -22,7 +22,7 @@ const useAddVehicle = ({ staffId, boothId, onAdded }: UseAddVehicleOptions) => {
     mutationFn: (input: AddVehicleInput) => addVehicle(boothId, input),
     retry: false,
     networkMode: "always",
-    onSuccess: onAdded,
+    onSuccess: (_, input) => onAdded(input),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: boothValetSessionsQueryKey(staffId, boothId) }),
   });

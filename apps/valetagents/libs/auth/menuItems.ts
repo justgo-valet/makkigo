@@ -26,7 +26,12 @@ const getMenuItems = ({ role, managedBoothId, agentBoothId, onboarding }: MenuAc
   if (onboarding) return [SETTINGS_ITEM];
   if (role === "VALET_AGENT") {
     return [
-      ...(agentBoothId ? [{ label: "집계", href: `/booths/${agentBoothId}/history` }] : []),
+      ...(agentBoothId
+        ? [
+            { label: "집계", href: `/booths/${agentBoothId}/history` },
+            { label: "업체 QR", href: `/booths/${agentBoothId}/merchant-qr` },
+          ]
+        : []),
       ...(managedBoothId !== null
         ? [
             { label: "요원 관리", href: `/booths/${managedBoothId}/agents` },
