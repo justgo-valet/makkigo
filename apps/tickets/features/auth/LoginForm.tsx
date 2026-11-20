@@ -3,6 +3,7 @@
 import { Button, FieldError, Input, Label } from "@makkigo/ui";
 import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 import type { FormEvent } from "react";
@@ -46,7 +47,7 @@ export default function LoginForm() {
       <Image src={makkigoLogo} alt="마끼고" width={132} height={54} priority />
       <h1 className="mt-6 text-2xl font-bold tracking-tight">업체 관리</h1>
       <p className="mt-2 text-sm leading-relaxed break-keep text-(--tertiary-color)">
-        마끼고 운영팀이 발급해 드린 아이디와 비밀번호로 로그인해 주세요. 계정이 없거나 잊어버렸다면 운영팀에 문의해 주세요.
+        마끼고 운영팀이 발급해 드린 아이디와 비밀번호로 로그인해 주세요. 비밀번호를 잊어버렸다면 운영팀에 문의해 주세요.
       </p>
       <div className="mt-8 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
@@ -78,6 +79,12 @@ export default function LoginForm() {
         <Button type="submit" size="lg" className="mt-2 w-full" disabled={pending}>
           {pending ? "로그인 중…" : "로그인"}
         </Button>
+        <p className="text-center text-sm text-(--tertiary-color)">
+          계정이 없나요?{" "}
+          <Link href="/find-merchant" className="font-medium text-primary hover:underline">
+            내 업체 찾기
+          </Link>
+        </p>
       </div>
     </form>
   );

@@ -8,7 +8,7 @@ const startOfSeoulDay = (now: Date) => {
 };
 
 export const readDashboard = async () => {
-  const [merchants, merchantAdmins, booths, approvedAgents, users, todaySessions, activeSessions, pendingRequests, recentSessions] =
+  const [merchants, merchantAdmins, booths, approvedAgents, users, todaySessions, activeSessions, pendingRequests, pendingAccountRequests, recentSessions] =
     await prisma.$transaction([
       prisma.merchant.count({ where: { deletedAt: null } }),
       prisma.merchantAdmin.count({ where: { disabledAt: null } }),
@@ -20,6 +20,7 @@ export const readDashboard = async () => {
       prisma.valetSession.count({ where: { createdAt: { gte: startOfSeoulDay(new Date()) } } }),
       prisma.valetSession.count({ where: { status: { in: [...ACTIVE_VALET_SESSION_STATUSES] } } }),
       prisma.boothMerchant.count({ where: { status: "PENDING", booth: { deletedAt: null }, merchant: { deletedAt: null } } }),
+      prisma.merchantAccountRequest.count({ where: { status: "PENDING" } }),
       prisma.valetSession.findMany({
         orderBy: { id: "desc" },
         take: 10,
@@ -34,7 +35,7 @@ export const readDashboard = async () => {
       }),
     ]);
   return {
-    counts: { merchants, merchantAdmins, booths, approvedAgents, users, todaySessions, activeSessions, pendingRequests },
+    counts: { merchants, merchantAdmins, booths, approvedAgents, users, todaySessions, activeSessions, pendingRequests, pendingAccountRequests },
     recentSessions,
   };
 };

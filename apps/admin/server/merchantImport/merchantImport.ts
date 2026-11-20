@@ -46,7 +46,9 @@ const existingSelect = {
   publicDataId: true,
   importTargetId: true,
   deletedAt: true,
-  _count: { select: { booths: true, admins: true, valetSessions: true } },
+  _count: {
+    select: { booths: true, admins: true, valetSessions: true, accountRequests: { where: { status: "PENDING" } } },
+  },
 } as const;
 
 const chunk = <Item>(items: Item[], size: number) =>
@@ -91,7 +93,7 @@ const loadExistingMerchants = async (targetId: number, stores: ImportStore[]): P
       merchants.set(merchant.id, {
         ...merchant,
         deleted: deletedAt !== null,
-        linked: _count.booths > 0 || _count.admins > 0 || _count.valetSessions > 0,
+        linked: _count.booths > 0 || _count.admins > 0 || _count.valetSessions > 0 || _count.accountRequests > 0,
       });
     }
   }
@@ -139,6 +141,7 @@ const importTarget = async (target: { id: number; signguCode: string; industryCo
         booths: { none: {} },
         admins: { none: {} },
         valetSessions: { none: {} },
+        accountRequests: { none: { status: "PENDING" } },
       },
       data: { deletedAt: at, kakaoPlaceId: null },
     });

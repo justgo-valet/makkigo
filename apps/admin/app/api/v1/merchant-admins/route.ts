@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
         return apiError("INVALID_LOGIN_ID", "아이디는 영문 소문자 · 숫자 · . _ - 로 4~32자여야 합니다.", 400);
       }
       if (result.reason === "MERCHANT_NOT_FOUND") return apiError("MERCHANT_NOT_FOUND", "업체를 찾을 수 없습니다.", 404);
+      if (result.reason === "REQUEST_NOT_PENDING") {
+        return apiError("REQUEST_NOT_PENDING", "이미 처리된 계정 요청입니다.", 409);
+      }
       return apiError("DUPLICATE_LOGIN_ID", "이미 쓰고 있는 아이디입니다.", 409);
     }
     return privateJson({ id: result.id, temporaryPassword: result.temporaryPassword }, { status: 201 });

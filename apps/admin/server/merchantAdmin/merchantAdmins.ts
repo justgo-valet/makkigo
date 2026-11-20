@@ -46,24 +46,34 @@ const readMerchantAdmin = (merchantAdminId: number) =>
 const hasMerchant = async (merchantId: number | null) =>
   merchantId === null || (await prisma.merchant.count({ where: { id: merchantId, deletedAt: null } })) === 1;
 
+class AccountRequestNotPendingError extends Error {}
+
 const createMerchantAdmin = async (input: MerchantAdminCreateBody) => {
   const loginId = normalizeLoginId(input.loginId);
   if (!loginId) return { ok: false as const, reason: "INVALID_LOGIN_ID" as const };
   if (!(await hasMerchant(input.merchantId))) return { ok: false as const, reason: "MERCHANT_NOT_FOUND" as const };
   const temporaryPassword = createTemporaryPassword();
+  const passwordHash = await hashPassword(temporaryPassword);
   try {
-    const merchantAdmin = await prisma.merchantAdmin.create({
-      data: {
-        loginId,
-        name: input.name,
-        merchantId: input.merchantId,
-        passwordHash: await hashPassword(temporaryPassword),
-        passwordChangeRequired: true,
-      },
-      select: { id: true },
+    const merchantAdmin = await prisma.$transaction(async (tx) => {
+      const created = await tx.merchantAdmin.create({
+        data: { loginId, name: input.name, merchantId: input.merchantId, passwordHash, passwordChangeRequired: true },
+        select: { id: true },
+      });
+      if (input.accountRequestId !== undefined) {
+        const { count } = await tx.merchantAccountRequest.updateMany({
+          where: { id: input.accountRequestId, status: "PENDING" },
+          data: { status: "COMPLETED", merchantAdminId: created.id, processedAt: new Date() },
+        });
+        if (count !== 1) throw new AccountRequestNotPendingError();
+      }
+      return created;
     });
     return { ok: true as const, id: merchantAdmin.id, temporaryPassword };
   } catch (error) {
+    if (error instanceof AccountRequestNotPendingError) {
+      return { ok: false as const, reason: "REQUEST_NOT_PENDING" as const };
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { ok: false as const, reason: "DUPLICATE_LOGIN_ID" as const };
     }

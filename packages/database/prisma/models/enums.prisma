@@ -52,3 +52,9 @@ enum StaffConsentType {
     PARTNER_TERMS
     PARTNER_PRIVACY_COLLECTION
 }
+
+enum MerchantAccountRequestStatus {
+    PENDING
+    COMPLETED
+    REJECTED
+}

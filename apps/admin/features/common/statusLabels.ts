@@ -21,4 +21,10 @@ const BOOTH_AGENT_STATUS = {
   REJECTED: { label: "거절", tone: "danger" },
 } as const satisfies Record<string, StatusBadgeProps>;
 
-export { BOOTH_AGENT_STATUS, BOOTH_MERCHANT_STATUS, VALET_SESSION_STATUS };
+const MERCHANT_ACCOUNT_REQUEST_STATUS = {
+  PENDING: { label: "대기", tone: "warning" },
+  COMPLETED: { label: "발급 완료", tone: "success" },
+  REJECTED: { label: "거절", tone: "danger" },
+} as const satisfies Record<string, StatusBadgeProps>;
+
+export { BOOTH_AGENT_STATUS, BOOTH_MERCHANT_STATUS, MERCHANT_ACCOUNT_REQUEST_STATUS, VALET_SESSION_STATUS };

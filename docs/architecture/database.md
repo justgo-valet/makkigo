@@ -32,6 +32,7 @@
 | 부스 | `booths`, `booth_photos`, `booth_agents`, `booth_fee_policies`, `booth_bank_accounts` | #9 |
 | 업체 · 티켓 | `merchants`(우편번호 · 좌표 · 카카오 장소 ID · 전화번호 · 공공데이터 상가업소번호 · 업종 · 수집 대상 포함), `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9, [#96](https://github.com/justgo-valet/makkigo/pull/96), [#132](https://github.com/justgo-valet/makkigo/pull/132), `20261119120000_merchant_import` |
 | 업체 수집 | `merchant_import_targets`(시군구 코드 · 이름, 업종 코드 · 이름 목록, 마지막 수집 시각 · 결과 요약 JSON) | `20261119120000_merchant_import` |
+| 계정 요청 | `merchant_account_requests`(찾은 업체 `merchant_id?` 또는 새 업체 이름 · 주소, 요청한 분 이름 · 연락처, 상태 대기/발급 완료/거절, 발급한 계정 `merchant_admin_id?`, 처리 시각) | `20261120090000_merchant_account_requests` |
 | 티켓 이미지 업로드 | `ticket_image_uploads` (예약 · 완료, 올린 업체 관리자) | |
 | 발렛 | `valet_sessions` | #9 |
 | 알림 | `push_devices`, `notifications` | #9 |
@@ -107,6 +108,13 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 - `merchants.category`: 업종 이름(소분류 `indsSclsNm`). 수동 등록 업체는 비어 있음
 - `merchants.import_target_id`: 이 업체를 처음 가져온 수집 대상. "이번 수집에 없는 업체 삭제" 를 그 대상 범위로만 하려고 둡니다. 대상을 지우거나 어드민이 업체를 지우면 비워지고(`SET NULL` · 삭제 API), 그 뒤로는 자동 삭제 · 되살림 대상이 아닙니다
 - `merchant_import_targets.last_synced_at` 은 **성공한** 수집 시각. 실패하면 그대로 두고 `last_result` 에만 실패를 남깁니다. 수집은 화면에서 손으로만 돌립니다. 규칙 → [runbook.md](../operations/runbook.md#업체-수집)
+
+## 계정 요청 (`20261120090000_merchant_account_requests`)
+
+- 로그인 없이 티켓 웹에서 넣는 업체 관리자 계정 요청. 업체 이름 · 주소는 찾은 업체여도 요청 때 값을 복사해 둡니다(업체가 지워져도 무엇을 요청했는지 남게)
+- `merchant_id` · `merchant_admin_id` 는 `SET NULL`. 연락처는 숫자만
+- 이름 · 연락처는 개인정보라 **처리(발급 완료 · 거절)한 뒤 30일이 지나면 행을 지웁니다**. 따로 정리 작업 없이 어드민이 계정 요청 목록을 열 때 지움
+- 대기 중인 요청이 걸린 업체는 업체 수집이 삭제 표시하지 않습니다
 
 ## 코드로 표현 못 하는 제약
 
