@@ -1,4 +1,5 @@
 import { Ubuntu } from "next/font/google";
+import { connection } from "next/server";
 
 import "./globals.css";
 
@@ -23,7 +24,9 @@ export const viewport: Viewport = {
   interactiveWidget: "resizes-content",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  await connection();
+
   return (
     <html lang="ko" className={ubuntu.variable}>
       <body className="flex h-screen w-full flex-col items-center bg-(--surface-color)">
