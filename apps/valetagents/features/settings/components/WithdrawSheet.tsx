@@ -19,14 +19,11 @@ interface WithdrawSheetProps {
   onClose: () => void;
 }
 
-const getWithdrawNotices = ({ role, managedBoothId }: MenuAccess) => [
+const getWithdrawNotices = ({ managedBoothId }: MenuAccess) => [
   "연결된 소셜 계정이 바로 해제되고, 모든 기기에서 로그아웃돼요.",
   ...(managedBoothId === null
     ? []
     : ["만든 부스도 함께 닫혀요. 소속 요원과 업체 계약이 모두 끝나요."]),
-  ...(role === "MERCHANT_ADMIN"
-    ? ["등록한 업체가 있으면 함께 닫혀서 고객이 도착 알림을 보낼 수 없어요."]
-    : []),
   "지난 발렛 처리 기록은 문의 · 분쟁 대응을 위해 5년 동안 보관돼요.",
 ];
 

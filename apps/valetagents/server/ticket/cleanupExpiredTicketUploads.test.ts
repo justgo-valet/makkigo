@@ -10,11 +10,13 @@ describe("cleanupExpiredTicketUploads", () => {
       id: "expired-reservation",
       stagingKey: "tickets/staging/expired.webp",
       state: "RESERVED",
+      expiresAt: new Date("2026-10-13T09:00:00.000Z"),
     };
     const complete = {
       id: "issued-asset",
       stagingKey: "tickets/staging/complete.webp",
       state: "COMPLETE",
+      expiresAt: new Date("2026-10-14T06:00:00.000Z"),
     };
     const findMany = vi.fn().mockResolvedValue([reserved, complete]);
     const count = vi.fn().mockResolvedValueOnce(1).mockResolvedValueOnce(1);
@@ -32,7 +34,13 @@ describe("cleanupExpiredTicketUploads", () => {
           now: () => new Date("2026-10-15T12:00:00.000Z"),
         },
       ),
-    ).resolves.toMatchObject({ eligibleCount: 2, cleaned: 2, failed: 0, partial: false });
+    ).resolves.toMatchObject({
+      eligibleCount: 2,
+      oldestEligibleAgeSeconds: 27 * 60 * 60,
+      cleaned: 2,
+      failed: 0,
+      partial: false,
+    });
 
     expect(storage.deleteObject).toHaveBeenCalledTimes(2);
     expect(storage.deleteObject).toHaveBeenCalledWith({ key: "tickets/staging/expired.webp" });

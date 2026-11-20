@@ -11,7 +11,6 @@ let listBoothMerchants: typeof ListBoothMerchants;
 let suffix: string;
 let managerId: number;
 let otherManagerId: number;
-let merchantAdminId: number;
 let boothId: number;
 let otherBoothId: number;
 const fixtureIds = { booth: [] as number[], staff: [] as number[], merchant: [] as number[] };
@@ -33,7 +32,6 @@ const createMerchant = async (
 ) => {
   const merchant = await prisma.merchant.create({
     data: {
-      adminId: merchantAdminId,
       name: `integration-${label}-${suffix}`,
       address: `서울시 테스트구 ${label}로`,
       ...overrides,
@@ -56,7 +54,7 @@ beforeAll(async () => {
   ({ listBoothMerchants } = await import("./listBoothMerchants"));
 
   suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const createStaff = async (label: string, role: "VALET_AGENT" | "MERCHANT_ADMIN") =>
+  const createStaff = async (label: string, role: "VALET_AGENT") =>
     (
       await prisma.staff.create({
         data: { role, name: `integration-${label}-${suffix}` },
@@ -73,10 +71,9 @@ beforeAll(async () => {
 
   managerId = await createStaff("manager", "VALET_AGENT");
   otherManagerId = await createStaff("other-manager", "VALET_AGENT");
-  merchantAdminId = await createStaff("merchant-admin", "MERCHANT_ADMIN");
   boothId = await createBooth("booth", managerId);
   otherBoothId = await createBooth("other-booth", otherManagerId);
-  fixtureIds.staff.push(managerId, otherManagerId, merchantAdminId);
+  fixtureIds.staff.push(managerId, otherManagerId);
   fixtureIds.booth.push(boothId, otherBoothId);
 });
 

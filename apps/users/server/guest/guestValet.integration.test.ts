@@ -89,7 +89,6 @@ beforeAll(async () => {
     (
       await prisma.merchant.create({
         data: {
-          adminId: staffId,
           name: `guest-${label}-${suffix}`,
           address: "서울시 테스트구",
           booths: { create: { boothId: contractBoothId, status: "APPROVED" } },

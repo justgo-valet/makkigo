@@ -3,11 +3,10 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import QueryProvider from "@/components/providers/QueryProvider";
+import ConsentStep from "@/features/onboarding/components/ConsentStep";
 import OnboardingShell from "@/features/onboarding/components/OnboardingShell";
-import RoleSelection from "@/features/onboarding/RoleSelection";
 import { getOnboardingMenu } from "@/libs/auth/menuItems";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
-import { hasStaffConsents } from "@/server/consent/staffConsents";
 import { getStaffOnboardingState } from "@/server/onboarding/getStaffOnboardingState";
 
 interface OnboardingPageProps {
@@ -26,11 +25,10 @@ export default async function OnboardingPage({ searchParams }: Readonly<Onboardi
   if (initialStatus.state === "ROLE_REQUIRED") {
     return (
       <QueryProvider sessionKey={staffId}>
-        <RoleSelection menu={menu} consentRequired={!(await hasStaffConsents(staffId))} />
+        <ConsentStep menu={menu} />
       </QueryProvider>
     );
   }
-  if (initialStatus.role === "MERCHANT_ADMIN") redirect("/onboarding/merchant");
 
   const requestedView = (await searchParams).view;
   const initialView = requestedView === "search" ? "search" : null;

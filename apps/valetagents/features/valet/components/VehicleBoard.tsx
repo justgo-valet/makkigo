@@ -2,19 +2,18 @@
 
 import { FieldError, cn } from "@makkigo/ui";
 
-import { formatCompletedLabel, formatPlateNumber, formatSessionLabel, formatWon } from "../formatters";
+import { formatPlateNumber, formatSessionLabel, formatWon } from "../formatters";
 
 import { VehicleCardContent, vehicleCardClass } from "./VehicleCard";
 
-import type { BoothValetSession, CompletedValetSession } from "../schemas/sessions";
+import type { BoothValetSession } from "../schemas/sessions";
 
 const FOCUS_CLASS =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 interface VehicleBoardProps {
   sessions: BoothValetSession[];
-  completed?: CompletedValetSession[];
-  completedCount?: number;
+  completedCount: number;
   updatedAt: number;
   errorMessage: string | null;
   onSelectSession?: (session: BoothValetSession) => void;
@@ -22,8 +21,7 @@ interface VehicleBoardProps {
 
 export default function VehicleBoard({
   sessions,
-  completed = [],
-  completedCount = completed.length,
+  completedCount,
   updatedAt,
   errorMessage,
   onSelectSession,
@@ -85,23 +83,6 @@ export default function VehicleBoard({
               ) : (
                 <div className={vehicleCardClass(session.status)}>{content}</div>
               )}
-            </li>
-          );
-        })}
-        {completed.map((session) => {
-          const content = (
-            <VehicleCardContent
-              status="COMPLETED"
-              imageUrl={session.carImageUrl}
-              plateNumber={session.plateNumber}
-              label={formatCompletedLabel(session.completedAt, updatedAt)}
-              fee={session.fee === null ? "금액 미입력" : formatWon(session.fee)}
-            />
-          );
-
-          return (
-            <li key={`completed-${session.id}`} className="min-w-0">
-              <div className={vehicleCardClass("COMPLETED")}>{content}</div>
             </li>
           );
         })}

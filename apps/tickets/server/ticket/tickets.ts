@@ -11,16 +11,9 @@ const latestVersion = {
   select: { design: true, createdAt: true },
 } satisfies Prisma.Ticket$versionsArgs;
 
-const listOwnMerchants = (staffId: number) =>
-  prisma.merchant.findMany({
-    where: { adminId: staffId, deletedAt: null },
-    select: { id: true, name: true },
-    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-  });
-
-const listOwnTickets = async (staffId: number) => {
+const listOwnTickets = async (merchantId: number) => {
   const tickets = await prisma.ticket.findMany({
-    where: { deletedAt: null, merchant: { adminId: staffId, deletedAt: null } },
+    where: { deletedAt: null, merchantId },
     select: { id: true, merchant: { select: { name: true } }, versions: latestVersion },
   });
   return tickets
@@ -34,9 +27,9 @@ const listOwnTickets = async (staffId: number) => {
     .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime() || right.id - left.id);
 };
 
-const getOwnTicket = async (staffId: number, ticketId: number) => {
+const getOwnTicket = async (merchantId: number, ticketId: number) => {
   const ticket = await prisma.ticket.findFirst({
-    where: { id: ticketId, deletedAt: null, merchant: { adminId: staffId, deletedAt: null } },
+    where: { id: ticketId, deletedAt: null, merchantId },
     select: { id: true, merchantId: true, merchant: { select: { name: true } }, versions: latestVersion },
   });
   const design = ticketDesignSchema.safeParse(ticket?.versions[0]?.design);
@@ -46,7 +39,7 @@ const getOwnTicket = async (staffId: number, ticketId: number) => {
 };
 
 const saveTicket = async (input: {
-  staffId: number;
+  ownMerchantId: number;
   merchantId?: number;
   ticketId?: number;
   design: TicketDesign;
@@ -56,15 +49,15 @@ const saveTicket = async (input: {
       const existing = input.ticketId === undefined
         ? null
         : await transaction.ticket.findFirst({
-            where: { id: input.ticketId, deletedAt: null, merchant: { adminId: input.staffId, deletedAt: null } },
+            where: { id: input.ticketId, deletedAt: null, merchantId: input.ownMerchantId },
             select: { id: true, merchantId: true },
           });
       if (input.ticketId !== undefined && !existing) return { kind: "NOT_FOUND" as const };
       const merchantId = existing?.merchantId ?? input.merchantId;
-      if (merchantId === undefined) return { kind: "NOT_FOUND" as const };
+      if (merchantId !== input.ownMerchantId) return { kind: "NOT_FOUND" as const };
 
       const merchant = await transaction.merchant.findFirst({
-        where: { id: merchantId, adminId: input.staffId, deletedAt: null },
+        where: { id: merchantId, deletedAt: null },
         select: { id: true },
       });
       if (!merchant) return { kind: "NOT_FOUND" as const };
@@ -72,7 +65,7 @@ const saveTicket = async (input: {
       const paths = [...new Set(input.design.layers.flatMap((layer) => (layer.type === "IMAGE" ? [layer.assetPath] : [])))];
       if (paths.length > 0) {
         const assets = await transaction.ticketImageUpload.count({
-          where: { merchantId, staffId: input.staffId, state: "COMPLETE", finalKey: { in: paths } },
+          where: { merchantId, state: "COMPLETE", finalKey: { in: paths } },
         });
         if (assets !== paths.length) return { kind: "ASSET_NOT_FOUND" as const };
       }
@@ -86,4 +79,4 @@ const saveTicket = async (input: {
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
   );
 
-export { getOwnTicket, listOwnMerchants, listOwnTickets, saveTicket };
+export { getOwnTicket, listOwnTickets, saveTicket };

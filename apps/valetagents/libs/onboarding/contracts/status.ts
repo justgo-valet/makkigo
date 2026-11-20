@@ -2,13 +2,11 @@ import { z } from "zod";
 
 import { requestSummarySchema } from "@/libs/booth/contracts/agent-request";
 
-const staffRoleSchema = z.enum(["VALET_AGENT", "MERCHANT_ADMIN"]);
+const staffRoleSchema = z.enum(["VALET_AGENT"]);
 const onboardingStateSchema = z.enum([
   "ROLE_REQUIRED",
   "BOOTH_REQUIRED",
   "AWAITING_APPROVAL",
-  "MERCHANT_REGISTRATION_REQUIRED",
-  "MERCHANT_APPROVAL_PENDING",
   "COMPLETE",
 ]);
 

@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { z } from "zod";
 import { prisma } from "database";
 
@@ -9,8 +7,6 @@ import {
   countIncompleteStaffSignups,
   purgeIncompleteStaffSignups,
 } from "@/server/consent/purgeIncompleteStaffSignups";
-import { createMerchantUploadCleanupService } from "@/server/merchantUploads/cleanupMerchantUploads";
-import { prismaMerchantUploadCleanupRepository } from "@/server/merchantUploads/prismaMerchantUploadCleanupRepository";
 import { createS3MerchantUploadStorage } from "@/server/merchantUploads/s3MerchantUploadStorage";
 import { cleanupExpiredTicketUploads } from "@/server/ticket/cleanupExpiredTicketUploads";
 
@@ -25,7 +21,6 @@ const cleanupBodySchema = z
     batchSize: z.number().int().min(1).max(100).default(100),
   })
   .strict();
-
 
 export async function POST(request: NextRequest) {
   if (!hasInternalToken(request, process.env.MERCHANT_UPLOAD_CLEANUP_TOKEN)) {
@@ -43,18 +38,8 @@ export async function POST(request: NextRequest) {
     const storage = body.data.dryRun
       ? { deleteObject: async () => Promise.reject(new Error("dry-run cannot delete objects")) }
       : createS3MerchantUploadStorage();
-    const cleanup = createMerchantUploadCleanupService({
-      repository: prismaMerchantUploadCleanupRepository,
-      storage,
-      createClaimId: randomUUID,
-    });
     const now = new Date();
-    const [merchantUploads, ticketUploads, incompleteStaffSignups] = await Promise.all([
-      cleanup({
-        dryRun: body.data.dryRun,
-        batchSize: body.data.batchSize,
-        signal: request.signal,
-      }),
+    const [ticketUploads, incompleteStaffSignups] = await Promise.all([
       cleanupExpiredTicketUploads(
         { dryRun: body.data.dryRun, batchSize: body.data.batchSize },
         {
@@ -68,12 +53,8 @@ export async function POST(request: NextRequest) {
         : purgeIncompleteStaffSignups(now, body.data.batchSize),
     ]);
     return privateJson({
-      ...merchantUploads,
-      claimed: merchantUploads.claimed + ticketUploads.claimed,
-      cleaned: merchantUploads.cleaned + ticketUploads.cleaned,
-      failed: merchantUploads.failed + ticketUploads.failed,
-      partial: merchantUploads.partial || ticketUploads.partial,
-      ticketUploads,
+      dryRun: body.data.dryRun,
+      ...ticketUploads,
       incompleteStaffSignups,
     });
   } catch (error) {

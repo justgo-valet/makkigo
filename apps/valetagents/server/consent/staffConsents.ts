@@ -4,24 +4,25 @@ import { prisma } from "database";
 
 import { PARTNER_DOCUMENT_VERSION, STAFF_CONSENT_TYPES } from "@/libs/consent/staffConsents";
 
-const hasStaffConsents = async (staffId: number) => {
-  const consents = await prisma.staffConsent.findMany({
-    where: { staffId, type: { in: [...STAFF_CONSENT_TYPES] } },
-    distinct: ["type"],
-    select: { type: true },
-  });
-
-  return consents.length === STAFF_CONSENT_TYPES.length;
-};
-
 const recordStaffConsents = async (staffId: number) => {
-  await prisma.staffConsent.createMany({
-    data: STAFF_CONSENT_TYPES.map((type) => ({
-      staffId,
-      type,
-      documentVersion: PARTNER_DOCUMENT_VERSION,
-    })),
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.staffConsent.findMany({
+      where: { staffId, documentVersion: PARTNER_DOCUMENT_VERSION },
+      select: { type: true },
+    });
+    const recorded = new Set(existing.map(({ type }) => type));
+    await tx.staffConsent.createMany({
+      data: STAFF_CONSENT_TYPES.filter((type) => !recorded.has(type)).map((type) => ({
+        staffId,
+        type,
+        documentVersion: PARTNER_DOCUMENT_VERSION,
+      })),
+    });
+    await tx.staff.updateMany({
+      where: { id: staffId, role: null, deletedAt: null },
+      data: { role: "VALET_AGENT" },
+    });
   });
 };
 
-export { hasStaffConsents, recordStaffConsents };
+export { recordStaffConsents };

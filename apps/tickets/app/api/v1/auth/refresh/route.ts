@@ -1,8 +1,9 @@
-import { InvalidRefreshTokenError, refreshStaffTokens } from "@makkigo/auth";
+import { InvalidRefreshTokenError, refreshMerchantAdminTokens } from "@makkigo/auth";
 import { NextResponse } from "next/server";
 
 import { clearAuthCookies, REFRESH_TOKEN_COOKIE, setAuthCookies } from "@/server/auth/authCookies";
-import { toPublicUrl } from "@/server/auth/oauthUrls";
+import { toPublicUrl } from "@/server/auth/publicUrl";
+import { isSameOrigin } from "@/server/common/isSameOrigin";
 
 import type { NextRequest } from "next/server";
 
@@ -10,7 +11,7 @@ const refresh = async (request: NextRequest) => {
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
   if (!refreshToken) return null;
   try {
-    return await refreshStaffTokens({ refreshToken, userAgent: request.headers.get("user-agent") });
+    return await refreshMerchantAdminTokens({ refreshToken, userAgent: request.headers.get("user-agent") });
   } catch (error) {
     if (error instanceof InvalidRefreshTokenError) return null;
     throw error;
@@ -25,7 +26,7 @@ const toSafeUrl = (value: string | null) => {
 
 export async function GET(request: NextRequest) {
   const tokens = await refresh(request).catch((error: unknown) => {
-    console.error("Failed to refresh staff tokens", error);
+    console.error("Failed to refresh merchant admin tokens", error);
     return null;
   });
   const response = NextResponse.redirect(
@@ -37,6 +38,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!isSameOrigin(request)) return NextResponse.json({ message: "허용되지 않은 요청 출처입니다." }, { status: 403 });
   try {
     const tokens = await refresh(request);
     if (!tokens) {
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
     setAuthCookies(response, tokens);
     return response;
   } catch (error) {
-    console.error("Failed to refresh staff tokens", error);
+    console.error("Failed to refresh merchant admin tokens", error);
     return NextResponse.json({ message: "로그인 상태를 갱신하지 못했습니다." }, { status: 500 });
   }
 }

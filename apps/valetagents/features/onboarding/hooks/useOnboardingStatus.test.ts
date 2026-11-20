@@ -27,9 +27,8 @@ describe("getOnboardingPollInterval", () => {
     expect(getOnboardingPollInterval(status("VALET_AGENT", "COMPLETE"))).toBe(false);
   });
 
-  it("does not poll before a role is selected or for merchant admins", () => {
+  it("does not poll before a role is assigned", () => {
     expect(getOnboardingPollInterval(status(null, "ROLE_REQUIRED"))).toBe(false);
-    expect(getOnboardingPollInterval(status("MERCHANT_ADMIN", "COMPLETE"))).toBe(false);
   });
 
   it("does not poll without status data", () => {
