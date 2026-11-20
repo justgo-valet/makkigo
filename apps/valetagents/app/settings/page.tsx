@@ -26,6 +26,7 @@ export default async function SettingsPage() {
       <AppSessionBridge authenticated />
       <SettingsContent
         staffId={staffId}
+        staffName={onboarding.name}
         menu={{ ...menu, onboarding: onboarding.state !== "COMPLETE" }}
         socialAccounts={socialAccounts}
       />

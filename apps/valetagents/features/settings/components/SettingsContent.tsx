@@ -7,10 +7,12 @@ import { useState, useSyncExternalStore } from "react";
 import AppHeader from "@/components/layouts/AppHeader";
 import { isInApp, openAppNotificationSettings } from "@/features/auth/appBridge";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useStaffName } from "@/features/settings/hooks/useStaffName";
 import { useWithdraw } from "@/features/settings/hooks/useWithdraw";
 
 import { SOCIAL_PROVIDER_LABELS, TERMS_ITEMS, getRoleLabel } from "../settingsItems";
 import PolicyPanel from "@/features/consent/components/PolicyPanel";
+import NameSheet from "./NameSheet";
 import SettingsRow from "./SettingsRow";
 import SettingsSection from "./SettingsSection";
 import WithdrawSheet from "./WithdrawSheet";
@@ -21,6 +23,7 @@ import type { TermsItem } from "../settingsItems";
 
 interface SettingsContentProps {
   staffId: number;
+  staffName: string | null;
   menu: MenuAccess;
   socialAccounts: StaffSocialAccount[];
 }
@@ -29,10 +32,12 @@ const subscribeNothing = () => () => {};
 
 export default function SettingsContent({
   staffId,
+  staffName,
   menu,
   socialAccounts,
 }: Readonly<SettingsContentProps>) {
   const logout = useLogout(staffId);
+  const nameForm = useStaffName(staffName);
   const withdraw = useWithdraw(staffId);
   const canOpenNotificationSettings = useSyncExternalStore(subscribeNothing, isInApp, () => false);
   const [openedTerms, setOpenedTerms] = useState<TermsItem | null>(null);
@@ -45,6 +50,21 @@ export default function SettingsContent({
 
       <div className="mt-6 flex flex-col gap-6 pb-6">
         <SettingsSection title="내 정보">
+          <SettingsRow>
+            <span className="shrink-0">이름</span>
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="truncate text-sm text-(--tertiary-color)">{staffName ?? "이름 없음"}</span>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto shrink-0 px-1 py-0.5 text-sm font-normal text-(--primary-color) hover:bg-transparent"
+                aria-label="이름 변경"
+                onClick={nameForm.open}
+              >
+                변경
+              </Button>
+            </span>
+          </SettingsRow>
           <SettingsRow>
             <span className="shrink-0">역할</span>
             <span className="truncate text-sm text-(--tertiary-color)">{getRoleLabel(menu)}</span>
@@ -134,6 +154,7 @@ export default function SettingsContent({
         </div>
       </div>
 
+      <NameSheet form={nameForm} />
       <WithdrawSheet
         open={withdraw.isOpen}
         menu={menu}

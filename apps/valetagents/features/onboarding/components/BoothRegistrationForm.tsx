@@ -5,6 +5,7 @@ import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
 import Link from "next/link";
 
+import { STAFF_NAME_MAX_LENGTH } from "@/libs/booth/contracts/agent-request";
 import { BOOTH_PHOTO_MIME_TYPES } from "@/libs/booth/contracts/photos";
 
 import {
@@ -23,6 +24,7 @@ import { useBoothRegistrationForm } from "../hooks/useBoothRegistrationForm";
 interface BoothRegistrationFormProps {
   returnPath: string;
   kakaoMapAppKey: string;
+  staffName: string | null;
 }
 
 const BOX_CLASS = "rounded-md border border-input";
@@ -31,8 +33,9 @@ const BACK_CLASS = "z-10 flex h-full items-center disabled:opacity-50";
 export default function BoothRegistrationForm({
   returnPath,
   kakaoMapAppKey,
+  staffName,
 }: Readonly<BoothRegistrationFormProps>) {
-  const { mapContainerRef, ...form } = useBoothRegistrationForm(kakaoMapAppKey);
+  const { mapContainerRef, ...form } = useBoothRegistrationForm(kakaoMapAppKey, staffName);
 
   return (
     <form
@@ -68,7 +71,24 @@ export default function BoothRegistrationForm({
       </p>
 
       <div className={cn("flex flex-col", form.step !== "booth" && "hidden")}>
-        <label htmlFor="booth-name" className={cn(LABEL_CLASS, "mt-3")}>
+        <label htmlFor="manager-name" className={cn(LABEL_CLASS, "mt-3")}>
+          내 이름
+          <RequiredMark />
+        </label>
+        <p className="text-xs leading-5 text-(--tertiary-color)">요원 관리 화면에 보이는 이름이에요</p>
+        <input
+          id="manager-name"
+          type="text"
+          aria-required
+          autoComplete="name"
+          maxLength={STAFF_NAME_MAX_LENGTH}
+          value={form.managerName}
+          disabled={form.isSaving}
+          className={INPUT_CLASS}
+          onChange={(event) => form.changeManagerName(event.target.value)}
+        />
+
+        <label htmlFor="booth-name" className={cn(LABEL_CLASS, "mt-3.5")}>
           부스 이름
           <RequiredMark />
         </label>
