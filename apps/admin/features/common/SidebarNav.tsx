@@ -1,13 +1,14 @@
 "use client";
 
 import { cn } from "@makkigo/ui";
-import { Building2, Car, LayoutDashboard, Store, UserCog } from "lucide-react";
+import { Building2, Car, CloudDownload, LayoutDashboard, Store, UserCog } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITEMS = [
   { href: "/", label: "대시보드", icon: LayoutDashboard },
   { href: "/merchants", label: "업체", icon: Store },
+  { href: "/merchant-import", label: "업체 수집", icon: CloudDownload },
   { href: "/merchant-admins", label: "업체 관리자", icon: UserCog },
   { href: "/booths", label: "부스", icon: Building2 },
   { href: "/valet-sessions", label: "발렛 세션", icon: Car },

@@ -16,7 +16,7 @@ interface KakaoKeywordDocument {
   y?: string;
 }
 
-const getKakaoJson = async (path: string, params: Record<string, string>): Promise<unknown> => {
+export const getKakaoJson = async (path: string, params: Record<string, string>): Promise<unknown> => {
   const apiKey = process.env.KAKAO_REST_API_KEY?.trim();
   if (!apiKey) throw new Error("KAKAO_REST_API_KEY is not set");
   const url = new URL(path, "https://dapi.kakao.com");
