@@ -12,7 +12,10 @@ vi.mock("database", () => ({
 import { createBooth } from "./createBooth";
 
 const createTransaction = () => ({
-  staff: { findFirst: vi.fn().mockResolvedValue({ role: "VALET_AGENT", boothMemberships: [] }) },
+  staff: {
+    findFirst: vi.fn().mockResolvedValue({ role: "VALET_AGENT", boothMemberships: [] }),
+    update: vi.fn().mockResolvedValue({}),
+  },
   booth: { create: vi.fn().mockResolvedValue({ id: 3 }) },
 });
 
@@ -22,6 +25,7 @@ const body = {
   addressDetail: null,
   feePolicy: { baseMinutes: 60, baseFee: 12_000, extraUnitMinutes: 10, extraUnitFee: 1_000 },
   bankAccount: { bankName: "국민은행", accountNumber: "123-456-7890", accountHolder: "마끼고" },
+  managerName: "김부스",
 };
 
 describe("createBooth", () => {

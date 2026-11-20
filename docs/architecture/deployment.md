@@ -8,7 +8,7 @@
 - DB 스키마는 배포 때 `prisma migrate deploy` 로 반영합니다. → [database.md](database.md)
 - 주소: 고객 앱 `app.makkigo.com`, 요원 앱 `valet.makkigo.com`, 업체 관리자 포털 `tickets.makkigo.com`, 슈퍼 어드민 `admin.makkigo.com` (Route 53 A 레코드 → EC2 탄력적 IP. 도메인 등록은 가비아, DNS 는 Route 53). 루트 `makkigo.com` 은 비워 둠
 - HTTPS: **Caddy** 가 Let's Encrypt 인증서를 자동 발급 · 갱신
-- 보안 헤더: Caddy 가 모든 사이트 응답에 `Strict-Transport-Security`(1년) · `X-Content-Type-Options: nosniff` · `Referrer-Policy: strict-origin-when-cross-origin` · `X-Frame-Options: DENY` · `Content-Security-Policy: frame-ancestors 'none'` 를 붙이고 `X-Powered-By` 를 지움 (`deploy/Caddyfile` 의 `security_headers`, decisions 2026-11-20)
+- 보안 헤더: Caddy 가 모든 사이트 응답에 `Strict-Transport-Security`(1년) · `X-Content-Type-Options: nosniff` · `Referrer-Policy: strict-origin-when-cross-origin` · `X-Frame-Options: DENY` 를 붙이고 `X-Powered-By` 를 지움. 화면 응답의 CSP 는 각 앱 `proxy.ts` 가 요청마다 nonce 를 만들어 붙이고(`@makkigo/ui/lib/contentSecurityPolicy`), Caddy 는 CSP 가 없는 응답(API · 정적 파일)에만 `frame-ancestors 'none'` 을 채움 (`deploy/Caddyfile` 의 `security_headers`, decisions 2026-11-20)
 - PostgreSQL 5432 는 호스트에도 열어 둠 (로컬에서 운영 DB 확인용). EC2 보안 그룹이 허용한 IP 만 접속 가능
 - 서버에서 쓰는 파일은 `deploy/` 폴더: `docker-compose.prod.yml`, `Caddyfile`, `load-env.sh`, `deploy.sh`
 

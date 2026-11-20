@@ -44,11 +44,15 @@ const getBoothRegistrationMapView = ({
 };
 
 const getBoothInfoAvailability = ({
+  managerName,
   name,
   isSaving,
   ...address
-}: BoothRegistrationAddress & { name: string; isSaving: boolean }) =>
-  name.trim().length > 0 && getBoothRegistrationMapView(address) === "ready" && !isSaving;
+}: BoothRegistrationAddress & { managerName: string; name: string; isSaving: boolean }) =>
+  managerName.trim().length > 0 &&
+  name.trim().length > 0 &&
+  getBoothRegistrationMapView(address) === "ready" &&
+  !isSaving;
 
 const isAlreadyOnboardedError = (error: unknown) => {
   if (typeof error !== "object" || error === null || !("data" in error)) return false;
@@ -62,9 +66,10 @@ const isAlreadyOnboardedError = (error: unknown) => {
   );
 };
 
-const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
+const useBoothRegistrationForm = (kakaoMapAppKey: string, staffName: string | null) => {
   const router = useRouter();
   const [step, setStep] = useState<BoothRegistrationStep>("booth");
+  const [managerName, setManagerName] = useState(staffName ?? "");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [addressDetail, setAddressDetail] = useState("");
@@ -99,6 +104,7 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
   const isLeaving = mutation.isSuccess || isAlreadyOnboardedError(mutation.error);
   const isSaving = mutation.isPending || isLeaving;
   const canProceed = getBoothInfoAvailability({
+    managerName,
     name,
     address,
     geocodedAddress,
@@ -109,6 +115,7 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
 
   return {
     step,
+    managerName,
     name,
     address,
     addressDetail,
@@ -130,6 +137,7 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
     canSubmit,
     errorMessage:
       mutation.error && !isLeaving ? getErrorMessage(mutation.error, SAVE_ERROR_MESSAGE) : null,
+    changeManagerName: setManagerName,
     changeName: setName,
     changeAddress: setAddress,
     changeAddressDetail: setAddressDetail,
@@ -145,7 +153,14 @@ const useBoothRegistrationForm = (kakaoMapAppKey: string) => {
         return;
       }
       if (!canSubmit || !payment.success) return;
-      mutation.mutate({ name, address, addressDetail, ...payment.data, photos: photos.files });
+      mutation.mutate({
+        name,
+        address,
+        addressDetail,
+        managerName,
+        ...payment.data,
+        photos: photos.files,
+      });
     },
   };
 };
