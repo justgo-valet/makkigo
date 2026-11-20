@@ -32,6 +32,7 @@ const listMerchantValetSessions = async (
         id: true,
         status: true,
         plateNumber: true,
+        ticketNumber: true,
         expectedArrivalAt: true,
         arrivalDelayMinutes: true,
         parkedAt: true,
@@ -43,7 +44,7 @@ const listMerchantValetSessions = async (
     prisma.valetSession.findMany({
       where: { merchantId, status: "COMPLETED", completedAt: { gte: startOfSeoulDay(now) } },
       orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-      select: { id: true, plateNumber: true, completedAt: true, baseFee: true, actualFee: true, ...carImageSelect },
+      select: { id: true, plateNumber: true, ticketNumber: true, completedAt: true, baseFee: true, actualFee: true, ...carImageSelect },
     }),
   ]);
 
@@ -52,6 +53,7 @@ const listMerchantValetSessions = async (
       id: session.id,
       status: session.status,
       plateNumber: session.plateNumber,
+      ticketNumber: session.ticketNumber,
       carImageUrl: toCarImageUrl(session),
       expectedArrivalAt: session.expectedArrivalAt?.toISOString() ?? null,
       arrivalDelayMinutes: session.arrivalDelayMinutes,
@@ -62,6 +64,7 @@ const listMerchantValetSessions = async (
     completed: completed.map((session) => ({
       id: session.id,
       plateNumber: session.plateNumber,
+      ticketNumber: session.ticketNumber,
       carImageUrl: toCarImageUrl(session),
       completedAt: session.completedAt?.toISOString(),
       fee: session.actualFee ?? session.baseFee,

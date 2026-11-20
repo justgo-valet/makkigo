@@ -30,6 +30,7 @@ const listCompletedValetSessions = async (
       select: {
         id: true,
         plateNumber: true,
+        ticketNumber: true,
         parkedAt: true,
         completedAt: true,
         baseFee: true,
@@ -54,6 +55,7 @@ const listCompletedValetSessions = async (
       items: sessions.map((session) => ({
         id: session.id,
         plateNumber: session.plateNumber,
+        ticketNumber: session.ticketNumber,
         merchant: session.merchant,
         parkedAt: session.parkedAt?.toISOString() ?? null,
         completedAt: session.completedAt?.toISOString() ?? "",

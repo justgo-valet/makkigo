@@ -13,6 +13,7 @@ const session = (fields: Partial<BoothValetSession>): BoothValetSession => ({
   id: 1,
   status: "ARRIVING",
   plateNumber: "68오8269",
+  ticketNumber: null,
   carImageUrl: "https://images.example.com/cars/_default.png",
   expectedArrivalAt: null,
   arrivalDelayMinutes: null,
