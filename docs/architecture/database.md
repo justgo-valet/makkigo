@@ -30,7 +30,8 @@
 | 슈퍼 어드민 | `admins`(아이디 · 비밀번호 해시 · 실패 횟수 · 잠금 · 비활성), `admin_refresh_tokens` | `20261119090000_super_admin_console` |
 | 업체 관리자 | `merchant_admins`(위 칸 + `merchant_id?` · `password_change_required`), `merchant_admin_refresh_tokens` | `20261119090000_super_admin_console` |
 | 부스 | `booths`, `booth_photos`, `booth_agents`, `booth_fee_policies`, `booth_bank_accounts` | #9 |
-| 업체 · 티켓 | `merchants`(우편번호 · 좌표 · 카카오 장소 ID · 전화번호 포함), `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9, [#96](https://github.com/justgo-valet/makkigo/pull/96), [#132](https://github.com/justgo-valet/makkigo/pull/132) |
+| 업체 · 티켓 | `merchants`(우편번호 · 좌표 · 카카오 장소 ID · 전화번호 · 공공데이터 상가업소번호 · 업종 · 수집 대상 포함), `merchant_photos`, `booth_merchants`, `tickets`, `ticket_versions` | #9, [#96](https://github.com/justgo-valet/makkigo/pull/96), [#132](https://github.com/justgo-valet/makkigo/pull/132), `20261119120000_merchant_import` |
+| 업체 수집 | `merchant_import_targets`(시군구 코드 · 이름, 업종 코드 · 이름 목록, 마지막 수집 시각 · 결과 요약 JSON) | `20261119120000_merchant_import` |
 | 티켓 이미지 업로드 | `ticket_image_uploads` (예약 · 완료, 올린 업체 관리자) | |
 | 발렛 | `valet_sessions` | #9 |
 | 알림 | `push_devices`, `notifications` | #9 |
@@ -51,7 +52,8 @@ staff ─┬─ staff_social_accounts · staff_refresh_tokens · staff_login_cod
          (부스 생성자 = 관리자)     └─ booth_merchants ── merchants ─┬─ merchant_photos
                                                                   ├─ tickets ── ticket_versions
                                                                   ├─ ticket_image_uploads
-                                                                  └─ merchant_admins ── merchant_admin_refresh_tokens
+                                                                  ├─ merchant_admins ── merchant_admin_refresh_tokens
+                                                                  └─ merchant_import_targets? (수집해 온 업체만)
 
 admins ── admin_refresh_tokens   (다른 테이블과 연결 없음)
 
@@ -98,6 +100,13 @@ valet_sessions ── (users?, vehicles?, merchants?, booths?, ticket_versions?,
 - `merchant_registration_sessions` · `merchant_image_uploads` 와 그 enum 을 지웁니다. S3 에 남은 `merchants/staging/*` 는 수명 주기 규칙으로 지웁니다 → [infrastructure.md](../operations/infrastructure.md)
 - `StaffRole` 에서 `MERCHANT_ADMIN` 을 뺍니다(PostgreSQL 은 enum 값을 못 지워 새 타입으로 바꿔 끼움). 위 비활성화가 먼저 돌아야 형 변환이 실패하지 않습니다.
 - 되돌리면 옛 코드가 `merchants.admin_id` 를 찾으므로, 이 마이그레이션 전 이미지로는 되돌릴 수 없습니다.
+
+## 업체 수집 칸 (`20261119120000_merchant_import`)
+
+- `merchants.public_data_id`: 상가(상권)정보의 상가업소번호(`bizesId`), 유니크. 있으면 출처가 공공데이터, 없으면 수동 등록. 삭제 표시된 행도 값을 남깁니다. 어드민이 지운 행은 `import_target_id` 도 비워 **다시 가져오지 않고**, 수집이 지운 행(대상이 그대로)은 다시 나타나면 되살립니다
+- `merchants.category`: 업종 이름(소분류 `indsSclsNm`). 수동 등록 업체는 비어 있음
+- `merchants.import_target_id`: 이 업체를 처음 가져온 수집 대상. "이번 수집에 없는 업체 삭제" 를 그 대상 범위로만 하려고 둡니다. 대상을 지우거나 어드민이 업체를 지우면 비워지고(`SET NULL` · 삭제 API), 그 뒤로는 자동 삭제 · 되살림 대상이 아닙니다
+- `merchant_import_targets.last_synced_at` 은 **성공한** 수집 시각. 실패하면 그대로 두고 `last_result` 에만 실패를 남깁니다. 수집은 화면에서 손으로만 돌립니다. 규칙 → [runbook.md](../operations/runbook.md#업체-수집)
 
 ## 코드로 표현 못 하는 제약
 

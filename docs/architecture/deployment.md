@@ -81,6 +81,7 @@
 | `/makkigo/prod/admin/KAKAO_REST_API_KEY` | 요원 앱과 같은 REST API 키. 카카오 로컬 장소 검색을 서버에서만 부름 |
 | `/makkigo/prod/admin/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 업체 QR 주소 |
 | `/makkigo/prod/admin/AWS_REGION` · `S3_IMAGE_BUCKET` · `IMAGE_BASE_URL` | 요원 앱과 같은 값. 업체 사진 업로드(`merchants/staging/` → `merchants/final/`) |
+| `/makkigo/prod/admin/PUBLIC_DATA_SERVICE_KEY` | 공공데이터포털 "소상공인시장진흥공단_상가(상권)정보" 서비스키(SecureString, Decoding 키 권장). 업체 수집 · 업종 목록에 씀. 없으면 업체 수집 화면에 안내가 뜨고 수집 · 업종 조회가 503 |
 | `/makkigo/prod/valetagents/FIREBASE_SERVICE_ACCOUNT_JSON` | 고객 앱과 같은 값(한 줄 JSON, SecureString). 요원이 주차 처리 · 차량 추가를 하면 요원 앱 서버가 고객에게 주차 완료 푸시를 보냄. 없으면 알림 내역만 남고 푸시는 나가지 않음(요청은 성공) |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_TOKEN` | 내부 cleanup route 전용 256-bit 임의 값. SecureString |
 | `/makkigo/prod/valetagents/MERCHANT_UPLOAD_CLEANUP_ENABLED` | 최초 및 rollback 시 `false`; 검증된 rollout에서만 `true` |
