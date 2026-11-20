@@ -1,0 +1,14 @@
+model MerchantImportTarget {
+    id            Int       @id @default(autoincrement())
+    signguCode    String    @map("signgu_code")
+    signguName    String    @map("signgu_name")
+    industryCodes String[]  @map("industry_codes")
+    industryNames String[]  @map("industry_names")
+    createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    lastSyncedAt  DateTime? @map("last_synced_at") @db.Timestamptz(3)
+    lastResult    Json?     @map("last_result")
+
+    merchants Merchant[]
+
+    @@map("merchant_import_targets")
+}

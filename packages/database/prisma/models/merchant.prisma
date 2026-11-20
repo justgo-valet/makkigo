@@ -1,16 +1,19 @@
 model Merchant {
-    id            Int       @id @default(autoincrement())
-    name          String
-    address       String
-    addressDetail String?   @map("address_detail")
-    postalCode    String?   @map("postal_code")
-    latitude      Float?
-    longitude     Float?
-    kakaoPlaceId  String?   @unique @map("kakao_place_id")
-    phone         String?
-    createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-    updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-    deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+    id             Int       @id @default(autoincrement())
+    name           String
+    address        String
+    addressDetail  String?   @map("address_detail")
+    postalCode     String?   @map("postal_code")
+    latitude       Float?
+    longitude      Float?
+    kakaoPlaceId   String?   @unique @map("kakao_place_id")
+    phone          String?
+    publicDataId   String?   @unique @map("public_data_id")
+    category       String?
+    importTargetId Int?      @map("import_target_id")
+    createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+    updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+    deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(3)
 
     admins             MerchantAdmin[]
     photos             MerchantPhoto[]
@@ -18,8 +21,10 @@ model Merchant {
     tickets            Ticket[]
     valetSessions      ValetSession[]
     ticketImageUploads TicketImageUpload[]
+    importTarget       MerchantImportTarget? @relation(fields: [importTargetId], references: [id], onDelete: SetNull)
 
     @@index([name])
+    @@index([importTargetId])
     @@map("merchants")
 }
 
