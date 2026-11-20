@@ -14,6 +14,7 @@ model MerchantAdmin {
     merchant           Merchant?                    @relation(fields: [merchantId], references: [id])
     refreshTokens      MerchantAdminRefreshToken[]
     ticketImageUploads TicketImageUpload[]
+    accountRequests    MerchantAccountRequest[]
 
     @@index([merchantId])
     @@map("merchant_admins")

@@ -22,16 +22,18 @@ import TemporaryPassword from "./TemporaryPassword";
 import type { MerchantOption } from "@/libs/merchant/contracts";
 import type { MerchantAdminCreateBody } from "@/libs/merchantAdmin/contracts";
 
-export default function CreateMerchantAdminButton() {
+export default function CreateMerchantAdminButton({
+  accountRequest,
+}: Readonly<{ accountRequest?: { id: number; requesterName: string; merchant: MerchantOption | null } }>) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [merchant, setMerchant] = useState<MerchantOption | null>(null);
+  const [merchant, setMerchant] = useState<MerchantOption | null>(accountRequest?.merchant ?? null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<{ id: number; temporaryPassword: string } | null>(null);
 
   const reset = () => {
-    setMerchant(null);
+    setMerchant(accountRequest?.merchant ?? null);
     setError(null);
     setCreated(null);
   };
@@ -46,10 +48,16 @@ export default function CreateMerchantAdminButton() {
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button">
-          <Plus aria-hidden />
-          업체 관리자 만들기
-        </Button>
+        {accountRequest ? (
+          <Button type="button" size="sm">
+            계정 발급
+          </Button>
+        ) : (
+          <Button type="button">
+            <Plus aria-hidden />
+            업체 관리자 만들기
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -73,6 +81,7 @@ export default function CreateMerchantAdminButton() {
                 loginId: String(form.get("loginId") ?? ""),
                 name: String(form.get("name") ?? ""),
                 merchantId: merchant?.id ?? null,
+                ...(accountRequest && { accountRequestId: accountRequest.id }),
               };
               setPending(true);
               setError(null);
@@ -95,7 +104,14 @@ export default function CreateMerchantAdminButton() {
               </Field>
               <Field>
                 <FieldLabel htmlFor="name">이름</FieldLabel>
-                <Input id="name" name="name" required maxLength={50} autoComplete="off" />
+                <Input
+                  id="name"
+                  name="name"
+                  required
+                  maxLength={50}
+                  autoComplete="off"
+                  defaultValue={accountRequest?.requesterName}
+                />
               </Field>
               <Field>
                 <FieldLabel>업체 (선택)</FieldLabel>

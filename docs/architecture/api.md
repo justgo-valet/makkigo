@@ -102,6 +102,9 @@
 | `GET /api/v1/valet-sessions` | 내 업체의 발렛 현황(요원 앱에 있던 업체용 차량 현황을 옮김) |
 | `GET · POST /api/v1/tickets` | 티켓 목록 · 생성 · 새 버전. 이미지 경로는 **같은 업체**의 확정된 업로드만(올린 관리자는 따지지 않음) |
 | `POST /api/v1/ticket-image-uploads/presign` · `complete` | 티켓 이미지 업로드(`tickets/staging/` → `tickets/final/`). 다른 업체면 404 |
+| `POST /api/v1/merchant-account-requests` | **로그인 없이** 업체 관리자 계정 요청 `{ merchantId, merchantName, merchantAddress, requesterName, requesterPhone, privacyConsent: true }` → 201. `merchantId` 가 있으면 그 업체(삭제 제외, 없으면 404), `null` 이면 새 업체 이름 · 주소 필수. 연락처는 숫자만 저장. 같은 연락처로 같은 업체에 대기 중인 요청이 있으면 409 `ALREADY_REQUESTED`. IP 당 15분에 20번(429) |
+
+화면 `/find-merchant`(로그인 없이 업체 이름 · 주소 검색, 2자 이상, 20개까지, IP 당 15분에 20번) · `/find-merchant/request?merchant=<id>`(계정 요청, 업체가 없으면 업체 등록 요청). 로그인 화면에 "내 업체 찾기" 링크.
 
 ## 슈퍼 어드민 (`apps/admin`)
 
@@ -113,9 +116,10 @@
 | `GET /api/v1/kakao-places?query=` | 카카오 로컬 키워드 검색(서버에서 `KAKAO_REST_API_KEY` 로 호출) → 이름 · 주소 · 우편번호 · 좌표 · 전화 · 장소 ID |
 | `GET · POST /api/v1/merchants` | 업체 검색(선택 목록용) · 추가. 같은 카카오 장소 ID 는 409 |
 | `PUT · DELETE /api/v1/merchants/{id}` | 업체 수정 · 삭제 표시(장소 ID 도 비워 다시 등록 가능) |
+| `POST /api/v1/merchant-account-requests/{id}/reject` | 대기 중인 계정 요청 거절. 대기가 아니면 404 `REQUEST_NOT_PENDING` |
 | `POST /api/v1/merchants/{id}/photos/presign` → `POST /api/v1/merchants/{id}/photos` | 사진 업로드: `merchants/staging/` 에 직접 POST 뒤 완료 요청이 크기 · 형식 · 파일 signature 를 보고 `merchants/final/{id}/` 로 복사, 행 추가, staging 삭제. **업체당 5장**(업체 행 잠금으로 동시 요청도 막음) |
 | `PUT /api/v1/merchants/{id}/photos` · `DELETE …/photos/{photoId}` | 사진 순서 바꾸기 · 삭제(S3 파일도) |
-| `POST /api/v1/merchant-admins` | 업체 관리자 계정 만들기 `{ loginId, name, merchantId? }` → 임시 비밀번호를 **한 번만** 보여 줌. 같은 아이디는 409 |
+| `POST /api/v1/merchant-admins` | 업체 관리자 계정 만들기 `{ loginId, name, merchantId?, accountRequestId? }` → 임시 비밀번호를 **한 번만** 보여 줌. 같은 아이디는 409. `accountRequestId` 를 주면 같은 트랜잭션에서 그 계정 요청을 발급 완료로 바꾸고 계정을 이어 둠. 요청이 이미 처리됐으면 409 `REQUEST_NOT_PENDING`(계정도 만들지 않음) |
 | `PATCH /api/v1/merchant-admins/{id}` | 업체 연결 · 해제 `{ merchantId \| null }` |
 | `POST /api/v1/merchant-admins/{id}/password-reset` · `disable` | 임시 비밀번호 재설정(변경 필수 + 모든 기기 로그아웃) · 사용 중지 |
 | `PUT · DELETE /api/v1/booths/{boothId}/merchants/{merchantId}` | 부스 연결 요청(없음 · 거절 → `PENDING`, 대기 · 등록이면 409) · 대기 취소 또는 등록 해제. 승인은 부스 관리자가 요원 앱에서 |
@@ -125,7 +129,7 @@
 | `DELETE /api/v1/merchant-import-targets/{id}` | 수집 대상 삭제. 가져온 업체는 남음 |
 | `POST /api/v1/merchant-import-targets/{id}/run` | 그 대상 하나를 바로 수집하고 `{ result }`(실패도 200 + `ok: false`, 대상에 저장). 서비스키가 없으면 503. 화면의 "전체 수집" 은 이 API 를 대상마다 차례로 부름(따로 API 없음). 규칙(추가 · 건너뜀 · 삭제 · 되살림 · 대량 삭제 멈춤) → [runbook.md](../operations/runbook.md#업체-수집) |
 
-화면: 대시보드(업체 · 업체 관리자 · 부스 · 요원 · 고객 수, 오늘 · 진행 중 세션, 연결 대기, 최근 세션), 업체(출처 수동/공공데이터 · 업종, "부스 연결된 업체만" `?linked=1`), 업체 수집, 업체 관리자, 부스, 발렛 세션.
+화면: 대시보드(업체 · 업체 관리자 · 부스 · 요원 · 고객 수, 오늘 · 진행 중 세션, 연결 대기, 계정 요청 대기, 최근 세션), 업체(출처 수동/공공데이터 · 업종, "부스 연결된 업체만" `?linked=1`), 업체 수집, 업체 관리자, 계정 요청(대기/전체, 계정 발급 · 거절. 처리한 요청은 목록을 열 때 30일 지난 것을 지움), 부스, 발렛 세션.
 
 ## 기반 PR
 

@@ -21,6 +21,7 @@ export default async function DashboardPage() {
     { label: "오늘 발렛 세션", value: counts.todaySessions, href: "/valet-sessions" },
     { label: "진행 중 세션", value: counts.activeSessions, href: "/valet-sessions" },
     { label: "부스 연결 대기", value: counts.pendingRequests, href: "/booths" },
+    { label: "계정 요청 대기", value: counts.pendingAccountRequests, href: "/merchant-account-requests" },
   ];
 
   return (

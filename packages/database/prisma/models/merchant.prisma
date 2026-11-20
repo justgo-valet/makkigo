@@ -21,6 +21,7 @@ model Merchant {
     tickets            Ticket[]
     valetSessions      ValetSession[]
     ticketImageUploads TicketImageUpload[]
+    accountRequests    MerchantAccountRequest[]
     importTarget       MerchantImportTarget? @relation(fields: [importTargetId], references: [id], onDelete: SetNull)
 
     @@index([name])

@@ -5,6 +5,7 @@ const merchantAdminCreateBodySchema = z
     loginId: z.string().max(100),
     name: z.string().trim().min(1).max(50),
     merchantId: z.number().int().positive().nullable(),
+    accountRequestId: z.number().int().positive().optional(),
   })
   .strict();
 
