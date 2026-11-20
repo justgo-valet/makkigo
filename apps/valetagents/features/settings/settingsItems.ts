@@ -21,7 +21,6 @@ const TERMS_ITEMS = [
 type TermsItem = (typeof TERMS_ITEMS)[number];
 
 const getRoleLabel = ({ role, managedBoothId }: MenuAccess) => {
-  if (role === "MERCHANT_ADMIN") return "업체 관리자";
   if (role === "VALET_AGENT") return managedBoothId === null ? "발렛 요원" : "부스 관리자";
   return "-";
 };

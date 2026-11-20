@@ -7,8 +7,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "마끼고 티켓 관리",
-  description: "업체 관리자가 고객에게 보여 줄 발렛 티켓을 만들고 고칩니다.",
+  title: "마끼고 업체 관리",
+  description: "업체 관리자가 발렛 티켓을 꾸미고 업체 정보와 발렛 현황을 봅니다.",
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

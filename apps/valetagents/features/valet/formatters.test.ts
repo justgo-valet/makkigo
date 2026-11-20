@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  formatCompletedLabel,
   formatPlateNumber,
   formatSessionLabel,
 } from "./formatters";
@@ -45,6 +44,5 @@ describe("valet session formatters", () => {
         NOW,
       ),
     ).toBe("3분 전 요청");
-    expect(formatCompletedLabel("2026-10-14T02:57:00.000Z", NOW)).toBe("3분 전 출차");
   });
 });

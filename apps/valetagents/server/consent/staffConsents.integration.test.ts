@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { STAFF_CONSENT_TYPES } from "@/libs/consent/staffConsents";
+
 import type { purgeIncompleteStaffSignups as PurgeIncompleteStaffSignups } from "./purgeIncompleteStaffSignups";
 import type * as StaffConsents from "./staffConsents";
 import type { PrismaClient, StaffRole } from "database";
@@ -58,12 +60,17 @@ afterAll(async () => {
 });
 
 describe("staff consents database integration", () => {
-  it("counts a staff as consented only after recording the partner documents", async () => {
+  it("records the partner documents and starts the staff as a valet agent", async () => {
     const staffId = await createStaff("new", null, 0);
 
-    await expect(staffConsents.hasStaffConsents(staffId)).resolves.toBe(false);
     await staffConsents.recordStaffConsents(staffId);
-    await expect(staffConsents.hasStaffConsents(staffId)).resolves.toBe(true);
+
+    await expect(prisma.staffConsent.count({ where: { staffId } })).resolves.toBe(
+      STAFF_CONSENT_TYPES.length,
+    );
+    await expect(
+      prisma.staff.findUniqueOrThrow({ where: { id: staffId }, select: { role: true } }),
+    ).resolves.toEqual({ role: "VALET_AGENT" });
   });
 
   it("removes only sign-ups that never consented nor chose a role for 30 days", async () => {

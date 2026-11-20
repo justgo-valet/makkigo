@@ -43,14 +43,18 @@ const cleanupExpiredTicketUploads = async (
       },
       orderBy: [{ expiresAt: "asc" }, { id: "asc" }],
       take: batchSize,
-      select: { id: true, stagingKey: true, state: true },
+      select: { id: true, stagingKey: true, state: true, expiresAt: true },
     }),
   ]);
   const completedCount = await dependencies.database.ticketImageUpload.count({ where: completedWhere });
   const totalEligibleCount = eligibleCount + completedCount;
+  const oldestEligibleAgeSeconds = candidates[0]
+    ? Math.max(0, Math.floor((cutoff.getTime() - candidates[0].expiresAt.getTime()) / 1_000))
+    : null;
   if (input.dryRun) {
     return {
       eligibleCount: totalEligibleCount,
+      oldestEligibleAgeSeconds,
       claimed: 0,
       cleaned: 0,
       failed: 0,
@@ -82,6 +86,7 @@ const cleanupExpiredTicketUploads = async (
   }
   return {
     eligibleCount: totalEligibleCount,
+    oldestEligibleAgeSeconds,
     claimed: candidates.length,
     cleaned,
     failed,

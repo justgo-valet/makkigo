@@ -10,7 +10,7 @@ vi.mock("./getStaffOnboardingState", () => ({
 
 import { getProtectedStaffAccess } from "./getProtectedStaffAccess";
 
-const status = (role: "VALET_AGENT" | "MERCHANT_ADMIN" | null, state: string) => ({
+const status = (role: "VALET_AGENT" | null, state: string) => ({
   role,
   state,
   nextPath: state === "COMPLETE" ? "/" : "/onboarding",
@@ -33,19 +33,7 @@ describe("getProtectedStaffAccess", () => {
     });
   });
 
-  it.each(["MERCHANT_REGISTRATION_REQUIRED", "MERCHANT_APPROVAL_PENDING"])(
-    "rejects an incomplete merchant in %s",
-    async (state) => {
-      onboarding.getStaffOnboardingState.mockResolvedValue(status("MERCHANT_ADMIN", state));
-      await expect(getProtectedStaffAccess(7)).resolves.toMatchObject({
-        ok: false,
-        reason: "MERCHANT_ONBOARDING_REQUIRED",
-      });
-    },
-  );
-
   it.each([
-    ["MERCHANT_ADMIN", "COMPLETE"],
     ["VALET_AGENT", "COMPLETE"],
     ["VALET_AGENT", "BOOTH_REQUIRED"],
     ["VALET_AGENT", "AWAITING_APPROVAL"],

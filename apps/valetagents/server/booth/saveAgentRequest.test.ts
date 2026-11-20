@@ -142,7 +142,7 @@ describe("saveAgentRequest", () => {
 
   it("rechecks staff role and active booth inside the serializable transaction", async () => {
     const noRole = createTransaction();
-    noRole.staff.findFirst.mockResolvedValue({ role: "MERCHANT_ADMIN" });
+    noRole.staff.findFirst.mockResolvedValue({ role: null });
     database.transaction.mockImplementationOnce((callback) => callback(noRole));
     await expect(saveAgentRequest(7, 3, body)).resolves.toEqual({
       ok: false,

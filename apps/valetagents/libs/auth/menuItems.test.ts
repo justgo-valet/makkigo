@@ -23,14 +23,6 @@ describe("getMenuItems", () => {
     });
   });
 
-  it("shows a merchant admin ticket management, QR codes and settings", () => {
-    expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: 3 })).toEqual([
-      { label: "티켓 관리", href: "/tickets" },
-      { label: "QR 코드", href: "/merchants/qr" },
-      { label: "설정", href: "/settings" },
-    ]);
-  });
-
   it("shows an agent who created no booth settings only", () => {
     expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: null })).toEqual([
       { label: "설정", href: "/settings" },
@@ -38,7 +30,7 @@ describe("getMenuItems", () => {
   });
 
   it("shows settings only while the staff is still onboarding", () => {
-    expect(getMenuItems({ role: "MERCHANT_ADMIN", managedBoothId: null, onboarding: true })).toEqual([
+    expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: null, onboarding: true })).toEqual([
       { label: "설정", href: "/settings" },
     ]);
   });

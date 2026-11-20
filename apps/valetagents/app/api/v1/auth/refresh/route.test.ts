@@ -38,11 +38,11 @@ describe("GET /api/v1/auth/refresh", () => {
   });
 
   it("재발급하고 원래 화면으로 돌려보낸다", async () => {
-    const response = await callGet("/tickets/3?tab=today");
+    const response = await callGet("/booths/3/history?date=2026-11-01");
 
     expect(mocks.refresh).toHaveBeenCalledWith({ refreshToken: "old-refresh", userAgent: null });
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://valet.makkigo.com/tickets/3?tab=today");
+    expect(response.headers.get("location")).toBe("https://valet.makkigo.com/booths/3/history?date=2026-11-01");
     expect(cookieNames(response)).toEqual([
       "makkigo_staff_access_token=new-access",
       "makkigo_staff_refresh_token=new-refresh",

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if ("error" in access) return access.error;
     const body = ticketSaveBodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) return apiError("INVALID_INPUT", "티켓 디자인이 올바르지 않습니다.", 400);
-    const result = await saveTicket({ staffId: access.staffId, ...body.data });
+    const result = await saveTicket({ ownMerchantId: access.merchantId, ...body.data });
     if (result.kind === "SAVED") {
       return privateJson({ ticketId: result.ticketId }, { status: body.data.ticketId === undefined ? 201 : 200 });
     }

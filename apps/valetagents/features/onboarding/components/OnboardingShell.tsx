@@ -7,7 +7,6 @@ import BoothRequestForm from "./BoothRequestForm";
 import BoothSearch from "./BoothSearch";
 import OnboardingToast from "./OnboardingToast";
 import { useOnboardingFlow } from "../hooks/useOnboardingFlow";
-import { useResetRole } from "../hooks/useResetRole";
 
 import type { OnboardingStatusResponse } from "../schemas/onboarding";
 import type { MenuAccess } from "@/libs/auth/menuItems";
@@ -28,17 +27,16 @@ export default function OnboardingShell({
   kakaoMapAppKey,
 }: Readonly<OnboardingShellProps>) {
   const flow = useOnboardingFlow({ staffId, initialStatus, initialView });
-  const role = useResetRole();
+  const canGoBack = !flow.showsPending && (flow.hasRequests || flow.selection !== null);
 
   const goBack = () => {
     if (flow.hasRequests) flow.showPending();
-    else if (flow.selection) flow.clearSelection();
-    else role.reset();
+    else flow.clearSelection();
   };
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
-      <AppHeader menu={menu} onBack={flow.showsPending || role.isResetting ? undefined : goBack} />
+      <AppHeader menu={menu} onBack={canGoBack ? goBack : undefined} />
       <div className="mt-2 flex flex-1 flex-col">
         {flow.showsPending ? (
           <ApprovalPending

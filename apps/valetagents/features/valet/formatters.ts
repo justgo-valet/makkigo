@@ -42,8 +42,6 @@ const formatSessionLabel = (session: BoothValetSession, now: number) => {
   }
 };
 
-const formatCompletedLabel = (completedAt: string, now: number) => formatAgo(completedAt, now, "출차");
-
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 const formatHistoryDate = (date: string) => {
@@ -62,7 +60,6 @@ const formatClock = (iso: string) => clockFormat.format(new Date(iso));
 
 export {
   formatClock,
-  formatCompletedLabel,
   formatHistoryDate,
   formatPlateNumber,
   formatSessionLabel,
