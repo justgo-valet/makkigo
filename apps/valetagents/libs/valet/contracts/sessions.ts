@@ -11,6 +11,7 @@ const boothValetSessionSchema = z.object({
   id: z.number().int().positive(),
   status: z.enum(BOOTH_VALET_SESSION_STATUSES),
   plateNumber: z.string(),
+  ticketNumber: z.number().int().positive().nullable(),
   carImageUrl: z.string().url(),
   expectedArrivalAt: z.string().datetime().nullable(),
   arrivalDelayMinutes: z.number().int().positive().nullable(),

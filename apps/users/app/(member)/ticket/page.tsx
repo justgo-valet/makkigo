@@ -10,9 +10,15 @@ export default async function TicketPage() {
   const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   const userId = accessToken ? await getActiveUserIdFromAccessToken(accessToken) : null;
   if (!userId) redirect("/login");
-  const design = await getCurrentTicket(userId);
-  if (!design) notFound();
+  const ticket = await getCurrentTicket(userId);
+  if (!ticket) notFound();
   const imageBaseUrl = process.env.IMAGE_BASE_URL?.trim();
   if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required to render ticket images");
-  return <TicketContent design={design} imageBaseUrl={imageBaseUrl} />;
+  return (
+    <TicketContent
+      design={ticket.design}
+      ticketNumber={ticket.ticketNumber}
+      imageBaseUrl={imageBaseUrl}
+    />
+  );
 }

@@ -9,6 +9,7 @@ model ValetSession {
     merchantId      Int? @map("merchant_id")
     boothId         Int? @map("booth_id")
     ticketVersionId Int? @map("ticket_version_id")
+    ticketNumber    Int? @map("ticket_number")
 
     expectedArrivalAt DateTime? @map("expected_arrival_at") @db.Timestamptz(3)
 

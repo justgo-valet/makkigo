@@ -450,6 +450,9 @@ importers:
       '@makkigo/push':
         specifier: workspace:*
         version: link:../../packages/push
+      '@makkigo/ticket-design':
+        specifier: workspace:*
+        version: link:../../packages/ticket-design
       '@makkigo/ui':
         specifier: workspace:*
         version: link:../../packages/ui

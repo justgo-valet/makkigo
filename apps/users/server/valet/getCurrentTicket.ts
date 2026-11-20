@@ -4,17 +4,21 @@ import { ACTIVE_VALET_SESSION_STATUSES, prisma } from "database";
 
 import type { TicketDesign } from "@makkigo/ticket-design";
 
-const getCurrentTicket = async (userId: number): Promise<TicketDesign | null> => {
+const getCurrentTicket = async (
+  userId: number,
+): Promise<{ design: TicketDesign; ticketNumber: number | null } | null> => {
   const session = await prisma.valetSession.findFirst({
     where: {
       userId,
       status: { in: [...ACTIVE_VALET_SESSION_STATUSES] },
     },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    select: { ticketVersion: { select: { design: true } } },
+    select: { ticketNumber: true, ticketVersion: { select: { design: true } } },
   });
   const design = ticketDesignSchema.safeParse(session?.ticketVersion?.design);
-  return design.success ? design.data : null;
+  return design.success
+    ? { design: design.data, ticketNumber: session?.ticketNumber ?? null }
+    : null;
 };
 
 export { getCurrentTicket };

@@ -1,6 +1,7 @@
 interface CompletedHistoryItem {
   id: number;
   plateNumber: string;
+  ticketNumber: number | null;
   merchant: { id: number; name: string } | null;
   parkedAt: string | null;
   completedAt: string;

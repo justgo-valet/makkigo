@@ -23,6 +23,7 @@ export type {
   TicketTextAlign,
   TicketTextLayer,
 } from "./ticketDesign";
+export { formatTicketNumber } from "./ticketNumber";
 export { getTextStyle, TicketRenderer } from "./TicketRenderer";
 export type {
   ResolveTicketAssetUrl,

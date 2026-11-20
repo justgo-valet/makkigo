@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTicketNumber } from "@makkigo/ticket-design";
 import { cn } from "@makkigo/ui";
 import Image from "next/image";
 import { useLayoutEffect, useRef } from "react";
@@ -57,6 +58,7 @@ interface VehicleCardContentProps {
   status: VehicleStatus;
   imageUrl: string;
   plateNumber: string;
+  ticketNumber: number | null;
   label: string;
   fee?: string;
 }
@@ -65,6 +67,7 @@ function VehicleCardContent({
   status,
   imageUrl,
   plateNumber,
+  ticketNumber,
   label,
   fee,
 }: Readonly<VehicleCardContentProps>) {
@@ -79,6 +82,11 @@ function VehicleCardContent({
       >
         <Image src={imageUrl} alt="" fill unoptimized className="object-contain" />
       </span>
+      {ticketNumber !== null && (
+        <FitLine className="text-[13px] leading-[18px] font-semibold tabular-nums">
+          {`티켓 ${formatTicketNumber(ticketNumber)}`}
+        </FitLine>
+      )}
       <FitLine className="text-[19px] leading-[27px] font-bold tabular-nums">
         {formatPlateNumber(plateNumber)}
       </FitLine>

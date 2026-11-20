@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTicketNumber } from "@makkigo/ticket-design";
 import { cn } from "@makkigo/ui";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -135,6 +136,11 @@ export default function CompletedHistory({
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-base font-bold tabular-nums">
+                    {item.ticketNumber !== null && (
+                      <span className="mr-2 text-sm font-semibold text-(--tertiary-color)">
+                        {formatTicketNumber(item.ticketNumber)}
+                      </span>
+                    )}
                     {formatPlateNumber(item.plateNumber)}
                   </span>
                   <span className="block truncate text-sm text-(--tertiary-color)">

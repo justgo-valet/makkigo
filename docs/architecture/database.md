@@ -34,7 +34,7 @@
 | 업체 수집 | `merchant_import_targets`(시군구 코드 · 이름, 업종 코드 · 이름 목록, 마지막 수집 시각 · 결과 요약 JSON) | `20261119120000_merchant_import` |
 | 계정 요청 | `merchant_account_requests`(찾은 업체 `merchant_id?` 또는 새 업체 이름 · 주소, 요청한 분 이름 · 연락처, 상태 대기/발급 완료/거절, 발급한 계정 `merchant_admin_id?`, 처리 시각) | `20261120090000_merchant_account_requests` |
 | 티켓 이미지 업로드 | `ticket_image_uploads` (예약 · 완료, 올린 업체 관리자) | |
-| 발렛 | `valet_sessions` | #9 |
+| 발렛 | `valet_sessions`(`ticket_number` 포함), `merchant_ticket_counters`(업체 · 날짜별 마지막 티켓 번호) | #9, `20261121090000_valet_ticket_number` |
 | 알림 | `push_devices`, `notifications` | #9 |
 | 위치 | `location_use_logs` (위치정보 이용 사실 확인자료) | [#96](https://github.com/justgo-valet/makkigo/pull/96) |
 
