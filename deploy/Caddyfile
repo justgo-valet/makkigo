@@ -1,5 +1,18 @@
+(security_headers) {
+	header {
+		defer
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+		Content-Security-Policy "frame-ancestors 'none'"
+		-X-Powered-By
+	}
+}
+
 {$USERS_DOMAIN} {
 	encode zstd gzip
+	import security_headers
 	handle /api/internal/* {
 		respond 403
 	}
@@ -13,6 +26,7 @@
 
 {$VALET_DOMAIN} {
 	encode zstd gzip
+	import security_headers
 	handle /api/internal/* {
 		respond 403
 	}
@@ -23,6 +37,7 @@
 
 {$TICKETS_DOMAIN} {
 	encode zstd gzip
+	import security_headers
 	handle /api/internal/* {
 		respond 403
 	}
@@ -33,6 +48,7 @@
 
 {$ADMIN_DOMAIN} {
 	encode zstd gzip
+	import security_headers
 	handle /api/internal/* {
 		respond 403
 	}
