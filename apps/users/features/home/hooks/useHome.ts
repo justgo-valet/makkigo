@@ -1,4 +1,5 @@
 import { getErrorMessage } from "@makkigo/api-client";
+import { formatTicketNumber } from "@makkigo/ticket-design";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -57,6 +58,9 @@ const getMetaItems = (snapshot: HomeSnapshot, vehicleNumber: string, now: number
 
   if (snapshot.parkedAt !== null) {
     return [
+      ...(snapshot.ticketNumber === null
+        ? []
+        : [`티켓 ${formatTicketNumber(snapshot.ticketNumber)}`]),
       formattedVehicleNumber,
       `${formatClockTime(snapshot.parkedAt)} 입차`,
       `${formatElapsed(elapsedMinutes(now, snapshot.parkedAt))} 경과`,

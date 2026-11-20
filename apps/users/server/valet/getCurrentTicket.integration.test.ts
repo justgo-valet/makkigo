@@ -96,6 +96,9 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integra
 
     await expect(getCurrentTicket(user.id)).resolves.toBeNull();
     await expect(getCurrentTicket(unrelatedUser.id)).resolves.toBeNull();
-    await expect(getCurrentTicket(pinnedUser.id)).resolves.toEqual(design("#111111"));
+    await expect(getCurrentTicket(pinnedUser.id)).resolves.toEqual({
+      design: design("#111111"),
+      ticketNumber: null,
+    });
   });
 });

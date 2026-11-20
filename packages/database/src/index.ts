@@ -19,6 +19,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export { ACTIVE_VALET_SESSION_STATUSES, lockPlateNumber } from "./valetSession";
+export { nextTicketNumber } from "./ticketNumber";
 export { findLatestTicketVersionId } from "./ticketVersion";
 export { calculateValetFee, findFeePolicy } from "./valetFee";
 export type { ValetFee, ValetFeePolicy } from "./valetFee";

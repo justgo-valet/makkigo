@@ -99,4 +99,21 @@ describe("parkValetSession database integration", () => {
     });
     expect(parked.parkedAt).not.toBeNull();
   });
+
+  it("numbers the merchant's parked cars from 1 again each Seoul day", async () => {
+    const parkAt = async (iso: string) => {
+      const session = await prisma.valetSession.create({
+        data: { status: "ARRIVING", plateNumber: "34나5678", merchantId },
+        select: { id: true },
+      });
+      sessionIds.push(session.id);
+      await parkValetSession(staffId, boothId, session.id, new Date(iso));
+      await prisma.valetSession.update({ where: { id: session.id }, data: { status: "COMPLETED" } });
+      return (await prisma.valetSession.findUniqueOrThrow({ where: { id: session.id } })).ticketNumber;
+    };
+
+    await expect(parkAt("2030-01-01T14:58:00.000Z")).resolves.toBe(1);
+    await expect(parkAt("2030-01-01T14:59:59.000Z")).resolves.toBe(2);
+    await expect(parkAt("2030-01-01T15:00:00.000Z")).resolves.toBe(1);
+  });
 });

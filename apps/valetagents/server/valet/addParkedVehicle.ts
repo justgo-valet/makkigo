@@ -1,6 +1,12 @@
 import "server-only";
 
-import { ACTIVE_VALET_SESSION_STATUSES, findLatestTicketVersionId, lockPlateNumber, prisma } from "database";
+import {
+  ACTIVE_VALET_SESSION_STATUSES,
+  findLatestTicketVersionId,
+  lockPlateNumber,
+  nextTicketNumber,
+  prisma,
+} from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
 import { contractedMerchantWhere } from "@/server/booth/listContractedMerchants";
@@ -62,6 +68,7 @@ const addParkedVehicle = async (
         merchantId: merchant?.id,
         boothId,
         ticketVersionId,
+        ticketNumber: merchant ? await nextTicketNumber(tx, merchant.id, now) : null,
         parkedAt: now,
         parkedById: staffId,
       },

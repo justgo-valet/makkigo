@@ -4,6 +4,7 @@ const activeValetSessionSchema = z.object({
   id: z.number().int().positive(),
   status: z.enum(["ARRIVING", "PARKED", "PICKUP_REQUESTED", "PICKUP_PREPARING"]),
   plateNumber: z.string(),
+  ticketNumber: z.number().int().positive().nullable(),
   carImageUrl: z.string().url(),
   expectedArrivalAt: z.string().datetime().nullable(),
   arrivalDelayMinutes: z.number().int().positive().nullable(),
@@ -15,6 +16,7 @@ const activeValetSessionSchema = z.object({
 const completedValetSessionSchema = z.object({
   id: z.number().int().positive(),
   plateNumber: z.string(),
+  ticketNumber: z.number().int().positive().nullable(),
   carImageUrl: z.string().url(),
   completedAt: z.string().datetime(),
   fee: z.number().int().nullable(),

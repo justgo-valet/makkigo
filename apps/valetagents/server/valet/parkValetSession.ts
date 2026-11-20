@@ -1,6 +1,6 @@
 import "server-only";
 
-import { findLatestTicketVersionId, prisma } from "database";
+import { findLatestTicketVersionId, nextTicketNumber, prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
 
@@ -37,18 +37,22 @@ const parkValetSession = async (
   if (!session?.merchant) return { ok: false, reason: "SESSION_NOT_FOUND" };
   if (session.status !== "ARRIVING") return { ok: false, reason: "NOT_PARKABLE" };
 
-  const { count } = await prisma.valetSession.updateMany({
-    where: { id: valetSessionId, status: "ARRIVING" },
-    data: {
-      status: "PARKED",
-      boothId,
-      parkedAt: now,
-      parkedById: staffId,
-      ticketVersionId: await findLatestTicketVersionId(prisma, session.merchant.id),
-    },
+  const merchantId = session.merchant.id;
+  const ticketVersionId = await findLatestTicketVersionId(prisma, merchantId);
+  const parked = await prisma.$transaction(async (tx) => {
+    const { count } = await tx.valetSession.updateMany({
+      where: { id: valetSessionId, status: "ARRIVING" },
+      data: { status: "PARKED", boothId, parkedAt: now, parkedById: staffId, ticketVersionId },
+    });
+    if (count === 0) return false;
+    await tx.valetSession.update({
+      where: { id: valetSessionId },
+      data: { ticketNumber: await nextTicketNumber(tx, merchantId, now) },
+    });
+    return true;
   });
 
-  if (count === 0) return { ok: false, reason: "NOT_PARKABLE" };
+  if (!parked) return { ok: false, reason: "NOT_PARKABLE" };
 
   return {
     ok: true,

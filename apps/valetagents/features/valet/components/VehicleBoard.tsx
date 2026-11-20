@@ -61,6 +61,7 @@ export default function VehicleBoard({
               status={session.status}
               imageUrl={session.carImageUrl}
               plateNumber={session.plateNumber}
+              ticketNumber={session.ticketNumber}
               label={formatSessionLabel(session, updatedAt)}
               fee={
                 session.fee !== null && session.status !== "ARRIVING" && session.status !== "PARKED"

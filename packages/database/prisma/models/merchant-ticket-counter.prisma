@@ -1,0 +1,10 @@
+model MerchantTicketCounter {
+    merchantId Int      @map("merchant_id")
+    day        DateTime @db.Date
+    lastNumber Int      @map("last_number")
+
+    merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+    @@id([merchantId, day])
+    @@map("merchant_ticket_counters")
+}

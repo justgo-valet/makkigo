@@ -1,6 +1,6 @@
 "use client";
 
-import { TicketRenderer } from "@makkigo/ticket-design";
+import { formatTicketNumber, TicketRenderer } from "@makkigo/ticket-design";
 import { Button, FieldError } from "@makkigo/ui";
 import { makkigoLogo } from "@makkigo/ui/assets";
 import Image from "next/image";
@@ -100,6 +100,7 @@ export default function GuestValet({
             </button>
 
             <output className="mt-4 block text-center text-sm text-(--tertiary-color)">
+              {session?.ticketNumber ? `티켓 ${formatTicketNumber(session.ticketNumber)} · ` : ""}
               {plate} ·{" "}
               {guest.isCompleted || !session ? "출차 완료" : STATUS_LABELS[session.status]}
             </output>
