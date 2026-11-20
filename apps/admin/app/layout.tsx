@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
 import "./globals.css";
@@ -11,7 +12,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+  await connection();
+
   return (
     <html lang="ko">
       <body className="min-h-dvh bg-(--surface-color) text-(--base-color) antialiased">{children}</body>
