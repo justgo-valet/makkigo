@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
+import NotificationSheet from "@/features/notification/NotificationSheet";
 
 import { useAddVehicle } from "../hooks/useAddVehicle";
 import { useBoothValetSessions } from "../hooks/useBoothValetSessions";
@@ -13,7 +14,6 @@ import { useNotificationToggle } from "../hooks/useNotificationToggle";
 import { useParkValetSession } from "../hooks/useParkValetSession";
 
 import AddVehicleSheet from "./AddVehicleSheet";
-import NotificationToggleSheet from "./NotificationToggleSheet";
 import PlateConfirmSheet from "./PlateConfirmSheet";
 import VehicleBoard from "./VehicleBoard";
 
@@ -59,7 +59,7 @@ export default function VehicleManagement({
     },
   });
 
-  const notifications = useNotificationToggle({ staffId, boothId, enabled: notificationsEnabled });
+  const notifications = useNotificationToggle({ staffId, boothId });
   const [completeTarget, setCompleteTarget] = useState<BoothValetSession | null>(null);
   const completing = useCompletePickup({
     staffId,
@@ -143,13 +143,14 @@ export default function VehicleManagement({
         onConfirm={() => completeTarget && completing.complete(completeTarget.id)}
         onClose={() => !completing.isCompleting && setCompleteTarget(null)}
       />
-      <NotificationToggleSheet
+      <NotificationSheet
+        staffId={staffId}
         open={notifications.open}
-        enabled={notifications.sheetEnabled}
+        enabled={notificationsEnabled}
         hasWorkTime={hasWorkTime}
-        isPending={notifications.isPending}
-        errorMessage={notifications.errorMessage}
-        onConfirm={notifications.confirm}
+        isToggling={notifications.isPending}
+        toggleErrorMessage={notifications.errorMessage}
+        onToggle={notifications.toggle}
         onClose={notifications.close}
       />
       <AddVehicleSheet
