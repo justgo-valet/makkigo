@@ -12,9 +12,10 @@ describe("getMenuItems", () => {
     ]);
   });
 
-  it("puts the history of the joined booth first for an approved agent", () => {
+  it("puts the history and merchant QR codes of the joined booth first for an approved agent", () => {
     expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: null, agentBoothId: 5 })).toEqual([
       { label: "집계", href: "/booths/5/history" },
+      { label: "업체 QR", href: "/booths/5/merchant-qr" },
       { label: "설정", href: "/settings" },
     ]);
     expect(getMenuItems({ role: "VALET_AGENT", managedBoothId: 3, agentBoothId: 3 })[0]).toEqual({
