@@ -84,6 +84,7 @@ function ValetSessions({ initialData, initialDataUpdatedAt }: Readonly<ValetBoar
                 status={session.status}
                 imageUrl={session.carImageUrl}
                 plateNumber={session.plateNumber}
+                ticketNumber={session.ticketNumber}
                 label={formatSessionLabel(session, updatedAt)}
                 fee={
                   session.fee !== null && session.status !== "ARRIVING" && session.status !== "PARKED"
@@ -99,6 +100,7 @@ function ValetSessions({ initialData, initialDataUpdatedAt }: Readonly<ValetBoar
                 status="COMPLETED"
                 imageUrl={session.carImageUrl}
                 plateNumber={session.plateNumber}
+                ticketNumber={session.ticketNumber}
                 label={formatCompletedLabel(session.completedAt, updatedAt)}
                 fee={session.fee === null ? "금액 미입력" : formatWon(session.fee)}
               />

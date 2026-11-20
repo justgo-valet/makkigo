@@ -100,7 +100,7 @@
 | `GET · POST /api/v1/auth/refresh` | 토큰 재발급. GET 은 `?next=` 로 페이지 이동(같은 앱 경로만) |
 | `POST /api/v1/auth/logout` | 이 기기 리프레시 토큰 폐기 + 쿠키 삭제 |
 | `POST /api/v1/account/password` | `{ currentPassword, newPassword }` → 204 + 새 쿠키(다른 기기 로그아웃). 현재 비밀번호가 틀리면 **400**(401 이면 공통 클라이언트가 로그인 만료로 처리함). 실패 횟수는 로그인과 같이 셈 |
-| `GET /api/v1/valet-sessions` | 내 업체의 발렛 현황(요원 앱에 있던 업체용 차량 현황을 옮김) |
+| `GET /api/v1/valet-sessions` | 내 업체의 발렛 현황(요원 앱에 있던 업체용 차량 현황을 옮김). 진행 중 · 오늘 출차 완료 모두 `ticketNumber`(그날 티켓 일련번호) 포함 |
 | `GET · POST /api/v1/tickets` | 티켓 목록 · 생성 · 새 버전. 이미지 경로는 **같은 업체**의 확정된 업로드만(올린 관리자는 따지지 않음) |
 | `POST /api/v1/ticket-image-uploads/presign` · `complete` | 티켓 이미지 업로드(`tickets/staging/` → `tickets/final/`). 다른 업체면 404 |
 | `POST /api/v1/merchant-account-requests` | **로그인 없이** 업체 관리자 계정 요청 `{ merchantId, merchantName, merchantAddress, requesterName, requesterPhone, privacyConsent: true }` → 201. `merchantId` 가 있으면 그 업체(삭제 제외, 없으면 404), `null` 이면 새 업체 이름 · 주소 필수. 연락처는 숫자만 저장. 같은 연락처로 같은 업체에 대기 중인 요청이 있으면 409 `ALREADY_REQUESTED`. IP 당 15분에 20번(429) |
