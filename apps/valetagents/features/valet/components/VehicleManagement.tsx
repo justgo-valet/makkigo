@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, cn } from "@makkigo/ui";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
@@ -48,7 +49,15 @@ export default function VehicleManagement({
   const [parkTarget, setParkTarget] = useState<BoothValetSession | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const parking = useParkValetSession({ staffId, boothId, onParked: () => setParkTarget(null) });
-  const adding = useAddVehicle({ staffId, boothId, onAdded: () => setAddOpen(false) });
+  const router = useRouter();
+  const adding = useAddVehicle({
+    staffId,
+    boothId,
+    onAdded: ({ merchantId }) => {
+      setAddOpen(false);
+      if (merchantId !== null) router.push(`/booths/${boothId}/merchant-qr?merchant=${merchantId}`);
+    },
+  });
 
   const notifications = useNotificationToggle({ staffId, boothId, enabled: notificationsEnabled });
   const [completeTarget, setCompleteTarget] = useState<BoothValetSession | null>(null);
