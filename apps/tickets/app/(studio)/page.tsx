@@ -3,16 +3,16 @@ import Link from "next/link";
 
 import StudioHeader from "@/features/tickets/components/StudioHeader";
 import TicketPreview from "@/features/tickets/components/TicketPreview";
-import { requireMerchantAdminPage } from "@/server/auth/staffSession";
-import { listOwnMerchants, listOwnTickets } from "@/server/ticket/tickets";
+import { requireMerchantAdminPage } from "@/server/auth/merchantAdminSession";
+import { listOwnTickets } from "@/server/ticket/tickets";
 
 const dateFormat = new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" });
 
 export default async function TicketsPage() {
-  const staffId = await requireMerchantAdminPage("/");
+  const { merchant } = await requireMerchantAdminPage("/");
   const imageBaseUrl = process.env.IMAGE_BASE_URL;
   if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required");
-  const [tickets, merchants] = await Promise.all([listOwnTickets(staffId), listOwnMerchants(staffId)]);
+  const tickets = await listOwnTickets(merchant.id);
 
   return (
     <>
@@ -23,22 +23,16 @@ export default async function TicketsPage() {
             <h1 className="text-2xl font-bold tracking-tight">티켓</h1>
             <p className="mt-1 text-sm text-(--tertiary-color)">고객이 발렛을 맡기면 고객 앱에 이 티켓이 보여요.</p>
           </div>
-          {merchants.length > 0 && (
-            <Link
-              href="/tickets/new"
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
-            >
-              <Plus className="size-4" aria-hidden />
-              새 티켓
-            </Link>
-          )}
+          <Link
+            href="/tickets/new"
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+          >
+            <Plus className="size-4" aria-hidden />
+            새 티켓
+          </Link>
         </div>
 
-        {merchants.length === 0 ? (
-          <p className="mt-16 rounded-2xl border border-dashed border-black/10 bg-white p-10 text-center text-sm text-(--tertiary-color)">
-            등록된 업체가 없어요. 요원 앱에서 업체를 먼저 등록해 주세요.
-          </p>
-        ) : tickets.length === 0 ? (
+        {tickets.length === 0 ? (
           <Link
             href="/tickets/new"
             className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 bg-white p-14 text-center transition-colors hover:border-primary/50 hover:bg-primary/[0.03]"

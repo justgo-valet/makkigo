@@ -1,0 +1,19 @@
+model MerchantAccountRequest {
+    id              Int                          @id @default(autoincrement())
+    merchantId      Int?                         @map("merchant_id")
+    merchantName    String                       @map("merchant_name")
+    merchantAddress String                       @map("merchant_address")
+    requesterName   String                       @map("requester_name")
+    requesterPhone  String                       @map("requester_phone")
+    status          MerchantAccountRequestStatus @default(PENDING)
+    merchantAdminId Int?                         @map("merchant_admin_id")
+    createdAt       DateTime                     @default(now()) @map("created_at") @db.Timestamptz(3)
+    processedAt     DateTime?                    @map("processed_at") @db.Timestamptz(3)
+
+    merchant      Merchant?      @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+    merchantAdmin MerchantAdmin? @relation(fields: [merchantAdminId], references: [id], onDelete: SetNull)
+
+    @@index([status, createdAt])
+    @@index([requesterPhone])
+    @@map("merchant_account_requests")
+}

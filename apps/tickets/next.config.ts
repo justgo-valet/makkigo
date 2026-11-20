@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)),
   transpilePackages: ['@makkigo/ui'],
+  headers: async () => [
+    {
+      source: '/:path*',
+      headers: [
+        { key: 'X-Frame-Options', value: 'DENY' },
+      ],
+    },
+  ],
 }
 
 export default nextConfig

@@ -3,7 +3,7 @@ import "server-only";
 import { prisma } from "database";
 
 import { BOOTH_MERCHANT_PAGE_SIZE } from "@/libs/booth/contracts/booth-merchants";
-import { toImageUrl } from "@/server/merchant/listOwnMerchants";
+import { toImageUrl } from "@/server/common/imageUrl";
 
 import { getBoothManagerFailure } from "./boothManager";
 

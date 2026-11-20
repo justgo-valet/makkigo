@@ -12,25 +12,22 @@ const UPLOAD_TTL_MS = 5 * 60 * 1000;
 const extensions: Record<TicketImageMimeType, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 const reserveTicketImageUpload = async (input: {
-  staffId: number;
+  merchantAdminId: number;
+  ownMerchantId: number;
   merchantId: number;
   contentType: TicketImageMimeType;
   size: number;
 }) => {
-  const merchant = await prisma.merchant.findFirst({
-    where: { id: input.merchantId, adminId: input.staffId, deletedAt: null },
-    select: { id: true },
-  });
-  if (!merchant) return { kind: "MERCHANT_NOT_FOUND" as const };
+  if (input.merchantId !== input.ownMerchantId) return { kind: "MERCHANT_NOT_FOUND" as const };
 
   const id = randomUUID();
-  const file = `${input.staffId}/${merchant.id}/${id}.${extensions[input.contentType]}`;
+  const file = `${input.merchantId}/${input.merchantAdminId}/${id}.${extensions[input.contentType]}`;
   const stagingKey = `tickets/staging/${file}`;
   await prisma.ticketImageUpload.create({
     data: {
       id,
-      merchantId: merchant.id,
-      staffId: input.staffId,
+      merchantId: input.merchantId,
+      merchantAdminId: input.merchantAdminId,
       stagingKey,
       finalKey: `tickets/final/${file}`,
       contentType: input.contentType,
@@ -46,9 +43,11 @@ const reserveTicketImageUpload = async (input: {
   }
 };
 
-const completeTicketImageUpload = async (input: { staffId: number; uploadId: string }) => {
+const completeTicketImageUpload = async (input: { merchantAdminId: number; merchantId: number; uploadId: string }) => {
   const upload = await prisma.ticketImageUpload.findUnique({ where: { id: input.uploadId } });
-  if (!upload || upload.staffId !== input.staffId) return { kind: "NOT_FOUND" as const };
+  if (!upload || upload.merchantAdminId !== input.merchantAdminId || upload.merchantId !== input.merchantId) {
+    return { kind: "NOT_FOUND" as const };
+  }
   if (upload.state === "COMPLETE") return { kind: "COMPLETE" as const, assetPath: upload.finalKey };
   if (upload.expiresAt <= new Date()) return { kind: "EXPIRED" as const };
 

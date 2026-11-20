@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { STAFF_NAME_MAX_LENGTH } from "./agent-request";
 import { bankAccountSchema, feePolicySchema } from "./payment-settings";
 import { boothPhotoUploadMetadataSchema, MAX_BOOTH_PHOTOS } from "./photos";
 
@@ -19,6 +20,7 @@ const createBoothBodySchema = z
       .transform((value) => value || null),
     feePolicy: feePolicySchema,
     bankAccount: bankAccountSchema,
+    managerName: z.string().trim().min(1).max(STAFF_NAME_MAX_LENGTH),
   })
   .strict();
 

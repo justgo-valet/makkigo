@@ -11,7 +11,11 @@ export async function POST(request: NextRequest) {
     if ("error" in access) return access.error;
     const body = ticketImageCompleteBodySchema.safeParse(await request.json().catch(() => null));
     if (!body.success) return apiError("INVALID_INPUT", "업로드 정보가 올바르지 않습니다.", 400);
-    const result = await completeTicketImageUpload({ staffId: access.staffId, uploadId: body.data.uploadId });
+    const result = await completeTicketImageUpload({
+      merchantAdminId: access.merchantAdminId,
+      merchantId: access.merchantId,
+      uploadId: body.data.uploadId,
+    });
     if (result.kind === "NOT_FOUND") return apiError("UPLOAD_NOT_FOUND", "업로드 예약을 찾을 수 없습니다.", 404);
     if (result.kind === "EXPIRED") return apiError("UPLOAD_EXPIRED", "이미지 업로드 시간이 지났습니다. 다시 올려 주세요.", 410);
     if (result.kind === "CONFLICT") return apiError("UPLOAD_CONFLICT", "이미지를 확정하지 못했습니다.", 409);

@@ -52,11 +52,6 @@ export default function BoothSearch({
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="mb-2 flex justify-end">
-        <Button asChild variant="outline" size="sm" className="bg-white text-sm text-(--base-color)">
-          <Link href="/booths/new">+ 부스 등록하기</Link>
-        </Button>
-      </div>
       <div className="relative z-10 h-14" onBlur={combobox.handleBlur}>
         <div
           className={cn(
@@ -156,11 +151,18 @@ export default function BoothSearch({
               combobox.view !== "results" && <p role="status">{VIEW_MESSAGES[combobox.view]}</p>
             )}
           </div>
-          <OnboardingLinks
-            canReturnToPending={canReturnToPending}
-            onShowPending={onShowPending}
-            className="mt-auto flex-col gap-3 pt-8 pb-6 text-base"
-          />
+          <div className="sticky bottom-0 mt-auto bg-(--surface-color) pt-8 pb-[calc(1.5rem+var(--safe-area-inset-bottom))]">
+            {!combobox.expanded && (
+              <Button asChild size="xl" className="w-full">
+                <Link href="/booths/new">+ 부스 등록하기</Link>
+              </Button>
+            )}
+            <OnboardingLinks
+              canReturnToPending={canReturnToPending}
+              onShowPending={onShowPending}
+              className="mt-4 flex-col gap-3 text-base"
+            />
+          </div>
         </>
       )}
     </div>

@@ -2,7 +2,7 @@ import "server-only";
 
 import { prisma } from "database";
 
-import { toImageUrl } from "@/server/merchant/listOwnMerchants";
+import { toImageUrl } from "@/server/common/imageUrl";
 
 import { startOfSeoulDay } from "./seoulDay";
 
@@ -11,11 +11,6 @@ import type { Prisma } from "database";
 const DEFAULT_CAR_IMAGE_PATH = "cars/_default.png";
 
 const carImageSelect = { vehicle: { select: { model: { select: { imageUrl: true } } } } } as const;
-
-interface ValetSessionScope {
-  active: Prisma.ValetSessionWhereInput;
-  completed: Prisma.ValetSessionWhereInput;
-}
 
 const carImageUrlOf =
   (imageBaseUrl: string) => (session: { vehicle: { model: { imageUrl: string } | null } | null }) =>
@@ -56,34 +51,4 @@ const readActiveValetSessions = async (where: Prisma.ValetSessionWhereInput, ima
   }));
 };
 
-const readValetSessionLists = async (scope: ValetSessionScope, imageBaseUrl: string, now: Date) => {
-  const toCarImageUrl = carImageUrlOf(imageBaseUrl);
-  const [items, completed] = await Promise.all([
-    readActiveValetSessions(scope.active, imageBaseUrl),
-    prisma.valetSession.findMany({
-      where: completedTodayWhere(scope.completed, now),
-      orderBy: [{ completedAt: "desc" }, { id: "desc" }],
-      select: {
-        id: true,
-        plateNumber: true,
-        completedAt: true,
-        baseFee: true,
-        actualFee: true,
-        ...carImageSelect,
-      },
-    }),
-  ]);
-
-  return {
-    items,
-    completed: completed.map((session) => ({
-      id: session.id,
-      plateNumber: session.plateNumber,
-      carImageUrl: toCarImageUrl(session),
-      completedAt: session.completedAt?.toISOString(),
-      fee: session.actualFee ?? session.baseFee,
-    })),
-  };
-};
-
-export { completedTodayWhere, readActiveValetSessions, readValetSessionLists };
+export { completedTodayWhere, readActiveValetSessions };

@@ -7,7 +7,7 @@ const TEST_DATABASE_NAME_PATTERN = /(?:^|[_-])test(?:$|[_-])/i;
 
 let prisma: PrismaClient;
 let getCurrentTicket: typeof GetCurrentTicket;
-const fixtureIds = { users: [] as number[], staff: [] as number[], sessions: [] as number[] };
+const fixtureIds = { users: [] as number[], merchants: [] as number[], sessions: [] as number[] };
 
 const requireTestDatabaseUrl = () => {
   const value = process.env.TEST_DATABASE_URL;
@@ -36,8 +36,7 @@ afterAll(async () => {
   if (!prisma) return;
   await prisma.valetSession.deleteMany({ where: { id: { in: fixtureIds.sessions } } });
   await prisma.user.deleteMany({ where: { id: { in: fixtureIds.users } } });
-  await prisma.merchant.deleteMany({ where: { adminId: { in: fixtureIds.staff } } });
-  await prisma.staff.deleteMany({ where: { id: { in: fixtureIds.staff } } });
+  await prisma.merchant.deleteMany({ where: { id: { in: fixtureIds.merchants } } });
   await prisma.$disconnect();
 });
 
@@ -50,15 +49,11 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integra
       prisma.user.create({ data: {} }),
     ]);
     fixtureIds.users.push(user.id, unrelatedUser.id, pinnedUser.id);
-    const staff = await prisma.staff.create({
-      data: { role: "MERCHANT_ADMIN", name: `customer-ticket-${suffix}` },
-      select: { id: true },
-    });
-    fixtureIds.staff.push(staff.id);
     const merchant = await prisma.merchant.create({
-      data: { adminId: staff.id, name: `customer-ticket-${suffix}`, address: "서울시 테스트구" },
+      data: { name: `customer-ticket-${suffix}`, address: "서울시 테스트구" },
       select: { id: true },
     });
+    fixtureIds.merchants.push(merchant.id);
     const ticket = await prisma.ticket.create({
       data: {
         merchantId: merchant.id,

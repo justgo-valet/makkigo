@@ -8,14 +8,13 @@ import { formatPlateNumber } from "../formatters";
 
 import type { BoothValetSession } from "../schemas/sessions";
 
-type VehicleStatus = BoothValetSession["status"] | "COMPLETED";
+type VehicleStatus = BoothValetSession["status"];
 
 const STATUS_STYLES: Record<VehicleStatus, { title: string; className: string }> = {
   PICKUP_REQUESTED: { title: "출차 요청", className: "bg-(--pickup-blink)" },
   PICKUP_PREPARING: { title: "출차 요청", className: "bg-[#ff3b30]" },
   PARKED: { title: "주차 중", className: "bg-white" },
   ARRIVING: { title: "도착 알림", className: "bg-[#ffeda6]" },
-  COMPLETED: { title: "출차 완료", className: "bg-[#b8ebc5]" },
 };
 
 const vehicleCardClass = (status: VehicleStatus) =>
