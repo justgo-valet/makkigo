@@ -22,19 +22,10 @@ const withdrawStaff = async (staffId: number): Promise<WithdrawStaffResult> => {
         where: { creatorId: staffId, deletedAt: null },
         select: { id: true },
       });
-      const merchants = await tx.merchant.findMany({
-        where: { adminId: staffId, deletedAt: null },
-        select: { id: true },
-      });
       const boothIds = booths.map(({ id }) => id);
-      const merchantIds = merchants.map(({ id }) => id);
 
       await tx.booth.updateMany({
         where: { id: { in: boothIds }, deletedAt: null },
-        data: { deletedAt: now },
-      });
-      await tx.merchant.updateMany({
-        where: { id: { in: merchantIds }, deletedAt: null },
         data: { deletedAt: now },
       });
 
@@ -43,7 +34,6 @@ const withdrawStaff = async (staffId: number): Promise<WithdrawStaffResult> => {
           status: { in: [...ACTIVE_VALET_SESSION_STATUSES] },
           OR: [
             { boothId: { in: boothIds } },
-            { merchantId: { in: merchantIds } },
             {
               boothId: null,
               merchant: { booths: { some: { boothId: { in: boothIds }, status: "APPROVED" } } },

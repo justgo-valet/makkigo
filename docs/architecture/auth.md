@@ -1,6 +1,8 @@
 # 인증
 
-공통 코드는 `packages/auth`, 고객 API 는 `apps/users/app/api/v1/auth/*`, 요원·업체 관리자 API 는 `apps/valetagents/app/api/v1/auth/*`에 둡니다. 토큰은 `aud`(`users` / `valetagents`)로 구분합니다.
+공통 코드는 `packages/auth`, 고객 API 는 `apps/users/app/api/v1/auth/*`, 요원 API 는 `apps/valetagents/app/api/v1/auth/*`, 업체 관리자 API 는 `apps/tickets/app/api/v1/auth/*`, 슈퍼 어드민 API 는 `apps/admin/app/api/v1/auth/*`에 둡니다. 토큰은 `aud`(`users` / `valetagents` / `merchant-admin` / `admin`)로 구분합니다.
+
+고객 · 요원은 소셜 로그인, 업체 관리자 · 슈퍼 어드민은 **아이디 · 비밀번호**입니다 → [아이디 · 비밀번호 로그인](#아이디--비밀번호-로그인-업체-관리자--슈퍼-어드민)
 
 ## 흐름
 
@@ -118,6 +120,34 @@
 | 카카오 | 카카오 로그인 활성화, Redirect URI 등록, (선택) 보안 → Client Secret 사용, 동의 항목에 카카오계정(이메일). 앱 SDK: 플랫폼에 iOS 번들 ID · Android 패키지 + 키 해시 (makkigo-mobile README) |
 | 구글 | OAuth 클라이언트 ID **웹 애플리케이션** 유형, 승인된 리디렉션 URI 등록, OAuth 동의 화면 게시. 앱 SDK: 같은 프로젝트에 **iOS**(번들 ID) · **Android**(패키지 + SHA-1) 클라이언트 |
 | 애플 | App ID(`com.makkigo.user`)에 Sign in with Apple, **Services ID** 생성 → 도메인 `app.makkigo.com` · Return URL 등록 |
+
+## 아이디 · 비밀번호 로그인 (업체 관리자 · 슈퍼 어드민)
+
+decisions 2026-11-19. 업체 관리자는 `apps/tickets`(`tickets.makkigo.com`), 슈퍼 어드민은 `apps/admin`(`admin.makkigo.com`). 계정은 따로 가입하지 않습니다 — 업체 관리자는 슈퍼 어드민이 콘솔에서, 슈퍼 어드민은 서버 명령으로 만듭니다 → [runbook.md](../operations/runbook.md#슈퍼-어드민-계정-만들기).
+
+| 항목 | 정한 것 | 이유 |
+|---|---|---|
+| 아이디 | 영문 소문자 · 숫자 · `.` `_` `-` 4~32자, 소문자로 저장(입력의 대문자는 소문자로 봄) | 대소문자 때문에 같은 사람이 두 계정을 갖지 않게 |
+| 비밀번호 | 8~72자. 저장은 `node:crypto` scrypt(N=32768, r=8, p=1) + 계정마다 다른 솔트, 해시 문자열에 설정값을 함께 적음 | 새 의존성 없이 느린 해시. 설정을 올려도 옛 해시를 읽을 수 있음 |
+| 없는 아이디 | 있는 계정과 같은 비용의 가짜 검증을 거친 뒤 "아이디 또는 비밀번호가 맞지 않습니다" | 응답 시간으로 계정 유무를 알 수 없게 |
+| 잠금 | **5번 연속 틀리면 15분 잠금**, 성공하면 횟수를 0 으로. 시도 횟수를 검증 **전에** 한 문장으로 올려, 동시에 많이 보내도 5번까지만 검증 | 무차별 대입 방지. 동시 요청으로 제한을 넘지 못하게 |
+| 비활성 계정 | 비밀번호가 맞을 때만 "사용이 중지된 계정" 을 알려 줌, 리프레시 · 페이지 접근도 막음 | 비밀번호를 모르는 사람에게 상태를 알리지 않음 |
+| 응답 | 틀림 401, 잠김 429, 비활성 403 | |
+| 첫 로그인 · 재설정 | 슈퍼 어드민이 계정을 만들거나 비밀번호를 재설정하면 **임시 비밀번호**(12자, 헷갈리는 글자 뺌)를 콘솔에 한 번만 보여 주고 `password_change_required` 를 켬. 켜져 있으면 포털의 모든 페이지가 비밀번호 변경 화면으로, API 는 403 `PASSWORD_CHANGE_REQUIRED` | 임시 비밀번호는 슈퍼 어드민도 알게 되므로 바로 바꾸게 |
+| 비밀번호 변경 | 현재 비밀번호 확인(틀리면 잠금 횟수에 들어감) + 새 비밀번호는 현재와 달라야 함. 바꾸면 그 계정의 리프레시 토큰을 모두 폐기하고 이 기기에 새 토큰 | 다른 기기에 남은 로그인을 끊음 |
+| 재설정 · 비활성화 | 슈퍼 어드민이 함. 둘 다 그 계정의 리프레시 토큰을 모두 폐기, 재설정은 잠금도 풂. 다시 켜는 기능은 아직 없음 | 액세스 토큰은 15분 뒤 끝나지만, 페이지 · API 는 요청마다 비활성 여부를 DB 에서 봐서 바로 막힘 |
+| 업체 미연결 | 업체가 없거나 닫힌 업체 관리자는 안내 화면(`/no-merchant`)으로, API 는 403 `MERCHANT_REQUIRED` | 한 계정 = 업체 하나 |
+
+**쿠키** (앱마다 따로, host-only · HttpOnly · SameSite=Lax · 운영 Secure, 도메인 공유 쿠키 없음)
+
+| 앱 | 액세스 토큰 (path `/`) | 리프레시 토큰 (path `/api/v1/auth`) |
+|---|---|---|
+| 업체 관리자 포털 | `makkigo_merchant_admin_access_token` | `makkigo_merchant_admin_refresh_token` |
+| 슈퍼 어드민 콘솔 | `makkigo_admin_access_token` | `makkigo_admin_refresh_token` |
+
+- 수명 · 저장 방식은 아래 [토큰](#토큰)과 같음(액세스 15분 · 리프레시 30일, DB 에 해시만, 재발급할 때마다 교체).
+- 로그인 CSRF 등: 로그인 · 재발급 · 로그아웃 · 쓰기 API 는 **같은 출처(`Origin`) 요청만** 받습니다.
+- 업체 관리자 포털은 예전에 요원 앱 소셜 로그인(`client=tickets`)을 빌려 썼지만 없앴습니다. 포털에는 OAuth 코드 · 환경변수가 없습니다.
 
 ## 토큰
 

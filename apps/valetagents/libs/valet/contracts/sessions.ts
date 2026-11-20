@@ -19,19 +19,6 @@ const boothValetSessionSchema = z.object({
   fee: z.number().int().nullable(),
 });
 
-const completedValetSessionSchema = z.object({
-  id: z.number().int().positive(),
-  plateNumber: z.string(),
-  carImageUrl: z.string().url(),
-  completedAt: z.string().datetime(),
-  fee: z.number().int().nullable(),
-});
-
-const valetSessionListResponseSchema = z.object({
-  items: z.array(boothValetSessionSchema),
-  completed: z.array(completedValetSessionSchema),
-});
-
 const boothValetSessionListResponseSchema = z.object({
   items: z.array(boothValetSessionSchema),
   completedCount: z.number().int().nonnegative(),
@@ -42,9 +29,6 @@ export {
   BOOTH_VALET_SESSION_STATUSES,
   boothValetSessionListResponseSchema,
   boothValetSessionSchema,
-  valetSessionListResponseSchema,
 };
 export type BoothValetSession = z.infer<typeof boothValetSessionSchema>;
-export type CompletedValetSession = z.infer<typeof completedValetSessionSchema>;
 export type BoothValetSessionListResponse = z.infer<typeof boothValetSessionListResponseSchema>;
-export type ValetSessionListResponse = z.infer<typeof valetSessionListResponseSchema>;

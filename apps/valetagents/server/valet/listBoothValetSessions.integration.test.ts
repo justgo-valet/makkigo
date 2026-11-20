@@ -49,7 +49,6 @@ const createBooth = async (label: string) => {
 const createMerchant = async (contractBoothId: number, status: BoothMerchantStatus) => {
   const merchant = await prisma.merchant.create({
     data: {
-      adminId: managerId,
       name: `integration-merchant-${suffix}`,
       address: "서울시 테스트구",
       booths: { create: { boothId: contractBoothId, status } },

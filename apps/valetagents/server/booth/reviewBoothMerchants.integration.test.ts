@@ -11,7 +11,6 @@ let reviewBoothMerchants: typeof ReviewBoothMerchants;
 let suffix: string;
 let managerId: number;
 let otherManagerId: number;
-let merchantAdminId: number;
 let boothId: number;
 const fixtureIds = { booth: [] as number[], staff: [] as number[], merchant: [] as number[] };
 
@@ -29,7 +28,6 @@ const requireTestDatabaseUrl = () => {
 const createMerchant = async (label: string) => {
   const merchant = await prisma.merchant.create({
     data: {
-      adminId: merchantAdminId,
       name: `integration-${label}-${suffix}`,
       address: "서울시 테스트구",
     },
@@ -127,7 +125,7 @@ beforeAll(async () => {
   ({ reviewBoothMerchants } = await import("./reviewBoothMerchants"));
 
   suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const createStaff = async (label: string, role: "VALET_AGENT" | "MERCHANT_ADMIN") =>
+  const createStaff = async (label: string, role: "VALET_AGENT") =>
     (
       await prisma.staff.create({
         data: { role, name: `integration-${label}-${suffix}` },
@@ -137,14 +135,13 @@ beforeAll(async () => {
 
   managerId = await createStaff("manager", "VALET_AGENT");
   otherManagerId = await createStaff("other-manager", "VALET_AGENT");
-  merchantAdminId = await createStaff("merchant-admin", "MERCHANT_ADMIN");
   boothId = (
     await prisma.booth.create({
       data: { creatorId: managerId, name: `integration-booth-${suffix}`, address: "서울시 테스트구" },
       select: { id: true },
     })
   ).id;
-  fixtureIds.staff.push(managerId, otherManagerId, merchantAdminId);
+  fixtureIds.staff.push(managerId, otherManagerId);
   fixtureIds.booth.push(boothId);
 });
 

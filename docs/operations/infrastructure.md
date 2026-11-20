@@ -13,6 +13,8 @@
                                                 ├ caddy        :80 · :443  HTTPS, 주소별 연결
                                                 ├ users        :3001       고객 앱  app.makkigo.com
                                                 ├ valetagents  :3000       요원 앱  valet.makkigo.com
+                                                ├ tickets      :3002       업체 관리자 포털  tickets.makkigo.com
+                                                ├ admin        :3003       슈퍼 어드민  admin.makkigo.com
                                                 ├ merchant-upload-cleanup  내부 hourly runner (포트 없음)
                                                 ├ agent-notification-sync  내부 1분 runner (포트 없음)
                                                 ├ users-jobs   매시간 고객 앱 내부 API 호출 (정리 작업, 포트 없음)
@@ -84,10 +86,11 @@ DB 에는 전체 주소가 아니라 **경로만** 저장하고, 서버가 `IMAG
 
 | 항목 | 상태 |
 |---|---|
-| 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `http://localhost:3002` · `https://valet.makkigo.com` · `https://app.makkigo.com` · `https://tickets.makkigo.com` 의 POST 허용. GET · HEAD 규칙에도 `https://tickets.makkigo.com` (티켓 편집기가 이미지를 캔버스에 그림) |
+| 버킷 CORS (POST) | 적용됨 — `http://localhost:3000` · `http://localhost:3002` · `http://localhost:3003` · `https://valet.makkigo.com` · `https://app.makkigo.com` · `https://tickets.makkigo.com` · `https://admin.makkigo.com` 의 POST 허용(admin 은 2026-11-19 추가). GET · HEAD 규칙에도 `https://tickets.makkigo.com` (티켓 편집기가 이미지를 캔버스에 그림) |
 | EC2 역할의 S3 권한 | 적용됨 — 운영 역할 정책이 `booths/staging/*` · `booths/final/*` 쓰기를 허용하는 것을 확인. `deploy/aws/setup-iam.sh` 는 업체 · 부스 · 티켓 경로를 포함 |
 | CloudFront staging 차단 | 업체 · 부스 staging 은 403 확인됨. **티켓 staging 은 미검증** — 공개 전 `tickets/staging/*` Deny 적용 및 URL 403 확인 필요 (아래 "staging 비공개") |
 | 부스 staging lifecycle | 활성화됨 — `booths/staging/` 객체는 업로드 후 1일 만료 |
+| 업체 staging lifecycle | 활성화됨(2026-11-19) — `merchants/staging/` 객체는 업로드 후 1일 만료 (`ExpireAbandonedMerchantStagingUpload`) |
 
 EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain을 사용하며, 아래 prefix 밖은
 거부합니다. 버킷 이름은 `setup-iam.sh` 의 `IMAGE_BUCKET`(기본 `makkigo-prod-image-apne2`)으로 바꿉니다.
@@ -110,7 +113,7 @@ EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain
 }
 ```
 
-- 브라우저 presigned POST는 `merchants/staging/{staffId}/{sessionId}/...` 또는
+- 브라우저 presigned POST는 `merchants/staging/{uuid}.{확장자}`(슈퍼 어드민, 2026-11-19) 또는
   `booths/staging/{staffId}/{uploadId}...` 또는 `tickets/staging/{staffId}/{merchantId}/...` 에만 발급합니다. 검증된 티켓 이미지는 `tickets/final/...`로 복사합니다.
 - final write는 서버 conditional CopyObject만 허용합니다. 브라우저/IAM에 final PutObject를
   허용하지 않는 별도 bucket policy 검증이 release gate입니다.
@@ -120,7 +123,7 @@ EC2 실행 역할에 정적 access key를 넣지 않고 default credential chain
 CORS 는 기존 GET · HEAD 규칙에 POST 규칙을 하나 더한 형태입니다:
 
 ```json
-{"AllowedOrigins":["https://valet.makkigo.com","https://app.makkigo.com","https://tickets.makkigo.com","http://localhost:3000","http://localhost:3002"],"AllowedMethods":["POST"],"AllowedHeaders":["*"],"MaxAgeSeconds":300}
+{"AllowedOrigins":["https://tickets.makkigo.com","https://valet.makkigo.com","https://app.makkigo.com","http://localhost:3000","http://localhost:3002","https://admin.makkigo.com","http://localhost:3003"],"AllowedMethods":["POST"],"AllowedHeaders":["*"],"MaxAgeSeconds":300}
 ```
 
 CORS 는 인증 · 쓰기 권한을 주지 않습니다. 2026-10-13 에 로컬 요원 앱에서 이 버킷으로 presigned POST,
@@ -162,9 +165,13 @@ curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/b
 curl -s -o /dev/null -w '%{http_code}\n' https://d2lnojrmgxqgrc.cloudfront.net/merchants/final/<키>
 ```
 
+#### 업체 사진 staging 수명 주기
+
+2026-11-19 부터 업체 사진은 슈퍼 어드민이 올리고, 업로드 추적 테이블이 없습니다. 완료하지 않은 `merchants/staging/*` 객체는 **S3 수명 주기 규칙**(접두사 `merchants/staging/`, 생성 후 1일 만료, 2026-11-19 적용)으로 지웁니다. 예전 업체 등록 세션이 남긴 staging 파일도 이 규칙이 치웁니다.
+
 ### Route 53
 
-`makkigo.com` 호스팅 영역 — A 레코드 `app` · `valet` → `13.209.92.174`. 루트 `makkigo.com` 은 비어 있습니다.
+`makkigo.com` 호스팅 영역 — A 레코드 `app` · `valet` → `13.209.92.174`. 루트 `makkigo.com` 은 비어 있습니다. `tickets` · `admin`(2026-11-19 추가)도 같은 IP 입니다.
 
 ## 도메인
 

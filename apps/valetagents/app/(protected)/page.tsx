@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 
 import AppHeader from "@/components/layouts/AppHeader";
 import QueryProvider from "@/components/providers/QueryProvider";
-import MerchantVehicleOverview from "@/features/valet/components/MerchantVehicleOverview";
 import VehicleManagement from "@/features/valet/components/VehicleManagement";
 import { ACCESS_TOKEN_COOKIE } from "@/server/auth/authCookies";
 import { getPathAfterLogin } from "@/server/auth/getPathAfterLogin";
@@ -13,7 +12,6 @@ import { findApprovedMembership } from "@/server/booth/boothAgent";
 import { listContractedMerchants } from "@/server/booth/listContractedMerchants";
 import { requireProtectedStaff } from "@/server/onboarding/requireProtectedStaff";
 import { listBoothValetSessions } from "@/server/valet/listBoothValetSessions";
-import { listMerchantValetSessions } from "@/server/valet/listMerchantValetSessions";
 
 const requireImageBaseUrl = () => {
   const imageBaseUrl = process.env.IMAGE_BASE_URL;
@@ -42,34 +40,15 @@ const loadBoothSessions = async (staffId: number) => {
     : null;
 };
 
-const loadMerchantSessions = async (staffId: number) => {
-  const data = await listMerchantValetSessions(staffId, requireImageBaseUrl());
-  return { data, loadedAt: Date.now() };
-};
-
 export default async function Home() {
   const token = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   const staffId = token ? await getActiveStaffIdFromAccessToken(token) : null;
   if (!staffId) redirect("/login");
-  const onboarding = await requireProtectedStaff(staffId);
+  await requireProtectedStaff(staffId);
   if ((await getPathAfterLogin(staffId)) === "/onboarding") redirect("/onboarding");
 
   const menu = await getStaffMenuAccess(staffId);
   if (!menu) redirect("/login");
-
-  if (onboarding.role === "MERCHANT_ADMIN") {
-    const sessions = await loadMerchantSessions(staffId);
-    return (
-      <QueryProvider sessionKey={staffId}>
-        <MerchantVehicleOverview
-          staffId={staffId}
-          initialData={sessions.data}
-          initialDataUpdatedAt={sessions.loadedAt}
-          menu={menu}
-        />
-      </QueryProvider>
-    );
-  }
 
   const booth = await loadBoothSessions(staffId);
 

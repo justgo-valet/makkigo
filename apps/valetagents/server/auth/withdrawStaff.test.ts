@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => {
   const tx = {
     booth: { findMany: vi.fn(), updateMany: vi.fn() },
-    merchant: { findMany: vi.fn(), updateMany: vi.fn() },
     valetSession: { findFirst: vi.fn() },
     staffSocialAccount: { deleteMany: vi.fn() },
     staffLoginCode: { deleteMany: vi.fn() },
@@ -37,7 +36,6 @@ describe("withdrawStaff Apple token revoke", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     db.tx.booth.findMany.mockResolvedValue([]);
-    db.tx.merchant.findMany.mockResolvedValue([]);
     db.tx.valetSession.findFirst.mockResolvedValue(null);
     db.prisma.staffSocialAccount.findMany.mockResolvedValue([APPLE_ACCOUNT]);
     db.revokeAppleRefreshToken.mockResolvedValue(true);

@@ -13,9 +13,9 @@ import { MAX_VALET_FEE } from "@/libs/valet/contracts/fee";
 
 import { formatPlateNumber } from "../formatters";
 
-import type { CompletedValetSession } from "../schemas/sessions";
+import type { CompletedHistoryItem } from "@/libs/valet/contracts/completed-history";
 
-type FeeTarget = Pick<CompletedValetSession, "id" | "plateNumber" | "fee">;
+type FeeTarget = Pick<CompletedHistoryItem, "id" | "plateNumber" | "fee">;
 
 interface FeeEditFormProps {
   session: FeeTarget;

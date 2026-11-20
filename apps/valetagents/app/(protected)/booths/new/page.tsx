@@ -27,6 +27,7 @@ export default async function NewBoothPage() {
       <BoothRegistrationForm
         returnPath={returnPath}
         kakaoMapAppKey={process.env.KAKAO_MAP_APP_KEY ?? ""}
+        staffName={onboarding.name}
       />
     </QueryProvider>
   );

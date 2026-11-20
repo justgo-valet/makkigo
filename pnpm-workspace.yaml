@@ -10,3 +10,5 @@ allowBuilds:
   protobufjs: false
   unrs-resolver: true
   workerd: true
+overrides:
+  effect: ^3.22.1
