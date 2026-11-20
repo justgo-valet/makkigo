@@ -48,6 +48,7 @@ const registration = (label: string) => ({
   ...boothBody(label),
   feePolicy: FEE_POLICY,
   bankAccount: BANK_ACCOUNT,
+  managerName: "김부스",
 });
 
 const countCreatedBooths = (...staffIds: number[]) =>
@@ -79,9 +80,9 @@ afterAll(async () => {
 describe("createBooth database integration", () => {
   it("creates the booth with its creator as an approved agent, its fee policy and bank account and completes onboarding", async () => {
     const staffId = await createStaff("VALET_AGENT");
-    const { feePolicy, bankAccount, ...body } = { ...registration("created"), addressDetail: "1층 로비" };
+    const { feePolicy, bankAccount, managerName, ...body } = { ...registration("created"), addressDetail: "1층 로비" };
 
-    const result = await createBooth(staffId, { ...body, feePolicy, bankAccount });
+    const result = await createBooth(staffId, { ...body, feePolicy, bankAccount, managerName });
     if (!result.ok) throw new Error(result.reason);
 
     await expect(
@@ -106,6 +107,9 @@ describe("createBooth database integration", () => {
     await expect(
       prisma.boothAgent.findMany({ where: { staffId }, select: { boothId: true, status: true } }),
     ).resolves.toEqual([{ boothId: result.value.id, status: "APPROVED" }]);
+    await expect(prisma.staff.findUnique({ where: { id: staffId }, select: { name: true } })).resolves.toEqual({
+      name: managerName,
+    });
     await expect(getStaffOnboardingState(staffId)).resolves.toMatchObject({ state: "COMPLETE" });
   });
 

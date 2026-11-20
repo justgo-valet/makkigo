@@ -8,6 +8,7 @@ import {
 const ADDRESS = "서울특별시 중구 세종대로 110";
 
 const filled = {
+  managerName: "김부스",
   name: "시청 부스",
   address: ADDRESS,
   geocodedAddress: ADDRESS,
@@ -19,6 +20,7 @@ describe("getBoothInfoAvailability", () => {
   it("moves on only with a named booth whose typed address the map has found", () => {
     expect(getBoothInfoAvailability(filled)).toBe(true);
     expect(getBoothInfoAvailability({ ...filled, name: " " })).toBe(false);
+    expect(getBoothInfoAvailability({ ...filled, managerName: " " })).toBe(false);
     expect(getBoothInfoAvailability({ ...filled, mapState: "error" })).toBe(false);
     expect(getBoothInfoAvailability({ ...filled, address: `${ADDRESS} 1` })).toBe(false);
     expect(getBoothInfoAvailability({ ...filled, isSaving: true })).toBe(false);
