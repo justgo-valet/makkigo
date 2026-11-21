@@ -71,12 +71,15 @@ export default function MerchantDetailView({
       </div>
 
       {detail.isNoBoothNoticeVisible && (
-        <p
+        <div
           role="alert"
-          className="mt-4 shrink-0 rounded-lg bg-(--surface-color) px-3.5 py-3 text-sm break-keep text-(--base-color)"
+          className="mt-4 shrink-0 rounded-lg bg-(--surface-color) px-3.5 py-3 break-keep"
         >
-          아직 발렛 부스가 없는 업체라 요청을 보낼 수 없어요.
-        </p>
+          <p className="text-sm font-bold text-(--base-color)">아직 마끼고 발렛이 없는 곳이에요</p>
+          <p className="mt-0.5 text-xs text-(--tertiary-color)">
+            발렛부스가 생기면 이곳에서도 도착 알림을 보낼 수 있어요.
+          </p>
+        </div>
       )}
       <Button
         type="button"
