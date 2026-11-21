@@ -2,6 +2,7 @@
 
 import { formatTicketNumber } from "@makkigo/ticket-design";
 import { cn } from "@makkigo/ui";
+import { SpinningWheels } from "@makkigo/ui/components/ui/spinning-wheels";
 import Image from "next/image";
 import { useLayoutEffect, useRef } from "react";
 
@@ -80,7 +81,10 @@ function VehicleCardContent({
           status === "ARRIVING" && "animate-arrival-drive",
         )}
       >
-        <Image src={imageUrl} alt="" fill unoptimized className="object-contain" />
+        <span className="relative mx-auto block aspect-[8/5] h-full">
+          <Image src={imageUrl} alt="" fill unoptimized className="object-contain" />
+          {status === "ARRIVING" && <SpinningWheels sideView={imageUrl.endsWith("/cars/_default.png")} />}
+        </span>
       </span>
       {ticketNumber !== null && (
         <FitLine className="text-[13px] leading-[18px] font-semibold tabular-nums">
