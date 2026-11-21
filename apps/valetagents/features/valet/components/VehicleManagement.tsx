@@ -89,6 +89,7 @@ export default function VehicleManagement({
         home
         notificationsEnabled={notificationsEnabled}
         onBellClick={notifications.openSheet}
+        qrHref={`/booths/${boothId}/merchant-qr`}
       />
 
       <VehicleBoard
