@@ -3,13 +3,13 @@ import * as React from "react"
 type Wheel = { left: string; top: string; height: string; squash: number }
 
 const PHOTO_WHEELS: Wheel[] = [
-  { left: "46%", top: "75%", height: "21%", squash: 0.84 },
-  { left: "84.5%", top: "73%", height: "21%", squash: 0.73 },
+  { left: "46%", top: "75%", height: "25%", squash: 0.84 },
+  { left: "84.5%", top: "73%", height: "25%", squash: 0.73 },
 ]
 
 const SIDE_VIEW_WHEELS: Wheel[] = [
-  { left: "22.4%", top: "64.5%", height: "21.5%", squash: 1 },
-  { left: "76%", top: "64.5%", height: "21.5%", squash: 1 },
+  { left: "22.4%", top: "64.5%", height: "26%", squash: 1 },
+  { left: "76%", top: "64.5%", height: "26%", squash: 1 },
 ]
 
 function SpinningWheels({ sideView }: { sideView: boolean }) {
@@ -30,7 +30,7 @@ function SpinningWheels({ sideView }: { sideView: boolean }) {
         >
           <svg
             viewBox="0 0 24 24"
-            className="block size-full animate-spin [animation-direction:reverse] [animation-duration:0.6s] motion-reduce:animate-none"
+            className="block size-full animate-spin [animation-direction:reverse] [animation-duration:0.35s] motion-reduce:animate-none"
           >
             <circle cx="12" cy="12" r="11.5" fill="#1f2937" />
             <circle cx="12" cy="12" r="7.5" fill="#cbd5e1" />
