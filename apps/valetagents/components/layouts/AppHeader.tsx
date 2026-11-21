@@ -17,6 +17,7 @@ interface AppHeaderProps {
   home?: boolean;
   notificationsEnabled?: boolean;
   onBellClick?: () => void;
+  qrHref?: string;
 }
 
 export default function AppHeader({
@@ -26,6 +27,7 @@ export default function AppHeader({
   home,
   notificationsEnabled,
   onBellClick,
+  qrHref,
 }: Readonly<AppHeaderProps>) {
   return (
     <header className="relative flex h-12 w-full shrink-0 items-center">
@@ -54,6 +56,14 @@ export default function AppHeader({
         className={cn(!home && "absolute left-[calc(50%+0.5rem)] -translate-x-1/2")}
       />
       <nav className="ml-auto flex items-center gap-3">
+        {qrHref && (
+          <Link
+            href={qrHref}
+            className="rounded-full border border-input bg-white px-2.5 py-1 text-sm font-semibold text-(--base-color)"
+          >
+            QR보기
+          </Link>
+        )}
         {onBellClick && (
           <button
             type="button"
