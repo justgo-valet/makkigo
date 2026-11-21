@@ -70,14 +70,19 @@ export default function MerchantDetailView({
         )}
       </div>
 
+      {detail.isNoBoothNoticeVisible && (
+        <p
+          role="alert"
+          className="mt-4 shrink-0 rounded-lg bg-(--surface-color) px-3.5 py-3 text-sm break-keep text-(--base-color)"
+        >
+          아직 발렛 부스가 없는 업체라 요청을 보낼 수 없어요.
+        </p>
+      )}
       <Button
         type="button"
         className="mt-4 h-[52px] w-full shrink-0 text-base font-bold"
         disabled={!merchant}
-        onClick={() => {
-          if (merchant)
-            onChoose({ id: merchant.id, name: merchant.name, address: merchant.address });
-        }}
+        onClick={() => detail.choose(onChoose)}
       >
         이 업체 선택하기
       </Button>
@@ -110,17 +115,19 @@ function MerchantInfo({
         </section>
       )}
 
-      <section className="flex flex-col gap-2">
-        <h4 className="text-sm font-bold text-(--base-color)">발렛 비용</h4>
-        <div className="flex flex-col gap-4">
-          {merchant.booths.map((booth) => (
-            <div key={booth.id} className="flex flex-col gap-2">
-              {hasManyBooths && <BoothName name={booth.name} />}
-              <FeePolicyTable feePolicy={booth.feePolicy} />
-            </div>
-          ))}
-        </div>
-      </section>
+      {merchant.booths.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h4 className="text-sm font-bold text-(--base-color)">발렛 비용</h4>
+          <div className="flex flex-col gap-4">
+            {merchant.booths.map((booth) => (
+              <div key={booth.id} className="flex flex-col gap-2">
+                {hasManyBooths && <BoothName name={booth.name} />}
+                <FeePolicyTable feePolicy={booth.feePolicy} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
