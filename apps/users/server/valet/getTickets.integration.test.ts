@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import type { getCurrentTicket as GetCurrentTicket } from "./getCurrentTicket";
+import type { getTickets as GetTickets } from "./getTickets";
 import type { PrismaClient } from "database";
 
 const TEST_DATABASE_NAME_PATTERN = /(?:^|[_-])test(?:$|[_-])/i;
 
 let prisma: PrismaClient;
-let getCurrentTicket: typeof GetCurrentTicket;
+let getTickets: typeof GetTickets;
 const fixtureIds = { users: [] as number[], merchants: [] as number[], sessions: [] as number[] };
 
 const requireTestDatabaseUrl = () => {
@@ -29,7 +29,7 @@ const design = (backgroundColor: string) => ({
 beforeAll(async () => {
   process.env.DATABASE_URL = requireTestDatabaseUrl();
   ({ prisma } = await import("database"));
-  ({ getCurrentTicket } = await import("./getCurrentTicket"));
+  ({ getTickets } = await import("./getTickets"));
 });
 
 afterAll(async () => {
@@ -40,7 +40,7 @@ afterAll(async () => {
   await prisma.$disconnect();
 });
 
-describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integration", () => {
+describe.skipIf(!process.env.TEST_DATABASE_URL)("customer ticket history integration", () => {
   it("renders the authenticated session's pinned version instead of the merchant's newest version", async () => {
     const suffix = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const [user, unrelatedUser, pinnedUser] = await Promise.all([
@@ -51,7 +51,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integra
     fixtureIds.users.push(user.id, unrelatedUser.id, pinnedUser.id);
     const merchant = await prisma.merchant.create({
       data: { name: `customer-ticket-${suffix}`, address: "서울시 테스트구" },
-      select: { id: true },
+      select: { id: true, name: true },
     });
     fixtureIds.merchants.push(merchant.id);
     const ticket = await prisma.ticket.create({
@@ -94,11 +94,67 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("current customer ticket integra
       pinnedUserSession.id,
     );
 
-    await expect(getCurrentTicket(user.id)).resolves.toBeNull();
-    await expect(getCurrentTicket(unrelatedUser.id)).resolves.toBeNull();
-    await expect(getCurrentTicket(pinnedUser.id)).resolves.toEqual({
-      design: design("#111111"),
-      ticketNumber: null,
+    const parkedAt = new Date("2026-11-20T01:00:00.000Z");
+    const completedSessions = await Promise.all(
+      [
+        { completedAt: new Date("2026-11-18T03:00:00.000Z"), versionIndex: 1 },
+        { completedAt: new Date("2026-11-19T03:00:00.000Z"), versionIndex: 0 },
+      ].map(({ completedAt, versionIndex }, index) =>
+        prisma.valetSession.create({
+          data: {
+            userId: unrelatedUser.id,
+            merchantId: merchant.id,
+            ticketVersionId: ticket.versions[versionIndex].id,
+            ticketNumber: index + 1,
+            plateNumber: `90마${suffix.slice(-4)}`,
+            status: "COMPLETED",
+            parkedAt,
+            completedAt,
+          },
+          select: { id: true },
+        }),
+      ),
+    );
+    const ticketlessCompleted = await prisma.valetSession.create({
+      data: {
+        userId: unrelatedUser.id,
+        plateNumber: `91바${suffix.slice(-4)}`,
+        status: "COMPLETED",
+        completedAt: new Date("2026-11-20T03:00:00.000Z"),
+      },
+      select: { id: true },
+    });
+    fixtureIds.sessions.push(...completedSessions.map(({ id }) => id), ticketlessCompleted.id);
+
+    await expect(getTickets(user.id)).resolves.toEqual({ current: null, past: [] });
+    await expect(getTickets(pinnedUser.id)).resolves.toEqual({
+      current: {
+        sessionId: pinnedUserSession.id,
+        design: design("#111111"),
+        ticketNumber: null,
+        merchantName: null,
+        issuedAt: null,
+      },
+      past: [],
+    });
+    await expect(getTickets(unrelatedUser.id)).resolves.toEqual({
+      current: null,
+      past: [
+        {
+          sessionId: completedSessions[1].id,
+          design: design("#111111"),
+          ticketNumber: 2,
+          merchantName: merchant.name,
+          issuedAt: parkedAt.toISOString(),
+        },
+        {
+          sessionId: completedSessions[0].id,
+          design: design("#222222"),
+          ticketNumber: 1,
+          merchantName: merchant.name,
+          issuedAt: parkedAt.toISOString(),
+        },
+      ],
     });
   });
 });
