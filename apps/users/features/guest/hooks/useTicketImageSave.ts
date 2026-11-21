@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { getDevicePlatform } from "@/libs/device/getDevicePlatform";
+
 const SAVE_ERROR_MESSAGE = "티켓 이미지를 저장하지 못했어요. 화면을 캡처해 주세요.";
 
 type SaveState = "idle" | "saving" | "tap-again";
@@ -14,7 +16,8 @@ const downloadFile = (file: File) => {
 };
 
 const deliver = async (file: File) => {
-  if (!navigator.canShare?.({ files: [file] })) {
+  const isAndroid = getDevicePlatform(navigator.userAgent) === "android";
+  if (isAndroid || !navigator.canShare?.({ files: [file] })) {
     downloadFile(file);
     return "done" as const;
   }
