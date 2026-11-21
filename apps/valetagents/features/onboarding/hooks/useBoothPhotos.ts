@@ -44,7 +44,7 @@ const selectBoothPhotoFiles = (currentCount: number, files: File[]) => {
   return { accepted, message };
 };
 
-const useBoothPhotos = () => {
+const useBoothPhotos = (reservedCount = 0) => {
   const [photos, setPhotos] = useState<BoothPhoto[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const photosRef = useRef<BoothPhoto[]>([]);
@@ -66,9 +66,9 @@ const useBoothPhotos = () => {
     photos,
     files: photos.map(({ file }) => file),
     message,
-    canAdd: photos.length < MAX_BOOTH_PHOTOS,
+    canAdd: reservedCount + photos.length < MAX_BOOTH_PHOTOS,
     add: (files: File[]) => {
-      const selected = selectBoothPhotoFiles(photosRef.current.length, files);
+      const selected = selectBoothPhotoFiles(reservedCount + photosRef.current.length, files);
       const added = selected.accepted.map((file) => ({
         key: `booth-photo-${nextKeyRef.current++}`,
         file,

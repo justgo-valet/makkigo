@@ -2,11 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const auth = vi.hoisted(() => ({ staffId: vi.fn(), role: vi.fn(), eligibility: vi.fn() }));
+const auth = vi.hoisted(() => ({ staffId: vi.fn(), role: vi.fn(), eligibility: vi.fn(), managesBooth: vi.fn() }));
 const storage = vi.hoisted(() => ({ createUploadPost: vi.fn() }));
 vi.mock("@/server/auth/getCurrentStaffId", () => ({ getCurrentStaffId: auth.staffId }));
 vi.mock("@/server/auth/getActiveStaffRole", () => ({ getActiveStaffRole: auth.role }));
 vi.mock("@/server/booth/createBooth", () => ({ getCreateBoothPreflightFailure: auth.eligibility }));
+vi.mock("@/server/booth/boothManager", () => ({ managesAnyBooth: auth.managesBooth }));
 vi.mock("@/server/booth/s3BoothPhotoStorage", () => ({ createBoothPhotoStorage: () => storage }));
 
 import { NextRequest } from "next/server";
@@ -25,6 +26,7 @@ describe("POST /api/v1/booth-image-uploads/presign", () => {
     auth.staffId.mockResolvedValue(7);
     auth.role.mockResolvedValue("VALET_AGENT");
     auth.eligibility.mockResolvedValue(null);
+    auth.managesBooth.mockResolvedValue(false);
     storage.createUploadPost.mockResolvedValue({ url: "https://s3.example.test", fields: { key: "staging/key" } });
     vi.spyOn(console, "error").mockImplementation(() => undefined);
   });
@@ -51,6 +53,16 @@ describe("POST /api/v1/booth-image-uploads/presign", () => {
 
     expect(response.status).toBe(400);
     expect(storage.createUploadPost).not.toHaveBeenCalled();
+  });
+
+  it("issues upload policies to a booth manager editing booth photos", async () => {
+    auth.eligibility.mockResolvedValue("ALREADY_ONBOARDED");
+    auth.managesBooth.mockResolvedValue(true);
+
+    const response = await callPost({ uploads: [{ contentType: "image/jpeg", size: 3 }] });
+
+    expect(response.status).toBe(200);
+    expect(storage.createUploadPost).toHaveBeenCalledOnce();
   });
 
   it("does not issue upload policies to an ineligible agent", async () => {

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { boothPhotoPresignRequestSchema } from "@/libs/booth/contracts/photos";
 import { getActiveStaffRole } from "@/server/auth/getActiveStaffRole";
 import { getCurrentStaffId } from "@/server/auth/getCurrentStaffId";
+import { managesAnyBooth } from "@/server/booth/boothManager";
 import { getCreateBoothPreflightFailure } from "@/server/booth/createBooth";
 import { readBoundedJson } from "@/server/booth/readBoothRegistration";
 import { createBoothPhotoStorage } from "@/server/booth/s3BoothPhotoStorage";
@@ -35,7 +36,8 @@ export async function POST(request: NextRequest) {
       return apiError("VALET_AGENT_REQUIRED", "발렛 요원만 부스를 등록할 수 있습니다.", 403);
     }
     const preflightFailure = await getCreateBoothPreflightFailure(staffId);
-    if (preflightFailure) {
+    const isManagerEditing = preflightFailure === "ALREADY_ONBOARDED" && (await managesAnyBooth(staffId));
+    if (preflightFailure && !isManagerEditing) {
       const error = CREATE_ERROR_RESPONSES[preflightFailure];
       return apiError(preflightFailure, error.message, error.status);
     }
