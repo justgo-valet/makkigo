@@ -8,16 +8,20 @@ const BOOTH_NAME_MAX_LENGTH = 50;
 const BOOTH_ADDRESS_MAX_LENGTH = 200;
 const BOOTH_ADDRESS_DETAIL_MAX_LENGTH = 100;
 
+const boothInfoFieldsShape = {
+  name: z.string().trim().min(1).max(BOOTH_NAME_MAX_LENGTH),
+  address: z.string().trim().min(1).max(BOOTH_ADDRESS_MAX_LENGTH),
+  addressDetail: z
+    .string()
+    .trim()
+    .max(BOOTH_ADDRESS_DETAIL_MAX_LENGTH)
+    .optional()
+    .transform((value) => value || null),
+};
+
 const createBoothBodySchema = z
   .object({
-    name: z.string().trim().min(1).max(BOOTH_NAME_MAX_LENGTH),
-    address: z.string().trim().min(1).max(BOOTH_ADDRESS_MAX_LENGTH),
-    addressDetail: z
-      .string()
-      .trim()
-      .max(BOOTH_ADDRESS_DETAIL_MAX_LENGTH)
-      .optional()
-      .transform((value) => value || null),
+    ...boothInfoFieldsShape,
     feePolicy: feePolicySchema,
     bankAccount: bankAccountSchema,
     managerName: z.string().trim().min(1).max(STAFF_NAME_MAX_LENGTH),
@@ -34,6 +38,7 @@ export {
   BOOTH_ADDRESS_DETAIL_MAX_LENGTH,
   BOOTH_ADDRESS_MAX_LENGTH,
   BOOTH_NAME_MAX_LENGTH,
+  boothInfoFieldsShape,
   createBoothBodySchema,
   createBoothRequestSchema,
   createBoothResponseSchema,

@@ -17,5 +17,8 @@ const getBoothManagerFailure = async (
   return booth.creatorId === staffId ? null : "BOOTH_MANAGER_REQUIRED";
 };
 
-export { getBoothManagerFailure };
+const managesAnyBooth = async (staffId: number) =>
+  (await prisma.booth.count({ where: { creatorId: staffId, deletedAt: null } })) > 0;
+
+export { getBoothManagerFailure, managesAnyBooth };
 export type { BoothManagerFailure };

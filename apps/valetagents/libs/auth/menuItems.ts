@@ -36,7 +36,7 @@ const getMenuItems = ({ role, managedBoothId, agentBoothId, onboarding }: MenuAc
         ? [
             { label: "요원 관리", href: `/booths/${managedBoothId}/agents` },
             { label: "업체 관리", href: `/booths/${managedBoothId}/merchants` },
-            { label: "요금 · 계좌", href: `/booths/${managedBoothId}/payment-settings` },
+            { label: "부스 정보", href: `/booths/${managedBoothId}/booth-info` },
           ]
         : []),
       SETTINGS_ITEM,
