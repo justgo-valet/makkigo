@@ -13,6 +13,7 @@ const updateBoothInfoRequestSchema = z
   .refine(
     ({ keptPhotoIds, photoUploads }) =>
       new Set(keptPhotoIds).size === keptPhotoIds.length &&
+      new Set(photoUploads.map(({ uploadId }) => uploadId)).size === photoUploads.length &&
       keptPhotoIds.length + photoUploads.length <= MAX_BOOTH_PHOTOS,
   );
 

@@ -54,6 +54,7 @@ const updateBoothInfo = async (
   newPhotoPaths: string[],
 ): Promise<UpdateBoothInfoResult> =>
   prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM booths WHERE id = ${boothId} FOR UPDATE`;
     const booth = await tx.booth.findFirst({
       where: { id: boothId, deletedAt: null },
       select: { creatorId: true, photos: { select: { id: true, path: true } } },

@@ -73,6 +73,7 @@ const useBoothInfoForm = ({
   const mutation = useMutation({
     mutationFn: async () => {
       if (!payment.success) throw new Error(INVALID_PAYMENT_MESSAGE);
+      await savePaymentSettings(boothId, payment.data);
       await updateBoothInfo(boothId, {
         name,
         address,
@@ -80,7 +81,6 @@ const useBoothInfoForm = ({
         keptPhotoIds: keptPhotos.map(({ id }) => id),
         photos: newPhotos.files,
       });
-      await savePaymentSettings(boothId, payment.data);
     },
     retry: false,
     onSuccess: () => {
@@ -89,10 +89,11 @@ const useBoothInfoForm = ({
     },
   });
 
+  const isSaving = mutation.isPending || mutation.isSuccess;
   const edit =
     <Value,>(setter: (value: Value) => void) =>
     (value: Value) => {
-      if (mutation.isPending) return;
+      if (isSaving) return;
       setSaved(false);
       mutation.reset();
       setter(value);
@@ -131,8 +132,8 @@ const useBoothInfoForm = ({
     removeKeptPhoto: edit((id: number) =>
       setKeptPhotos((photos) => photos.filter((photo) => photo.id !== id)),
     ),
-    isSaving: mutation.isPending,
-    canSave: name.trim().length > 0 && addressUsable && payment.success && !mutation.isPending,
+    isSaving,
+    canSave: name.trim().length > 0 && addressUsable && payment.success && !isSaving,
     invalidMessage:
       addressChanged && mapView === "error"
         ? ADDRESS_NOT_FOUND_MESSAGE
