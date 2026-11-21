@@ -9,6 +9,7 @@ import { useHiddenHeader } from "@/features/auth/hooks/useHiddenHeader";
 import ConsentPanel from "@/features/consent/components/ConsentPanel";
 import GuestExitConsent from "@/features/guest/components/GuestExitConsent";
 import { useGuestValet } from "@/features/guest/hooks/useGuestValet";
+import { useTicketImageSave } from "@/features/guest/hooks/useTicketImageSave";
 import BankTransferSheet from "@/features/valet/components/BankTransferSheet";
 import PickupAcceptedContent from "@/features/valet/components/PickupAcceptedContent";
 import ValetSheet from "@/features/valet/components/ValetSheet";
@@ -28,20 +29,21 @@ const STATUS_LABELS = {
 interface GuestValetProps {
   merchant: { id: number; name: string };
   merchantTicket: TicketDesign | null;
-  imageBaseUrl: string;
 }
 
 const formatPlate = (plateNumber: string) => plateNumber.replace(/(\d{4})$/, " $1");
 
-export default function GuestValet({
-  merchant,
-  merchantTicket,
-  imageBaseUrl,
-}: Readonly<GuestValetProps>) {
+export default function GuestValet({ merchant, merchantTicket }: Readonly<GuestValetProps>) {
   useHiddenHeader();
   const guest = useGuestValet(merchant.id);
-  const resolveAssetUrl = (path: string) =>
-    new URL(path, imageBaseUrl.endsWith("/") ? imageBaseUrl : `${imageBaseUrl}/`).toString();
+  const {
+    ticketRef,
+    isSaving: isSavingTicket,
+    needsTap: ticketNeedsTap,
+    errorMessage: ticketSaveError,
+    save: saveTicket,
+  } = useTicketImageSave();
+  const resolveAssetUrl = (path: string) => `/api/v1/guest/ticket-assets/${path}`;
   const ticket = guest.ticket ?? merchantTicket;
   const { session } = guest;
   const plate = formatPlate(session?.plateNumber ?? guest.plateNumber ?? "");
@@ -105,7 +107,7 @@ export default function GuestValet({
               {guest.isCompleted || !session ? "출차 완료" : STATUS_LABELS[session.status]}
             </output>
 
-            <div className="mx-auto mt-3 w-full max-w-[300px]">
+            <div ref={ticketRef} className="mx-auto mt-3 w-full max-w-[300px] bg-white p-3">
               {ticket ? (
                 <TicketRenderer
                   ariaLabel="발렛 티켓"
@@ -124,7 +126,36 @@ export default function GuestValet({
                   <p className="mt-3 text-xl font-bold text-(--base-color)">{plate}</p>
                 </section>
               )}
+              {session?.ticketNumber ? (
+                <p className="mt-3 text-center text-sm font-semibold text-(--base-color) tabular-nums">
+                  티켓 {formatTicketNumber(session.ticketNumber)} · {plate}
+                </p>
+              ) : null}
             </div>
+
+            {(guest.isCompleted || !session || guest.isPickupRequested) && (
+              <div className="mt-3 flex flex-col items-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isSavingTicket}
+                  onClick={() =>
+                    void saveTicket(
+                      `makkigo-ticket${session?.ticketNumber ? `-${formatTicketNumber(session.ticketNumber)}` : ""}.png`,
+                    )
+                  }
+                >
+                  {isSavingTicket
+                    ? "티켓 이미지를 만드는 중…"
+                    : ticketNeedsTap
+                      ? "눌러서 저장하기"
+                      : "티켓 이미지 저장"}
+                </Button>
+                {ticketSaveError && (
+                  <FieldError className="mt-2 text-center">{ticketSaveError}</FieldError>
+                )}
+              </div>
+            )}
 
             <div className="mt-auto">
               {guest.isCompleted || !session ? (

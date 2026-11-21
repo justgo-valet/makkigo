@@ -54,9 +54,9 @@ export const verifyAccessToken = async (
 
 export const createRandomToken = () => randomBytes(32).toString("base64url");
 
-export const createRefreshToken = (): IssuedToken => ({
+export const createRefreshToken = (ttlSeconds = REFRESH_TOKEN_TTL_SECONDS): IssuedToken => ({
   token: createRandomToken(),
-  expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_SECONDS * 1000),
+  expiresAt: new Date(Date.now() + ttlSeconds * 1000),
 });
 
 export const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");

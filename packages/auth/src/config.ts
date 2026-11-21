@@ -2,6 +2,7 @@ import { AuthConfigError } from "./errors";
 
 export const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
+export const STAFF_REFRESH_TOKEN_TTL_SECONDS = 90 * 24 * 60 * 60;
 export const OAUTH_STATE_TTL_SECONDS = 10 * 60;
 export const LOGIN_CODE_TTL_SECONDS = 2 * 60;
 
