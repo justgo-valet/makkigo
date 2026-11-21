@@ -75,12 +75,7 @@ function VehicleCardContent({
   return (
     <>
       <span className="sr-only">{STATUS_STYLES[status].title}</span>
-      <span
-        className={cn(
-          "relative mb-0.5 block h-16 w-full max-w-40",
-          status === "ARRIVING" && "animate-arrival-drive",
-        )}
-      >
+      <span className="relative mb-0.5 block h-16 w-full max-w-40">
         <span className="relative mx-auto block aspect-[8/5] h-full">
           <Image src={imageUrl} alt="" fill unoptimized className="object-contain" />
           {status === "ARRIVING" && <SpinningWheels sideView={imageUrl.endsWith("/cars/_default.png")} />}
