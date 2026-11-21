@@ -3,6 +3,7 @@
 import { Button, FieldError } from "@makkigo/ui";
 import { Switch } from "@makkigo/ui/components/ui/switch";
 import Image from "next/image";
+import Link from "next/link";
 
 import ConsentPanel from "@/features/consent/components/ConsentPanel";
 import EditNumberSheet from "@/features/mypage/components/EditNumberSheet";
@@ -100,6 +101,21 @@ export default function MypageContent() {
             </span>
           </MypageRow>
         ))}
+      </MypageSection>
+
+      <MypageSection title="발렛 이용">
+        <Link href="/ticket" className="block w-full">
+          <MypageRow>
+            <span className="min-w-0 flex-1">발렛 티켓 내역</span>
+            <Image
+              src="/icons/chevron_right.svg"
+              alt=""
+              aria-hidden="true"
+              width={16}
+              height={16}
+            />
+          </MypageRow>
+        </Link>
       </MypageSection>
 
       {mypage.notificationSettings.isAvailable && (
