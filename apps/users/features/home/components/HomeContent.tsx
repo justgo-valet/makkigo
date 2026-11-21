@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, FieldError } from "@makkigo/ui";
+import { InfoBubble } from "@makkigo/ui/components/ui/info-bubble";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -106,15 +107,20 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
           </Button>
         )}
         {home.boothLocation.isVisible && (
-          <Button
-            type="button"
-            variant="link"
-            className="h-auto self-start px-0 font-semibold"
-            onClick={home.boothLocation.open}
-          >
-            <Image src="/icons/map_pin.svg" alt="" aria-hidden="true" width={20} height={20} />
-            부스 위치 보기
-          </Button>
+          <div className="flex items-center gap-1 self-start">
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto px-0 font-semibold"
+              onClick={home.boothLocation.open}
+            >
+              <Image src="/icons/map_pin.svg" alt="" aria-hidden="true" width={20} height={20} />
+              부스 위치 보기
+            </Button>
+            <InfoBubble label="발렛부스 설명">
+              발렛부스는 요원이 차를 받아 대신 주차하고, 출차할 때 다시 가져다주는 곳이에요.
+            </InfoBubble>
+          </div>
         )}
         {home.actions.length > 0 && (
           <div className="grid grid-cols-2 gap-3 *:odd:last:col-span-2 short:gap-2">
