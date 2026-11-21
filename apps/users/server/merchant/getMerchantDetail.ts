@@ -11,11 +11,7 @@ const photoOrder = [{ sortOrder: "asc" as const }, { id: "asc" as const }];
 const getMerchantDetail = async (merchantId: number): Promise<MerchantDetail | null> => {
   const now = new Date();
   const merchant = await prisma.merchant.findFirst({
-    where: {
-      id: merchantId,
-      deletedAt: null,
-      booths: { some: availableBoothWhere(now) },
-    },
+    where: { id: merchantId, deletedAt: null },
     select: {
       id: true,
       name: true,
