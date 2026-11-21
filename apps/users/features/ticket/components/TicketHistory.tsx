@@ -61,7 +61,7 @@ export default function TicketHistory({
       {past.length > 0 && (
         <section aria-labelledby="past-tickets-title" className="flex flex-col gap-3">
           <h2 id="past-tickets-title" className="text-base font-semibold text-(--base-color)">
-            지난 티켓 <span className="text-(--tertiary-color)">{past.length}</span>
+            지난 티켓
           </h2>
           <ul className="grid grid-cols-2 gap-x-3 gap-y-5">
             {past.map((ticket) => (
