@@ -14,13 +14,11 @@ const TOGGLE_ERROR_MESSAGE = "알림 설정을 바꾸지 못했어요. 잠시 �
 interface UseNotificationToggleOptions {
   staffId: number;
   boothId: number;
-  enabled: boolean;
 }
 
-const useNotificationToggle = ({ staffId, boothId, enabled }: UseNotificationToggleOptions) => {
+const useNotificationToggle = ({ staffId, boothId }: UseNotificationToggleOptions) => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [sheetEnabled, setSheetEnabled] = useState(enabled);
   const mutation = useMutation({
     mutationFn: (next: boolean) => setNotifications(boothId, next),
     retry: false,
@@ -31,20 +29,17 @@ const useNotificationToggle = ({ staffId, boothId, enabled }: UseNotificationTog
         boothValetSessionsQueryKey(staffId, boothId),
         (data) => data && { ...data, notificationsEnabled: next },
       );
-      setOpen(false);
     },
   });
 
   return {
-    sheetEnabled,
     open,
     openSheet: () => {
       mutation.reset();
-      setSheetEnabled(enabled);
       setOpen(true);
     },
-    close: () => !mutation.isPending && setOpen(false),
-    confirm: () => mutation.mutate(!sheetEnabled),
+    close: () => setOpen(false),
+    toggle: (next: boolean) => mutation.mutate(next),
     isPending: mutation.isPending,
     errorMessage: mutation.error ? getErrorMessage(mutation.error, TOGGLE_ERROR_MESSAGE) : null,
   };

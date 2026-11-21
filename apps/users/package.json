@@ -25,6 +25,7 @@
     "@makkigo/ui": "workspace:*",
     "@tanstack/react-query": "^5.108.0",
     "database": "workspace:*",
+    "html-to-image": "^1.11.13",
     "ky": "^2.2.0",
     "lucide-react": "^1.76.0",
     "motion": "^13.5.1",

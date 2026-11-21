@@ -12,14 +12,5 @@ export default async function GuestPage({ searchParams }: Readonly<GuestPageProp
   const guest = merchantId.success ? await getGuestMerchant(merchantId.data) : null;
   if (!guest) return <GuestUnavailable />;
 
-  const imageBaseUrl = process.env.IMAGE_BASE_URL?.trim();
-  if (!imageBaseUrl) throw new Error("IMAGE_BASE_URL is required to render ticket images");
-
-  return (
-    <GuestValet
-      merchant={guest.merchant}
-      merchantTicket={guest.ticket}
-      imageBaseUrl={imageBaseUrl}
-    />
-  );
+  return <GuestValet merchant={guest.merchant} merchantTicket={guest.ticket} />;
 }

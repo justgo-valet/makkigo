@@ -24,6 +24,7 @@
     "@tanstack/react-query": "^5.108.0",
     "database": "workspace:*",
     "ky": "^2.2.0",
+    "lucide-react": "^1.76.0",
     "next": "^16.4.6",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",

@@ -1,4 +1,4 @@
-export { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./config";
+export { ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS, STAFF_REFRESH_TOKEN_TTL_SECONDS } from "./config";
 export {
   AuthConfigError,
   InvalidPasswordError,
