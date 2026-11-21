@@ -29,17 +29,11 @@ export default async function MerchantQrPage({ params, searchParams }: Readonly<
   const merchantId = parsePositiveId((await searchParams).merchant);
 
   const [qrCodes, menu] = await Promise.all([
-    listMerchantQrCodes(staffId, boothId, merchantId),
+    listMerchantQrCodes(staffId, boothId),
     getStaffMenuAccess(staffId),
   ]);
   if (!menu) redirect("/login");
   if (!qrCodes.ok) notFound();
 
-  return (
-    <MerchantQrCodes
-      menu={menu}
-      qrCodes={qrCodes.value}
-      allHref={merchantId === null ? null : `/booths/${boothId}/merchant-qr`}
-    />
-  );
+  return <MerchantQrCodes menu={menu} qrCodes={qrCodes.value} initialMerchantId={merchantId} />;
 }

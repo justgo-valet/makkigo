@@ -13,13 +13,11 @@ const guestUrl = (merchantId: number) => {
   return url.toString();
 };
 
-const listMerchantQrCodes = async (staffId: number, boothId: number, merchantId: number | null) => {
+const listMerchantQrCodes = async (staffId: number, boothId: number) => {
   const failure = await getBoothAgentFailure(staffId, boothId);
   if (failure) return { ok: false as const, reason: failure };
 
-  const merchants = (await listContractedMerchants(boothId)).filter(
-    ({ id }) => merchantId === null || id === merchantId,
-  );
+  const merchants = await listContractedMerchants(boothId);
   return {
     ok: true as const,
     value: await Promise.all(
