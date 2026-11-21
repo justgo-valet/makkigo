@@ -58,6 +58,7 @@
 | `GET /api/v1/guest/merchants/{id}` | **비회원(업체 QR)**: 업체 정보와 최신 티켓 `{ merchant: { id, name }, ticket }`(티켓 없으면 `null`). 닫힌 업체 · 승인된 부스 계약이 없는 업체는 404 `MERCHANT_NOT_FOUND` | 없음 | |
 | `POST /api/v1/guest/merchants/{id}/session` | **비회원**: `{ plateNumber }`(공백 · 하이픈 허용) → `{ session, ticket }`. `session` 은 현재 세션 조회와 같은 형식. 찾는 범위는 그 번호의 진행 중 세션 중 **이 업체와 승인된 계약이 있는 부스**에 있거나 **이 업체로 연결된** 것. `ticket` 은 세션의 티켓, 세션에 티켓이 없으면 (세션에 업체가 없거나 이 업체일 때만) 이 업체 최신 티켓. 번호가 주소 · 로그에 남지 않게 POST. 400 `INVALID_PLATE_NUMBER` · 404 `MERCHANT_NOT_FOUND` · `SESSION_NOT_FOUND` | 없음 | |
 | `POST /api/v1/guest/merchants/{id}/pickup-request` | **비회원 출차 요청**: `{ plateNumber, agreed: true, documentVersion }` → 회원 출차 요청과 같은 처리(기준 요금 고정 · 요원 알림 · 푸시) + 세션에 업체가 없었으면 **이 업체 · 최신 티켓 연결** + `guest_consents` 에 이용약관 · 제3자 제공 동의 기록 → 200 `{ session, ticket }`. 400 `CONSENT_REQUIRED` · 404 · 409 `NOT_PARKED` · `ALREADY_REQUESTED` · 422 `NO_BOOTH` | 없음 | |
+| `GET /api/v1/guest/ticket-assets/{tickets/final/…}` | **비회원 티켓 이미지**: 티켓 이미지 레이어를 같은 출처로 내려 줌(서버가 `IMAGE_BASE_URL` 에서 받아 그대로, `Cache-Control: public, max-age=31536000, immutable`). 경로는 티켓 디자인 규칙(`tickets/final/…` JPEG · PNG · WebP, `..` 금지)만, 아니면 404. 비회원 화면이 티켓을 이미지로 저장하려면 그림을 읽을 수 있어야 해서 둠(CloudFront 는 CSP · CORS 로 읽지 못함) | ✅ 누구나 | |
 | (비회원 API 공통) | 로그인 없음, `Cache-Control: no-store`. **IP 당 분당 조회 120회 · 출차 요청 10회**(따로 셈, 서버 메모리 — EC2 한 대 기준) 넘으면 429 `TOO_MANY_REQUESTS`. 화면이 5초마다 다시 읽어(탭 하나 분당 12회) 같은 와이파이 · 통신사 IP 를 쓰는 손님 여럿을 고려. IP 는 Caddy 가 채우는 `X-Forwarded-For` 첫 값 | | |
 
 상태 코드, 요청 예시, 확인 결과는 각 PR 본문에 있습니다.
