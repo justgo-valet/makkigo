@@ -7,13 +7,15 @@ import {
   BottomSheetFooter,
   BottomSheetHeader,
 } from "@makkigo/ui/components/ui/bottom-sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@makkigo/ui/components/ui/select";
 import { useState } from "react";
 
-import { INPUT_CLASS, SELECT_ARROW_CLASS } from "@/components/fieldStyles";
 import { PLATE_NUMBER_PATTERN, normalizePlateNumber } from "@/libs/valet/contracts/add-vehicle";
 
 import type { AddVehicleInput } from "../apis/addVehicle";
 
+
+const NO_MERCHANT = "none";
 const LABEL_CLASS = "gap-1 text-sm font-semibold text-(--base-color)";
 
 interface AddVehicleFormProps {
@@ -32,14 +34,14 @@ function AddVehicleForm({
   onClose,
 }: Readonly<AddVehicleFormProps>) {
   const [value, setValue] = useState("");
-  const [merchantId, setMerchantId] = useState(merchants.length === 1 ? String(merchants[0].id) : "");
+  const [merchantId, setMerchantId] = useState(merchants.length === 1 ? String(merchants[0].id) : NO_MERCHANT);
   const plateNumber = normalizePlateNumber(value);
 
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        onAdd({ plateNumber, merchantId: merchantId === "" ? null : Number(merchantId) });
+        onAdd({ plateNumber, merchantId: merchantId === NO_MERCHANT ? null : Number(merchantId) });
       }}
     >
       <BottomSheetHeader title="차량 추가" description="직접 주차된 차량을 추가해요" />
@@ -65,19 +67,19 @@ function AddVehicleForm({
             <FieldLabel htmlFor="add-vehicle-merchant" className={cn(LABEL_CLASS, "mt-3")}>
               업체
             </FieldLabel>
-            <select
-              id="add-vehicle-merchant"
-              value={merchantId}
-              onChange={(event) => setMerchantId(event.target.value)}
-              className={cn(INPUT_CLASS, SELECT_ARROW_CLASS, "mt-0")}
-            >
-              <option value="">선택 안 함</option>
-              {merchants.map(({ id, name }) => (
-                <option key={id} value={String(id)}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            <Select value={merchantId} onValueChange={setMerchantId}>
+              <SelectTrigger id="add-vehicle-merchant">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_MERCHANT}>선택 안 함</SelectItem>
+                {merchants.map(({ id, name }) => (
+                  <SelectItem key={id} value={String(id)}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </>
         )}
         {errorMessage && <FieldError>{errorMessage}</FieldError>}

@@ -3,11 +3,11 @@
 import { formatTicketNumber } from "@makkigo/ticket-design";
 import { cn } from "@makkigo/ui";
 import Image from "next/image";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@makkigo/ui/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import AppHeader from "@/components/layouts/AppHeader";
-import { INPUT_CLASS, SELECT_ARROW_CLASS } from "@/components/fieldStyles";
 
 import {
   formatClock,
@@ -89,20 +89,20 @@ export default function CompletedHistory({
         <Image src="/icons/chevron_right.svg" alt="" aria-hidden="true" width={20} height={20} className="rotate-90" />
       </button>
 
-      <select
-        aria-label="업체"
-        value={merchant}
-        onChange={(event) => router.replace(historyHref(boothId, history.date, event.target.value))}
-        className={cn(INPUT_CLASS, SELECT_ARROW_CLASS)}
-      >
-        <option value={ALL_MERCHANTS}>업체 전체</option>
-        {history.merchants.map(({ id, name }) => (
-          <option key={id} value={String(id)}>
-            {name}
-          </option>
-        ))}
-        <option value={NO_MERCHANT}>업체 없음</option>
-      </select>
+      <Select value={merchant} onValueChange={(next) => router.replace(historyHref(boothId, history.date, next))}>
+        <SelectTrigger aria-label="업체" className="mt-2">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL_MERCHANTS}>업체 전체</SelectItem>
+          {history.merchants.map(({ id, name }) => (
+            <SelectItem key={id} value={String(id)}>
+              {name}
+            </SelectItem>
+          ))}
+          <SelectItem value={NO_MERCHANT}>업체 없음</SelectItem>
+        </SelectContent>
+      </Select>
 
       <section
         aria-label="합계"

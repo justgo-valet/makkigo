@@ -38,7 +38,7 @@ export default function MerchantManagement({
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col">
-      <AppHeader menu={menu} />
+      <AppHeader menu={menu} backHref="/" />
 
       <h1 className="mt-4 text-xl font-bold text-(--base-color)">업체 관리</h1>
 

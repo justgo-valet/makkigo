@@ -8,15 +8,12 @@ import {
   BottomSheetHeader,
 } from "@makkigo/ui/components/ui/bottom-sheet";
 import Image from "next/image";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@makkigo/ui/components/ui/select";
 import { useState } from "react";
 
-import { SELECT_ARROW_CLASS } from "@/components/fieldStyles";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const SELECT_CLASS = cn(
-  "h-10 rounded-md border border-input bg-white pl-3 text-base font-bold text-(--base-color) outline-none focus-visible:border-primary",
-  SELECT_ARROW_CLASS,
-);
+const SELECT_TRIGGER_CLASS = "h-10 w-auto font-bold";
 const MONTH_BUTTON_CLASS = "flex size-10 items-center justify-center rounded-full disabled:opacity-30";
 
 const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, index) => from + index);
@@ -69,30 +66,30 @@ export default function DatePickerSheet({
       <BottomSheetContent>
         <BottomSheetHeader title="날짜 선택" />
         <div className="mt-4 flex items-center gap-2 px-5">
-          <select
-            aria-label="연도"
-            value={view.year}
-            onChange={(event) => show(Number(event.target.value), view.month)}
-            className={SELECT_CLASS}
-          >
-            {range(minYear, last.year).map((year) => (
-              <option key={year} value={year}>
-                {year}년
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="월"
-            value={view.month}
-            onChange={(event) => show(view.year, Number(event.target.value))}
-            className={SELECT_CLASS}
-          >
-            {range(1, view.year === last.year ? last.month : 12).map((month) => (
-              <option key={month} value={month}>
-                {month}월
-              </option>
-            ))}
-          </select>
+          <Select value={String(view.year)} onValueChange={(year) => show(Number(year), view.month)}>
+            <SelectTrigger aria-label="연도" className={SELECT_TRIGGER_CLASS}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {range(minYear, last.year).map((year) => (
+                <SelectItem key={year} value={String(year)}>
+                  {year}년
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={String(view.month)} onValueChange={(month) => show(view.year, Number(month))}>
+            <SelectTrigger aria-label="월" className={SELECT_TRIGGER_CLASS}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {range(1, view.year === last.year ? last.month : 12).map((month) => (
+                <SelectItem key={month} value={String(month)}>
+                  {month}월
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <button
             type="button"
             aria-label="이전 달"
