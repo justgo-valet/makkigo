@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, FieldError, TimePickerSheet } from "@makkigo/ui";
+import { InfoBubble } from "@makkigo/ui/components/ui/info-bubble";
 
 import { INPUT_CLASS } from "@/components/fieldStyles";
 
@@ -61,7 +62,10 @@ export default function BoothRequestForm({
     >
       <BoothMap address={booth.address} appKey={kakaoMapAppKey} />
 
-      <h1 className="mt-6 text-xl font-bold text-(--base-color)">{booth.name}</h1>
+      <div className="mt-6 flex items-center gap-1">
+        <h1 className="text-xl font-bold text-(--base-color)">{booth.name}</h1>
+        <InfoBubble label="발렛부스 설명">발렛부스는 요원이 차를 받아 대신 주차하고, 출차할 때 다시 가져다주는 곳이에요.</InfoBubble>
+      </div>
       <p className="mt-1 text-sm text-(--tertiary-color)">{formatAddress(booth)}</p>
 
       <h2 className="mt-6 text-base font-bold text-(--base-color)">발렛 비용</h2>
