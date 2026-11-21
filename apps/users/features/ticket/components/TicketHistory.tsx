@@ -94,7 +94,7 @@ export default function TicketHistory({
 
       <Dialog open={openedTicket !== null} onOpenChange={(isOpen) => !isOpen && close()}>
         {openedTicket && (
-          <DialogContent className="max-w-sm gap-3 rounded-2xl p-5 pt-12">
+          <DialogContent className="max-w-[min(24rem,calc(100%-2rem))] gap-3 rounded-2xl p-5 pt-12 sm:max-w-sm">
             <TicketRenderer
               ariaLabel="발렛 티켓"
               className={`aspect-[3/4] w-full ${TICKET_SHADOW}`}
