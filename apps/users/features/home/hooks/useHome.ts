@@ -189,7 +189,6 @@ const useHome = () => {
 
   return {
     status: "ready" as const,
-    hasTicket: snapshot.hasTicket,
     title: snapshot.merchantName ?? "장소 미정",
     badge: STATUS_BADGES[snapshot.status] ?? null,
     metaItems: getMetaItems(snapshot, snapshot.plateNumber ?? vehicle.plateNumber, now),

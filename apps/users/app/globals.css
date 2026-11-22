@@ -2,7 +2,8 @@
 
 @source './**/*.{ts,tsx}';
 
-@custom-variant short (@media (max-height: 44rem));
+@custom-variant short (@container home (max-height: 46rem));
+@custom-variant compact (@container home (max-height: 35rem));
 
 :root {
   font-family: var(--font-ubuntu), "Apple SD Gothic Neo", system-ui, sans-serif;

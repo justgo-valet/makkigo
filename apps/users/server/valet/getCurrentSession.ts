@@ -40,7 +40,6 @@ const findSessionView = async (
     select: {
       id: true,
       status: true,
-      ticketVersionId: true,
       ticketNumber: true,
       plateNumber: true,
       merchantId: true,
@@ -85,7 +84,6 @@ const findSessionView = async (
   return {
     id: session.id,
     status,
-    hasTicket: session.ticketVersionId !== null,
     ticketNumber: session.ticketNumber,
     plateNumber: session.plateNumber,
     merchantId: session.merchantId,
