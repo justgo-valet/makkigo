@@ -9,7 +9,7 @@
 | 앱 | 폴더 | 앱 ID (iOS 번들 ID = Android 패키지명) | 이름 | 담당 |
 |---|---|---|---|---|
 | 고객 앱 | `apps/users` | `com.makkigo.user` | 마끼고 | 태균 |
-| 요원 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 요원 | 지상님 |
+| 요원 앱 | `apps/valetagents` | `com.makkigo.valetagent` | 마끼고 파트너 | 지상님 |
 
 두 앱이 같은 로그인 창 열기 · 웹뷰 브리지 · 푸시 토큰 코드를 쓰므로 `packages/` 에 공통으로 둡니다.
 
