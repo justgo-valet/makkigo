@@ -24,6 +24,7 @@ const notifyPickupCompleted = async ({
       valetSessionId,
       title: "출차 완료",
       body: `${place}${plateNumber} 차량의 출차가 완료됐어요`,
+      sound: "user-pickup-completed",
     });
   } catch (error) {
     console.error("Failed to notify pickup completion", error);

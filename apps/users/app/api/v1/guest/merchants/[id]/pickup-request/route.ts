@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return guestError(result.reason, error.message, error.status);
     }
 
-    after(() => pushStaffNotifications(result.notificationIds, { sound: "valet-alert" }));
+    after(() => pushStaffNotifications(result.notificationIds, { sound: "valet-pickup" }));
 
     return NextResponse.json(await getGuestSession(started.merchantId, body.data.plateNumber), {
       headers: NO_STORE,

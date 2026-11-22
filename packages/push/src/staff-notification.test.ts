@@ -63,9 +63,9 @@ describe("pushStaffNotifications", () => {
     prisma.notification.findMany.mockResolvedValue([target(1, ["a"])]);
     sendPushToTokens.mockResolvedValue({ sentCount: 1, sentTokens: ["a"], invalidTokens: [] });
 
-    await pushStaffNotifications([1], { sound: "valet-alert" });
+    await pushStaffNotifications([1], { sound: "valet-arrival" });
 
-    expect(sendPushToTokens).toHaveBeenCalledWith(["a"], expect.objectContaining({ sound: "valet-alert" }));
+    expect(sendPushToTokens).toHaveBeenCalledWith(["a"], expect.objectContaining({ sound: "valet-arrival" }));
   });
 
   it("하나도 못 보내면 알림 내역은 그대로 둔다", async () => {

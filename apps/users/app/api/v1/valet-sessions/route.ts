@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    after(() => pushStaffNotifications(result.notificationIds, { sound: "valet-alert" }));
+    after(() => pushStaffNotifications(result.notificationIds, { sound: "valet-arrival" }));
 
     return NextResponse.json({ id: result.valetSessionId }, { status: 201 });
   } catch (error) {
