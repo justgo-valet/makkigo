@@ -2,12 +2,12 @@
 
 import { formatTicketNumber, TicketRenderer } from "@makkigo/ticket-design";
 import { Button, FieldError } from "@makkigo/ui";
-import { makkigoLogo } from "@makkigo/ui/assets";
-import Image from "next/image";
 
+import BackButton from "@/components/layouts/BackButton";
 import { useHiddenHeader } from "@/features/auth/hooks/useHiddenHeader";
 import ConsentPanel from "@/features/consent/components/ConsentPanel";
 import GuestExitConsent from "@/features/guest/components/GuestExitConsent";
+import GuestScreen from "@/features/guest/components/GuestScreen";
 import { useGuestValet } from "@/features/guest/hooks/useGuestValet";
 import { useTicketImageSave } from "@/features/guest/hooks/useTicketImageSave";
 import BankTransferSheet from "@/features/valet/components/BankTransferSheet";
@@ -49,10 +49,8 @@ export default function GuestValet({ merchant, merchantTicket }: Readonly<GuestV
   const plate = formatPlate(session?.plateNumber ?? guest.plateNumber ?? "");
 
   return (
-    <div className="mx-auto h-full w-full max-w-[375px]">
-      <div className="flex min-h-full flex-col rounded-lg bg-white px-6 py-6">
-        <Image src={makkigoLogo} alt="마끼고" width={95} height={39} priority />
-
+    <GuestScreen>
+      <div className="flex flex-1 flex-col">
         {!session && !guest.isCompleted ? (
           <form className="flex flex-1 flex-col" onSubmit={guest.lookup}>
             <div className="mt-5">
@@ -90,16 +88,11 @@ export default function GuestValet({ merchant, merchantTicket }: Readonly<GuestV
           </form>
         ) : (
           <div className="flex flex-1 flex-col">
-            <button
-              type="button"
+            <BackButton
+              label="차량 번호 재입력"
               onClick={guest.reset}
-              className="mt-2 flex min-h-10 w-fit items-center gap-1 text-sm text-(--tertiary-color) outline-none focus-visible:rounded-sm focus-visible:ring-3 focus-visible:ring-primary/20"
-            >
-              <span aria-hidden="true" className="text-lg leading-none">
-                ←
-              </span>
-              차량 번호 재입력
-            </button>
+              className="-ml-1.5 h-11 w-fit"
+            />
 
             <output className="mt-4 block text-center text-sm text-(--tertiary-color)">
               {session?.ticketNumber ? `티켓 ${formatTicketNumber(session.ticketNumber)} · ` : ""}
@@ -231,6 +224,6 @@ export default function GuestValet({ merchant, merchantTicket }: Readonly<GuestV
           onClose={guest.closeDocument}
         />
       )}
-    </div>
+    </GuestScreen>
   );
 }

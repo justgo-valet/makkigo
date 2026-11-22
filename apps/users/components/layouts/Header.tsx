@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import BackButton from "@/components/layouts/BackButton";
 import NotificationBellButton from "@/features/notification/components/NotificationBellButton";
 import { useLayout } from "@/stores/layout";
 
@@ -24,15 +25,11 @@ export default function Header() {
   return (
     <header className="relative flex items-center justify-between w-full h-12">
       {showBackButton && (
-        <button
-          type="button"
+        <BackButton
+          label={backNavigateText}
           onClick={backButtonHandler ?? router.back}
-          aria-label={backNavigateText ?? "뒤로 가기"}
-          className="z-10 flex h-full cursor-pointer items-center gap-1 text-xs text-(--tertiary-color)"
-        >
-          <Image src="/icons/arrow_left.svg" alt="" aria-hidden="true" width={28} height={28} />
-          {backNavigateText && <span>{backNavigateText}</span>}
-        </button>
+          className="h-full"
+        />
       )}
 
       {logoPosition !== "hidden" && (
