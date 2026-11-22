@@ -87,6 +87,42 @@
   --color-ring: var(--ring);
 }
 
+/*
+ * 바텀 시트 애니메이션. tw-animate 의 enter · exit 는 transform 과 함께 filter(blur) 도
+ * 움직이는데, filter 가 끼면 Chrome(Android 웹뷰)이 애니메이션을 GPU 로 넘기지 못하고
+ * 메인 스레드에서 돌려, 시트를 여는 순간 화면을 그리느라 바쁘면 시트가 멈칫한다.
+ * transform · opacity 만 움직이고, iOS 시트처럼 빠르게 출발해 천천히 멈추는 곡선을 쓴다.
+ * 시간은 duration-* 로 바꿀 수 있다 (기본 열기 0.5초 · 닫기 0.3초). inline 이라야
+ * duration 변수를 :root 가 아니라 시트 요소에서 읽는다.
+ */
+@theme inline {
+  --animate-sheet-in: sheet-in var(--tw-duration, 0.5s) cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-sheet-out: sheet-out var(--tw-duration, 0.3s) cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  --animate-sheet-overlay-in: sheet-overlay-in var(--tw-duration, 0.5s) cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-sheet-overlay-out: sheet-overlay-out var(--tw-duration, 0.3s) cubic-bezier(0.32, 0.72, 0, 1) forwards;
+
+  @keyframes sheet-in {
+    from {
+      transform: translate3d(0, 100%, 0);
+    }
+  }
+  @keyframes sheet-out {
+    to {
+      transform: translate3d(0, 100%, 0);
+    }
+  }
+  @keyframes sheet-overlay-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes sheet-overlay-out {
+    to {
+      opacity: 0;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
