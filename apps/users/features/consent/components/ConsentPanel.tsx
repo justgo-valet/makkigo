@@ -24,7 +24,7 @@ export default function ConsentPanel({
 
   return (
     <div
-      className="fixed top-0 left-0 z-50 h-screen w-full bg-white pt-(--safe-area-inset-top) pb-(--safe-area-inset-bottom)"
+      className="fixed top-0 left-0 z-50 h-(--viewport-height) w-full bg-white pt-(--safe-area-inset-top) pb-(--safe-area-inset-bottom)"
       id={id}
     >
       <header className="p-4 flex items-center gap-2 justify-start h-16">
@@ -37,8 +37,8 @@ export default function ConsentPanel({
         content={content}
         className={cn(
           onAgree
-            ? "h-[calc(100vh-4rem-5rem-var(--safe-area-inset-top)-var(--safe-area-inset-bottom))]"
-            : "h-[calc(100vh-4rem-var(--safe-area-inset-top)-var(--safe-area-inset-bottom))]",
+            ? "h-[calc(var(--viewport-height)-4rem-5rem-var(--safe-area-inset-top)-var(--safe-area-inset-bottom))]"
+            : "h-[calc(var(--viewport-height)-4rem-var(--safe-area-inset-top)-var(--safe-area-inset-bottom))]",
           "overflow-y-auto rounded-md px-6 pb-4",
         )}
       />

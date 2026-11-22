@@ -107,18 +107,21 @@ export default function GuestValet({ merchant, merchantTicket }: Readonly<GuestV
               {guest.isCompleted || !session ? "출차 완료" : STATUS_LABELS[session.status]}
             </output>
 
-            <div ref={ticketRef} className="mx-auto mt-3 w-full max-w-[300px] bg-white p-3">
+            <div
+              ref={ticketRef}
+              className="group/ticket mx-auto mt-3 w-full max-w-[300px] bg-white p-3"
+            >
               {ticket ? (
                 <TicketRenderer
                   ariaLabel="발렛 티켓"
-                  className="aspect-[3/4] w-full shadow-[0_4px_5px_rgba(2,8,23,0.22)]"
+                  className="aspect-[3/4] w-full shadow-[0_4px_5px_rgba(2,8,23,0.22)] group-data-capture/ticket:shadow-none group-data-capture/ticket:outline group-data-capture/ticket:outline-[#e2e8f0]"
                   design={ticket}
                   resolveAssetUrl={resolveAssetUrl}
                 />
               ) : (
                 <section
                   aria-label="발렛 티켓"
-                  className="flex aspect-[3/4] w-full flex-col items-center justify-center rounded-lg bg-white px-6 text-center shadow-[0_4px_5px_rgba(2,8,23,0.22)]"
+                  className="flex aspect-[3/4] w-full flex-col items-center justify-center rounded-lg bg-white px-6 text-center shadow-[0_4px_5px_rgba(2,8,23,0.22)] group-data-capture/ticket:shadow-none group-data-capture/ticket:outline group-data-capture/ticket:outline-[#e2e8f0]"
                 >
                   <p className="text-base font-bold text-(--base-color)">
                     {session?.merchantName ?? merchant.name}

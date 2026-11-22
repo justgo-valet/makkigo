@@ -8,6 +8,13 @@
   font-family: var(--font-ubuntu), "Apple SD Gothic Neo", system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  --viewport-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --viewport-height: 100dvh;
+  }
 }
 
 * {

@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { getDevicePlatform } from "@/libs/device/getDevicePlatform";
+
 const SAVE_ERROR_MESSAGE = "티켓 이미지를 저장하지 못했어요. 화면을 캡처해 주세요.";
 
 type SaveState = "idle" | "saving" | "tap-again";
@@ -14,7 +16,8 @@ const downloadFile = (file: File) => {
 };
 
 const deliver = async (file: File) => {
-  if (!navigator.canShare?.({ files: [file] })) {
+  const isAndroid = getDevicePlatform(navigator.userAgent) === "android";
+  if (isAndroid || !navigator.canShare?.({ files: [file] })) {
     downloadFile(file);
     return "done" as const;
   }
@@ -29,13 +32,31 @@ const deliver = async (file: File) => {
   }
 };
 
+const pad = (value: number) => String(value).padStart(2, "0");
+
+const withSavedTime = (fileName: string, savedAt: Date) => {
+  const date = `${savedAt.getFullYear()}${pad(savedAt.getMonth() + 1)}${pad(savedAt.getDate())}`;
+  const time = `${pad(savedAt.getHours())}${pad(savedAt.getMinutes())}${pad(savedAt.getSeconds())}`;
+  return fileName.replace(/\.png$/, `-${date}-${time}.png`);
+};
+
 const renderTicketImage = async (node: HTMLElement, fileName: string) => {
   const { toBlob } = await import("html-to-image");
-  const options = { pixelRatio: 3, skipFonts: true, backgroundColor: "#ffffff" };
-  await toBlob(node, options);
-  const blob = await toBlob(node, options);
-  if (!blob) throw new Error("empty ticket image");
-  return new File([blob], fileName, { type: "image/png" });
+  const frame = document.createElement("div");
+  frame.style.cssText = `position:fixed;top:0;left:-10000px;width:${node.offsetWidth}px`;
+  const copy = node.cloneNode(true) as HTMLElement;
+  copy.dataset.capture = "";
+  frame.append(copy);
+  document.body.append(frame);
+  try {
+    const options = { pixelRatio: 3, backgroundColor: "#ffffff", style: { margin: "0" } };
+    await toBlob(copy, options);
+    const blob = await toBlob(copy, options);
+    if (!blob) throw new Error("empty ticket image");
+    return new File([blob], withSavedTime(fileName, new Date()), { type: "image/png" });
+  } finally {
+    frame.remove();
+  }
 };
 
 const useTicketImageSave = () => {
