@@ -76,7 +76,15 @@ Firebase 프로젝트 **`makkigo-3d555`** 하나에 고객 앱 · 요원 앱을 
 
 - 푸시를 못 보내면(미동의 · 기기 없음 · 발송 실패) 알림 내역의 채널을 비워 둡니다. 알림톡 대체는 알림톡 연동 때 이 자리에서 보냅니다.
 - Android 알림 채널: `makkigo_default` (중요도 높음).
-- 요원 앱 도착 예정 · 출차 요청 알림은 전용 알림음으로 보냅니다 (`pushStaffNotifications(ids, { sound: "valet-alert" })`). Android 는 채널 `makkigo_valet_alert`, iOS 는 소리 파일 `valet_alert.caf` 를 고르고, 둘 다 요원 앱에 들어 있습니다. 이 채널 · 파일이 없는 예전 앱은 기본 알림음으로 울립니다. Android 는 만든 채널의 소리를 바꿀 수 없으므로 소리를 바꾸려면 새 채널 id 를 씁니다.
+- 음성 알림음: 아래 알림은 `sound` 를 지정해 보내고(`packages/push/src/fcm.ts` 의 소리 표), OS가 앱에 든 소리 파일을 알림 소리로 재생합니다. 그래서 무음 · 진동 · 방해금지 설정을 그대로 따릅니다. 나머지 알림은 기본 알림음입니다.
+
+  | 알림 | 받는 앱 | 음성 | `sound` | Android 채널 | iOS 소리 파일 |
+  |---|---|---|---|---|---|
+  | 도착 예정 | 요원 | 차량이 곧 도착합니다 | `valet-arrival` | `makkigo_valet_arrival` | `valet_arrival.caf` |
+  | 출차 요청 (회원 · 비회원) | 요원 | 출차 요청이 왔습니다 | `valet-pickup` | `makkigo_valet_pickup` | `valet_pickup.caf` |
+  | 출차 완료 | 고객 | 차량이 준비되었습니다 | `user-pickup-completed` | `makkigo_user_pickup_completed` | `user_pickup_completed.caf` |
+
+  채널 · 소리 파일은 makkigo-mobile 앱에 들어 있어서 소리를 바꾸거나 추가하려면 앱을 먼저 배포합니다. 이 채널 · 파일이 없는 예전 앱은 기본 알림음으로 울립니다. Android 는 만든 채널의 소리를 바꿀 수 없으므로 소리를 바꾸려면 새 채널 id 를 씁니다.
 - 로컬 테스트 발송: `node --env-file=apps/users/.env.development.local packages/push/scripts/send-test.mjs <토큰> [경로]`
 
 ## 빌드 · 서명
