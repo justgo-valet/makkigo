@@ -38,7 +38,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-sheet-overlay-out data-[state=open]:animate-sheet-overlay-in",
         className
       )}
       {...props}
@@ -85,7 +85,9 @@ function SheetContent({
           if (ref) ref.current = node
         }}
         className={cn(
-          "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
+          "fixed z-50 flex flex-col gap-4 bg-background shadow-lg",
+          side !== "bottom" &&
+            "transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
           side === "right" &&
             "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
           side === "left" &&
@@ -93,7 +95,8 @@ function SheetContent({
           side === "top" &&
             "inset-x-0 top-0 h-auto border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
           side === "bottom" &&
-            "inset-x-0 bottom-0 h-auto border-t pb-(--safe-area-inset-bottom) data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+            // 끌다 놓았을 때 제자리로 돌아오는 것도 같은 곡선으로.
+            "inset-x-0 bottom-0 h-auto border-t pb-(--safe-area-inset-bottom) [transition:transform_0.3s_cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in",
           className
         )}
         {...props}
