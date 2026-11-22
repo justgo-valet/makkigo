@@ -9,6 +9,7 @@
   },
   "scripts": {
     "create-admin": "node --env-file-if-exists=../../.env.development scripts/create-admin.mjs",
+    "reset-admin-password": "node --env-file-if-exists=../../.env.development scripts/reset-admin-password.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
