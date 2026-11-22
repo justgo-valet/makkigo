@@ -182,6 +182,19 @@ pnpm --filter @makkigo/auth create-admin <아이디> <이름>
 
 운영 이미지에서는 아직 실행해 보지 않았습니다(로컬 Node 22 에서만 확인).
 
+### 슈퍼 어드민 비밀번호 바꾸기
+
+콘솔에는 슈퍼 어드민 비밀번호를 바꾸는 화면이 없습니다. 만들 때와 같이 서버에서 migrate 이미지로 바꿉니다. 새 비밀번호는 숨김 입력으로 두 번 묻습니다. 바꾸면 로그인 실패 횟수 · 잠금이 풀리고 그 계정의 모든 기기가 로그아웃됩니다. 비활성 계정은 바꾸지 않습니다.
+
+```sh
+# 서버에서 (위와 같이 IMAGE_TAG · ENV_DIR 를 export 한 뒤)
+docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate \
+  node /repo/packages/auth/scripts/reset-admin-password.mjs <아이디>
+
+# 로컬
+pnpm --filter @makkigo/auth reset-admin-password <아이디>
+```
+
 ## 업체 관리자 계정 발급
 
 1. 슈퍼 어드민 → 업체: 카카오 장소 검색으로 업체를 추가하고 상세 주소 · 사진을 채움
