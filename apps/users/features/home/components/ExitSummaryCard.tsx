@@ -19,7 +19,7 @@ export default function ExitSummaryCard({
 }: Readonly<ExitSummaryCardProps>) {
   return (
     <div className="flex flex-col rounded-xl border bg-white px-4">
-      <div className="flex items-center justify-between gap-3 py-4 short:py-3">
+      <div className="flex items-center justify-between gap-3 py-4 short:py-3 compact:py-2">
         <p className="shrink-0 font-bold whitespace-nowrap text-(--base-color)">
           {summary.headline}
           {summary.emphasis && <span className="ml-1.5 text-primary">{summary.emphasis}</span>}
@@ -32,7 +32,7 @@ export default function ExitSummaryCard({
       <button
         type="button"
         disabled={!summary.canSeeFeeDetail}
-        className="flex items-center justify-between py-4 text-left short:py-3"
+        className="flex items-center justify-between py-4 text-left short:py-3 compact:py-2"
         onClick={onFeeDetailClick}
       >
         <span className="text-(--tertiary-color)">{summary.feeLabel}</span>
@@ -52,7 +52,7 @@ export default function ExitSummaryCard({
       {summary.accountLabel && (
         <>
           <Separator />
-          <div className="flex items-center justify-between gap-3 py-3">
+          <div className="flex items-center justify-between gap-3 py-3 compact:py-2">
             <p className="min-w-0 text-sm break-all text-(--base-color)">{summary.accountLabel}</p>
             <BankTransferButton transfer={transfer} />
           </div>
