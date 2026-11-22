@@ -39,10 +39,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   return (
     <html lang="ko" className={ubuntu.variable}>
-      <body className="flex flex-col items-center w-full h-screen">
+      <body className="flex flex-col items-center w-full h-(--viewport-height)">
         <QueryProvider>
           <main
-            className={`flex h-screen w-full max-w-[767px] flex-col items-center p-4 ${TOP_PADDING_BY_PLATFORM[platform]} pb-[calc(1rem+var(--safe-area-inset-bottom))]`}
+            className={`flex h-(--viewport-height) w-full max-w-[767px] flex-col items-center p-4 ${TOP_PADDING_BY_PLATFORM[platform]} pb-[calc(1rem+var(--safe-area-inset-bottom))]`}
           >
             <Header />
             <section className="min-h-0 w-full flex-1">{children}</section>
