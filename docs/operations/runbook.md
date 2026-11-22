@@ -42,7 +42,7 @@ docker ps                     # 컨테이너 상태
 - **배포 전에 백업**: 이 마이그레이션은 업체와 예전 업체 관리자의 연결(`merchants.admin_id`), `ticket_image_uploads.staff_id`, 업체 등록 세션 두 테이블을 지웁니다. 아래 "DB 백업" 으로 전체 덤프를 먼저 받아 둡니다. 되살릴 길은 덤프뿐입니다.
 - **태그로 되돌릴 수 없음**: 이 배포 뒤 옛 이미지 태그로 되돌리면 옛 코드가 지운 칸 · 테이블을 찾다가 업체 관리자 · 티켓 · 업체 등록 쪽이 오류입니다. 또 compose 가 `makkigo-admin:<태그>` 를 요구하므로 admin 이미지가 없는 옛 태그는 받기(pull)부터 실패합니다. 문제가 생기면 고쳐서 앞으로 배포합니다.
 - **짧은 오류 구간**: `deploy.sh` 는 옛 컨테이너가 떠 있는 동안 마이그레이션을 돌립니다. 새 컨테이너로 바뀌기 전까지 옛 tickets · 요원 앱의 업체 관리자 화면과 정리 runner 가 오류를 낼 수 있습니다. 고객 앱 · 요원의 부스 업무는 영향이 없습니다.
-- **배포 뒤**: 슈퍼 어드민 계정 만들기(아래) → 쓰지 않게 된 SSM 값 삭제([deployment.md](../architecture/deployment.md#슈퍼-어드민-배포-2026-11-19)).
+- **배포 뒤**: 쓰지 않게 된 SSM 값 삭제([deployment.md](../architecture/deployment.md#슈퍼-어드민-배포-2026-11-19)).
 
 ## 로그 보기 · 재시작
 
@@ -165,35 +165,9 @@ webhook/플랫폼 경보를 받는지 staging에서 주입 검증합니다.
 schema와 tombstone은 삭제하지 않습니다. IAM/CORS나 object integrity가 의심되면 signing/runner를
 비활성화하되 업체 onboarding guard와 pending read 화면은 유지합니다.
 
-## 슈퍼 어드민 계정 만들기
+## 슈퍼 어드민 계정
 
-콘솔에는 슈퍼 어드민을 만드는 화면이 없습니다. 서버에서 migrate 이미지로 만듭니다. 비밀번호는 명령줄 인자로 받지 않고 숨김 입력으로 두 번 묻습니다.
-
-```sh
-# 서버에서
-cd /opt/makkigo/deploy
-export IMAGE_TAG=<현재 태그> ENV_DIR=/opt/makkigo/env
-docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate \
-  node /repo/packages/auth/scripts/create-admin.mjs <아이디> <이름>
-
-# 로컬 (.env.development 의 DATABASE_URL, 환경변수가 있으면 그쪽 우선)
-pnpm --filter @makkigo/auth create-admin <아이디> <이름>
-```
-
-운영 이미지에서는 아직 실행해 보지 않았습니다(로컬 Node 22 에서만 확인).
-
-### 슈퍼 어드민 비밀번호 바꾸기
-
-콘솔에는 슈퍼 어드민 비밀번호를 바꾸는 화면이 없습니다. 만들 때와 같이 서버에서 migrate 이미지로 바꿉니다. 새 비밀번호는 숨김 입력으로 두 번 묻습니다. 바꾸면 로그인 실패 횟수 · 잠금이 풀리고 그 계정의 모든 기기가 로그아웃됩니다. 비활성 계정은 바꾸지 않습니다.
-
-```sh
-# 서버에서 (위와 같이 IMAGE_TAG · ENV_DIR 를 export 한 뒤)
-docker compose -f docker-compose.prod.yml --profile migrate run --rm migrate \
-  node /repo/packages/auth/scripts/reset-admin-password.mjs <아이디>
-
-# 로컬
-pnpm --filter @makkigo/auth reset-admin-password <아이디>
-```
+계정 만들기 · 비밀번호 바꾸기는 보안상 스크립트 · 화면을 두지 않습니다(2026-11-23 스크립트 삭제). 운영 계정은 `makkigo_admin` 하나이고(`admins` 테이블), 꼭 필요하면 DB 권한이 있는 담당자가 직접 처리합니다. 비밀번호는 `packages/auth` 의 `hashPassword` 형식으로 저장됩니다.
 
 ## 업체 관리자 계정 발급
 
