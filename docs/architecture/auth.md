@@ -123,7 +123,7 @@
 
 ## 아이디 · 비밀번호 로그인 (업체 관리자 · 슈퍼 어드민)
 
-decisions 2026-11-19. 업체 관리자는 `apps/tickets`(`tickets.makkigo.com`), 슈퍼 어드민은 `apps/admin`(`admin.makkigo.com`). 계정은 따로 가입하지 않습니다 — 업체 관리자는 슈퍼 어드민이 콘솔에서, 슈퍼 어드민은 서버 명령으로 만듭니다 → [runbook.md](../operations/runbook.md#슈퍼-어드민-계정-만들기).
+decisions 2026-11-19. 업체 관리자는 `apps/tickets`(`tickets.makkigo.com`), 슈퍼 어드민은 `apps/admin`(`admin.makkigo.com`). 계정은 따로 가입하지 않습니다 — 업체 관리자는 슈퍼 어드민이 콘솔에서, 슈퍼 어드민은 화면 · 스크립트 없이 DB 담당자가 직접 관리합니다 → [runbook.md](../operations/runbook.md#슈퍼-어드민-계정).
 
 | 항목 | 정한 것 | 이유 |
 |---|---|---|
