@@ -13,7 +13,7 @@ import type { ReactNode } from "react";
 interface ValetSheetProps {
   open: boolean;
   title: string;
-  description?: string;
+  description?: ReactNode;
   confirmLabel?: string;
   isConfirmDisabled?: boolean;
   errorMessage?: string | null;

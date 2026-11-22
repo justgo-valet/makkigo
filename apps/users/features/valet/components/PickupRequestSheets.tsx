@@ -16,8 +16,14 @@ export default function PickupRequestSheets({ flow }: Readonly<PickupRequestShee
     <>
       <ValetSheet
         open={flow.isNoSessionOpen}
-        title="도착 알림 없이 바로 요원님께 맡기셨나요?"
-        description="요원님께서 주차 중입니다. 주차가 끝나면 출차 요청을 할 수 있어요."
+        title="아직 맡기신 차량 정보가 없어요"
+        description={
+          <>
+            요원님께 바로 맡기셨다면 주차 후 차량이 등록돼요.
+            <br />
+            등록되면 출차 요청을 할 수 있어요.
+          </>
+        }
         onConfirm={flow.close}
         onClose={flow.close}
       />
