@@ -48,7 +48,7 @@ export default function NameSheet({ form }: Readonly<{ form: ReturnType<typeof u
             </Button>
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="xl"
               className="w-full text-(--tertiary-color)"
               onClick={form.close}

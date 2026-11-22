@@ -51,7 +51,7 @@ export default function ValetNoticeSheet({
           {closeLabel && (
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="xl"
               className="w-full text-(--tertiary-color)"
               disabled={isPending}
