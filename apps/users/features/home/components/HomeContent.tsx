@@ -3,11 +3,11 @@
 import { Button, FieldError } from "@makkigo/ui";
 import { InfoBubble } from "@makkigo/ui/components/ui/info-bubble";
 import Image from "next/image";
-import Link from "next/link";
 
 import BoothLocationSheet from "@/features/home/components/BoothLocationSheet";
 import ExitSummaryCard from "@/features/home/components/ExitSummaryCard";
 import HomeActionItem from "@/features/home/components/HomeActionItem";
+import HomeTicketCard from "@/features/home/components/HomeTicketCard";
 import ValetStatusHeader from "@/features/home/components/ValetStatusHeader";
 import { useExitCompletion } from "@/features/home/hooks/useExitCompletion";
 import { useHome } from "@/features/home/hooks/useHome";
@@ -59,171 +59,166 @@ export default function HomeContent({ kakaoMapAppKey }: Readonly<{ kakaoMapAppKe
   }
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none short:gap-3 short:pt-2 short:pb-3 [&::-webkit-scrollbar]:hidden">
-      {pushPermissionBanner.isVisible && (
-        <PushPermissionBanner onOpenSettings={pushPermissionBanner.openSettings} />
-      )}
-      <ValetStatusHeader title={home.title} badge={home.badge} metaItems={home.metaItems} />
+    <div className="h-full [container-name:home] [container-type:size]">
+      <div className="flex h-full flex-col gap-6 overflow-y-auto pt-4 pb-6 scrollbar-none short:gap-3 short:pt-2 short:pb-3 [&::-webkit-scrollbar]:hidden">
+        {pushPermissionBanner.isVisible && (
+          <PushPermissionBanner onOpenSettings={pushPermissionBanner.openSettings} />
+        )}
+        <ValetStatusHeader title={home.title} badge={home.badge} metaItems={home.metaItems} />
 
-      <div className="relative mx-auto aspect-video min-h-20 w-full max-w-sm shrink">
-        <Image
-          src={home.carImageUrl}
-          alt={home.carImageAlt}
-          fill
-          unoptimized
-          priority
-          className="object-contain"
-        />
-        {home.carAction && (
-          <button
-            type="button"
-            aria-label={home.carAction.title}
-            className="absolute inset-0 rounded-xl"
-            onClick={actionHandlers[home.carAction.key]}
+        <div className="relative mx-auto aspect-video min-h-20 w-full max-w-sm shrink">
+          <Image
+            src={home.carImageUrl}
+            alt={home.carImageAlt}
+            fill
+            unoptimized
+            priority
+            className="object-contain"
+          />
+          {home.carAction && (
+            <button
+              type="button"
+              aria-label={home.carAction.title}
+              className="absolute inset-0 rounded-xl"
+              onClick={actionHandlers[home.carAction.key]}
+            />
+          )}
+        </div>
+        {home.isCarImagePlaceholder && (
+          <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color) short:-mt-1 short:text-xs compact:hidden">
+            차량 사진 준비 중이에요. 실제 차량과 다를 수 있어요
+          </p>
+        )}
+
+        {home.exitSummary && (
+          <ExitSummaryCard
+            summary={home.exitSummary}
+            transfer={home.bankTransfer}
+            onFeeDetailClick={pickupRequest.openFeeDetail}
           />
         )}
-      </div>
-      {home.isCarImagePlaceholder && (
-        <p className="-mt-3 text-center text-sm break-keep text-(--tertiary-color) short:-mt-1 short:text-xs">
-          차량 사진 준비 중이에요. 실제 차량과 다를 수 있어요
-        </p>
-      )}
 
-      {home.exitSummary && (
-        <ExitSummaryCard
-          summary={home.exitSummary}
-          transfer={home.bankTransfer}
-          onFeeDetailClick={pickupRequest.openFeeDetail}
+        <div className="flex flex-col gap-3 short:gap-2">
+          {home.boothLocation.isVisible && (
+            <div className="flex items-center gap-1 self-start">
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto px-0 font-semibold"
+                onClick={home.boothLocation.open}
+              >
+                <Image src="/icons/map_pin.svg" alt="" aria-hidden="true" width={20} height={20} />
+                부스 위치 보기
+              </Button>
+              <InfoBubble label="발렛부스 설명">
+                발렛부스는 요원이 차를 받아 대신 주차하고, 출차할 때 다시 가져다주는 곳이에요.
+              </InfoBubble>
+            </div>
+          )}
+          {home.actions.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 *:odd:last:col-span-2 short:gap-2">
+              {home.actions.map((action) => (
+                <HomeActionItem
+                  key={action.key}
+                  action={action}
+                  onClick={actionHandlers[action.key]}
+                />
+              ))}
+            </div>
+          )}
+          <HomeTicketCard />
+        </div>
+
+        <MerchantSearchSheet
+          open={merchantSearch.isSearchOpen}
+          detailMerchantId={merchantSearch.detailMerchantId}
+          kakaoMapAppKey={kakaoMapAppKey}
+          onClose={merchantSearch.close}
+          onViewMerchant={merchantSearch.viewMerchant}
+          onBackToList={merchantSearch.backToList}
+          onChooseMerchant={merchantSearch.chooseMerchant}
         />
-      )}
-
-      <div className="flex flex-col gap-3 short:gap-2">
-        {home.hasTicket && (
-          <Button asChild variant="link" className="h-auto self-start px-0 font-semibold">
-            <Link href="/ticket">
-              <Image src="/icons/ticket.svg" alt="" aria-hidden="true" width={20} height={20} />
-              발렛 티켓 보러가기
-            </Link>
-          </Button>
-        )}
-        {home.boothLocation.isVisible && (
-          <div className="flex items-center gap-1 self-start">
-            <Button
-              type="button"
-              variant="link"
-              className="h-auto px-0 font-semibold"
-              onClick={home.boothLocation.open}
-            >
-              <Image src="/icons/map_pin.svg" alt="" aria-hidden="true" width={20} height={20} />
-              부스 위치 보기
-            </Button>
-            <InfoBubble label="발렛부스 설명">
-              발렛부스는 요원이 차를 받아 대신 주차하고, 출차할 때 다시 가져다주는 곳이에요.
-            </InfoBubble>
-          </div>
-        )}
-        {home.actions.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 *:odd:last:col-span-2 short:gap-2">
-            {home.actions.map((action) => (
-              <HomeActionItem
-                key={action.key}
-                action={action}
-                onClick={actionHandlers[action.key]}
-              />
-            ))}
-          </div>
-        )}
+        <ValetNoticeSheet
+          open={merchantSearch.isMerchantRequiredOpen}
+          title="업체가 선택되지 않았어요"
+          description="업체 검색을 하시겠어요?"
+          confirmLabel="업체 검색하기"
+          closeLabel="나중에 할게요"
+          onConfirm={merchantSearch.open}
+          onClose={merchantSearch.close}
+        />
+        <ArrivalConfirmSheet
+          open={merchantSearch.isArrivalOpen}
+          merchantName={merchantSearch.pickedMerchant?.name ?? null}
+          isSending={merchantSearch.isSending}
+          errorMessage={merchantSearch.sendErrorMessage}
+          onSend={merchantSearch.sendArrival}
+          onClose={merchantSearch.close}
+        />
+        <LocationConsentSheet
+          open={merchantSearch.isLocationConsentOpen}
+          isSending={merchantSearch.isSending}
+          errorMessage={merchantSearch.sendErrorMessage}
+          onAgreeAndSend={merchantSearch.agreeLocationAndSend}
+          onSendWithoutLocation={merchantSearch.sendWithoutLocation}
+          onClose={merchantSearch.close}
+        />
+        <PickupRequestSheets flow={pickupRequest} />
+        <BankTransferSheet transfer={home.bankTransfer} />
+        <BoothLocationSheet location={home.boothLocation} />
+        <ValetNoticeSheet
+          open={cancelArrival.isOpen}
+          title="도착 알림을 취소할까요?"
+          description="도착 알림을 받은 발렛 요원님께 취소했다고 알려요"
+          confirmLabel="도착 알림 취소하기"
+          pendingLabel="취소하는 중…"
+          closeLabel="닫기"
+          isPending={cancelArrival.isCancelling}
+          errorMessage={cancelArrival.errorMessage}
+          onConfirm={cancelArrival.confirm}
+          onClose={cancelArrival.close}
+        />
+        <ValetNoticeSheet
+          open={arrivalDelay.isArrivalRequiredOpen}
+          title="도착 알림을 먼저 해주세요"
+          description="도착 알림을 보낸 뒤에 지연 알림을 보낼 수 있어요"
+          confirmLabel="도착 알림 하러 가기"
+          closeLabel="닫기"
+          onConfirm={arrivalDelay.startArrival}
+          onClose={arrivalDelay.close}
+        />
+        <ArrivalDelaySheet
+          open={arrivalDelay.isSelectOpen}
+          expectedArrivalTime={arrivalDelay.expectedArrivalTime}
+          options={arrivalDelay.options}
+          selectedOptionMinutes={arrivalDelay.selectedOptionMinutes}
+          stepper={arrivalDelay.stepper}
+          maxMinutes={arrivalDelay.maxMinutes}
+          isSending={arrivalDelay.isSending}
+          errorMessage={arrivalDelay.errorMessage}
+          onSelect={arrivalDelay.select}
+          onDecrease={arrivalDelay.decrease}
+          onIncrease={arrivalDelay.increase}
+          onSend={arrivalDelay.send}
+          onClose={arrivalDelay.close}
+        />
+        <ValetNoticeSheet
+          open={arrivalDelay.isSentOpen}
+          title="지연 알림을 보냈어요"
+          description={`요원님께 ${arrivalDelay.sentDelayText ?? ""} 늦어진다고 알렸어요`}
+          confirmLabel="확인"
+          onConfirm={arrivalDelay.close}
+          onClose={arrivalDelay.close}
+        />
+        <ValetNoticeSheet
+          open={exitCompletion.isOpen}
+          title="출차가 완료됐어요"
+          description={exitCompletion.description}
+          confirmLabel="확인"
+          onConfirm={exitCompletion.confirm}
+          onClose={exitCompletion.confirm}
+        />
       </div>
-
-      <MerchantSearchSheet
-        open={merchantSearch.isSearchOpen}
-        detailMerchantId={merchantSearch.detailMerchantId}
-        kakaoMapAppKey={kakaoMapAppKey}
-        onClose={merchantSearch.close}
-        onViewMerchant={merchantSearch.viewMerchant}
-        onBackToList={merchantSearch.backToList}
-        onChooseMerchant={merchantSearch.chooseMerchant}
-      />
-      <ValetNoticeSheet
-        open={merchantSearch.isMerchantRequiredOpen}
-        title="업체가 선택되지 않았어요"
-        description="업체 검색을 하시겠어요?"
-        confirmLabel="업체 검색하기"
-        closeLabel="나중에 할게요"
-        onConfirm={merchantSearch.open}
-        onClose={merchantSearch.close}
-      />
-      <ArrivalConfirmSheet
-        open={merchantSearch.isArrivalOpen}
-        merchantName={merchantSearch.pickedMerchant?.name ?? null}
-        isSending={merchantSearch.isSending}
-        errorMessage={merchantSearch.sendErrorMessage}
-        onSend={merchantSearch.sendArrival}
-        onClose={merchantSearch.close}
-      />
-      <LocationConsentSheet
-        open={merchantSearch.isLocationConsentOpen}
-        isSending={merchantSearch.isSending}
-        errorMessage={merchantSearch.sendErrorMessage}
-        onAgreeAndSend={merchantSearch.agreeLocationAndSend}
-        onSendWithoutLocation={merchantSearch.sendWithoutLocation}
-        onClose={merchantSearch.close}
-      />
-      <PickupRequestSheets flow={pickupRequest} />
-      <BankTransferSheet transfer={home.bankTransfer} />
-      <BoothLocationSheet location={home.boothLocation} />
-      <ValetNoticeSheet
-        open={cancelArrival.isOpen}
-        title="도착 알림을 취소할까요?"
-        description="도착 알림을 받은 발렛 요원님께 취소했다고 알려요"
-        confirmLabel="도착 알림 취소하기"
-        pendingLabel="취소하는 중…"
-        closeLabel="닫기"
-        isPending={cancelArrival.isCancelling}
-        errorMessage={cancelArrival.errorMessage}
-        onConfirm={cancelArrival.confirm}
-        onClose={cancelArrival.close}
-      />
-      <ValetNoticeSheet
-        open={arrivalDelay.isArrivalRequiredOpen}
-        title="도착 알림을 먼저 해주세요"
-        description="도착 알림을 보낸 뒤에 지연 알림을 보낼 수 있어요"
-        confirmLabel="도착 알림 하러 가기"
-        closeLabel="닫기"
-        onConfirm={arrivalDelay.startArrival}
-        onClose={arrivalDelay.close}
-      />
-      <ArrivalDelaySheet
-        open={arrivalDelay.isSelectOpen}
-        expectedArrivalTime={arrivalDelay.expectedArrivalTime}
-        options={arrivalDelay.options}
-        selectedOptionMinutes={arrivalDelay.selectedOptionMinutes}
-        stepper={arrivalDelay.stepper}
-        maxMinutes={arrivalDelay.maxMinutes}
-        isSending={arrivalDelay.isSending}
-        errorMessage={arrivalDelay.errorMessage}
-        onSelect={arrivalDelay.select}
-        onDecrease={arrivalDelay.decrease}
-        onIncrease={arrivalDelay.increase}
-        onSend={arrivalDelay.send}
-        onClose={arrivalDelay.close}
-      />
-      <ValetNoticeSheet
-        open={arrivalDelay.isSentOpen}
-        title="지연 알림을 보냈어요"
-        description={`요원님께 ${arrivalDelay.sentDelayText ?? ""} 늦어진다고 알렸어요`}
-        confirmLabel="확인"
-        onConfirm={arrivalDelay.close}
-        onClose={arrivalDelay.close}
-      />
-      <ValetNoticeSheet
-        open={exitCompletion.isOpen}
-        title="출차가 완료됐어요"
-        description={exitCompletion.description}
-        confirmLabel="확인"
-        onConfirm={exitCompletion.confirm}
-        onClose={exitCompletion.confirm}
-      />
     </div>
   );
 }
