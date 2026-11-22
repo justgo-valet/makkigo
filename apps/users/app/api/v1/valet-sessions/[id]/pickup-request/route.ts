@@ -54,7 +54,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
-    after(() => pushStaffNotifications(result.notificationIds, { sound: "valet-alert" }));
+    after(() => pushStaffNotifications(result.notificationIds, { sound: "valet-pickup" }));
 
     const body: PickupRequestResponse = {
       session: await getMyActiveSession(userId, valetSessionId.data),
