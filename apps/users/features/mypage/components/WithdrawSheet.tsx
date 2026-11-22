@@ -58,7 +58,7 @@ export default function WithdrawSheet({
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="xl"
             className="w-full text-(--tertiary-color)"
             onClick={onClose}

@@ -80,7 +80,7 @@ export default function LocationConsentSheet({
           </Button>
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="xl"
             className="w-full text-(--tertiary-color)"
             disabled={isSending}

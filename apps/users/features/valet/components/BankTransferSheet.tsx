@@ -78,7 +78,7 @@ export default function BankTransferSheet({ transfer }: Readonly<{ transfer: Ban
         <BottomSheetFooter className="pt-5 pb-[calc(1.5rem+var(--safe-area-inset-bottom))]">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="xl"
             className="w-full text-(--tertiary-color)"
             onClick={transfer.copyAccountNumber}
