@@ -73,7 +73,7 @@ export default function VehicleBoard({
 
           return (
             <li key={session.id} className="min-w-0">
-              {onSelectSession && session.status !== "PARKED" ? (
+              {onSelectSession ? (
                 <button
                   type="button"
                   className={cn(vehicleCardClass(session.status), FOCUS_CLASS)}

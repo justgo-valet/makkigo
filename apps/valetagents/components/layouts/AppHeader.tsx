@@ -5,6 +5,9 @@ import { cn } from "@makkigo/ui";
 import { Sheet, SheetTrigger } from "@makkigo/ui/components/ui/sheet";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+
+import { useCloseOnAppBack } from "@/features/auth/hooks/useCloseOnAppBack";
 
 import AppMenu from "./AppMenu";
 
@@ -29,6 +32,9 @@ export default function AppHeader({
   onBellClick,
   qrHref,
 }: Readonly<AppHeaderProps>) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  useCloseOnAppBack(isMenuOpen, () => setIsMenuOpen(false));
+
   return (
     <header className="relative flex h-12 w-full shrink-0 items-center">
       {backHref ? (
@@ -79,7 +85,7 @@ export default function AppHeader({
             />
           </button>
         )}
-        <Sheet>
+        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <SheetTrigger aria-label="메뉴">
             <Image src="/icons/menu.svg" alt="" aria-hidden="true" width={24} height={24} />
           </SheetTrigger>
