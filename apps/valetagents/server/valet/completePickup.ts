@@ -1,6 +1,6 @@
 import "server-only";
 
-import { prisma } from "database";
+import { calculateValetFee, findFeePolicy, prisma } from "database";
 
 import { getBoothAgentFailure } from "@/server/booth/boothAgent";
 
@@ -11,7 +11,12 @@ type CompletePickupResult =
   | { ok: true; notice: PickupCompletedNotice | null }
   | { ok: false; reason: BoothAgentFailure | "SESSION_NOT_FOUND" | "NOT_COMPLETABLE" };
 
-const COMPLETABLE_STATUSES = ["PICKUP_REQUESTED", "PICKUP_PREPARING"] as const;
+const COMPLETABLE_STATUSES = ["PARKED", "PICKUP_REQUESTED", "PICKUP_PREPARING"] as const;
+
+const feeUntil = async (boothId: number, parkedAt: Date | null, now: Date) => {
+  const feePolicy = parkedAt ? await findFeePolicy(prisma, boothId, now) : null;
+  return feePolicy && parkedAt ? calculateValetFee(feePolicy, parkedAt, now).total : null;
+};
 
 const completePickup = async (
   staffId: number,
@@ -27,6 +32,7 @@ const completePickup = async (
     select: {
       status: true,
       plateNumber: true,
+      parkedAt: true,
       user: { select: { id: true, deletedAt: true } },
       merchant: { select: { name: true } },
     },
@@ -37,9 +43,15 @@ const completePickup = async (
     return { ok: false, reason: "NOT_COMPLETABLE" };
   }
 
+  const isEarly = session.status === "PARKED";
   const { count } = await prisma.valetSession.updateMany({
-    where: { id: valetSessionId, boothId, status: { in: [...COMPLETABLE_STATUSES] } },
-    data: { status: "COMPLETED", completedAt: now, completedById: staffId },
+    where: { id: valetSessionId, boothId, status: session.status },
+    data: {
+      status: "COMPLETED",
+      completedAt: now,
+      completedById: staffId,
+      ...(isEarly && { baseFee: await feeUntil(boothId, session.parkedAt, now) }),
+    },
   });
 
   if (count === 0) return { ok: false, reason: "NOT_COMPLETABLE" };

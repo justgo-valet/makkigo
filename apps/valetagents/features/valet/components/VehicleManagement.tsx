@@ -14,6 +14,7 @@ import { useNotificationToggle } from "../hooks/useNotificationToggle";
 import { useParkValetSession } from "../hooks/useParkValetSession";
 
 import AddVehicleSheet from "./AddVehicleSheet";
+import EarlyPickupDialog from "./EarlyPickupDialog";
 import PlateConfirmSheet from "./PlateConfirmSheet";
 import VehicleBoard from "./VehicleBoard";
 
@@ -66,12 +67,14 @@ export default function VehicleManagement({
     boothId,
     onCompleted: () => setCompleteTarget(null),
   });
+  const isEarlyPickup = completeTarget?.status === "PARKED";
+  const closeComplete = () => !completing.isCompleting && setCompleteTarget(null);
 
   const selectSession = (session: BoothValetSession) => {
     if (session.status === "ARRIVING") {
       parking.resetError();
       setParkTarget(session);
-    } else if (session.status === "PICKUP_REQUESTED" || session.status === "PICKUP_PREPARING") {
+    } else {
       completing.resetError();
       setCompleteTarget(session);
     }
@@ -137,12 +140,19 @@ export default function VehicleManagement({
       <PlateConfirmSheet
         title="출차 완료"
         description="확인을 누르면 이 차량을 출차 완료로 처리해요."
-        plateNumber={completeTarget?.plateNumber ?? null}
+        plateNumber={completeTarget && !isEarlyPickup ? completeTarget.plateNumber : null}
         fee={completeTarget?.fee ?? null}
         isPending={completing.isCompleting}
         errorMessage={completing.errorMessage}
         onConfirm={() => completeTarget && completing.complete(completeTarget.id)}
-        onClose={() => !completing.isCompleting && setCompleteTarget(null)}
+        onClose={closeComplete}
+      />
+      <EarlyPickupDialog
+        plateNumber={completeTarget && isEarlyPickup ? completeTarget.plateNumber : null}
+        isPending={completing.isCompleting}
+        errorMessage={completing.errorMessage}
+        onConfirm={() => completeTarget && completing.complete(completeTarget.id)}
+        onClose={closeComplete}
       />
       <NotificationSheet
         staffId={staffId}

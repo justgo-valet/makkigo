@@ -43,6 +43,15 @@ beforeAll(async () => {
         name: `integration-complete-${suffix}`,
         address: "서울시 테스트구",
         agents: { create: { staffId, status: "APPROVED" } },
+        feePolicies: {
+          create: {
+            baseMinutes: 60,
+            baseFee: 10000,
+            extraUnitMinutes: 30,
+            extraUnitFee: 2000,
+            effectiveFrom: new Date("2026-01-01T00:00:00.000Z"),
+          },
+        },
       },
       select: { id: true },
     })
@@ -85,6 +94,44 @@ describe("completePickup database integration", () => {
       status: "COMPLETED",
       completedAt: now,
       completedById: staffId,
+    });
+  });
+
+  it("completes a parked car before any pickup request with the fee up to now", async () => {
+    const now = new Date("2026-10-14T03:10:00.000Z");
+    const session = await prisma.valetSession.create({
+      data: {
+        status: "PARKED",
+        plateNumber: "78라9012",
+        boothId,
+        parkedAt: new Date("2026-10-14T01:50:00.000Z"),
+      },
+      select: { id: true },
+    });
+
+    await expect(completePickup(staffId, boothId, session.id, now)).resolves.toEqual({
+      ok: true,
+      notice: null,
+    });
+
+    expect(await prisma.valetSession.findUniqueOrThrow({ where: { id: session.id } })).toMatchObject({
+      status: "COMPLETED",
+      completedAt: now,
+      completedById: staffId,
+      pickupRequestedAt: null,
+      baseFee: 12000,
+    });
+  });
+
+  it("does not complete a car that is not parked yet", async () => {
+    const session = await prisma.valetSession.create({
+      data: { status: "ARRIVING", plateNumber: "90마1234", boothId },
+      select: { id: true },
+    });
+
+    await expect(completePickup(staffId, boothId, session.id)).resolves.toEqual({
+      ok: false,
+      reason: "NOT_COMPLETABLE",
     });
   });
 
