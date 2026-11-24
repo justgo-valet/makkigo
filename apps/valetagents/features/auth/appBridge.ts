@@ -1,6 +1,7 @@
 interface MakkigoAppChannel { postMessage: (message: string) => void }
 
 const PUSH_TOKEN_EVENT = "makkigo:push-token";
+const APP_BACK_EVENT = "makkigo:back";
 const channel = () => (window as Window & { MakkigoApp?: MakkigoAppChannel }).MakkigoApp ?? null;
 export const isInApp = () => channel() !== null;
 
@@ -37,6 +38,15 @@ export const onAppPushToken = (listener: (state: AppPushState) => void) => {
   const handleEvent = (event: Event) => listener(toAppPushState(event));
   window.addEventListener(PUSH_TOKEN_EVENT, handleEvent);
   return () => window.removeEventListener(PUSH_TOKEN_EVENT, handleEvent);
+};
+
+export const onAppBack = (listener: () => void) => {
+  const handleEvent = (event: Event) => {
+    event.preventDefault();
+    listener();
+  };
+  window.addEventListener(APP_BACK_EVENT, handleEvent);
+  return () => window.removeEventListener(APP_BACK_EVENT, handleEvent);
 };
 
 export const askAppForPushToken = () => {
