@@ -14,5 +14,15 @@ export default async function LoginPage({ searchParams }: Readonly<{
   const token = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
   const staffId = token ? await getActiveStaffIdFromAccessToken(token) : null;
   if (staffId) redirect(await getPathAfterLogin(staffId));
-  return <><AppSessionBridge authenticated={false} /><LoginContent error={parseLoginError((await searchParams).error)} /></>;
+  const ticketsPublicUrl = process.env.TICKETS_PUBLIC_URL?.trim();
+  if (!ticketsPublicUrl) throw new Error("환경변수 TICKETS_PUBLIC_URL 이 설정되지 않았습니다.");
+  return (
+    <>
+      <AppSessionBridge authenticated={false} />
+      <LoginContent
+        error={parseLoginError((await searchParams).error)}
+        merchantAdminLoginUrl={new URL("/login", ticketsPublicUrl).toString()}
+      />
+    </>
+  );
 }
