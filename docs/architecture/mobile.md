@@ -23,6 +23,7 @@
 |---|---|
 | 여는 주소 | 빌드 때 `--dart-define=WEB_BASE_URL=...` (기본값 `http://localhost:3000`) |
 | 같은 호스트 · 포트 | 웹뷰 안에서 이동 |
+| 허용한 다른 출처 | 웹뷰 안에서 이동. 요원 앱만 업체 관리자 포털(`--dart-define=MERCHANT_PORTAL_URL=...`, 기본값 `https://tickets.makkigo.com`). 브리지 · 푸시 메시지는 여전히 `WEB_BASE_URL` 출처에서만 받음(포털에는 `makkigo:back` 도 보내지 않음). Android 뒤로 가기는 포털 `/` · `/login` 도 홈으로 봄 — 세션에 따라 둘이 서로 리다이렉트해 웹 뒤로 가기가 돌기만 하기 때문. 포털의 QR 저장 · 인쇄는 웹뷰에서 안 되므로 앱 안에서는 컴퓨터 브라우저로 안내 |
 | 다른 호스트, `tel:` 등 | 외부 브라우저 · 앱으로 열기 |
 | 뒤로 가기 (Android) | 먼저 웹에 `makkigo:back` 을 보내 웹이 막으면 끝 → [브리지](#웹--앱-브리지). 아니면 홈(쿼리 · 해시 없는 `/`)은 웹 기록이 있어도 **"앱을 종료하시겠습니까?"** 시트, 그 밖의 화면은 웹 기록이 있으면 웹 뒤로 · 없으면 같은 시트. "종료하기"를 눌러야 종료 (mobile #38) |
 | 기록 덮어쓰기 | Android 앱은 페이지가 시작한 이동(링크 · `location.assign` · `location.replace`)을 막고 `loadUrl` 로 다시 열어서(webview_flutter) **`location.replace` 도 기록이 쌓임**. 기록을 덮어써야 하면 Next `router.replace`(소프트 이동)를 씀 |

@@ -74,9 +74,11 @@
 | `/makkigo/prod/valetagents/AWS_REGION` | `ap-northeast-2` |
 | `/makkigo/prod/valetagents/S3_IMAGE_BUCKET` | 비공개 이미지 버킷 이름 |
 | `/makkigo/prod/valetagents/IMAGE_BASE_URL` | CloudFront 공개 기준 URL. 브라우저 빌드 변수가 아니라 서버 런타임 값 |
+| `/makkigo/prod/valetagents/TICKETS_PUBLIC_URL` | `https://tickets.makkigo.com`. 로그인 화면 "업체 관리자 로그인"이 여는 포털 주소. 없으면 로그인 화면이 오류 |
 | `/makkigo/prod/valetagents/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 요원 앱 "업체 QR" 화면의 고객용 QR 주소(`/guest?merchant=<id>`). 없으면 그 화면이 오류 |
 | `/makkigo/prod/tickets/PUBLIC_URL` | `https://tickets.makkigo.com` |
 | `/makkigo/prod/tickets/DATABASE_URL` · `AUTH_JWT_SECRET` | 요원 앱과 같은 DB. 2026-11-19 부터 소셜 로그인을 쓰지 않으므로 `AUTH_JWT_SECRET` 은 요원 앱과 달라도 됨(토큰 `aud` 로도 나뉨) |
+| `/makkigo/prod/tickets/VALET_PUBLIC_URL` | `https://valet.makkigo.com`. 파트너 앱 안 로그인 화면의 "파트너 로그인으로 돌아가기" 주소. 없으면 그 링크를 숨김 |
 | `/makkigo/prod/tickets/USERS_PUBLIC_URL` | `https://app.makkigo.com`. 업체 정보 화면의 고객용 QR 주소(`/guest?merchant=<id>`). 없으면 그 화면이 오류 |
 | `/makkigo/prod/tickets/AWS_REGION` · `S3_IMAGE_BUCKET` · `IMAGE_BASE_URL` | 요원 앱과 같은 값. 티켓 이미지 업로드 |
 | `/makkigo/prod/admin/PUBLIC_URL` · `DATABASE_URL` · `AUTH_JWT_SECRET` | 슈퍼 어드민. `PUBLIC_URL` = `https://admin.makkigo.com`. `DATABASE_URL` 은 요원 앱과 같은 값, `AUTH_JWT_SECRET` 은 **다른 앱과 따로 만든 값**(2026-11-19) |
@@ -234,4 +236,4 @@ dry-run 확인도 건너뜁니다.
 
 `apps/admin` 은 tickets 와 같은 방식으로 배포합니다: `Dockerfile` 의 `admin` 단계(포트 3003), compose 의 `admin` 서비스(`admin.env`), Caddy 의 `{$ADMIN_DOMAIN}`(기본 `admin.makkigo.com`), `load-env.sh` 의 `admin` 대상, 배포 빌드 matrix 의 `admin`(이미지 `makkigo-admin`).
 
-Route 53 `admin` A 레코드와 SSM `/makkigo/prod/admin/*` · `/makkigo/prod/tickets/USERS_PUBLIC_URL` 은 2026-11-19 에 만들었습니다. S3 CORS(admin POST) · `merchants/staging/` 수명 주기 규칙도 같은 날 적용. 남은 것: 새 코드를 배포한 **뒤** 더는 쓰지 않는 SSM 값 삭제(`tickets/` 의 `OAUTH_CALLBACK_ORIGIN` · `AUTH_COOKIE_DOMAIN` · `KAKAO_REST_API_KEY` · `GOOGLE_CLIENT_ID` · `APPLE_SERVICES_ID`, `valetagents/` 의 `TICKETS_PUBLIC_URL`. `valetagents/USERS_PUBLIC_URL` 은 2026-11-21 부터 요원 앱 업체 QR 에 다시 씀) → [infrastructure.md](../operations/infrastructure.md). SSM 값이 없어도 컨테이너는 뜨지만(헬스 체크는 DB 를 보지 않음) 로그인 등 모든 화면이 오류입니다.
+Route 53 `admin` A 레코드와 SSM `/makkigo/prod/admin/*` · `/makkigo/prod/tickets/USERS_PUBLIC_URL` 은 2026-11-19 에 만들었습니다. S3 CORS(admin POST) · `merchants/staging/` 수명 주기 규칙도 같은 날 적용. 남은 것: 새 코드를 배포한 **뒤** 더는 쓰지 않는 SSM 값 삭제(`tickets/` 의 `OAUTH_CALLBACK_ORIGIN` · `AUTH_COOKIE_DOMAIN` · `KAKAO_REST_API_KEY` · `GOOGLE_CLIENT_ID` · `APPLE_SERVICES_ID`. `valetagents/TICKETS_PUBLIC_URL` 은 2026-11-26 부터 로그인 화면에 다시 씀 — 이미 지웠다면 다시 만듦. `valetagents/USERS_PUBLIC_URL` 은 2026-11-21 부터 요원 앱 업체 QR 에 다시 씀) → [infrastructure.md](../operations/infrastructure.md). SSM 값이 없어도 컨테이너는 뜨지만(헬스 체크는 DB 를 보지 않음) 로그인 등 모든 화면이 오류입니다.
