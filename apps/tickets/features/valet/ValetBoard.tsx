@@ -50,7 +50,7 @@ function ValetSessions({ initialData, initialDataUpdatedAt }: Readonly<ValetBoar
   ];
 
   return (
-    <main className={cn("mx-auto max-w-6xl px-6 py-10", pickupRequest && "animate-pickup-blink")}>
+    <main className={cn("mx-auto max-w-6xl px-4 pt-8 pb-[calc(2.5rem+var(--safe-area-inset-bottom))] sm:px-6 sm:pt-10", pickupRequest && "animate-pickup-blink")}>
       <h1 className="text-2xl font-bold tracking-tight">발렛 현황</h1>
       <p className="mt-1 text-sm text-(--tertiary-color)">맡겨진 차량과 오늘 출차한 차량이에요. 5초마다 새로 불러와요.</p>
 
@@ -77,7 +77,7 @@ function ValetSessions({ initialData, initialDataUpdatedAt }: Readonly<ValetBoar
           지금 맡겨진 차량이 없어요.
         </p>
       ) : (
-        <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+        <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
           {sessions.map((session) => (
             <li key={session.id} className="min-w-0">
               <VehicleCard

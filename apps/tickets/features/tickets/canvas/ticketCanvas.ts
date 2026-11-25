@@ -52,6 +52,22 @@ const getTicketAspect = (shape: TicketShapePreset) => {
   return ticketEditorShapePresets.some((preset) => preset === shape) ? 5 / 7 : 3 / 4;
 };
 
+const MIN_LONG_SIDE = 240;
+
+const fitTicketLongSide = (
+  shape: TicketShapePreset,
+  maxLongSide: number,
+  padding: number,
+  workspace: { width: number; height: number },
+) => {
+  const aspect = getTicketAspect(shape);
+  const fit = Math.min(
+    (workspace.width - padding * 2) / Math.min(aspect, 1),
+    (workspace.height - padding * 2) * Math.max(aspect, 1),
+  );
+  return Math.floor(Math.min(maxLongSide, Math.max(MIN_LONG_SIDE, fit)));
+};
+
 const getTicketFrame = (
   shape: TicketShapePreset,
   longSide: number,
@@ -395,6 +411,7 @@ export {
   getShapePathData,
   getTextMeta,
   getTicketAspect,
+  fitTicketLongSide,
   getTicketFrame,
   keepInsideFrame,
   layerMeta,

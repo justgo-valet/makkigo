@@ -8,7 +8,7 @@ export default async function PasswordPage() {
   return (
     <>
       <StudioHeader nav={!passwordChangeRequired} />
-      <main className="flex justify-center px-6 py-16">
+      <main className="flex justify-center px-4 pt-10 pb-[calc(4rem+var(--safe-area-inset-bottom))] sm:px-6 sm:pt-16">
         <PasswordForm required={passwordChangeRequired} />
       </main>
     </>

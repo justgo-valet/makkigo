@@ -43,6 +43,7 @@ interface TicketInspectorProps {
   shape: TicketShapePreset;
   backgroundColor: string;
   frameWidth: number;
+  displayFrameWidth: number;
   onShapeChange: (shape: TicketShapePreset) => void;
   onBackgroundChange: (color: string) => void;
   onUpdate: (update: (object: FabricObject) => void, immediate?: boolean) => void;
@@ -139,6 +140,7 @@ export default function TicketInspector({
   shape,
   backgroundColor,
   frameWidth,
+  displayFrameWidth,
   onShapeChange,
   onBackgroundChange,
   onUpdate,
@@ -151,9 +153,10 @@ export default function TicketInspector({
       if (object instanceof Textbox) update(object);
     }, immediate);
   const shapes = ticketEditorShapePresets.some((preset) => preset === shape) ? ticketEditorShapePresets : [shape, ...ticketEditorShapePresets];
+  const displayFontSize = active?.kind === "TEXT" ? Math.round((active.fontSize * displayFrameWidth) / frameWidth) : 0;
 
   return (
-    <aside aria-label="속성" className="w-80 shrink-0 overflow-y-auto border-l border-black/5 bg-white">
+    <aside aria-label="속성" className="max-h-[40dvh] shrink-0 overflow-y-auto border-t border-black/5 bg-white pb-(--safe-area-inset-bottom) md:max-h-none md:w-80 md:border-t-0 md:border-l">
       {!active && (
         <>
           <Section title="티켓 모양">
@@ -262,13 +265,18 @@ export default function TicketInspector({
                 type="range"
                 aria-label="글자 크기"
                 className="min-w-0 flex-1 accent-primary"
-                min={Math.round(MIN_FONT_SIZE * frameWidth)}
-                max={Math.round(MAX_FONT_SIZE * frameWidth)}
+                min={Math.round(MIN_FONT_SIZE * displayFrameWidth)}
+                max={Math.round(MAX_FONT_SIZE * displayFrameWidth)}
                 step={1}
-                value={Math.round(active.fontSize)}
-                onChange={(event) => updateText((text) => text.set({ fontSize: Number(event.target.value) }), false)}
+                value={displayFontSize}
+                onChange={(event) =>
+                  updateText(
+                    (text) => text.set({ fontSize: (Number(event.target.value) * frameWidth) / displayFrameWidth }),
+                    false,
+                  )
+                }
               />
-              <span className="w-10 text-right font-mono text-xs text-(--tertiary-color)">{Math.round(active.fontSize)}</span>
+              <span className="w-10 text-right font-mono text-xs text-(--tertiary-color)">{displayFontSize}</span>
             </label>
           </Section>
           <Section title="글자 색">
