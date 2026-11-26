@@ -13,7 +13,10 @@ const ERROR_MESSAGES: Record<LoginError, string> = {
   failed: "로그인하지 못했어요. 다시 시도해주세요.",
 };
 
-export default function LoginContent({ error }: Readonly<{ error: LoginError | null }>) {
+export default function LoginContent({ error, merchantAdminLoginUrl }: Readonly<{
+  error: LoginError | null;
+  merchantAdminLoginUrl: string;
+}>) {
   const { providers, pending, error: displayedError, login } = useSocialLogin(error);
 
   // 파란 배경이 상태바 뒤까지 깔리므로 글자를 흰색으로.
@@ -29,6 +32,15 @@ export default function LoginContent({ error }: Readonly<{ error: LoginError | n
       disabled={pending}
       errorMessage={displayedError && ERROR_MESSAGES[displayedError]}
       onLogin={login}
+      footer={
+        <a
+          href={merchantAdminLoginUrl}
+          aria-disabled={pending}
+          className="mt-1 self-center px-3 py-2 text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50 text-(--tertiary-color) underline-offset-4 hover:underline"
+        >
+          업체 관리자이신가요? <span className="font-semibold text-(--base-color)">업체 관리자 로그인</span>
+        </a>
+      }
     />
   );
 }

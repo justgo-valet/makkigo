@@ -17,7 +17,7 @@ export default async function TicketsPage() {
   return (
     <>
       <StudioHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-[calc(2.5rem+var(--safe-area-inset-bottom))] sm:px-6 sm:pt-10">
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">티켓</h1>
@@ -35,7 +35,7 @@ export default async function TicketsPage() {
         {tickets.length === 0 ? (
           <Link
             href="/tickets/new"
-            className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 bg-white p-14 text-center transition-colors hover:border-primary/50 hover:bg-primary/[0.03]"
+            className="mt-10 flex flex-col items-center gap-3 rounded-2xl border border-dashed border-black/15 bg-white p-8 sm:p-14 text-center transition-colors hover:border-primary/50 hover:bg-primary/[0.03]"
           >
             <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Plus className="size-6" aria-hidden />
@@ -44,9 +44,9 @@ export default async function TicketsPage() {
             <span className="text-sm text-(--tertiary-color)">글자와 이미지를 올려 업체만의 티켓을 꾸며 보세요.</span>
           </Link>
         ) : (
-          <ul className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6">
+          <ul className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4 sm:gap-6">
             {tickets.map((ticket) => (
-              <li key={ticket.id}>
+              <li key={ticket.id} className="min-w-0">
                 <Link
                   href={`/tickets/${ticket.id}`}
                   aria-label={`${ticket.merchantName} 티켓 ${ticket.id} 편집`}

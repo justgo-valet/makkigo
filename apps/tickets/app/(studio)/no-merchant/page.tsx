@@ -11,7 +11,7 @@ export default async function NoMerchantPage() {
   return (
     <>
       <StudioHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-[calc(2.5rem+var(--safe-area-inset-bottom))] sm:px-6 sm:pt-10">
         <p className="mt-16 rounded-2xl border border-dashed border-black/10 bg-white p-10 text-center text-sm text-(--tertiary-color)">
           아직 연결된 업체가 없어요. 운영팀에 문의해 주세요.
         </p>

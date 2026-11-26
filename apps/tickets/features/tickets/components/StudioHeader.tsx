@@ -19,22 +19,25 @@ export default function StudioHeader({ nav = true }: Readonly<{ nav?: boolean }>
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-10 border-b border-black/5 bg-white/90 backdrop-blur print:hidden">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-6">
+    <header className="sticky top-0 z-10 border-b border-black/5 bg-white/90 pt-(--safe-area-inset-top) backdrop-blur print:hidden">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 px-4 sm:h-16 sm:flex-nowrap sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Image src={makkigoLogo} alt="마끼고" width={84} height={34} priority />
           <span className="h-4 w-px bg-black/10" aria-hidden />
           <span className="text-sm font-semibold">업체 관리</span>
         </Link>
         {nav && (
-          <nav aria-label="메뉴" className="ml-6 flex items-center gap-1">
+          <nav
+            aria-label="메뉴"
+            className="order-last -mx-4 flex w-[calc(100%+2rem)] items-center gap-1 overflow-x-auto px-3 pb-2 sm:order-none sm:mx-0 sm:ml-6 sm:w-auto sm:overflow-visible sm:p-0"
+          >
             {NAV_ITEMS.map(({ href, label, match }) => (
               <Link
                 key={href}
                 href={href}
                 aria-current={match(pathname) ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-9 items-center rounded-lg px-3 text-sm text-(--tertiary-color) transition-colors hover:bg-black/5 hover:text-(--base-color)",
+                  "inline-flex h-9 shrink-0 items-center rounded-lg px-3 text-sm text-(--tertiary-color) transition-colors hover:bg-black/5 hover:text-(--base-color)",
                   match(pathname) && "font-semibold text-(--base-color)",
                 )}
               >
@@ -43,7 +46,7 @@ export default function StudioHeader({ nav = true }: Readonly<{ nav?: boolean }>
             ))}
           </nav>
         )}
-        <div className="ml-auto">
+        <div className="ml-auto flex h-14 items-center sm:h-auto">
           <LogoutButton />
         </div>
       </div>
