@@ -25,7 +25,7 @@ interface MerchantSearchSheetProps {
 }
 
 const MESSAGES = {
-  idle: "업체명이나 지역을 입력해 주세요",
+  idle: "업체명이나 초성을 입력해 주세요",
   loading: "검색하고 있어요",
   empty: "검색 결과가 없어요",
 } as const;
@@ -65,7 +65,7 @@ export default function MerchantSearchSheet({
         <SheetHeader className="sr-only">
           <SheetTitle>업체 검색</SheetTitle>
           <SheetDescription>
-            발렛을 맡길 업체를 업체명이나 지역으로 찾아 위치와 요금을 확인해요.
+            발렛을 맡길 업체를 업체명이나 초성으로 찾아 위치와 요금을 확인해요.
           </SheetDescription>
         </SheetHeader>
         <div
@@ -75,7 +75,7 @@ export default function MerchantSearchSheet({
 
         <div
           className={
-            isDetail ? "hidden" : "flex min-h-0 flex-1 flex-col animate-in fade-in duration-200"
+            isDetail ? "hidden" : "flex min-h-0 flex-1 animate-in flex-col duration-200 fade-in"
           }
         >
           <h2 className="shrink-0 text-lg font-bold text-(--base-color)">업체 검색</h2>
@@ -86,14 +86,14 @@ export default function MerchantSearchSheet({
               inputMode="search"
               enterKeyHint="search"
               aria-label="업체 검색어"
-              placeholder="업체명, 지역으로 검색"
+              placeholder="업체명 또는 초성으로 검색"
               className="h-[42px] border-slate-200 px-3 text-base placeholder:text-(--tertiary-color)"
               value={search.keyword}
               onChange={(event) => search.changeKeyword(event.target.value)}
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 scrollbar-none overflow-y-auto [&::-webkit-scrollbar]:hidden">
             {search.view === "results" ? (
               <ul className="flex flex-col gap-2">
                 {search.merchants.map((merchant) => (
