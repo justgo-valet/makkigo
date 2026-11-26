@@ -18,6 +18,7 @@ import {
   getShapePathData,
   getTextMeta,
   getTicketAspect,
+  fitTicketLongSide,
   getTicketFrame,
   keepInsideFrame,
   layerMeta,
@@ -44,6 +45,7 @@ interface TicketStudioProps {
 
 const LONG_SIDE = 560;
 const PADDING = 56;
+const COMPACT_PADDING = 20;
 const HISTORY_LIMIT = 60;
 
 const isTypingTarget = (target: EventTarget | null) =>
@@ -109,14 +111,13 @@ export default function TicketStudio({
     [imageBaseUrl],
   );
 
-  const layoutFor = useCallback((shape: TicketShapePreset) => {
-    const workspace = workspaceRef.current;
-    return getTicketFrame(
-      shape,
-      LONG_SIDE,
-      PADDING,
-      workspace ? { width: workspace.clientWidth, height: workspace.clientHeight } : undefined,
-    );
+  const layoutFor = useCallback((shape: TicketShapePreset, keepLongSide?: number) => {
+    const element = workspaceRef.current;
+    if (!element) return getTicketFrame(shape, LONG_SIDE, PADDING);
+    const workspace = { width: element.clientWidth, height: element.clientHeight };
+    if (window.matchMedia("(min-width: 768px)").matches) return getTicketFrame(shape, LONG_SIDE, PADDING, workspace);
+    const longSide = keepLongSide ?? fitTicketLongSide(shape, LONG_SIDE, COMPACT_PADDING, workspace);
+    return getTicketFrame(shape, longSide, COMPACT_PADDING, workspace);
   }, []);
 
   const readDesign = useCallback(() => {
@@ -296,7 +297,14 @@ export default function TicketStudio({
     });
 
     const relayout = () => {
-      const size = layoutFor(baseRef.current.shape);
+      const frame = frameRef.current;
+      const active = canvas.getActiveObject();
+      const editing = active instanceof Textbox && active.isEditing;
+      const size = layoutFor(baseRef.current.shape, editing ? Math.max(frame.width, frame.height) : undefined);
+      if (size.frame.width !== frame.width || size.frame.height !== frame.height) {
+        void applyDesign(readDesign());
+        return;
+      }
       const dx = size.frame.left - frameRef.current.left;
       const dy = size.frame.top - frameRef.current.top;
       if (!dx && !dy && canvas.width === size.canvasWidth && canvas.height === size.canvasHeight) return;
@@ -331,7 +339,7 @@ export default function TicketStudio({
       canvasRef.current = null;
       void canvas.dispose();
     };
-  }, [applyDesign, initialDesign, layoutFor, recordHistory, syncState]);
+  }, [applyDesign, initialDesign, layoutFor, readDesign, recordHistory, syncState]);
 
   const dirty = savedSnapshot !== null && currentSnapshot !== savedSnapshot;
 
@@ -534,70 +542,75 @@ export default function TicketStudio({
 
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-black/5 bg-white px-4">
-        <Link
-          href="/"
-          aria-label="티켓 목록으로"
-          className="flex size-9 items-center justify-center rounded-lg text-(--tertiary-color) transition-colors hover:bg-black/5 hover:text-(--base-color)"
-        >
-          <ArrowLeft className="size-5" aria-hidden />
-        </Link>
-        <div className="min-w-0">
-          <h1 className="text-base font-bold">{ticketId ? "티켓 편집" : "새 티켓"}</h1>
-          {!ticketId && merchants.length > 1 ? (
-            <select
-              aria-label="업체"
-              className="-ml-1 max-w-56 truncate rounded bg-transparent text-xs text-(--tertiary-color) outline-none hover:text-(--base-color) focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-60"
-              value={merchantId}
-              disabled={hasImages || busy !== null}
-              title={hasImages ? "이미지는 올린 업체에만 쓸 수 있어 업체를 바꿀 수 없어요." : undefined}
-              onChange={(event) => setMerchantId(Number(event.target.value))}
+      <header className="flex shrink-0 items-center gap-3 border-b border-black/5 bg-white px-4 pt-(--safe-area-inset-top)">
+        <div className="flex h-16 min-w-0 flex-1 items-center gap-3">
+          <Link
+            href="/"
+            aria-label="티켓 목록으로"
+            className="flex size-9 items-center justify-center rounded-lg text-(--tertiary-color) transition-colors hover:bg-black/5 hover:text-(--base-color)"
+          >
+            <ArrowLeft className="size-5" aria-hidden />
+          </Link>
+          <div className="min-w-0">
+            <h1 className="text-base font-bold">{ticketId ? "티켓 편집" : "새 티켓"}</h1>
+            {!ticketId && merchants.length > 1 ? (
+              <select
+                aria-label="업체"
+                className="-ml-1 w-full min-w-0 max-w-56 truncate rounded bg-transparent text-xs text-(--tertiary-color) outline-none hover:text-(--base-color) focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-60"
+                value={merchantId}
+                disabled={hasImages || busy !== null}
+                title={hasImages ? "이미지는 올린 업체에만 쓸 수 있어 업체를 바꿀 수 없어요." : undefined}
+                onChange={(event) => setMerchantId(Number(event.target.value))}
+              >
+                {merchants.map((merchant) => (
+                  <option key={merchant.id} value={merchant.id}>{merchant.name}</option>
+                ))}
+              </select>
+            ) : (
+              <p className="truncate text-xs text-(--tertiary-color)">{merchantName}</p>
+            )}
+          </div>
+          <div className="ml-auto flex items-center gap-1">
+            <span className="mr-2 hidden text-xs text-(--tertiary-color) sm:inline" aria-live="polite">
+              {busy === "upload" ? "이미지 올리는 중…" : dirty ? "저장하지 않은 변경이 있어요" : savedSnapshot ? "모두 저장됨" : ""}
+            </span>
+            <button
+              type="button"
+              aria-label="되돌리기"
+              title="되돌리기 (⌘Z)"
+              disabled={!history.canUndo || busy !== null}
+              className="flex size-9 items-center justify-center rounded-lg text-(--base-color) transition-colors hover:bg-black/5 disabled:opacity-30"
+              onClick={() => void moveHistory(-1)}
             >
-              {merchants.map((merchant) => (
-                <option key={merchant.id} value={merchant.id}>{merchant.name}</option>
-              ))}
-            </select>
-          ) : (
-            <p className="truncate text-xs text-(--tertiary-color)">{merchantName}</p>
-          )}
-        </div>
-        <div className="ml-auto flex items-center gap-1">
-          <span className="mr-2 text-xs text-(--tertiary-color)" aria-live="polite">
-            {busy === "upload" ? "이미지 올리는 중…" : dirty ? "저장하지 않은 변경이 있어요" : savedSnapshot ? "모두 저장됨" : ""}
-          </span>
-          <button
-            type="button"
-            aria-label="되돌리기"
-            title="되돌리기 (⌘Z)"
-            disabled={!history.canUndo || busy !== null}
-            className="flex size-9 items-center justify-center rounded-lg text-(--base-color) transition-colors hover:bg-black/5 disabled:opacity-30"
-            onClick={() => void moveHistory(-1)}
-          >
-            <Undo2 className="size-[18px]" aria-hidden />
-          </button>
-          <button
-            type="button"
-            aria-label="다시 하기"
-            title="다시 하기 (⇧⌘Z)"
-            disabled={!history.canRedo || busy !== null}
-            className="flex size-9 items-center justify-center rounded-lg text-(--base-color) transition-colors hover:bg-black/5 disabled:opacity-30"
-            onClick={() => void moveHistory(1)}
-          >
-            <Redo2 className="size-[18px]" aria-hidden />
-          </button>
-          <button
-            type="button"
-            disabled={busy !== null || (!dirty && Boolean(ticketId))}
-            className="ml-2 inline-flex h-10 items-center gap-1.5 rounded-lg bg-primary px-5 text-sm font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
-            onClick={() => void save()}
-          >
-            {busy === "save" ? "저장 중…" : <><Check className="size-4" aria-hidden />저장</>}
-          </button>
+              <Undo2 className="size-[18px]" aria-hidden />
+            </button>
+            <button
+              type="button"
+              aria-label="다시 하기"
+              title="다시 하기 (⇧⌘Z)"
+              disabled={!history.canRedo || busy !== null}
+              className="flex size-9 items-center justify-center rounded-lg text-(--base-color) transition-colors hover:bg-black/5 disabled:opacity-30"
+              onClick={() => void moveHistory(1)}
+            >
+              <Redo2 className="size-[18px]" aria-hidden />
+            </button>
+            <button
+              type="button"
+              disabled={busy !== null || (!dirty && Boolean(ticketId))}
+              className="ml-2 inline-flex h-10 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm sm:px-5 font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+              onClick={() => void save()}
+            >
+              {busy === "save" ? "저장 중…" : <><Check className="size-4" aria-hidden />저장</>}
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
-        <nav aria-label="추가" className="flex w-22 shrink-0 flex-col items-center gap-2 border-r border-black/5 bg-white py-4">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <nav
+          aria-label="추가"
+          className="flex shrink-0 items-center gap-2 border-b border-black/5 bg-white px-4 py-2 md:w-22 md:flex-col md:border-r md:border-b-0 md:px-0 md:py-4"
+        >
           <button
             type="button"
             disabled={full || busy !== null}
@@ -650,6 +663,7 @@ export default function TicketStudio({
           shape={shape}
           backgroundColor={backgroundColor}
           frameWidth={canvasSize.frame.width}
+          displayFrameWidth={getTicketFrame(shape, LONG_SIDE, PADDING).frame.width}
           onShapeChange={(next) => void changeShape(next)}
           onBackgroundChange={changeBackground}
           onUpdate={updateActive}

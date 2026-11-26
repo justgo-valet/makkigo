@@ -42,7 +42,7 @@ export default function LoginForm() {
   return (
     <form
       onSubmit={submit}
-      className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-[0_8px_32px_rgba(3,9,15,0.08)]"
+      className="w-full max-w-sm rounded-2xl bg-white p-6 sm:p-8 shadow-[0_8px_32px_rgba(3,9,15,0.08)]"
     >
       <Image src={makkigoLogo} alt="마끼고" width={132} height={54} priority />
       <h1 className="mt-6 text-2xl font-bold tracking-tight">업체 관리</h1>
